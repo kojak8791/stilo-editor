@@ -22,9 +22,9 @@ import { notImplemented } from '../errors';
  * ```
  */
 export function markInputRule(
-  regexp: RegExp,
-  type: MarkType,
-  attrs: Attrs | null = null,
+  _regexp: RegExp,
+  _type: MarkType,
+  _attrs: Attrs | null = null,
 ): InputRule {
   return notImplemented('markInputRule');
 }

@@ -22,6 +22,11 @@ implement **exactly one task at a time**, as written, and nothing else.
   read-only. If you believe another file must change, ask (see §1.4).
 - **Do not change public APIs, types or signatures** already defined in `src/core/` or in the
   task's Contract section.
+  Exception: stubs prefix unused parameters with `_` (`_html`, `_options`) only to silence lint.
+  When you implement a stub, remove the `_` from every parameter you now use. This is not a
+  signature change.
+- **Lint warnings fail the build** (`npm run check` uses `--error-on-warnings`). Fix every
+  warning; read the full output, which is never truncated.
 - **Do not change existing tests to make them pass.** If a provided test looks wrong, ask.
 - **Do not change `docs/`**, except the `## Questions` and `## Report` sections of your task file.
 - **Do not invent features.** Implement what the task says, no extras, no "improvements".

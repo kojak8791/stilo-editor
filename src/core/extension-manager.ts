@@ -30,7 +30,7 @@ export const REQUIRED_NODES: readonly string[] = ['doc', 'paragraph', 'text'];
  * Flattens nested arrays one level and sorts extensions by `priority` (descending), keeping the
  * order of appearance for equal priorities (stable sort).
  */
-export function sortExtensions(extensions: Array<Extension | Extension[]>): Extension[] {
+export function sortExtensions(_extensions: Array<Extension | Extension[]>): Extension[] {
   return notImplemented('sortExtensions');
 }
 
@@ -53,7 +53,7 @@ export class ExtensionManager {
    * - any of {@link REQUIRED_NODES} missing → `StiloError`;
    * - `topNode` is `doc`.
    */
-  constructor(extensions: Array<Extension | Extension[]>) {
+  constructor(_extensions: Array<Extension | Extension[]>) {
     notImplemented('ExtensionManager');
   }
 
@@ -76,7 +76,7 @@ export class ExtensionManager {
    * 4. `keymap({ Backspace: undoInputRule })`;
    * 5. `keymap(baseKeymap)` from prosemirror-commands.
    */
-  createPlugins(editor: Editor): Plugin[] {
+  createPlugins(_editor: Editor): Plugin[] {
     return notImplemented('ExtensionManager.createPlugins');
   }
 }

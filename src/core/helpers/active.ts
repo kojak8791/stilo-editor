@@ -6,7 +6,7 @@ import { notImplemented } from '../errors';
  * Whether `actual` contains every key of `expected` with a strictly equal (`===`) value.
  * `undefined` `expected` always matches.
  */
-export function attrsMatch(actual: Attrs, expected?: Record<string, unknown>): boolean {
+export function attrsMatch(_actual: Attrs, _expected?: Record<string, unknown>): boolean {
   return notImplemented('attrsMatch');
 }
 
@@ -19,9 +19,9 @@ export function attrsMatch(actual: Attrs, expected?: Record<string, unknown>): b
  *   least one text node. Traverse only the selected range (`doc.nodesBetween(from, to)`).
  */
 export function isMarkActive(
-  state: EditorState,
-  type: MarkType,
-  attrs?: Record<string, unknown>,
+  _state: EditorState,
+  _type: MarkType,
+  _attrs?: Record<string, unknown>,
 ): boolean {
   return notImplemented('isMarkActive');
 }
@@ -32,9 +32,9 @@ export function isMarkActive(
  * including the document itself).
  */
 export function isNodeActive(
-  state: EditorState,
-  type: NodeType,
-  attrs?: Record<string, unknown>,
+  _state: EditorState,
+  _type: NodeType,
+  _attrs?: Record<string, unknown>,
 ): boolean {
   return notImplemented('isNodeActive');
 }

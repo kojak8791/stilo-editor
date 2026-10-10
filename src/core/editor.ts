@@ -42,7 +42,7 @@ export class Editor {
    *    through the editor's dispatch (see events in `EditorEvents`);
    * 5. `autofocus`: `true`/`'start'` → focus at start, `'end'` → focus at end.
    */
-  constructor(options: EditorOptions) {
+  constructor(_options: EditorOptions) {
     notImplemented('Editor');
   }
 
@@ -81,7 +81,7 @@ export class Editor {
    *   `transaction: null`.
    * - `emitUpdate: false` suppresses the `update` event.
    */
-  setHTML(html: string, options?: SetContentOptions): void {
+  setHTML(_html: string, _options?: SetContentOptions): void {
     notImplemented('Editor.setHTML');
   }
 
@@ -91,7 +91,7 @@ export class Editor {
   }
 
   /** Same as {@link setHTML}, from ProseMirror JSON (`Node.fromJSON`). */
-  setJSON(json: JSONContent, options?: SetContentOptions): void {
+  setJSON(_json: JSONContent, _options?: SetContentOptions): void {
     notImplemented('Editor.setJSON');
   }
 
@@ -112,17 +112,17 @@ export class Editor {
    * Whether a mark or node named `name` is active (`isMarkActive` / `isNodeActive`).
    * Unknown names return `false`.
    */
-  isActive(name: string, attrs?: Record<string, unknown>): boolean {
+  isActive(_name: string, _attrs?: Record<string, unknown>): boolean {
     return notImplemented('Editor.isActive');
   }
 
   /** Switches read-only mode on/off. */
-  setEditable(editable: boolean): void {
+  setEditable(_editable: boolean): void {
     notImplemented('Editor.setEditable');
   }
 
   /** Focuses the editor; optionally moves the cursor to the start or end of the document. */
-  focus(position?: 'start' | 'end'): void {
+  focus(_position?: 'start' | 'end'): void {
     notImplemented('Editor.focus');
   }
 
@@ -132,12 +132,12 @@ export class Editor {
   }
 
   /** Registers an event handler. */
-  on<E extends keyof EditorEvents>(event: E, handler: EventHandler<EditorEvents[E]>): void {
+  on<E extends keyof EditorEvents>(_event: E, _handler: EventHandler<EditorEvents[E]>): void {
     notImplemented('Editor.on');
   }
 
   /** Removes an event handler. */
-  off<E extends keyof EditorEvents>(event: E, handler: EventHandler<EditorEvents[E]>): void {
+  off<E extends keyof EditorEvents>(_event: E, _handler: EventHandler<EditorEvents[E]>): void {
     notImplemented('Editor.off');
   }
 

@@ -6,6 +6,6 @@ import { notImplemented } from '../errors';
  * resulting element is parsed with `DOMParser.fromSchema(schema)` from prosemirror-model.
  * An empty string produces the empty document (one empty paragraph).
  */
-export function parseHTML(schema: Schema, html: string): Node {
+export function parseHTML(_schema: Schema, _html: string): Node {
   return notImplemented('parseHTML');
 }

@@ -7,6 +7,6 @@ import { notImplemented } from '../errors';
  * container element of a detached document (`document.implementation.createHTMLDocument('')`),
  * then the container's `innerHTML`.
  */
-export function serializeHTML(schema: Schema, fragment: Fragment): string {
+export function serializeHTML(_schema: Schema, _fragment: Fragment): string {
   return notImplemented('serializeHTML');
 }

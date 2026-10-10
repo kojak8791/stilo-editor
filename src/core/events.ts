@@ -14,15 +14,15 @@ export type EventHandler<T> = (payload: T) => void;
  * - `clear` removes all handlers of all events.
  */
 export class EventEmitter<Events extends object> {
-  on<E extends keyof Events>(event: E, handler: EventHandler<Events[E]>): void {
+  on<E extends keyof Events>(_event: E, _handler: EventHandler<Events[E]>): void {
     notImplemented('EventEmitter.on');
   }
 
-  off<E extends keyof Events>(event: E, handler: EventHandler<Events[E]>): void {
+  off<E extends keyof Events>(_event: E, _handler: EventHandler<Events[E]>): void {
     notImplemented('EventEmitter.off');
   }
 
-  emit<E extends keyof Events>(event: E, payload: Events[E]): void {
+  emit<E extends keyof Events>(_event: E, _payload: Events[E]): void {
     notImplemented('EventEmitter.emit');
   }
 
