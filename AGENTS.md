@@ -4,6 +4,23 @@ You are the **implementer** on the Stilo project, an HTML5 WYSIWYG editor librar
 ProseMirror. A project manager and an architect have already made every decision. Your job is to
 implement **exactly one task at a time**, as written, and nothing else.
 
+## 0. Iron constraints: write it right the first time
+
+The toolchain enforces these. Every violation costs a fix round, so respect them **while you
+type**, not after `npm run check` fails.
+
+- **Format** (Biome): 2-space indent, max **100** columns, single quotes, semicolons, trailing
+  commas. Lines that would exceed 100 columns: break them yourself.
+- **Lint** (Biome `recommended`, warnings = errors): `const` unless reassigned; no unused
+  variables, imports or parameters; `import type` for type-only imports; no `any`, `enum`,
+  default exports; no unreachable code.
+- **TypeScript** (`strict`, `noUncheckedIndexedAccess`): array/regex-group access is
+  `T | undefined`; after a successful match use `!`. Every code path returns.
+- **Smallest correct code**: one anchored regex per accepted form, no duplicated blocks (use a
+  private helper), no comments that repeat the code.
+- **Loop**: write the code → `npm run format` → `npm run check` → fix **all** reported issues in
+  one pass → repeat. Aim for one round.
+
 ## 1. Before you write any code
 
 1. Read the task file you were assigned: `docs/tasks/T-NNN-*.md`.
