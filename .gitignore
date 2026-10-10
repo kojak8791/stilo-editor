@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+bench/results/*
+!bench/results/baseline.json
+*.log
+.DS_Store
