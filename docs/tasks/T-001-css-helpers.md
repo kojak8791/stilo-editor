@@ -130,4 +130,38 @@ spacing):
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+### Files changed
+
+- `src/core/html/css.ts` — implemented all 9 functions
+
+### Summary
+
+- **`parseStyle`**: splits on `;`, extracts `prop: value` pairs, trims, lowercases property,
+  strips `!important`.
+- **`normalizeColor`**: handles `#rgb`, `#rrggbb`, `rgb()`, `rgba()` (with numeric or `%` alpha),
+  and CSS keywords. Regex patterns use `\s*` around all delimiters to accept arbitrary spacing.
+  The rgba alpha capture uses `(?:\d+(?:\.\d+)?%|\d+(?:\.\d+)?)` to correctly parse both `100%`
+  and `0.12345` as a single atomic value.
+- **`normalizeFontSize`**: validates `^\d+(\.\d+)?(px|pt|em|rem|%)$` and strips unit.
+- **`normalizeFontFamily`**: splits by `,`, removes surrounding quotes, collapses whitespace,
+  quotes names with special chars.
+- **`normalizeTextAlign`**: maps `start` → `left`, rejects unknown values.
+- **`normalizeStyleValue`**: dispatches to the correct normalizer via `switch`.
+- **`buildStyle`**: iterates `STYLE_PROPERTIES` in order, normalizes values, joins with `; `.
+- **`readStyle`**: reads raw `style` attribute via `getAttribute`, parses and normalizes.
+- **`sanitizeStyle`**: filters output + input-only properties, lowercases input-only values.
+- Removed unused `notImplemented` import.
+
+### Tests
+
+- **122/122** tests pass in `src/core/html/css.test.ts`.
+- `npm run typecheck` passes cleanly.
+- `npm run lint` shows warnings only in pre-existing stub files (expected per task Notes).
+
+### Points for reviewer
+
+- The rgba alpha regex `(?:\d+(?:\.\d+)?%|\d+(?:\.\d+)?)` is the key fix: it captures the
+  entire alpha value (with optional `%`) as one group, avoiding the greedy `\d+` vs `%?`
+  ambiguity that caused `100%` to fail.
+- `\s*` is placed after **every** comma and after the opening paren in both rgb/rgba patterns
+  to accept arbitrary spacing (e.g. `RGB( 0 , 128 , 255 )`).
