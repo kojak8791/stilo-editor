@@ -111,8 +111,19 @@ is `null` → `true`; otherwise `true` only if the scheme is in `IMAGE_PROTOCOLS
 
 ## Questions
 
-<!-- Implementer: write questions here and stop if anything is unclear. -->
+No questions.
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+- **Files changed**: `src/core/html/sanitize.ts`
+- **Summary**: Implemented every function in the sanitizer module:
+  - `urlScheme`: strips whitespace/control characters via `[...url].filter(...)`, matches scheme regex.
+  - `isAllowedHref`: delegates to `urlScheme`, accepts relative URLs and schemes in `LINK_PROTOCOLS`.
+  - `isAllowedImageSrc`: trims input, checks empty → `IMAGE_DATA_URL` → scheme via `urlScheme` → `IMAGE_PROTOCOLS`.
+  - `purifiers` WeakMap: per-window DOMPurify cache (module-level mutable value).
+  - `getPurifier`: lazy-creates DOMPurify instance with the `uponSanitizeAttribute` hook, caches per window.
+  - `filterAttribute`: switch on attribute name — style → `sanitizeStyle`, class → `language-*` tokens, href/src → protocol check, target → `_blank` only, default → unchanged.
+  - `getConfig`: returns DOMPurify config with spread arrays for `ALLOWED_TAGS`/`ALLOWED_ATTR` and `ALLOW_DATA_ATTR: false`.
+  - `sanitizeToString` / `sanitizeToDOM`: delegate to `getPurifier().sanitize(html, config)`, the latter with `RETURN_DOM: true`.
+- **Acceptance**: `npm run check` passes (typecheck + lint + 219 tests, all 97 sanitize tests pass).
+- **Reviewer notes**: The hook is added only to the per-window purifier instance, never to the default `DOMPurify` export. No new exports or files were added.
