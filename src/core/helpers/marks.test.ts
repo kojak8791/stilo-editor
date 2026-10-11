@@ -42,6 +42,23 @@ describe('setMark', () => {
     expect(editor.getHTML()).toBe('<h1>ab</h1><p><strong>c</strong>d</p>');
   });
 
+  it('returns false where an existing mark excludes the mark', () => {
+    const editor = createCoreEditor('<p><code>ab</code></p>');
+    const strong = editor.schema.marks.strong!;
+    select(editor, 2);
+    expect(run(editor, setMark(strong))).toBe(false);
+    select(editor, 1, 3);
+    expect(run(editor, setMark(strong))).toBe(false);
+    expect(editor.getHTML()).toBe('<p><code>ab</code></p>');
+  });
+
+  it('marks only the text without excluding marks in a mixed range', () => {
+    const editor = createCoreEditor('<p><code>a</code>b</p>');
+    select(editor, 1, 3);
+    expect(run(editor, setMark(editor.schema.marks.strong!))).toBe(true);
+    expect(editor.getHTML()).toBe('<p><code>a</code><strong>b</strong></p>');
+  });
+
   it('does not dispatch in a dry run', () => {
     const editor = createCoreEditor('<p>abc</p>');
     select(editor, 2, 3);

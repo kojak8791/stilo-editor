@@ -1,20 +1,28 @@
-import type { Attrs, MarkType } from 'prosemirror-model';
+import type { Attrs, Mark, MarkType } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
 import { isMarkActive } from './active';
+
+/** Whether one of `marks` (other than `type` itself) excludes marks of `type`. */
+function isExcluded(marks: readonly Mark[], type: MarkType): boolean {
+  return marks.some((mark) => mark.type !== type && mark.type.excludes(type));
+}
 
 /**
  * Command: adds a mark of `type` with `attrs` to the selection.
  *
  * - Empty selection: adds the mark to the stored marks (applies to the next typed text).
- *   Returns `false` if the parent node does not allow the mark.
+ *   Returns `false` if the parent node does not allow the mark, or a mark at the cursor
+ *   excludes it (e.g. bold inside code).
  * - Non-empty selection: adds the mark to every selection range. Returns `false` if no text in
- *   the selection allows the mark. The transaction scrolls into view.
+ *   the selection accepts the mark (parent allows it, no existing mark excludes it). The
+ *   transaction scrolls into view.
  */
 export function setMark(type: MarkType, attrs: Attrs | null = null): Command {
   return (state, dispatch) => {
     const { empty, $from, ranges } = state.selection;
     if (empty) {
-      if (!$from.parent.type.allowsMarkType(type)) return false;
+      const marks = state.storedMarks ?? $from.marks();
+      if (!$from.parent.type.allowsMarkType(type) || isExcluded(marks, type)) return false;
       dispatch?.(state.tr.addStoredMark(type.create(attrs)));
       return true;
     }
@@ -22,7 +30,10 @@ export function setMark(type: MarkType, attrs: Attrs | null = null): Command {
     let applies = false;
     for (const range of ranges) {
       state.doc.nodesBetween(range.$from.pos, range.$to.pos, (node, _pos, parent) => {
-        applies ||= node.isText && parent?.type.allowsMarkType(type) === true;
+        applies ||=
+          node.isText &&
+          parent?.type.allowsMarkType(type) === true &&
+          !isExcluded(node.marks, type);
         return !applies;
       });
     }

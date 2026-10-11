@@ -38,6 +38,7 @@ export const Bold = defineExtension({
         },
         { style: 'font-weight', getAttrs: (value) => isBoldWeight(value) && null },
       ],
+      group: 'formatting',
       toDOM: () => ['strong', 0],
     },
   }),

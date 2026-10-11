@@ -5,13 +5,20 @@ import { Document, Paragraph, Text } from '../../src/extensions';
 
 /**
  * Minimal extensions for testing the core without depending on the real extensions.
- * `strong` is a mark, `title` is a block with a `level` attribute that allows no marks,
+ * `strong` is a mark, `code` a mark that excludes all others, `title` is a block with a `level` attribute that allows no marks,
  * `rule` is an atom block.
  */
 export const TestStrong = defineExtension({
   name: 'strong',
   marks: () => ({
     strong: { parseDOM: [{ tag: 'strong' }], toDOM: () => ['strong', 0] },
+  }),
+});
+
+export const TestCode = defineExtension({
+  name: 'code',
+  marks: () => ({
+    code: { excludes: '_', parseDOM: [{ tag: 'code' }], toDOM: () => ['code', 0] },
   }),
 });
 
@@ -43,7 +50,16 @@ export const TestRule = defineExtension({
 export function createCoreEditor(content = '', extra: Extension[] = []): Editor {
   return new Editor({
     element: document.createElement('div'),
-    extensions: [Document(), Text(), Paragraph(), TestStrong(), TestTitle(), TestRule(), ...extra],
+    extensions: [
+      Document(),
+      Text(),
+      Paragraph(),
+      TestStrong(),
+      TestCode(),
+      TestTitle(),
+      TestRule(),
+      ...extra,
+    ],
     content,
   });
 }

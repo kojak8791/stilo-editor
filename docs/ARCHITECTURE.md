@@ -422,7 +422,12 @@ configured with `{ <name>: { ...options } }`.
 | `underline` | `<u>` | `u`, `text-decoration: underline` |
 | `strike` | `<s>` | `s`, `del`, `strike`, `text-decoration: line-through` |
 | `subscript` / `superscript` (M2) | `<sub>` / `<sup>` | same, `vertical-align: sub/super`; mutually exclusive |
-| `code` | `<code>` | `code`; excludes all other marks except `link` |
+| `code` | `<code>` | `code`; excludes all other marks except `link` (see below) |
+
+Mark exclusion: every mark except `link` declares `group: 'formatting'`, and `code` declares
+`excludes: 'formatting'`. Naming the group instead of the marks keeps the schema valid when some
+marks are disabled. `setMark` (and so every `set*`/`toggle*` command) returns `false` where an
+existing mark excludes the new one, so `can().toggleBold()` is `false` inside code.
 
 ### 7.3 Inline styles: allowlist and normalization
 
