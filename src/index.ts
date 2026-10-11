@@ -5,7 +5,7 @@ export type { Extension, ExtensionContext, ExtensionSpec } from './core/extensio
 export { DEFAULT_PRIORITY, defineExtension } from './core/extension';
 export { attrsMatch, isMarkActive, isNodeActive } from './core/helpers/active';
 export { markInputRule } from './core/helpers/input-rules';
-export { setMark, unsetMark } from './core/helpers/marks';
+export { setMark, toggleMark, unsetMark } from './core/helpers/marks';
 export type {
   CommandFactories,
   CommandFactory,

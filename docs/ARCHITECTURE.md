@@ -525,7 +525,13 @@ container of a detached document (`document.implementation.createHTMLDocument()`
   - `createTestEditor({ extensions?, html? })`: defaults to `StarterKit()`; returns an `Editor`.
   - Selection markers in `html`: `|` = cursor, `[` … `]` = range. Test content must not contain
     these characters as text.
-  - `getHTMLWithSelection(editor)`: canonical HTML with the selection markers re-inserted.
+  - `getHTMLWithSelection(editor)`: canonical HTML with the selection markers re-inserted. `|`
+    carries the marks the next typed character would get (`<strong>b|</strong>`: typing
+    continues in bold); `[` and `]` hug the selected text.
+  - `typeText(editor, text)`: types character by character, running input rules.
+  - `pressKey(editor, 'Mod-b')`: sends a key combination to the keymaps (`Mod` = `Ctrl`). Write
+    the combination exactly as in the keymap (`'Mod-Shift-s'`, lowercase letter): the synthetic
+    event has no `keyCode`, the fallback browsers use for `Shift`/Caps Lock variants.
 - **Per-extension minimum tests**: parse (every "also parsed from" source in §7), serialize,
   idempotence, each command (enabled/disabled cases), each keyboard shortcut, each input rule.
 - **E2E** (Playwright, `tests/e2e/`): real typing, clipboard, drag & drop, UI, anything needing

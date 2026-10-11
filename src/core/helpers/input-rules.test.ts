@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createCoreEditor, select, typeText } from '../../../tests/helpers/core';
+import { typeText } from '../../../tests/helpers';
+import { createCoreEditor, select } from '../../../tests/helpers/core';
 import { defineExtension } from '../extension';
 import { markInputRule } from './input-rules';
 

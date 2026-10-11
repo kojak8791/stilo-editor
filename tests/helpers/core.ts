@@ -59,16 +59,3 @@ export function selectNode(editor: Editor, pos: number): void {
   const { state } = editor;
   editor.view.dispatch(state.tr.setSelection(NodeSelection.create(state.doc, pos)));
 }
-
-/** Types `text` character by character, letting input rules handle each character. */
-export function typeText(editor: Editor, text: string): void {
-  const { view } = editor;
-  for (const char of text) {
-    const { from, to } = view.state.selection;
-    const insert = () => view.state.tr.insertText(char, from, to);
-    const handled = view.someProp('handleTextInput', (handler) =>
-      handler(view, from, to, char, insert),
-    );
-    if (!handled) view.dispatch(insert());
-  }
-}
