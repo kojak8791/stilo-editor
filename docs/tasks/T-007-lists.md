@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-401, F-402, F-403, F-404, F-405 |
 | Milestone | M1 |
 | Depends on | T-006 |
