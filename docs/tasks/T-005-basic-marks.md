@@ -66,7 +66,11 @@ Extra mark spec properties for `Code` only: `excludes: 'formatting'` and `code: 
 Italic needs whitespace (or line start) before it, so `snake_case_` stays plain text.
 
 Each extension gets a one-line JSDoc like Bold's (without the "Reference extension" sentence),
-e.g. `/** The \`italic\` mark (\`<em>\`), docs/SPEC.md F-202. Also parsed from \`<i>\` and an italic \`font-style\`. */`.
+for example:
+
+```ts
+/** The `italic` mark (`<em>`), docs/SPEC.md F-202. Also parsed from `<i>` and an italic `font-style`. */
+```
 
 ## Tests
 
