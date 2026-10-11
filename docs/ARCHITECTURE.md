@@ -530,7 +530,8 @@ container of a detached document (`document.implementation.createHTMLDocument()`
   idempotence, each command (enabled/disabled cases), each keyboard shortcut, each input rule.
 - **E2E** (Playwright, `tests/e2e/`): real typing, clipboard, drag & drop, UI, anything needing
   layout. Runs against the demo page.
-- **Security**: `tests/fixtures/xss/*.html` run through `setHTML` and paste; output asserted clean.
+- **Security**: the payloads in `tests/fixtures/xss/vectors.ts` run through the sanitizer (and,
+  from M1, `setHTML` and paste); output asserted clean.
 
 ## 11. Benchmarks
 

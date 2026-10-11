@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | NFR-2 |
 | Milestone | M0 |
 | Depends on | T-001 |
