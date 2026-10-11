@@ -1,13 +1,13 @@
-import type { Attrs, MarkType, NodeType } from 'prosemirror-model';
-import type { EditorState } from 'prosemirror-state';
-import { notImplemented } from '../errors';
+import type { Attrs, Mark, MarkType, NodeType } from 'prosemirror-model';
+import { type EditorState, NodeSelection } from 'prosemirror-state';
 
 /**
  * Whether `actual` contains every key of `expected` with a strictly equal (`===`) value.
  * `undefined` `expected` always matches.
  */
-export function attrsMatch(_actual: Attrs, _expected?: Record<string, unknown>): boolean {
-  return notImplemented('attrsMatch');
+export function attrsMatch(actual: Attrs, expected?: Record<string, unknown>): boolean {
+  if (!expected) return true;
+  return Object.entries(expected).every(([key, value]) => actual[key] === value);
 }
 
 /**
@@ -19,11 +19,25 @@ export function attrsMatch(_actual: Attrs, _expected?: Record<string, unknown>):
  *   least one text node. Traverse only the selected range (`doc.nodesBetween(from, to)`).
  */
 export function isMarkActive(
-  _state: EditorState,
-  _type: MarkType,
-  _attrs?: Record<string, unknown>,
+  state: EditorState,
+  type: MarkType,
+  attrs?: Record<string, unknown>,
 ): boolean {
-  return notImplemented('isMarkActive');
+  const hasMark = (marks: readonly Mark[]) =>
+    marks.some((mark) => mark.type === type && attrsMatch(mark.attrs, attrs));
+  const { empty, from, to, $from } = state.selection;
+  if (empty) return hasMark(state.storedMarks ?? $from.marks());
+
+  let found = false;
+  let all = true;
+  state.doc.nodesBetween(from, to, (node) => {
+    if (node.isText) {
+      found = true;
+      all &&= hasMark(node.marks);
+    }
+    return all;
+  });
+  return found && all;
 }
 
 /**
@@ -32,9 +46,14 @@ export function isMarkActive(
  * including the document itself).
  */
 export function isNodeActive(
-  _state: EditorState,
-  _type: NodeType,
-  _attrs?: Record<string, unknown>,
+  state: EditorState,
+  type: NodeType,
+  attrs?: Record<string, unknown>,
 ): boolean {
-  return notImplemented('isNodeActive');
+  const { selection } = state;
+  const nodes = selection instanceof NodeSelection ? [selection.node] : [];
+  for (let depth = selection.$from.depth; depth >= 0; depth--) {
+    nodes.push(selection.$from.node(depth));
+  }
+  return nodes.some((node) => node.type === type && attrsMatch(node.attrs, attrs));
 }

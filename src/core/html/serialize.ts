@@ -1,5 +1,4 @@
-import type { Fragment, Schema } from 'prosemirror-model';
-import { notImplemented } from '../errors';
+import { DOMSerializer, type Fragment, type Schema } from 'prosemirror-model';
 
 /**
  * Serializes a fragment (usually `doc.content`) to a canonical HTML string
@@ -7,6 +6,9 @@ import { notImplemented } from '../errors';
  * container element of a detached document (`document.implementation.createHTMLDocument('')`),
  * then the container's `innerHTML`.
  */
-export function serializeHTML(_schema: Schema, _fragment: Fragment): string {
-  return notImplemented('serializeHTML');
+export function serializeHTML(schema: Schema, fragment: Fragment): string {
+  const doc = document.implementation.createHTMLDocument('');
+  const container = doc.createElement('div');
+  container.append(DOMSerializer.fromSchema(schema).serializeFragment(fragment, { document: doc }));
+  return container.innerHTML;
 }

@@ -15,7 +15,7 @@ the context serves several implementations.
 |---|---|---|---|---|
 | T-001 | CSS style helpers | NFR-2, §7.3 | Implementer | done |
 | T-002 | HTML sanitizer | NFR-2, F-010 | Implementer | done |
-| T-003 | Core runtime: event emitter, extension manager, `Editor`, HTML parse/serialize, helpers; `Document`, `Text`, `Paragraph` | F-001…F-009 | Architect | todo |
+| T-003 | Core runtime: event emitter, extension manager, `Editor`, HTML parse/serialize, helpers; `Document`, `Text`, `Paragraph` | F-001…F-009 | Architect | done |
 | T-004 | Test helpers (`createTestEditor`, selection markers), `Bold` reference extension, `StarterKit` skeleton | F-201, F-301 | Architect | todo |
 
 ## M1 — MVP
