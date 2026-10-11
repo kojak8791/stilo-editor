@@ -1,11 +1,14 @@
 export { Blockquote } from './blockquote';
 export { Bold } from './bold';
+export { BulletList } from './bullet-list';
 export { Code } from './code';
 export { Document } from './document';
 export { HardBreak } from './hard-break';
 export { Heading, type HeadingLevel, type HeadingOptions } from './heading';
 export { HorizontalRule } from './horizontal-rule';
 export { Italic } from './italic';
+export { ListItem } from './list-item';
+export { OrderedList } from './ordered-list';
 export { Paragraph } from './paragraph';
 export { StarterKit, type StarterKitOptions } from './starter-kit';
 export { Strike } from './strike';

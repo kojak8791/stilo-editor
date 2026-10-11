@@ -1,12 +1,15 @@
 import type { Extension } from '../../core/extension';
 import { Blockquote } from '../blockquote';
 import { Bold } from '../bold';
+import { BulletList } from '../bullet-list';
 import { Code } from '../code';
 import { Document } from '../document';
 import { HardBreak } from '../hard-break';
 import { Heading, type HeadingOptions } from '../heading';
 import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
+import { ListItem } from '../list-item';
+import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
 import { Strike } from '../strike';
 import { Text } from '../text';
@@ -24,6 +27,9 @@ export interface StarterKitOptions {
   blockquote?: false;
   horizontalRule?: false;
   hardBreak?: false;
+  bulletList?: false;
+  orderedList?: false;
+  listItem?: false;
   bold?: false;
   italic?: false;
   underline?: false;
@@ -56,6 +62,9 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Blockquote, options.blockquote),
     ...include(HorizontalRule, options.horizontalRule),
     ...include(HardBreak, options.hardBreak),
+    ...include(BulletList, options.bulletList),
+    ...include(OrderedList, options.orderedList),
+    ...include(ListItem, options.listItem),
     ...include(Bold, options.bold),
     ...include(Italic, options.italic),
     ...include(Underline, options.underline),
