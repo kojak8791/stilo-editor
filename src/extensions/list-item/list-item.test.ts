@@ -188,4 +188,11 @@ describe('ListItem: input rules', () => {
     typeText(editor, text);
     expect(getHTMLWithSelection(editor)).toBe(expected);
   });
+
+  it('undoes the input rule with Backspace right after it', () => {
+    const editor = createTestEditor({ html: '<p>|</p>' });
+    typeText(editor, '- ');
+    expect(pressKey(editor, 'Backspace')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p>- |</p>');
+  });
 });
