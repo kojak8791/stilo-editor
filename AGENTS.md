@@ -60,6 +60,9 @@ type**, not after `npm run check` fails.
 - Relative imports without file extension. No path aliases.
 - Follow the naming table in `docs/ARCHITECTURE.md` §4.1.
 - An extension always has the same shape: copy `src/extensions/bold/` and adapt it.
+- A ProseMirror `Command` returns a `boolean` and calls `dispatch` itself. Return a command's
+  result as is (`wrapIn(type)(state, dispatch)`); never pass it to `dispatch` or compare it
+  with `null`.
 - Style attributes are handled only through `src/core/html/css.ts`. Never build or parse
   `style` strings by hand.
 - HTML output must match `docs/ARCHITECTURE.md` §7 exactly.
