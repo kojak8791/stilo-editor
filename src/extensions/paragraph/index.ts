@@ -1,4 +1,13 @@
+import { setBlockType } from 'prosemirror-commands';
+import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
+
+declare module '../../core/types' {
+  interface Commands {
+    /** Turns the selected textblocks into paragraphs. */
+    setParagraph: () => Command;
+  }
+}
 
 /**
  * The `paragraph` node (`<p>`). Priority 1000 makes it the first block node, which ProseMirror
@@ -16,5 +25,11 @@ export const Paragraph = defineExtension({
       parseDOM: [{ tag: 'p' }],
       toDOM: () => ['p', 0],
     },
+  }),
+  commands: ({ schema }) => ({
+    setParagraph: () => setBlockType(schema.nodes.paragraph!),
+  }),
+  keymap: ({ editor }) => ({
+    'Mod-Alt-0': () => editor.commands.setParagraph(),
   }),
 });

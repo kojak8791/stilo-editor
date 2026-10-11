@@ -96,13 +96,14 @@ describe('ExtensionManager', () => {
       defineExtension({ name: 'p', plugins: () => [plugin] })(),
       TestRule(),
     ];
-    const manager = new ExtensionManager(extensions);
-    const plugins = manager.createPlugins({} as Editor);
-    expect(plugins).toHaveLength(5);
+    // The base extensions may define keymaps too: count relative to them.
+    const baseline = new ExtensionManager(base()).createPlugins({} as Editor).length;
+    const plugins = new ExtensionManager(extensions).createPlugins({} as Editor);
+    expect(plugins).toHaveLength(baseline + 2);
     expect(plugins[0]?.spec).toHaveProperty('isInputRules', true);
-    expect(plugins[1]?.props.handleKeyDown).toBeTypeOf('function');
-    expect(plugins[2]).toBe(plugin);
-    expect(plugins[3]?.props.handleKeyDown).toBeTypeOf('function');
-    expect(plugins[4]?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins.at(-4)?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins.at(-3)).toBe(plugin);
+    expect(plugins.at(-2)?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins.at(-1)?.props.handleKeyDown).toBeTypeOf('function');
   });
 });
