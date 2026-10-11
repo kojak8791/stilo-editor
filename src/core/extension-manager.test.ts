@@ -88,7 +88,7 @@ describe('ExtensionManager', () => {
     expect(spy).toHaveBeenCalledWith({ options: { value: 2 }, schema: editor.schema, editor });
   });
 
-  it('returns input rules, keymaps, extension plugins, undoInputRule and baseKeymap in order', () => {
+  it('returns input rules, undoInputRule, keymaps, extension plugins and baseKeymap in order', () => {
     const plugin = new Plugin({});
     const extensions = [
       ...base(),
@@ -101,9 +101,9 @@ describe('ExtensionManager', () => {
     const plugins = new ExtensionManager(extensions).createPlugins({} as Editor);
     expect(plugins).toHaveLength(baseline + 2);
     expect(plugins[0]?.spec).toHaveProperty('isInputRules', true);
-    expect(plugins.at(-4)?.props.handleKeyDown).toBeTypeOf('function');
-    expect(plugins.at(-3)).toBe(plugin);
-    expect(plugins.at(-2)?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins[1]?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins.at(-3)?.props.handleKeyDown).toBeTypeOf('function');
+    expect(plugins.at(-2)).toBe(plugin);
     expect(plugins.at(-1)?.props.handleKeyDown).toBeTypeOf('function');
   });
 });

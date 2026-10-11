@@ -110,9 +110,10 @@ export class ExtensionManager {
    * `inputRules`, `keymap`, `plugins`. Returns, in this order:
    *
    * 1. one `inputRules({ rules })` plugin with all input rules;
-   * 2. one `keymap()` plugin per extension that defines a keymap, in extension order;
-   * 3. all extension plugins, in extension order;
-   * 4. `keymap({ Backspace: undoInputRule })`;
+   * 2. `keymap({ Backspace: undoInputRule })`: it applies only right after an input rule, so it
+   *    takes precedence over the extensions (Backspace after `- ` gives back `- `);
+   * 3. one `keymap()` plugin per extension that defines a keymap, in extension order;
+   * 4. all extension plugins, in extension order;
    * 5. `keymap(baseKeymap)` from prosemirror-commands.
    */
   createPlugins(editor: Editor): Plugin[] {
@@ -135,9 +136,9 @@ export class ExtensionManager {
     }
     return [
       inputRules({ rules }),
+      keymap({ Backspace: undoInputRule }),
       ...keymaps,
       ...plugins,
-      keymap({ Backspace: undoInputRule }),
       keymap(baseKeymap),
     ];
   }

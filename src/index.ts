@@ -5,6 +5,7 @@ export type { Extension, ExtensionContext, ExtensionSpec } from './core/extensio
 export { DEFAULT_PRIORITY, defineExtension } from './core/extension';
 export { attrsMatch, isMarkActive, isNodeActive } from './core/helpers/active';
 export { markInputRule } from './core/helpers/input-rules';
+export { toggleList } from './core/helpers/lists';
 export { setMark, toggleMark, unsetMark } from './core/helpers/marks';
 export { insertBlock, insertBlockNode } from './core/helpers/nodes';
 export { textDecorationRules } from './core/helpers/parse-rules';

@@ -46,11 +46,25 @@ export const TestRule = defineExtension({
   }),
 });
 
-/** A bullet list (`<ul>`) whose items (`<li>`) hold `paragraph block*`, like the real lists. */
+/**
+ * Two list types, `list` (`<ul>`) and `numbered` (`<ol>`), in the `list` group, whose items
+ * (`<li>`) hold `paragraph block*`, like the real lists.
+ */
 export const TestList = defineExtension({
   name: 'list',
   nodes: () => ({
-    list: { group: 'block', content: 'item+', parseDOM: [{ tag: 'ul' }], toDOM: () => ['ul', 0] },
+    list: {
+      group: 'block list',
+      content: 'item+',
+      parseDOM: [{ tag: 'ul' }],
+      toDOM: () => ['ul', 0],
+    },
+    numbered: {
+      group: 'block list',
+      content: 'item+',
+      parseDOM: [{ tag: 'ol' }],
+      toDOM: () => ['ol', 0],
+    },
     item: {
       content: 'paragraph block*',
       defining: true,

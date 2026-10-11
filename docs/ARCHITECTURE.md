@@ -373,8 +373,9 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
 4. Schema mark order (affects nesting in HTML output, outermost first):
    `link`, `textStyle`, `highlight`, `bold`, `italic`, `underline`, `strike`, `subscript`,
    `superscript`, `code`. This is enforced by the priorities of these extensions.
-5. Plugin order: input rules plugin, then keymaps (by priority), then other plugins (by priority),
-   then `baseKeymap` from `prosemirror-commands` last.
+5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
+   an input rule, so it may take precedence over every extension), then keymaps (by priority),
+   then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last.
 
 ### 6.3 StarterKit
 
