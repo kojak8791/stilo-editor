@@ -264,4 +264,27 @@ Input rules (`typeText`, then optionally a key):
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+### Files changed
+
+**Created (6 files):**
+- `src/extensions/bullet-list/index.ts` — `BulletList` extension with `toggleBulletList` command, `Mod-Shift-8` keymap, and `-/+/*` input rules.
+- `src/extensions/bullet-list/bullet-list.test.ts` — parse, idempotence, command, keymap, and input rule tests for bullet lists.
+- `src/extensions/list-item/index.ts` — `ListItem` extension with `splitListItem`, `sinkListItem`, `liftListItem` commands and `Enter`/`Tab`/`Shift-Tab`/`Backspace` keymap.
+- `src/extensions/list-item/list-item.test.ts` — parse, idempotence, `getText`, command, keymap, and input rule tests covering all cases from the task.
+- `src/extensions/ordered-list/index.ts` — `OrderedList` extension with `toggleOrderedList` command, `Mod-Shift-7` keymap, `parseStart` helper, and `\d+. ` input rules.
+- `src/extensions/ordered-list/ordered-list.test.ts` — parse, idempotence, command, keymap, and input rule tests for ordered lists.
+
+**Modified (3 files):**
+- `src/extensions/index.ts` — added alphabetical exports for `BulletList`, `ListItem`, `OrderedList`.
+- `src/extensions/starter-kit/index.ts` — imported the three extensions, added `bulletList`/`orderedList`/`listItem` to `StarterKitOptions`, added them to `StarterKit()` after `HardBreak`.
+- `src/extensions/starter-kit/starter-kit.test.ts` — added `'bulletList', 'orderedList', 'listItem'` to both expected name lists.
+
+### Summary
+
+Implemented three node extensions (BulletList, OrderedList, ListItem) following the exact code given in the task contract. The ListItem extension provides split/sink/lift commands and keymap handlers (Enter, Tab, Shift-Tab, Backspace). BulletList and OrderedList each provide a `toggleList` command, keyboard shortcut (`Mod-Shift-8` / `Mod-Shift-7`), and input rules for automatic list creation. All 589 tests pass including the new list tests.
+
+### Points for the reviewer
+
+- All test cases from the task's Tests table are covered (parse, serialize, idempotence, commands, keymap, input rules).
+- The `parseStart` helper for `<ol start="n">` follows the exact code from the contract.
+- Input rules: `-`/`*`/`+` for bullet lists, `\d+. ` for ordered lists, with the `match` filter for ordered lists to avoid resetting the start number.
