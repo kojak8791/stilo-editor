@@ -136,6 +136,41 @@ Input rules (`typeText` from `<p>|</p>`):
 
 <!-- Implementer: write questions here and stop if anything is unclear. -->
 
+No questions.
+
 ## Report
 
 <!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+
+### Files changed
+
+**Created:**
+- `src/extensions/italic/index.ts` — Italic mark extension (`<em>`, parsed from `<i>` and `font-style: italic`)
+- `src/extensions/italic/italic.test.ts` — Unit tests for Italic
+- `src/extensions/underline/index.ts` — Underline mark extension (`<u>`, parsed from `text-decoration: underline`)
+- `src/extensions/underline/underline.test.ts` — Unit tests for Underline
+- `src/extensions/strike/index.ts` — Strike mark extension (`<s>`, parsed from `<del>`, `<strike>`, `text-decoration: line-through`)
+- `src/extensions/strike/strike.test.ts` — Unit tests for Strike
+- `src/extensions/code/index.ts` — Code mark extension (`<code>`, excludes `formatting` group)
+- `src/extensions/code/code.test.ts` — Unit tests for Code
+
+**Modified:**
+- `src/extensions/index.ts` — Added exports for Italic, Underline, Strike, Code (alphabetical order)
+- `src/extensions/starter-kit/index.ts` — Added imports, options, and inclusion of the four extensions
+- `src/extensions/starter-kit/starter-kit.test.ts` — Updated expected name lists
+
+### Summary
+
+Implemented four mark extensions (Italic, Underline, Strike, Code) as copies of the Bold reference extension, each with:
+- Mark spec with `group: 'formatting'` (Code also has `excludes: 'formatting'` and `code: true`)
+- Parse rules per the contract table (HTML tags + CSS style rules via `textDecorationRules`)
+- Commands (`set`, `unset`, `toggle`) using core `setMark`/`unsetMark`/`toggleMark` helpers
+- Keymap shortcuts (`Mod-i`, `Mod-u`, `Mod-Shift-s`, `Mod-e`)
+- Input rules for inline markup (`*...*`, `_..._`, `~~...~~`, `` `...` ``)
+- Unit tests covering parse, serialize, idempotence, commands, shortcuts, and input rules
+
+### Points for the reviewer
+
+- The underscore input rule regex uses `/(?:^|\s)_([^_]+)_$/` (line start or whitespace before the underscore) to prevent `snake_case_` from triggering italic, as specified in the task note.
+- The `code` mark's `excludes: 'formatting'` property is set before `group: 'formatting'` to match the Bold extension pattern (group after excludes).
+- All 424 tests pass including the new 96 tests for the four extensions.

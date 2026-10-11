@@ -3,7 +3,16 @@ import { StarterKit } from '.';
 
 describe('StarterKit', () => {
   it('returns the implemented default extensions', () => {
-    expect(StarterKit().map((ext) => ext.name)).toEqual(['doc', 'text', 'paragraph', 'bold']);
+    expect(StarterKit().map((ext) => ext.name)).toEqual([
+      'doc',
+      'text',
+      'paragraph',
+      'bold',
+      'italic',
+      'underline',
+      'strike',
+      'code',
+    ]);
   });
 
   it('leaves out the extensions set to false', () => {
@@ -11,6 +20,10 @@ describe('StarterKit', () => {
       'doc',
       'text',
       'paragraph',
+      'italic',
+      'underline',
+      'strike',
+      'code',
     ]);
   });
 });

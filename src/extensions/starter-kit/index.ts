@@ -1,8 +1,12 @@
 import type { Extension } from '../../core/extension';
 import { Bold } from '../bold';
+import { Code } from '../code';
 import { Document } from '../document';
+import { Italic } from '../italic';
 import { Paragraph } from '../paragraph';
+import { Strike } from '../strike';
 import { Text } from '../text';
+import { Underline } from '../underline';
 
 /**
  * Options of {@link StarterKit}, by extension name: `false` disables the extension, an object
@@ -13,6 +17,10 @@ export interface StarterKitOptions {
   text?: false;
   paragraph?: false;
   bold?: false;
+  italic?: false;
+  underline?: false;
+  strike?: false;
+  code?: false;
 }
 
 /** Returns the extension unless its option is `false`. */
@@ -37,5 +45,9 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Text, options.text),
     ...include(Paragraph, options.paragraph),
     ...include(Bold, options.bold),
+    ...include(Italic, options.italic),
+    ...include(Underline, options.underline),
+    ...include(Strike, options.strike),
+    ...include(Code, options.code),
   ];
 }
