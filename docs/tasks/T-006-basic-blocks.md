@@ -234,4 +234,34 @@ Input rules (`typeText`):
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+### Files changed
+
+**Created (8 files):**
+- `src/extensions/heading/index.ts` — Heading node extension with `setHeading`/`toggleHeading` commands, `Mod-Alt-<N>` keymap, and `#N ` input rules
+- `src/extensions/heading/heading.test.ts` — Parse, idempotence, command, keymap, and input rule tests
+- `src/extensions/blockquote/index.ts` — Blockquote node extension with `setBlockquote`/`unsetBlockquote`/`toggleBlockquote` commands, `Mod-Shift-b` keymap, and `> ` input rule
+- `src/extensions/blockquote/blockquote.test.ts` — Parse, idempotence, command, keymap, and input rule tests
+- `src/extensions/horizontal-rule/index.ts` — HorizontalRule node extension with `setHorizontalRule` command and `---` input rule
+- `src/extensions/horizontal-rule/horizontal-rule.test.ts` — Parse, idempotence, command, and input rule tests
+- `src/extensions/hard-break/index.ts` — HardBreak node extension with `setHardBreak` command and `Shift-Enter` keymap
+- `src/extensions/hard-break/hard-break.test.ts` — Parse, idempotence, getText, command, and keymap tests
+
+**Modified (3 files):**
+- `src/extensions/index.ts` — Added alphabetical exports for Blockquote, HardBreak, Heading (with types), HorizontalRule
+- `src/extensions/starter-kit/index.ts` — Added imports, `StarterKitOptions` entries (`heading`, `blockquote`, `horizontalRule`, `hardBreak`), and four `include()` calls in order after Paragraph
+- `src/extensions/starter-kit/starter-kit.test.ts` — Updated both expected name lists to include the four new node names
+
+### What was done
+
+Implemented four block-level node extensions following the reference extension shape:
+
+1. **Heading** — Configurable levels (default all six), `setBlockType`-based commands, keymap per allowed level, `textblockTypeInputRule` per level
+2. **Blockquote** — Uses `lift`/`wrapIn` from `prosemirror-commands`, `lift` when active / `wrapIn` when inactive for toggle
+3. **HorizontalRule** — Uses `insertBlockNode` from core helpers, `InputRule` with `tr.delete()` for the `---` pattern
+4. **HardBreak** — Inline node with `linebreakReplacement: true` and `leafText: () => '\n'`, uses `replaceSelectionWith(type.create())`
+
+### Points for the reviewer
+
+- The `lift`/`wrapIn` functions from `prosemirror-commands` return `Transaction | null`, so I convert to `boolean` with `!= null` checks to satisfy the `Command` return type
+- `setHeading` is a local factory function (not typed as `Command`) to preserve its `(attrs) => Command` signature while being reusable in `toggleHeading`
+- All 484 tests pass (including the 51 new tests across 4 test files)
