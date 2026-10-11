@@ -1,7 +1,11 @@
 import type { Extension } from '../../core/extension';
+import { Blockquote } from '../blockquote';
 import { Bold } from '../bold';
 import { Code } from '../code';
 import { Document } from '../document';
+import { HardBreak } from '../hard-break';
+import { Heading, type HeadingOptions } from '../heading';
+import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
 import { Paragraph } from '../paragraph';
 import { Strike } from '../strike';
@@ -16,6 +20,10 @@ export interface StarterKitOptions {
   doc?: false;
   text?: false;
   paragraph?: false;
+  heading?: false | Partial<HeadingOptions>;
+  blockquote?: false;
+  horizontalRule?: false;
+  hardBreak?: false;
   bold?: false;
   italic?: false;
   underline?: false;
@@ -44,6 +52,10 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Document, options.doc),
     ...include(Text, options.text),
     ...include(Paragraph, options.paragraph),
+    ...include(Heading, options.heading),
+    ...include(Blockquote, options.blockquote),
+    ...include(HorizontalRule, options.horizontalRule),
+    ...include(HardBreak, options.hardBreak),
     ...include(Bold, options.bold),
     ...include(Italic, options.italic),
     ...include(Underline, options.underline),

@@ -1,6 +1,10 @@
+export { Blockquote } from './blockquote';
 export { Bold } from './bold';
 export { Code } from './code';
 export { Document } from './document';
+export { HardBreak } from './hard-break';
+export { Heading, type HeadingLevel, type HeadingOptions } from './heading';
+export { HorizontalRule } from './horizontal-rule';
 export { Italic } from './italic';
 export { Paragraph } from './paragraph';
 export { StarterKit, type StarterKitOptions } from './starter-kit';
