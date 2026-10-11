@@ -23,7 +23,7 @@ the context serves several implementations.
 | Task | Content | Spec | Owner | Status |
 |---|---|---|---|---|
 | T-005 | Marks: `Italic`, `Underline`, `Strike`, `Code` | F-202…F-205 | Implementer | done |
-| T-006 | Blocks: `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak` | F-302…F-305 | Implementer | todo |
+| T-006 | Blocks: `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak` | F-302…F-305 | Implementer | done |
 | T-007 | Lists: `BulletList`, `OrderedList`, `ListItem` | F-401…F-405 | Implementer | todo |
 | T-008 | `Link` | F-206 | Implementer | todo |
 | T-009 | `History`, `ClearFormatting` | F-101…F-103, F-212 | Implementer | todo |
