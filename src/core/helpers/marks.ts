@@ -1,5 +1,6 @@
 import type { Attrs, MarkType } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
+import { isMarkActive } from './active';
 
 /**
  * Command: adds a mark of `type` with `attrs` to the selection.
@@ -65,4 +66,16 @@ export function unsetMark(type: MarkType): Command {
     }
     return true;
   };
+}
+
+/**
+ * Command: {@link unsetMark} when the mark is active (see `isMarkActive`), otherwise
+ * {@link setMark}. Unlike `toggleMark` from prosemirror-commands, a partially marked selection
+ * gets the mark added, consistently with `isActive`.
+ */
+export function toggleMark(type: MarkType, attrs: Attrs | null = null): Command {
+  return (state, dispatch) =>
+    isMarkActive(state, type, attrs ?? undefined)
+      ? unsetMark(type)(state, dispatch)
+      : setMark(type, attrs)(state, dispatch);
 }
