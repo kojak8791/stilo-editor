@@ -220,6 +220,7 @@ interface EditorOptions {
   editable?: boolean;                      // default true
   autofocus?: boolean | 'start' | 'end';   // default false
   ariaLabel?: string;                      // aria-label of the editable area
+  compactParagraphs?: boolean;             // default true: <li>text</li> (ADR 0001)
 }
 
 class Editor {
@@ -402,7 +403,7 @@ configured with `{ <name>: { ...options } }`.
 | `hardBreak` | `<br>` | same | inline |
 | `bulletList` | `<ul>` | `ul` | content `listItem+` |
 | `orderedList` | `<ol start="n">` | `ol` | `start` (omitted when 1) |
-| `listItem` | `<li>` | `li` | content `paragraph block*` |
+| `listItem` | `<li>` | `li` | content `paragraph block*`; a single paragraph without attributes is written without `<p>` (`compactParagraphs`, ADR 0001) |
 | `codeBlock` (M2) | `<pre><code class="language-x">` | `pre` | `language` (class omitted when null); no marks |
 | `taskList` (M2) | `<ul data-type="taskList">` | same | content `taskItem+` |
 | `taskItem` (M2) | `<li data-checked="true\|false">` | `li[data-checked]` | `checked` |
@@ -449,6 +450,8 @@ Color rule: `#rgb`/`#rrggbb` → lowercase `#rrggbb`; `rgb(r, g, b)` and `rgba(.
 is `inherit`, `initial`, `unset`, `revert`, `currentcolor`; anything else dropped.
 
 Output format: properties in the table order, `prop: value` joined with `; `, no trailing `;`.
+`serializeHTML` rewrites every `style` attribute with `sanitizeStyle`, because ProseMirror sets
+styles through `style.cssText` and the browser re-serializes them (trailing `;`, `rgb()`).
 Example: `<span style="font-family: 'Times New Roman', serif; font-size: 12pt; color: #ff0000">`.
 
 All parsing/normalization/building of style strings goes through `src/core/html/css.ts`
@@ -576,3 +579,4 @@ via `performance.now()`. Results go to `bench/results/<date>.json`; budgets live
 | D-11 | `setHTML`/`setJSON` take an options object; replacement is undoable by default, `resetHistory: true` starts fresh | 2026-10-10 |
 | D-09 | Performance verified by benchmarks with budgets (NFR-1) | 2026-10-10 |
 | D-10 | Code and docs in English | 2026-10-10 |
+| D-12 | Single-paragraph list items are written without `<p>`; option `compactParagraphs` ([ADR 0001](decisions/0001-tight-list-items.md)) | 2026-10-11 |

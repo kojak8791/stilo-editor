@@ -41,6 +41,7 @@ export class Editor {
   private readonly plugins: Plugin[];
   private readonly dryRunners: CommandRunners;
   private readonly emitter = new EventEmitter<EditorEvents>();
+  private readonly compactParagraphs: boolean;
   private destroyed = false;
 
   /**
@@ -61,6 +62,7 @@ export class Editor {
     this.plugins = this.manager.createPlugins(this);
     this.commands = this.createRunners(true);
     this.dryRunners = this.createRunners(false);
+    this.compactParagraphs = options.compactParagraphs ?? true;
 
     const editable = options.editable ?? true;
     this.view = new EditorView(options.element, {
@@ -105,9 +107,13 @@ export class Editor {
     return this.destroyed;
   }
 
-  /** Canonical HTML of the document (`serializeHTML`). Empty document → `<p></p>`. */
+  /**
+   * Canonical HTML of the document (`serializeHTML`, honoring `compactParagraphs`). Empty
+   * document → `<p></p>`.
+   */
   getHTML(): string {
-    return serializeHTML(this.schema, this.state.doc.content);
+    const { compactParagraphs } = this;
+    return serializeHTML(this.schema, this.state.doc.content, { compactParagraphs });
   }
 
   /**

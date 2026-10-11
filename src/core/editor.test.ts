@@ -60,6 +60,32 @@ describe('Editor: creation', () => {
   });
 });
 
+describe('Editor: compactParagraphs', () => {
+  const loose = '<ul><li><p>a</p></li><li><p>b</p><p>c</p></li></ul>';
+
+  it('writes single-paragraph list items without <p> by default', async () => {
+    const editor = createCoreEditor(loose);
+    expect(editor.getHTML()).toBe('<ul><li>a</li><li><p>b</p><p>c</p></li></ul>');
+    editor.setHTML(editor.getHTML());
+    expect(editor.getHTML()).toBe('<ul><li>a</li><li><p>b</p><p>c</p></li></ul>');
+  });
+
+  it('keeps every <p> with compactParagraphs: false', async () => {
+    const { Editor } = await import('./editor');
+    const { Document, Paragraph, Text } = await import('../extensions');
+    const { TestList } = await import('../../tests/helpers/core');
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [Document(), Text(), Paragraph(), TestList()],
+      content: '<ul><li>a</li></ul>',
+      compactParagraphs: false,
+    });
+    expect(editor.getHTML()).toBe('<ul><li><p>a</p></li></ul>');
+    editor.setHTML(loose);
+    expect(editor.getHTML()).toBe(loose);
+  });
+});
+
 describe('Editor: content', () => {
   it.each([
     ['', '<p></p>'],

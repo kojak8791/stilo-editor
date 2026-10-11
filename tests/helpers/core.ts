@@ -4,9 +4,9 @@ import { defineExtension, type Extension } from '../../src/core/extension';
 import { Document, Paragraph, Text } from '../../src/extensions';
 
 /**
- * Minimal extensions for testing the core without depending on the real extensions.
- * `strong` is a mark, `code` a mark that excludes all others, `title` is a block with a `level` attribute that allows no marks,
- * `rule` is an atom block.
+ * Minimal extensions for testing the core without depending on the real extensions:
+ * `strong` is a mark, `code` a mark that excludes all others, `title` a block with a `level`
+ * attribute that allows no marks, `rule` an atom block, `list` / `item` a bullet list.
  */
 export const TestStrong = defineExtension({
   name: 'strong',
@@ -46,6 +46,20 @@ export const TestRule = defineExtension({
   }),
 });
 
+/** A bullet list (`<ul>`) whose items (`<li>`) hold `paragraph block*`, like the real lists. */
+export const TestList = defineExtension({
+  name: 'list',
+  nodes: () => ({
+    list: { group: 'block', content: 'item+', parseDOM: [{ tag: 'ul' }], toDOM: () => ['ul', 0] },
+    item: {
+      content: 'paragraph block*',
+      defining: true,
+      parseDOM: [{ tag: 'li' }],
+      toDOM: () => ['li', 0],
+    },
+  }),
+});
+
 /** Creates an editor with `Document`, `Text`, `Paragraph`, the test extensions and `extra`. */
 export function createCoreEditor(content = '', extra: Extension[] = []): Editor {
   return new Editor({
@@ -58,6 +72,7 @@ export function createCoreEditor(content = '', extra: Extension[] = []): Editor 
       TestCode(),
       TestTitle(),
       TestRule(),
+      TestList(),
       ...extra,
     ],
     content,

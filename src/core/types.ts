@@ -58,6 +58,12 @@ export interface EditorOptions {
   autofocus?: boolean | 'start' | 'end';
   /** `aria-label` of the editable area. */
   ariaLabel?: string;
+  /**
+   * Write a list item (and, from M2, a table cell) whose only content is one paragraph without
+   * attributes without its `<p>`: `<li>text</li>`. `false` keeps ProseMirror's standard output,
+   * `<li><p>text</p></li>`. Default: `true`. See docs/decisions/0001-tight-list-items.md.
+   */
+  compactParagraphs?: boolean;
 }
 
 /** Options of `setHTML` / `setJSON`. */
