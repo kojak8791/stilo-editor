@@ -1,5 +1,3 @@
-import { notImplemented } from './errors';
-
 /** A handler for an event payload. */
 export type EventHandler<T> = (payload: T) => void;
 
@@ -14,19 +12,26 @@ export type EventHandler<T> = (payload: T) => void;
  * - `clear` removes all handlers of all events.
  */
 export class EventEmitter<Events extends object> {
-  on<E extends keyof Events>(_event: E, _handler: EventHandler<Events[E]>): void {
-    notImplemented('EventEmitter.on');
+  private handlers: { [E in keyof Events]?: Set<EventHandler<Events[E]>> } = {};
+
+  on<E extends keyof Events>(event: E, handler: EventHandler<Events[E]>): void {
+    let handlers = this.handlers[event];
+    if (!handlers) {
+      handlers = new Set();
+      this.handlers[event] = handlers;
+    }
+    handlers.add(handler);
   }
 
-  off<E extends keyof Events>(_event: E, _handler: EventHandler<Events[E]>): void {
-    notImplemented('EventEmitter.off');
+  off<E extends keyof Events>(event: E, handler: EventHandler<Events[E]>): void {
+    this.handlers[event]?.delete(handler);
   }
 
-  emit<E extends keyof Events>(_event: E, _payload: Events[E]): void {
-    notImplemented('EventEmitter.emit');
+  emit<E extends keyof Events>(event: E, payload: Events[E]): void {
+    for (const handler of [...(this.handlers[event] ?? [])]) handler(payload);
   }
 
   clear(): void {
-    notImplemented('EventEmitter.clear');
+    this.handlers = {};
   }
 }

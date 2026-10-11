@@ -1,6 +1,5 @@
 import type { Attrs, MarkType } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
-import { notImplemented } from '../errors';
 
 /**
  * Command: adds a mark of `type` with `attrs` to the selection.
@@ -10,8 +9,31 @@ import { notImplemented } from '../errors';
  * - Non-empty selection: adds the mark to every selection range. Returns `false` if no text in
  *   the selection allows the mark. The transaction scrolls into view.
  */
-export function setMark(_type: MarkType, _attrs: Attrs | null = null): Command {
-  return notImplemented('setMark');
+export function setMark(type: MarkType, attrs: Attrs | null = null): Command {
+  return (state, dispatch) => {
+    const { empty, $from, ranges } = state.selection;
+    if (empty) {
+      if (!$from.parent.type.allowsMarkType(type)) return false;
+      dispatch?.(state.tr.addStoredMark(type.create(attrs)));
+      return true;
+    }
+
+    let applies = false;
+    for (const range of ranges) {
+      state.doc.nodesBetween(range.$from.pos, range.$to.pos, (node, _pos, parent) => {
+        applies ||= node.isText && parent?.type.allowsMarkType(type) === true;
+        return !applies;
+      });
+    }
+    if (!applies) return false;
+
+    if (dispatch) {
+      const tr = state.tr;
+      for (const range of ranges) tr.addMark(range.$from.pos, range.$to.pos, type.create(attrs));
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
 }
 
 /**
@@ -22,6 +44,25 @@ export function setMark(_type: MarkType, _attrs: Attrs | null = null): Command {
  * - Non-empty selection: removes the mark from every range. Returns `false` if no range has the
  *   mark. The transaction scrolls into view.
  */
-export function unsetMark(_type: MarkType): Command {
-  return notImplemented('unsetMark');
+export function unsetMark(type: MarkType): Command {
+  return (state, dispatch) => {
+    const { empty, $from, ranges } = state.selection;
+    if (empty) {
+      if (!type.isInSet(state.storedMarks ?? $from.marks())) return false;
+      dispatch?.(state.tr.removeStoredMark(type));
+      return true;
+    }
+
+    const hasMark = ranges.some((range) =>
+      state.doc.rangeHasMark(range.$from.pos, range.$to.pos, type),
+    );
+    if (!hasMark) return false;
+
+    if (dispatch) {
+      const tr = state.tr;
+      for (const range of ranges) tr.removeMark(range.$from.pos, range.$to.pos, type);
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
 }
