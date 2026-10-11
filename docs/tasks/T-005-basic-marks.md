@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-202, F-203, F-204, F-205 |
 | Milestone | M1 |
 | Depends on | T-004 |
