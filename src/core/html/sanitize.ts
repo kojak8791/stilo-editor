@@ -1,6 +1,26 @@
 import DOMPurify, { type DOMPurify as Purifier } from 'dompurify';
 import { sanitizeStyle } from './css';
 
+/**
+ * HTML sanitization with DOMPurify. See docs/ARCHITECTURE.md §8 and docs/SPEC.md NFR-2.
+ *
+ * Implementation requirements:
+ *
+ * - Use a **Stilo-owned DOMPurify instance**, created lazily with `DOMPurify(window)` and cached
+ *   per `window` (WeakMap). Never add hooks to the default DOMPurify export: it may be shared
+ *   with the host application. No DOM access at module top level.
+ * - Config: `ALLOWED_TAGS`, `ALLOWED_ATTR` below, `ALLOW_DATA_ATTR: false`. Unknown tags are
+ *   unwrapped with their content kept (DOMPurify default).
+ * - One `uponSanitizeAttribute` hook filters attribute values; when the filter returns `null`
+ *   the attribute is removed (`keepAttr = false`), otherwise `attrValue` is replaced:
+ *   - `style` → `sanitizeStyle(value)` from `./css`;
+ *   - `class` → only tokens matching `^language-[\w-]+$`, joined with a space;
+ *   - `href` → kept (trimmed) if {@link isAllowedHref};
+ *   - `src` → kept (trimmed) if {@link isAllowedImageSrc};
+ *   - `target` → kept only if exactly `_blank`;
+ *   - any other allowed attribute → unchanged.
+ */
+
 /** Tags kept by the sanitizer. */
 export const ALLOWED_TAGS: readonly string[] = [
   'p',
