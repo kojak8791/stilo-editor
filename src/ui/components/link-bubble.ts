@@ -1,5 +1,5 @@
 import type { VirtualElement } from '@floating-ui/dom';
-import { Pencil, Unlink } from 'lucide';
+import { ExternalLink, Pencil, Unlink } from 'lucide';
 import type { Editor } from '../../index';
 import type { Messages } from '../i18n/types';
 import { createIcon } from './icon';
@@ -38,10 +38,11 @@ export function createLinkBubble(editor: Editor, options: LinkBubbleOptions): Li
   content.setAttribute('aria-label', messages['toolbar.link']);
 
   const url = document.createElement('a');
-  url.className = 'stilo-link-bubble__url';
+  url.className = 'stilo-link-bubble__button';
   url.target = '_blank';
   url.rel = 'noopener noreferrer';
-  url.title = messages['link.open'];
+  url.setAttribute('aria-label', messages['link.open']);
+  url.append(createIcon(ExternalLink));
 
   const edit = createButton(Pencil, messages['link.edit']);
   const remove = createButton(Unlink, messages['link.remove']);
@@ -85,7 +86,7 @@ export function createLinkBubble(editor: Editor, options: LinkBubbleOptions): Li
     if (!link) return;
     const href = String(editor.getAttributes('link').href ?? '');
     url.href = href;
-    url.textContent = href;
+    url.title = `${messages['link.open']}: ${href}`;
     popover.open();
   }
 

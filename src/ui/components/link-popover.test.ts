@@ -187,7 +187,10 @@ describe('link bubble', () => {
     expect(bubble.getAttribute('role')).toBe('group');
     const url = bubble.querySelector('a')!;
     expect(url.getAttribute('href')).toBe('https://x.com');
-    expect(url.textContent).toBe('https://x.com');
+    expect(url.textContent).toBe('');
+    expect(url.getAttribute('aria-label')).toBe('Open link in a new tab');
+    expect(url.title).toBe('Open link in a new tab: https://x.com');
+    expect(url.querySelector('svg')).not.toBeNull();
     expect(url.target).toBe('_blank');
     expect(url.rel).toBe('noopener noreferrer');
     const labels = [...bubble.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'));

@@ -393,8 +393,9 @@ the link at the cursor, like the link preview of webmail editors.
 
 ```html
 <div class="stilo-popover stilo-link-bubble" role="group" aria-label="Link" hidden>
-  <a class="stilo-link-bubble__url" href="https://x.com" target="_blank"
-    rel="noopener noreferrer" title="Open link in a new tab">https://x.com</a>
+  <a class="stilo-link-bubble__button" href="https://x.com" target="_blank"
+    rel="noopener noreferrer" aria-label="Open link in a new tab"
+    title="Open link in a new tab: https://x.com">…ExternalLink…</a>
   <button type="button" class="stilo-link-bubble__button" aria-label="Edit link"
     title="Edit link">…Pencil…</button>
   <button type="button" class="stilo-link-bubble__button" aria-label="Remove link"
@@ -515,8 +516,8 @@ Layout:
 - Link popover: 320px wide form; URL on its own row with border and radius, focus ring,
   `--stilo-color-error` border when invalid; checkbox label and actions on the second row;
   buttons with border and radius, the primary one filled with `--stilo-color-focus`.
-- Link bubble: flex row; URL in `--stilo-color-focus`, at most 240px with ellipsis; icon buttons
-  like the toolbar buttons.
+- Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
+  open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
 
 ## 8. Later
 

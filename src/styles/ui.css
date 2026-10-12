@@ -252,30 +252,19 @@
   color: #ffffff;
 }
 
-/* Link bubble */
+/* Link bubble: small and unobtrusive */
 .stilo-link-bubble {
   display: flex;
-  align-items: center;
-  gap: 2px;
-  font-family: var(--stilo-font-family, system-ui, sans-serif);
-  font-size: var(--stilo-font-size, 14px);
-}
-
-.stilo-link-bubble__url {
-  max-width: 240px;
-  padding: 0 8px;
-  overflow: hidden;
-  color: var(--stilo-color-focus, #0969da);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: 1px;
+  padding: 2px;
 }
 
 .stilo-link-bubble__button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--stilo-button-size, 32px);
-  height: var(--stilo-button-size, 32px);
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: none;
   border-radius: var(--stilo-radius, 6px);
@@ -286,4 +275,9 @@
 
 .stilo-link-bubble__button:hover {
   background: var(--stilo-color-hover, #eef1f4);
+}
+
+.stilo-link-bubble__button .stilo-icon {
+  width: 16px;
+  height: 16px;
 }
