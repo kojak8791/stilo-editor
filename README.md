@@ -26,12 +26,11 @@ Clean HTML in and out, headless core, no paid tiers.
 Long contracts, manuals, books and reports with tens of thousands of paragraphs can be edited
 in the browser, without pagination tricks and without splitting the content. Stilo builds on
 [ProseMirror](https://prosemirror.net), which updates only the part of the page that changed,
-and adds three rules of its own:
+and treats performance as a requirement:
 
-- no work proportional to the whole document on a keystroke: no full-document scans in plugins,
-  no HTML serialization per change;
-- the browser skips layout and painting of the blocks outside the viewport
-  (`content-visibility`): this alone made typing in 10,000 paragraphs six times faster;
+- a keystroke never costs work proportional to the whole document;
+- the browser lays out and paints only what is on screen
+  ([how](docs/decisions/0003-performance-baseline.md#decision));
 - every change can be measured: `npm run bench` drives the editor in Chromium on generated
   documents and fails when a budget is exceeded.
 
