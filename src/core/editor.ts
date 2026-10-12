@@ -1,3 +1,4 @@
+import { closeHistory } from 'prosemirror-history';
 import type { Node, Schema } from 'prosemirror-model';
 import { EditorState, type Plugin, Selection, type Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
@@ -121,7 +122,7 @@ export class Editor {
    *
    * - `resetHistory: false` (default): one transaction replacing the whole content
    *   (`tr.replaceWith(0, doc.content.size, newDoc.content)`), selection at document start;
-   *   undoable.
+   *   undoable as its own step (`closeHistory`: never grouped with the changes before it).
    * - `resetHistory: true`: a new `EditorState` with the same plugins; `update` is emitted with
    *   `transaction: null`.
    * - `emitUpdate: false` suppresses the `update` event.
@@ -231,6 +232,7 @@ export class Editor {
     }
     const tr = this.state.tr.replaceWith(0, this.state.doc.content.size, doc.content);
     tr.setSelection(Selection.atStart(tr.doc));
+    closeHistory(tr);
     if (!emitUpdate) tr.setMeta(SKIP_UPDATE_META, true);
     this.view.dispatch(tr);
   }

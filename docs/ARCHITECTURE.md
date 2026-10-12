@@ -274,8 +274,9 @@ Semantics:
   }
   ```
 
-  - `resetHistory: false` (default): the whole content is replaced by **one undoable transaction**;
-    the selection goes to the start of the document.
+  - `resetHistory: false` (default): the whole content is replaced by **one undoable transaction**,
+    never grouped with the changes before it (`closeHistory`); the selection goes to the start of
+    the document.
   - `resetHistory: true`: a fresh `EditorState` is created with the same plugins (all plugin
     states, history included, start from scratch). Typical use: a "New document" button calls
     `setHTML('', { resetHistory: true })`, or loading a different document.

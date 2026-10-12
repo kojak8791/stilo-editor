@@ -53,7 +53,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-209 | Highlight (background color) | M2 | `Mod-Shift-h` | `==text==` |
 | F-210 | Font family | M2 | — | — |
 | F-211 | Font size | M2 | — | — |
-| F-212 | Clear formatting (remove all marks in selection) | M1 | `Mod-\` | — |
+| F-212 | Clear formatting (remove all formatting marks in selection; links are kept) | M1 | `Mod-\` | — |
 
 ## 4. Blocks (`F-3xx`)
 

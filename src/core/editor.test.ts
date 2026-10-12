@@ -1,3 +1,4 @@
+import { history, undo } from 'prosemirror-history';
 import type { Command } from 'prosemirror-state';
 import { describe, expect, it, vi } from 'vitest';
 import { createCoreEditor, select, selectNode } from '../../tests/helpers/core';
@@ -160,6 +161,19 @@ describe('Editor: setHTML', () => {
     expect(editor.state.plugins).toEqual(previous.plugins);
     expect(editor.getHTML()).toBe('<p>new</p>');
     expect(update).toHaveBeenCalledWith({ editor, transaction: null });
+  });
+
+  it('is undone as its own step, not grouped with the changes just before it', () => {
+    const TestHistory = defineExtension({ name: 'history', plugins: () => [history()] });
+    const editor = createCoreEditor('<p>a</p>', [TestHistory()]);
+    select(editor, 2);
+    editor.view.dispatch(editor.state.tr.insertText('b'));
+    editor.setHTML('<p>new</p>');
+    const runUndo = () => undo(editor.state, (tr) => editor.view.dispatch(tr));
+    expect(runUndo()).toBe(true);
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+    expect(runUndo()).toBe(true);
+    expect(editor.getHTML()).toBe('<p>a</p>');
   });
 });
 
