@@ -161,6 +161,36 @@ describe('ListItem: keymap', () => {
     expect(getHTMLWithSelection(editor)).toBe('<ul><li>a|b</li></ul>');
   });
 
+  it.each([
+    ['<ul><li>a</li></ul><p>|</p>', '<ul><li>a|</li></ul>'],
+    ['<ol><li>a</li></ol><p>|</p><p>b</p>', '<ol><li>a|</li></ol><p>b</p>'],
+    ['<ul><li>a</li></ul><p>|b</p>', '<ul><li>a|b</li></ul>'],
+    ['<ul><li>a</li></ul><h2>|b</h2>', '<ul><li>a|b</li></ul>'],
+    [
+      '<ul><li><strong>a</strong></li></ul><p>|<em>b</em></p>',
+      '<ul><li><strong>a|</strong><em>b</em></li></ul>',
+    ],
+    [
+      '<ul><li><p>a</p><ul><li>b</li></ul></li></ul><p>|</p>',
+      '<ul><li><p>a</p><ul><li>b|</li></ul></li></ul>',
+    ],
+    [
+      '<ul><li><p>a</p><ul><li>b</li></ul></li></ul><p>|c</p>',
+      '<ul><li><p>a</p><ul><li>b|c</li></ul></li></ul>',
+    ],
+  ])('Backspace after a list joins %j into its last item: %j', (html, expected) => {
+    const editor = createTestEditor({ html });
+    expect(pressKey(editor, 'Backspace')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(expected);
+  });
+
+  it('undoes the join after a list in one step', () => {
+    const editor = createTestEditor({ html: '<ul><li>a</li></ul><p>|b</p>' });
+    pressKey(editor, 'Backspace');
+    expect(pressKey(editor, 'Mod-z')).toBe(true);
+    expect(editor.getHTML()).toBe('<ul><li>a</li></ul><p>b</p>');
+  });
+
   it('unwraps single paragraph with Backspace', () => {
     const editor = createTestEditor({
       html: '<ul><li><p>a</p><p>|b</p></li></ul>',

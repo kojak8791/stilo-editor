@@ -88,7 +88,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-401 | Bullet list | M1 | `Mod-Shift-8` | `- `, `* `, `+ ` |
 | F-402 | Ordered list (with `start` attribute) | M1 | `Mod-Shift-7` | `1. ` (number becomes `start`) |
 | F-403 | Nested lists (unlimited depth), mixed types | M1 | `Tab` / `Shift-Tab` | — |
-| F-404 | Enter on empty item exits/lifts; Backspace at item start lifts | M1 | — | — |
+| F-404 | Enter on empty item exits/lifts; Backspace at item start lifts; Backspace at the start of a block right after a list joins it to the end of the last item (an empty block is deleted) | M1 | — | — |
 | F-405 | Toggle / convert between bullet and ordered | M1 | — | — |
 | F-406 | Task list (checkbox items) | M2 | `Mod-Shift-9` | `[ ] `, `[x] ` |
 | F-407 | List style type (roman, alpha, ...) | M3 | — | — |
