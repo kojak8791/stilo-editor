@@ -50,6 +50,7 @@
     "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.8.0",
     "dompurify": "^3.4.16",
     "lucide": "^1.55.0",
     "prosemirror-commands": "^1.7.2",

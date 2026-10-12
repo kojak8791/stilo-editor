@@ -1,0 +1,55 @@
+/* Demo page only. Content defaults move to src/styles/content.css (T-016). */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1f2328;
+  background: #f6f8fa;
+}
+
+.demo {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.demo__title {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.demo__subtitle {
+  margin: 24px 0 8px;
+  font-size: 1rem;
+}
+
+.demo__editor {
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.demo__editor .stilo-content {
+  min-height: 300px;
+  padding: 16px 20px;
+  outline: none;
+  line-height: 1.5;
+}
+
+.demo__output {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.stilo-placeholder::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: #8c959f;
+  pointer-events: none;
+}

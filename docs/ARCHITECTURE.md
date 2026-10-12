@@ -13,6 +13,7 @@ agent must not deviate from it; changes go through an ADR (`docs/decisions/`).
 | Editor engine | ProseMirror (`prosemirror-*` packages) |
 | Sanitization | DOMPurify |
 | Icons (UI only) | `lucide` |
+| Popover positioning (UI only) | `@floating-ui/dom` ([ADR 0002](decisions/0002-floating-ui.md)) |
 | Build | Vite (library mode) + `tsc` for `.d.ts` |
 | Unit tests | Vitest + jsdom |
 | E2E & benchmarks | Playwright (`@playwright/test`), Chromium / Firefox / WebKit |
@@ -28,7 +29,7 @@ Runtime `dependencies`:
 prosemirror-model  prosemirror-state  prosemirror-view  prosemirror-transform
 prosemirror-commands  prosemirror-keymap  prosemirror-history  prosemirror-inputrules
 prosemirror-schema-list  prosemirror-tables  prosemirror-dropcursor  prosemirror-gapcursor
-dompurify  lucide
+dompurify  lucide  @floating-ui/dom
 ```
 
 `devDependencies`:
@@ -74,7 +75,7 @@ src/extensions/  ──► src/core/
 src/core/        ──► (ProseMirror, DOMPurify only)
 ```
 
-- `src/core/` and `src/extensions/` **never** import from `src/ui/` or `lucide`.
+- `src/core/` and `src/extensions/` **never** import from `src/ui/`, `lucide` or `@floating-ui/dom`.
 - `src/ui/` imports the core **only** through `src/index.ts`, never from `src/core/**` or
   `src/extensions/**` directly.
 - Everything a UI needs (command execution, `can()`, `isActive()`, events, node attributes of the
@@ -116,7 +117,7 @@ stilo-editor/
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
 ├── docs/
-│   ├── VISION.md  SPEC.md  ARCHITECTURE.md
+│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md
 │   ├── decisions/                ADRs: NNNN-short-title.md
 │   └── tasks/                    T-NNN-short-title.md + _TEMPLATE.md
 ├── src/
@@ -533,24 +534,24 @@ plain text is `textBetween(…, '
 
 ## 9. Default UI (`src/ui/`)
 
+The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`](UI.md).
+
 - Separate entry `stilo-editor/ui`, fully optional (see §2.2). It uses only the public core API
-  (`editor.commands`, `editor.can()`, `editor.isActive()`, events). It never touches ProseMirror
-  internals except through the public `editor.view` for positioning popovers.
+  (`editor.commands`, `editor.can()`, `editor.isActive()`, events). It touches `editor.view` only
+  to anchor popovers to the selection and to listen to DOM events on `view.dom`.
 - Customization levels, from least to most effort:
   1. CSS custom properties / overriding `ui.css`;
-  2. toolbar configuration (which items, which groups, order) and custom items via the registry;
+  2. toolbar configuration (which items, which groups, order) and custom items;
   3. replacing single UI parts (e.g. own link dialog) through options;
   4. no default UI at all: core only + `content.css`, custom UI on the public API.
-- `createToolbar(editor, { container, items, locale })`. `items` is an array of groups of item IDs:
-  `[['undo', 'redo'], ['heading'], ['bold', 'italic', 'underline', 'strike', 'code'], ['link'],
-  ['bulletList', 'orderedList', 'blockquote']]`.
-- Toolbar items are declared in a registry with a fixed shape:
-  `{ id, kind: 'button' | 'dropdown' | 'color', icon, labelKey, run(editor), isActive?(editor),
-  isEnabled?(editor) }`. State refresh on `transaction` events, batched with
-  `requestAnimationFrame`.
-- Icons from `lucide`. Strings from `src/ui/i18n/<locale>.ts` (`en` default, `it`).
+- `createToolbar(editor, { container, items, messages })`. `items` is an array of groups; each
+  entry is the ID of a default item or a custom item object (UI.md §3).
+- Toolbar items have a fixed shape (`kind: 'button' | 'dropdown'`, label key, `run(editor)`,
+  optional `isActive`, `isEnabled`, `isAvailable`). State refresh on `transaction` events,
+  batched with `requestAnimationFrame`.
+- Icons from `lucide`; floating elements positioned by `@floating-ui/dom` through one popover
+  component (ADR 0002). Strings from `src/ui/i18n/<locale>.ts` (`en` default, `it`).
 - Plain DOM, no framework. Styling in `src/styles/ui.css` with `--stilo-*` custom properties.
-- Detailed UI design is produced in the M1 UI tasks.
 
 ---
 
@@ -607,3 +608,4 @@ via `performance.now()`. Results go to `bench/results/<date>.json`; budgets live
 | D-09 | Performance verified by benchmarks with budgets (NFR-1) | 2026-10-10 |
 | D-10 | Code and docs in English | 2026-10-10 |
 | D-12 | Single-paragraph list items are written without `<p>`; option `compactParagraphs` ([ADR 0001](decisions/0001-tight-list-items.md)) | 2026-10-11 |
+| D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1 ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
