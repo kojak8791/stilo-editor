@@ -49,6 +49,7 @@ explicit budgets.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical design, stack, file layout, extension API, HTML contract |
 | [decisions/](decisions/) | Architecture Decision Records (changes to decisions) |
 | [UI.md](UI.md) | Design of the default UI |
+| [PERFORMANCE.md](PERFORMANCE.md) | Performance in practice, how it is measured, limits |
 | [BACKLOG.md](BACKLOG.md) | Tasks done and planned |
 | [guides/](guides/) | How-to guides (e.g. ProseMirror positions) |
 | [../AGENTS.md](../AGENTS.md) | Rules for contributors and coding agents |

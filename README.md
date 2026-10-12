@@ -9,9 +9,9 @@ Clean HTML in and out, headless core, no paid tiers.
 
 ## Why Stilo
 
-- **Built for very large documents.** Typing stays fluid in a document of 10,000 paragraphs and
-  remains usable at 50,000 (see [Large documents](#large-documents)). Measured in a real browser,
-  checked against budgets, not assumed.
+- **Built for very large documents.** Typing stays immediate in a document longer than most
+  novels (see [Large documents](#large-documents)). Measured in a real browser, checked against
+  budgets, not assumed.
 - **Entirely open source (MIT).** Aiming at the feature level of Tiptap or CKEditor 5, with no paid
   tiers and no closed "pro" extensions.
 - **HTML is the public format.** Content goes in as HTML and comes out as clean, semantic,
@@ -23,30 +23,16 @@ Clean HTML in and out, headless core, no paid tiers.
 
 ## Large documents
 
-Long contracts, manuals, books and reports with tens of thousands of paragraphs can be edited
-in the browser, without pagination tricks and without splitting the content. Stilo builds on
-[ProseMirror](https://prosemirror.net), which updates only the part of the page that changed,
-and treats performance as a requirement:
+Stilo is made for long documents: contracts, manuals, books, reports. Typing feels immediate in
+a document of 10,000 paragraphs — about 400,000 words, longer than most novels — and the editor
+stays usable at five times that size, without pagination tricks and without splitting the
+content. Formatting, search and selection keep up with the size of the text.
 
-- a keystroke never costs work proportional to the whole document;
-- the browser lays out and paints only what is on screen
-  ([how](docs/decisions/0003-performance-baseline.md#decision));
-- every change can be measured: `npm run bench` drives the editor in Chromium on generated
-  documents and fails when a budget is exceeded.
-
-Reference measurements (Chromium, desktop PC, documents with headings, mixed formatting and
-links; details in [ADR 0003](docs/decisions/0003-performance-baseline.md)):
-
-| Document | HTML size | Load | Key press to screen (median) | Export `getHTML()` |
-|---|---|---|---|---|
-| 1,000 paragraphs | 0.4 MB | 0.13 s | under 16 ms | 13 ms |
-| 10,000 paragraphs | 4 MB | 1.1 s | 24 ms | 125 ms |
-| 50,000 paragraphs | 20 MB | 5.6 s | 150 ms | 0.7 s |
-| Nested list, 2,000 items, 8 levels | 0.2 MB | 0.09 s | under 16 ms | 12 ms |
-
-A key press under 16 ms fits in one frame of a 60 Hz screen. Beyond 50,000 paragraphs the limit
-is the size of the page itself: Stilo does not virtualize the document, so every block stays in
-the DOM and remains searchable, selectable and accessible.
+This is measured, not promised. A benchmark drives the editor in a real browser on generated
+documents and times everything from loading and exporting the HTML down to the milliseconds
+between a key press and the character on screen; every change is checked against performance
+budgets. What it means in practice, the numbers and the limits:
+[Performance](docs/PERFORMANCE.md).
 
 ## Usage
 
@@ -89,6 +75,7 @@ it is merged, and performance is measured against explicit budgets (`npm run ben
 | [SPEC.md](docs/SPEC.md) | Features, non-functional requirements, roadmap |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, file layout, extension API, HTML contract |
 | [UI.md](docs/UI.md) | Design of the default UI |
+| [PERFORMANCE.md](docs/PERFORMANCE.md) | Performance in practice, how it is measured, limits |
 | [BACKLOG.md](docs/BACKLOG.md) | Tasks done and planned |
 | [AGENTS.md](AGENTS.md) | Rules for contributors and coding agents |
 
