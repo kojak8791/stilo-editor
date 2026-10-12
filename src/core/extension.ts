@@ -45,6 +45,9 @@ export const DEFAULT_PRIORITY = 100;
  * const heading = Heading({ levels: [1, 2, 3] });
  * ```
  */
+// Lets bundlers drop unused extensions and the packages only they import: the build turns it
+// into `@__PURE__` on every `defineExtension` call (checked by `npm run size`).
+/* @__NO_SIDE_EFFECTS__ */
 export function defineExtension<Options extends object = Record<string, never>>(
   spec: ExtensionSpec<Options>,
 ): (options?: Partial<Options>) => Extension<Options> {

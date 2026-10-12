@@ -79,3 +79,17 @@ npm run bench
 Results are written to `bench/results/<date>.json`. In the demo, `/demo/?bench` exposes the
 benchmark API: open the browser console and run `__stilo.load('paragraphs-10k')` to try a large
 document by hand.
+
+## Download size
+
+What an app built with Vite downloads, measured on 2026-10-12 with `npm run size`:
+
+| App | Minified | Gzip |
+|---|---|---|
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.0 kB | 77.5 kB |
+| Core and `StarterKit` | 271.1 kB | 85.1 kB |
+| Core, `StarterKit` and the default UI | 308.2 kB | 97.1 kB |
+
+Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
+styles add 2.6 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
+consumer would, and fails if the minimal app contains packages that only unused extensions need.

@@ -97,6 +97,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 | `test:watch` | `vitest` | Unit tests, watch mode |
 | `test:e2e` | `playwright test` | E2E tests |
 | `bench` | `playwright test -c playwright.bench.config.ts` | Performance benchmarks |
+| `size` | `npm run build && node scripts/size.mjs` | Bundle size of typical apps, tree-shaking check |
 | `check` | `npm run typecheck && npm run lint && npm run test` | **Quality gate** |
 
 ---
@@ -159,6 +160,8 @@ stilo-editor/
 │   ├── helpers/                  createTestEditor, selection markers, fixtures loader
 │   ├── fixtures/                 html/ (word, gdocs, ...), xss/
 │   └── e2e/                      *.spec.ts (Playwright)
+├── scripts/
+│   └── size.mjs                  Bundle size report (`npm run size`)
 └── bench/
     ├── generators/               Benchmark document generators
     ├── *.bench.ts                Playwright benchmarks

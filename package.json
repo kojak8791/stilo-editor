@@ -47,6 +47,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "bench": "playwright test -c playwright.bench.config.ts",
+    "size": "npm run build && node scripts/size.mjs",
     "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {

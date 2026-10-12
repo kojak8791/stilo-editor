@@ -117,5 +117,6 @@ The toolchain enforces these. Respect them while you type, not after `npm run ch
 | `npm run format` | Auto-fix formatting and safe lint issues |
 | `npm run test:watch` | Unit tests in watch mode |
 | `npm run bench` | Performance benchmarks (needs `npx playwright install chromium`) |
+| `npm run size` | Bundle size of typical apps; fails if tree-shaking breaks |
 | `npm run test:e2e` | Playwright E2E |
 | `npm run dev` | Demo page |

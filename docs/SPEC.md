@@ -261,7 +261,8 @@ best-effort in M2, tested in M3. E2E tests run on Chromium, Firefox and WebKit.
 
 - ESM only, TypeScript declarations included, tree-shakable (`sideEffects` limited to CSS).
 - The core can be imported in Node without crashing (no DOM access at module top level).
-- Bundle size is reported by `npm run build`; budgets will be set by ADR after M1.
+- Bundle size is reported by `npm run size` (docs/PERFORMANCE.md); budgets will be set by ADR
+  after M1.
 - **Headless-first**: the core (`stilo-editor`) never imports the UI (`stilo-editor/ui`). Using
   only the core, with a custom UI, is a first-class scenario. The default UI uses only the public
   core API. Enforced by an architecture test (ARCHITECTURE §2.2).
