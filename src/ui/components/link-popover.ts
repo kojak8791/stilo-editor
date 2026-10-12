@@ -5,7 +5,7 @@ import { createPopover } from './popover';
 
 /** Options of {@link createLinkPopover}. */
 export interface LinkPopoverOptions {
-  /** Inside the UI root, so that `--stilo-*` custom properties are inherited. */
+  /** The element the popover scrolls with: the parent of the editable element. */
   container: HTMLElement;
   messages: Messages;
 }

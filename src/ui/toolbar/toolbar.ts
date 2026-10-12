@@ -3,6 +3,7 @@ import { StiloError } from '../../index';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
 import { createIcon } from '../components/icon';
+import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
 import { en } from '../i18n/en';
@@ -146,11 +147,21 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     element.appendChild(groupEl);
   }
 
-  // One link popover per toolbar, opened by the link button and by Mod-k in the editor
+  // One link popover and link bubble per toolbar, mounted next to the editable element so that
+  // they scroll with the content. The popover opens with the link button, Mod-k in the editor
+  // and the edit button of the bubble.
+  const editorHost = editor.view.dom.parentElement ?? element;
   const linkPopover =
     'setLink' in editor.commands
-      ? createLinkPopover(editor, { container: element, messages })
+      ? createLinkPopover(editor, { container: editorHost, messages })
       : null;
+  const linkBubble = linkPopover
+    ? createLinkBubble(editor, {
+        container: editorHost,
+        messages,
+        onEdit: () => linkPopover.open(),
+      })
+    : null;
   const context: ToolbarContext = {
     openLinkPopover: () => linkPopover?.open(),
   };
@@ -244,11 +255,9 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   editor.on('transaction', onTransaction);
 
-  // mousedown on toolbar: preventDefault to keep editor focus, except on the form fields of
-  // popovers (the link URL), which must take the focus
+  // mousedown on toolbar: preventDefault to keep editor focus
   const onToolbarMousedown = (e: MouseEvent): void => {
     if (isDestroyed) return;
-    if ((e.target as Element).closest('input, label')) return;
     e.preventDefault();
   };
   element.addEventListener('mousedown', onToolbarMousedown);
@@ -363,6 +372,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
       ddInstance.destroy();
     }
     linkPopover?.destroy();
+    linkBubble?.destroy();
 
     if (container.contains(element)) {
       container.removeChild(element);

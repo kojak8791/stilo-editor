@@ -25,7 +25,9 @@ export type MessageKey =
   | 'link.url'
   | 'link.newTab'
   | 'link.apply'
-  | 'link.remove';
+  | 'link.remove'
+  | 'link.edit'
+  | 'link.open';
 
 /** UI strings: every {@link MessageKey}, plus the label keys of custom toolbar items. */
 export type Messages = Readonly<Record<MessageKey, string>> & Readonly<Record<string, string>>;

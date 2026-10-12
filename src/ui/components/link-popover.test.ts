@@ -13,12 +13,14 @@ function setup(html: string, extensions = [StarterKit()]) {
   document.body.append(container);
   const toolbar = createToolbar(editor, { container });
   const button = toolbar.element.querySelector<HTMLButtonElement>('[data-item="link"]')!;
-  const dialog = toolbar.element.querySelector<HTMLElement>('.stilo-link-popover')!;
+  const host = editor.view.dom.parentElement!;
+  const dialog = host.querySelector<HTMLElement>('.stilo-link-popover')!;
+  const bubble = host.querySelector<HTMLElement>('.stilo-link-bubble')!;
   const url = dialog?.querySelector<HTMLInputElement>('.stilo-link-popover__url');
   const newTab = dialog?.querySelector<HTMLInputElement>('input[type="checkbox"]');
   const [apply, remove] = dialog ? [...dialog.querySelectorAll('button')] : [];
   const modK = () => press(editor.view.dom, 'k', { ctrlKey: true });
-  return { editor, toolbar, button, dialog, url, newTab, apply, remove, modK };
+  return { editor, toolbar, host, button, dialog, bubble, url, newTab, apply, remove, modK };
 }
 
 function press(target: Element, key: string, init: KeyboardEventInit = {}): KeyboardEvent {
@@ -51,9 +53,10 @@ describe('link button', () => {
   });
 
   it('is not rendered without the Link extension, and Mod-k is left alone', () => {
-    const { toolbar, dialog, modK } = setup('<p>ab</p>', [StarterKit({ link: false })]);
+    const { toolbar, dialog, bubble, modK } = setup('<p>ab</p>', [StarterKit({ link: false })]);
     expect(toolbar.element.querySelector('[data-item="link"]')).toBeNull();
     expect(dialog).toBeNull();
+    expect(bubble).toBeNull();
     expect(modK().defaultPrevented).toBe(false);
   });
 });
@@ -149,18 +152,81 @@ describe('link popover', () => {
     expect(editor.getHTML()).toBe('<p>ab</p>');
   });
 
-  it('lets the URL field take the focus on mouse down', () => {
-    const { url, modK } = setup('<p>[ab]</p>');
-    modK();
-    const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-    url!.dispatchEvent(event);
-    expect(event.defaultPrevented).toBe(false);
+  it('is mounted next to the editable element, which becomes the popover host', () => {
+    const { editor, host, dialog, bubble } = setup('<p>[ab]</p>');
+    expect(dialog.parentElement).toBe(host);
+    expect(bubble.parentElement).toBe(host);
+    expect(editor.view.dom.contains(dialog)).toBe(false);
+    expect(host.classList.contains('stilo-popover-host')).toBe(true);
   });
 
-  it('is removed by toolbar.destroy()', () => {
-    const { toolbar, dialog, modK } = setup('<p>[ab]</p>');
+  it('is removed by toolbar.destroy(), with the host class', () => {
+    const { toolbar, host, dialog, bubble, modK } = setup('<p>[ab]</p>');
     modK();
     toolbar.destroy();
     expect(dialog.isConnected).toBe(false);
+    expect(bubble.isConnected).toBe(false);
+    expect(host.classList.contains('stilo-popover-host')).toBe(false);
+  });
+});
+
+describe('link bubble', () => {
+  const html = '<p><a href="https://x.com" target="_blank">a|b</a>c</p>';
+
+  function cursor(editor: ReturnType<typeof createTestEditor>, from: number, to = from): void {
+    editor.view.dispatch(
+      editor.state.tr.setSelection(TextSelection.create(editor.state.doc, from, to)),
+    );
+  }
+
+  it('shows the link at the cursor while the editor has the focus', () => {
+    const { editor, bubble } = setup(html);
+    expect(bubble.hidden).toBe(true);
+    editor.focus();
+    expect(bubble.hidden).toBe(false);
+    expect(bubble.getAttribute('role')).toBe('group');
+    const url = bubble.querySelector('a')!;
+    expect(url.getAttribute('href')).toBe('https://x.com');
+    expect(url.textContent).toBe('https://x.com');
+    expect(url.target).toBe('_blank');
+    expect(url.rel).toBe('noopener noreferrer');
+    const labels = [...bubble.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'));
+    expect(labels).toEqual(['Edit link', 'Remove link']);
+  });
+
+  it('hides outside a link, on a range and on blur', () => {
+    const { editor, bubble } = setup(html);
+    editor.focus();
+    cursor(editor, 4);
+    expect(bubble.hidden).toBe(true);
+    cursor(editor, 2);
+    expect(bubble.hidden).toBe(false);
+    cursor(editor, 1, 3);
+    expect(bubble.hidden).toBe(true);
+    cursor(editor, 2);
+    editor.blur();
+    expect(bubble.hidden).toBe(true);
+  });
+
+  it('removes the link, keeping the focus in the editor', () => {
+    const { editor, bubble } = setup(html);
+    editor.focus();
+    const removeButton = bubble.querySelectorAll('button')[1]!;
+    const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    removeButton.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    removeButton.click();
+    expect(editor.getHTML()).toBe('<p>abc</p>');
+    expect(bubble.hidden).toBe(true);
+  });
+
+  it('opens the link popover, prefilled, with the edit button', () => {
+    const { editor, bubble, dialog, url } = setup(html);
+    editor.focus();
+    bubble.querySelector('button')!.click();
+    expect(dialog.hidden).toBe(false);
+    expect(url!.value).toBe('https://x.com');
+    expect(document.activeElement).toBe(url);
+    expect(bubble.hidden).toBe(true);
   });
 });

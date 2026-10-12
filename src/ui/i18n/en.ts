@@ -28,4 +28,6 @@ export const en: Messages = {
   'link.newTab': 'Open in new tab',
   'link.apply': 'Apply',
   'link.remove': 'Remove link',
+  'link.edit': 'Edit link',
+  'link.open': 'Open link in a new tab',
 };

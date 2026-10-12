@@ -28,4 +28,6 @@ export const it: Messages = {
   'link.newTab': 'Apri in una nuova scheda',
   'link.apply': 'Applica',
   'link.remove': 'Rimuovi collegamento',
+  'link.edit': 'Modifica collegamento',
+  'link.open': 'Apri il collegamento in una nuova scheda',
 };
