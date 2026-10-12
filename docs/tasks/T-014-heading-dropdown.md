@@ -11,7 +11,7 @@
 ## Goal
 
 A reusable popover (Floating UI), a dropdown menu built on it, and the heading dropdown in the
-toolbar; plus three fixes to the T-013 toolbar. **The tests are provided and complete: you write
+toolbar; plus four fixes to the T-013 toolbar. **The tests are provided and complete: you write
 only the implementation and the CSS.** Make the provided tests pass without changing them.
 
 ## Context (read before starting)
@@ -35,6 +35,7 @@ Files to modify:
 
 - `src/ui/toolbar/toolbar.ts`, `src/ui/toolbar/types.ts`, `src/ui/toolbar/items.ts`
 - `src/ui/index.ts`
+- `src/ui/components/icon.ts`
 - `src/styles/ui.css`
 
 Do not touch: the two provided test files, everything else, and `docs/` (except the Questions and
@@ -90,6 +91,10 @@ Report sections of this file).
 2. `ArrowLeft` always moves to the previous item, wrapping from the first to the last. Today it
    does nothing on the last item.
 3. `isMacPlatform` is no longer exported from `src/ui/index.ts`.
+4. Icons are clipped: `createIcon` builds the SVG by hand without `viewBox="0 0 24 24"`, so at
+   the CSS size of 18px only part of the drawing shows. Use `createElement` from `lucide`
+   (it sets `viewBox`) with the custom attributes `class: 'stilo-icon'` and
+   `aria-hidden: 'true'`.
 
 ## Notes
 
