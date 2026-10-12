@@ -87,6 +87,11 @@
   padding: 4px;
 }
 
+/* A component class with its own `display` must not show a closed popover. */
+.stilo-popover[hidden] {
+  display: none;
+}
+
 /* Dropdown */
 .stilo-dropdown__trigger {
   width: auto;

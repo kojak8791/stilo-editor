@@ -509,6 +509,8 @@ Layout:
 - Dropdown trigger: auto width, `min-width: 120px`, text left, chevron right.
 - Popover host: `position: relative`. Popover: `position: absolute`, `top: 0`, `left: 0`,
   `width: max-content`, background, border, radius, shadow, `z-index`, `padding: 4px`.
+  `.stilo-popover[hidden]` is `display: none`, so that a component class setting `display`
+  (the link bubble is `flex`) never shows a closed popover.
 - Option: flex row, label left, shortcut right in `--stilo-color-muted` at `0.85em`;
   hover/focus → `--stilo-color-hover`; checked → `--stilo-color-active`; disabled → opacity 0.4.
 - Heading preview: `.stilo-dropdown__option--h<n> .stilo-dropdown__label` uses
