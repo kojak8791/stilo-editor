@@ -72,4 +72,9 @@ Hints, pitfalls, links to the ProseMirror docs relevant to this task.
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer. -->
+<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer, failed
+`npm run check` runs before the final one. -->
+
+## Metrics
+
+<!-- Reviewer: architect tokens (preparation, review), review rounds, escalation (yes/no). -->

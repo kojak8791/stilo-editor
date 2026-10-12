@@ -2,12 +2,13 @@
 
 Planned tasks for M0 and M1, derived from `docs/SPEC.md` §13 (roadmap) and ordered by
 dependency. This is a plan, not a contract: each task file (`T-NNN-*.md`) is written only when the
-task is next, and may split or merge rows. Owner **Architect** means written directly by the
-architect (contracts, reference code); **Implementer** means a closed task file for the
-implementer (see `AGENTS.md`).
+task is next, and may split or merge rows. Owner **Implementer** means a task file for the
+implementer, who writes the code and the tests (see `AGENTS.md`); **Architect** means work the
+architect does itself, declared here (contracts, core design, or a task whose specification
+would cost as much as its code). See `docs/VISION.md`, "Project meta-goals".
 
-Tasks group closely related features that follow the same reference code, so that one reading of
-the context serves several implementations.
+Tasks group closely related features, so that one reading of the context serves several
+implementations.
 
 ## M0 — Foundations
 

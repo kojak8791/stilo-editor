@@ -33,14 +33,36 @@ CKEditor 5, while being **entirely open source**: no paid tiers, no closed "pro"
 
 ## Project meta-goals
 
-Stilo is also a learning project and an experiment: it is developed by a project manager, an
-"architect" model (Claude), and a **local LLM** (Qwen3.6-35B-A3B / Bonsai27B via opencode + LM
-Studio) that implements well-defined tasks. Because of this:
+Stilo is also a learning project and an experiment: can a **local LLM** take a real share of the
+work on a medium-complexity library, and where does it pay off? It is developed by a project
+manager (human), an "architect" model (Claude) and a local implementer model (Qwen3.6-35B-A3B /
+Bonsai27B via opencode + LM Studio).
 
-- All decisions (dependencies, configuration, file layout, APIs, HTML output) are written down
-  **before** implementation, in `docs/`.
-- Implementation work is split into small, closed tasks (`docs/tasks/`) with tests as the contract.
-- The local implementer follows [AGENTS.md](../AGENTS.md) and never makes architectural decisions.
+**The product comes first.** Only code that passes the quality gate and the review is merged,
+whoever wrote it. Within that limit:
+
+- **Project manager**: goals, priorities, trade-offs, merges. Decides who takes a borderline task,
+  and every escalation.
+- **Architect**: architecture, decisions ([decisions/](decisions/)), contracts (types,
+  signatures, HTML output), and task files that describe behavior and acceptance cases. It writes
+  no implementation code, except where the backlog or a task Report says so.
+- **Implementer**: writes the code and the tests of each task, chooses the internal design within
+  the contract, and iterates until the quality gate passes ([AGENTS.md](../AGENTS.md)). It never
+  makes architectural decisions.
+
+The split is **hybrid and declared**. The local model takes the work where it saves something:
+long, repetitive, well-testable tasks. A task whose specification would cost as much as its code
+may go to the architect, openly (Owner column in [tasks/BACKLOG.md](tasks/BACKLOG.md)). If the
+implementer still fails after three review rounds, the project manager decides: re-specify,
+split, or escalate to the architect; the task Report records it.
+
+Each task records what it cost (architect tokens for preparation and review, implementer fix
+rounds), so that the project can answer with data where a local model saves tokens or time, and
+where it does not.
+
+Because of this, all decisions (dependencies, configuration, file layout, APIs, HTML output) are
+written down **before** implementation, in `docs/`, and implementation work is split into tasks
+([tasks/](tasks/)) whose acceptance cases are the contract.
 
 ## Document map
 

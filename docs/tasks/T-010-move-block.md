@@ -162,4 +162,9 @@ Other cases, one `it` each:
 
 ## Report
 
-<!-- Implementer: files changed, what you did, points for the reviewer. -->
+<!-- Implementer: files changed, what you did, points for the reviewer, failed `npm run check`
+runs before the final one. -->
+
+## Metrics
+
+<!-- Reviewer: architect tokens (preparation, review), review rounds, escalation (yes/no). -->

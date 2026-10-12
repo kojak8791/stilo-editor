@@ -1,8 +1,10 @@
 # AGENTS.md — Rules for the implementing agent
 
 You are the **implementer** on the Stilo project, an HTML5 WYSIWYG editor library built on
-ProseMirror. A project manager and an architect have already made every decision. Your job is to
-implement **exactly one task at a time**, as written, and nothing else.
+ProseMirror. A project manager and an architect have fixed everything that matters outside your
+task: dependencies, configuration, file layout, public APIs, HTML output. Inside a task, **you
+design and write the code and its tests**, within the task's contract, and you iterate until the
+quality gate passes. Implement **exactly one task at a time**, and nothing else.
 
 ## 0. Iron constraints: write it right the first time
 
@@ -26,8 +28,9 @@ type**, not after `npm run check` fails.
 1. Read the task file you were assigned: `docs/tasks/T-NNN-*.md`.
 2. Read every document and file listed in its **Context** section.
 3. Read the reference extension `src/extensions/bold/` if the task creates or changes an extension.
-4. If anything in the task is ambiguous, contradictory, or impossible: **stop**. Write your
-   question in the task's `## Questions` section and do not guess.
+4. If anything in the task is ambiguous, contradictory, or impossible, or an expected result
+   contradicts the behavior the task describes: **stop**. Write your question in the task's
+   `## Questions` section and do not guess.
 
 ## 2. Hard rules (never break these)
 
@@ -87,6 +90,8 @@ type**, not after `npm run check` fails.
   (`setHTML(getHTML())` then `getHTML()` is identical), every command, every shortcut, every
   input rule.
 - Write the tests the task asks for. Keep the provided tests unchanged.
+- When a test fails, fix the code, not the expected result. If the same failure survives three
+  attempts, stop: write in `## Questions` the failing case, the output, and what you tried.
 
 ## 6. Definition of done
 
@@ -96,7 +101,7 @@ A task is done only when **all** of these are true:
 2. Every acceptance criterion in the task is satisfied.
 3. Only files in the task's Scope were changed (`git status` to verify).
 4. You filled in the task's `## Report` section: files changed, what you did, anything the
-   reviewer should look at.
+   reviewer should look at, and how many `npm run check` runs failed before the final one.
 
 ## 7. Git
 
