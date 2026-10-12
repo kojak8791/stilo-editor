@@ -1,11 +1,25 @@
 import { Star } from 'lucide';
+import { NodeSelection } from 'prosemirror-state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestEditor } from '../../../tests/helpers';
 import { StarterKit, StiloError } from '../../index';
-import { createToolbar, en, it as itLocale, type ToolbarButton } from '../index';
+import {
+  createToolbar,
+  en,
+  headingDropdown,
+  it as itLocale,
+  type ToolbarButton,
+  type ToolbarOptions,
+} from '../index';
 
 function attachEditor(editor: ReturnType<typeof createTestEditor>): void {
   document.body.append(editor.view.dom.parentElement!);
+}
+
+function press(target: Element, key: string, init: KeyboardEventInit = {}): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
+  target.dispatchEvent(event);
+  return event;
 }
 
 function createToolbarContainer(): HTMLElement {
@@ -27,25 +41,26 @@ describe('toolbar', () => {
     const container = createToolbarContainer();
     const toolbar = createToolbar(editor, { container });
 
-    expect(toolbar.element.parentElement).toBe(container);
-    expect(toolbar.element.children.length).toBe(1); // only child is the toolbar element
+    expect(container.children.length).toBe(1);
+    expect(container.firstElementChild).toBe(toolbar.element);
     expect(toolbar.element.getAttribute('role')).toBe('toolbar');
     expect(toolbar.element.getAttribute('aria-label')).toBe('Formatting');
     expect(toolbar.element.getAttribute('aria-orientation')).toBe('horizontal');
 
-    const groups = toolbar.element.querySelectorAll('[role="group"]');
-    expect(groups.length).toBe(3);
+    // Groups are direct children of the toolbar (the dropdown menu is appended after them).
+    const groups = [...toolbar.element.children].filter(
+      (el) => el.getAttribute('role') === 'group',
+    );
+    expect(groups.length).toBe(4);
+    expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
-    const items: string[] = [];
-    groups.forEach((group: Element) => {
-      group.querySelectorAll('[data-item]').forEach((btn: Element) => {
-        items.push(btn.getAttribute('data-item')!);
-      });
-    });
-
+    const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
+      el.getAttribute('data-item'),
+    );
     expect(items).toEqual([
       'undo',
       'redo',
+      'heading',
       'bold',
       'italic',
       'underline',
@@ -364,66 +379,25 @@ describe('toolbar', () => {
     attachEditor(editor);
     const container = createToolbarContainer();
     const toolbar = createToolbar(editor, { container });
+    const items = [...toolbar.element.querySelectorAll<HTMLElement>('[data-item]')];
+    const byId = (id: string) => items.find((el) => el.dataset.item === id)!;
+    const from = (id: string, key: string) => {
+      byId(id).focus();
+      press(byId(id), key);
+      return (document.activeElement as HTMLElement).dataset.item;
+    };
 
-    const buttons = toolbar.element.querySelectorAll<HTMLButtonElement>('[data-item]');
-
-    // 17.1: ArrowRight from undo
-    buttons[0]!.focus();
-    buttons[0]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[1]);
-    expect(buttons[1]!.getAttribute('tabindex')).toBe('0');
-    expect(buttons[0]!.getAttribute('tabindex')).toBe('-1');
-
-    // 17.2: ArrowLeft wraps to last
-    buttons[buttons.length - 1]!.focus();
-    buttons[buttons.length - 1]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[buttons.length - 1]);
-    // After the ArrowRight, redo is focused. ArrowLeft from redo should go to undo.
-    // Let me re-do this properly.
-
-    // Reset: start from undo
-    buttons[0]!.focus();
-    buttons[0]!.setAttribute('tabindex', '0');
-    for (let i = 1; i < buttons.length; i++) buttons[i]!.setAttribute('tabindex', '-1');
-
-    // ArrowRight from undo → redo
-    buttons[0]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[1]);
-
-    // ArrowLeft from redo → undo
-    buttons[1]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[0]);
-
-    // End: last item
-    buttons[0]!.focus();
-    buttons[0]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[buttons.length - 1]);
-
-    // Home: first item
-    buttons[buttons.length - 1]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[0]);
-
-    // End then ArrowRight wraps to first
-    buttons[0]!.focus();
-    buttons[0]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
-    );
-    buttons[buttons.length - 1]!.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(buttons[0]);
+    expect(from('undo', 'ArrowRight')).toBe('redo');
+    expect(byId('redo').getAttribute('tabindex')).toBe('0');
+    expect(byId('undo').getAttribute('tabindex')).toBe('-1');
+    expect(from('redo', 'ArrowLeft')).toBe('undo');
+    expect(from('undo', 'ArrowLeft')).toBe('horizontalRule');
+    expect(from('horizontalRule', 'ArrowLeft')).toBe('blockquote');
+    expect(from('horizontalRule', 'ArrowRight')).toBe('undo');
+    expect(from('redo', 'ArrowRight')).toBe('heading');
+    expect(from('bold', 'End')).toBe('horizontalRule');
+    expect(from('bold', 'Home')).toBe('undo');
+    expect(items.filter((el) => el.getAttribute('tabindex') === '0')).toEqual([byId('undo')]);
 
     toolbar.destroy();
     editor.destroy();
@@ -562,5 +536,171 @@ describe('toolbar', () => {
 
     editor.destroy();
     expect(container.children.length).toBe(0);
+  });
+});
+
+describe('heading dropdown', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}, starter = StarterKit()) {
+    const editor = createTestEditor({ html, extensions: [starter] });
+    attachEditor(editor);
+    const container = createToolbarContainer();
+    const toolbar = createToolbar(editor, { container, ...options });
+    const trigger = toolbar.element.querySelector<HTMLButtonElement>('[data-item="heading"]')!;
+    const menu = toolbar.element.querySelector<HTMLElement>('[role="menu"]')!;
+    const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
+    const focused = () => (document.activeElement as HTMLElement).dataset.option;
+    return { editor, container, toolbar, trigger, menu, option, focused };
+  }
+
+  it('renders the trigger and the menu', () => {
+    const { trigger, menu, option } = setup('<p>a|b</p>');
+    expect(trigger.classList.contains('stilo-toolbar__button')).toBe(true);
+    expect(trigger.classList.contains('stilo-dropdown__trigger')).toBe(true);
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger.getAttribute('title')).toBe('Text style');
+    expect(trigger.querySelector('.stilo-dropdown__value')!.textContent).toBe('Paragraph');
+    expect(trigger.getAttribute('aria-label')).toBe('Text style: Paragraph');
+
+    expect(menu.hidden).toBe(true);
+    expect(menu.classList.contains('stilo-popover')).toBe(true);
+    expect(menu.classList.contains('stilo-dropdown__menu')).toBe(true);
+    expect(menu.getAttribute('aria-label')).toBe('Text style');
+    const ids = [...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].map(
+      (el) => el.dataset.option,
+    );
+    expect(ids).toEqual(['paragraph', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+    expect(option('h1').classList.contains('stilo-dropdown__option--h1')).toBe(true);
+    expect(option('h1').querySelector('.stilo-dropdown__label')!.textContent).toBe('Heading 1');
+    expect(option('h1').querySelector('.stilo-dropdown__shortcut')!.textContent).toBe('Ctrl+Alt+1');
+    expect(option('paragraph').getAttribute('aria-checked')).toBe('true');
+    expect(option('h1').getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('shows the active block type', () => {
+    const { trigger, option } = setup('<h2>a|b</h2>', { messages: itLocale });
+    expect(trigger.querySelector('.stilo-dropdown__value')!.textContent).toBe('Titolo 2');
+    expect(trigger.getAttribute('aria-label')).toBe('Stile testo: Titolo 2');
+    expect(option('h2').getAttribute('aria-checked')).toBe('true');
+    expect(option('paragraph').getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('shows the dropdown label and is disabled when no option applies', () => {
+    const { editor, toolbar, trigger, menu } = setup('<p>a</p><hr>');
+    editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 3)));
+    toolbar.update();
+    expect(trigger.querySelector('.stilo-dropdown__value')!.textContent).toBe('Text style');
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    trigger.click();
+    expect(menu.hidden).toBe(true);
+  });
+
+  it('opens on click and focuses the checked option; a second click closes', () => {
+    const { trigger, menu, focused } = setup('<h3>a|b</h3>');
+    trigger.click();
+    expect(menu.hidden).toBe(false);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(focused()).toBe('h3');
+    trigger.click();
+    expect(menu.hidden).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('opens with ArrowDown and ArrowUp on the trigger; Escape returns to it', () => {
+    const { trigger, menu, focused } = setup('<p>a|b</p>');
+    trigger.focus();
+    press(trigger, 'ArrowDown');
+    expect(menu.hidden).toBe(false);
+    expect(focused()).toBe('paragraph');
+    press(document.activeElement!, 'Escape');
+    expect(menu.hidden).toBe(true);
+    expect(document.activeElement).toBe(trigger);
+    press(trigger, 'ArrowUp');
+    expect(focused()).toBe('h6');
+  });
+
+  it('moves through the options with the keyboard', () => {
+    const { trigger, focused } = setup('<p>a|b</p>');
+    trigger.click();
+    const keys: Array<[key: string, expected: string]> = [
+      ['ArrowDown', 'h1'],
+      ['End', 'h6'],
+      ['ArrowDown', 'paragraph'],
+      ['ArrowUp', 'h6'],
+      ['Home', 'paragraph'],
+    ];
+    for (const [key, expected] of keys) {
+      press(document.activeElement!, key);
+      expect(focused()).toBe(expected);
+    }
+  });
+
+  it('skips disabled options and ignores clicks on them', () => {
+    const { trigger, menu, option, focused } = setup(
+      '<p>a|b</p>',
+      {},
+      StarterKit({ heading: { levels: [1, 2] } }),
+    );
+    expect(option('h2').hasAttribute('aria-disabled')).toBe(false);
+    expect(option('h3').getAttribute('aria-disabled')).toBe('true');
+    trigger.click();
+    press(document.activeElement!, 'ArrowUp');
+    expect(focused()).toBe('h2');
+    press(document.activeElement!, 'ArrowDown');
+    expect(focused()).toBe('paragraph');
+    option('h4').click();
+    expect(menu.hidden).toBe(false);
+  });
+
+  it('selects with Enter, then focuses the editor', () => {
+    const { editor, toolbar, trigger, menu } = setup('<p>a|b</p>');
+    trigger.click();
+    press(document.activeElement!, 'ArrowDown');
+    press(document.activeElement!, 'Enter');
+    expect(editor.getHTML()).toBe('<h1>ab</h1>');
+    expect(menu.hidden).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(editor.view.dom);
+    toolbar.update();
+    expect(trigger.querySelector('.stilo-dropdown__value')!.textContent).toBe('Heading 1');
+  });
+
+  it('selects with a click; the active option stays enabled', () => {
+    const { editor, trigger, option } = setup('<h3>a|b</h3>');
+    expect(option('h3').hasAttribute('aria-disabled')).toBe(false);
+    trigger.click();
+    option('paragraph').click();
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+
+  it('closes on Tab and on pointer down outside', () => {
+    const { trigger, menu } = setup('<p>a|b</p>');
+    trigger.click();
+    press(document.activeElement!, 'Tab');
+    expect(menu.hidden).toBe(true);
+    trigger.click();
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    expect(menu.hidden).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('follows the configured levels and the Heading extension', () => {
+    const custom = setup('<p>a|b</p>', { items: [[headingDropdown([1, 2])]] });
+    const ids = [...custom.menu.querySelectorAll<HTMLElement>('[data-option]')].map(
+      (el) => el.dataset.option,
+    );
+    expect(ids).toEqual(['paragraph', 'h1', 'h2']);
+
+    const { toolbar } = setup('<p>ab</p>', {}, StarterKit({ heading: false }));
+    expect(toolbar.element.querySelector('[data-item="heading"]')).toBeNull();
+  });
+
+  it('destroy() removes the open menu', () => {
+    const { container, toolbar, trigger } = setup('<p>a|b</p>');
+    trigger.click();
+    toolbar.destroy();
+    expect(container.childElementCount).toBe(0);
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+    expect(() => press(document.body, 'Escape')).not.toThrow();
   });
 });
