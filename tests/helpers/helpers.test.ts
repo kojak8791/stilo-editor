@@ -1,6 +1,14 @@
 import { NodeSelection } from 'prosemirror-state';
 import { describe, expect, it } from 'vitest';
-import { createTestEditor, getHTMLWithSelection, pressKey, typeText } from '.';
+import {
+  copySelection,
+  createTestEditor,
+  getHTMLWithSelection,
+  pasteHTML,
+  pasteText,
+  pressKey,
+  typeText,
+} from '.';
 
 describe('createTestEditor', () => {
   it('uses StarterKit and an empty document by default', () => {
@@ -90,5 +98,26 @@ describe('typeText and pressKey', () => {
     const editor = createTestEditor({ html: '<p>[a]</p>' });
     expect(pressKey(editor, 'Mod-b')).toBe(true);
     expect(pressKey(editor, 'Mod-F12')).toBe(false);
+  });
+});
+
+describe('pasteHTML, pasteText and copySelection', () => {
+  it('pasteText returns true and inserts text', () => {
+    const editor = createTestEditor({ html: '<p>x|y</p>' });
+    expect(pasteText(editor, 'a')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p>xa|y</p>');
+  });
+
+  it('pasteHTML returns true and inserts HTML', () => {
+    const editor = createTestEditor({ html: '<p>x|y</p>' });
+    expect(pasteHTML(editor, '<strong>a</strong>')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p>x<strong>a|</strong>y</p>');
+  });
+
+  it('copySelection returns html and text', () => {
+    expect(copySelection(createTestEditor({ html: '<p>[ab]</p>' }))).toEqual({
+      html: '<p data-pm-slice="1 1 []">ab</p>',
+      text: 'ab',
+    });
   });
 });

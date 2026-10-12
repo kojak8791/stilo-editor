@@ -139,3 +139,19 @@ export function pressKey(editor: Editor, combo: string): boolean {
   });
   return editor.view.someProp('handleKeyDown', (handler) => handler(editor.view, event)) ?? false;
 }
+
+/** Runs the editor's paste logic on `html` (sanitized by the editor). Returns whether it was handled. */
+export function pasteHTML(editor: Editor, html: string): boolean {
+  return editor.view.pasteHTML(html, new Event('paste') as ClipboardEvent);
+}
+
+/** Runs the editor's paste logic on plain `text`. Returns whether it was handled. */
+export function pasteText(editor: Editor, text: string): boolean {
+  return editor.view.pasteText(text, new Event('paste') as ClipboardEvent);
+}
+
+/** What copying the current selection puts on the clipboard: `html` and plain `text`. */
+export function copySelection(editor: Editor): { html: string; text: string } {
+  const { dom, text } = editor.view.serializeForClipboard(editor.state.selection.content());
+  return { html: dom.innerHTML, text };
+}

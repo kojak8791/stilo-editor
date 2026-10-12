@@ -292,8 +292,21 @@ const pasteTextCases: Array<[string, string, boolean, string]> = [
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer, failed
-`npm run check` runs before the final one. -->
+Files changed:
+- `src/core/html/serialize.ts`: Added `canonicalizeDOM` (extracted post-processing from `serializeHTML`) and `createClipboardSerializer` (DOMSerializer subclass that overrides `serializeFragment` to post-process only the outermost call). `serializeHTML` now calls `canonicalizeDOM` on its container.
+- `src/core/editor.ts`: Installed `clipboardSerializer` in the `EditorView` props, built from `createClipboardSerializer(this.schema, { compactParagraphs: this.compactParagraphs })`. Updated constructor JSDoc step 4.
+- `src/core/clipboard.test.ts`: Created with tests for copy (9 `it.each` cases), multi-step copy (compactParagraphs true/false + round trip), paste HTML (12 `it.each` cases), paste plain text (12 `it.each` cases), and security (36 XSS vectors).
+- `src/core/html/serialize.test.ts`: Added one `describe('createClipboardSerializer', …)` with 6 `it.each` cases.
+- `tests/helpers/index.ts`: Added `pasteHTML`, `pasteText`, `copySelection` helpers.
+- `tests/helpers/helpers.test.ts`: Added one `describe('pasteHTML, pasteText and copySelection', …)` with 3 tests.
+
+Reviewer points:
+- `createClipboardSerializer` uses a subclass that overrides `serializeFragment`. Post-processing runs only when `target === undefined` (outermost call), avoiding quadratic work on nested lists.
+- The subclass constructor calls `super(base.nodes, base.marks)` to inherit the schema's node/mark serializers.
+- All paste test cases pass because `transformPastedHTML` (DOMPurify) + parse rules already handle sanitization and parsing.
+- The `data-pm-slice` attribute in copy output is preserved (it's not in `ALLOWED_ATTR`, so DOMPurify strips it on paste, which is the expected behavior per ARCHITECTURE §8).
+
+`npm run check` runs before final: 1 (typecheck error on `clipboardSerializer` type, fixed by creating the serializer as a variable before the EditorView options).
 
 ## Metrics
 

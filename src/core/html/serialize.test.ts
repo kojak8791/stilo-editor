@@ -1,6 +1,6 @@
 import { Schema } from 'prosemirror-model';
 import { describe, expect, it } from 'vitest';
-import { serializeHTML } from './serialize';
+import { createClipboardSerializer, serializeHTML } from './serialize';
 
 // A paragraph with an optional raw `style`, to check style normalization and that paragraphs
 // with attributes are never unwrapped.
@@ -69,5 +69,37 @@ describe('serializeHTML: styles', () => {
 
   it('unwraps a list paragraph whose style was entirely dropped', () => {
     expect(html(list(item(p('a', 'position: absolute'))))).toBe('<ul><li>a</li></ul>');
+  });
+});
+
+const clipboardCases: Array<[string, PMNode, boolean | undefined, string]> = [
+  [
+    'one paragraph per item',
+    list(item(p('a')), item(p('b'))),
+    undefined,
+    '<ul><li>a</li><li>b</li></ul>',
+  ],
+  ['several blocks', list(item(p('a'), p('b'))), undefined, '<ul><li><p>a</p><p>b</p></li></ul>'],
+  [
+    'a nested list',
+    list(item(p('a'), list(item(p('b'))))),
+    undefined,
+    '<ul><li><p>a</p><ul><li>b</li></ul></li></ul>',
+  ],
+  ['compactParagraphs: false', list(item(p('a'))), false, '<ul><li><p>a</p></li></ul>'],
+  ['a style', p('a', 'color: rgb(255, 0, 0)'), undefined, '<p style="color: #ff0000">a</p>'],
+  ['a dropped style', list(item(p('a', 'position: absolute'))), undefined, '<ul><li>a</li></ul>'],
+];
+
+describe('createClipboardSerializer', () => {
+  it.each(clipboardCases)('canonicalizes: %s', (_name, node, compactParagraphs, expected) => {
+    const serializer = createClipboardSerializer(schema, {
+      compactParagraphs: compactParagraphs as boolean | undefined,
+    });
+    const fragment = schema.nodes.doc!.create(null, node).content;
+    const doc = document.implementation.createHTMLDocument('');
+    const container = doc.createElement('div');
+    container.append(serializer.serializeFragment(fragment, { document: doc }));
+    expect(container.innerHTML).toBe(expected);
   });
 });

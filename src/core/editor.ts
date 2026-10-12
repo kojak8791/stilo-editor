@@ -7,7 +7,7 @@ import { ExtensionManager } from './extension-manager';
 import { isMarkActive, isNodeActive } from './helpers/active';
 import { parseHTML } from './html/parse';
 import { sanitizeToString } from './html/sanitize';
-import { serializeHTML } from './html/serialize';
+import { createClipboardSerializer, serializeHTML } from './html/serialize';
 import type {
   CommandRunners,
   EditorEvents,
@@ -53,7 +53,8 @@ export class Editor {
    * 3. initial document from `parseHTML(schema, options.content ?? '')`;
    * 4. `EditorView` mounted inside `options.element`, with attributes `class="stilo-content"`,
    *    `role="textbox"`, `aria-multiline="true"`, `aria-label` (if given); `editable` from
-   *    options (default `true`); `transformPastedHTML` → `sanitizeToString`; transactions go
+   *    options (default `true`); `transformPastedHTML` → `sanitizeToString`;
+   *    `clipboardSerializer` → `createClipboardSerializer`; transactions go
    *    through the editor's dispatch (see events in `EditorEvents`);
    * 5. `autofocus`: `true`/`'start'` → focus at start, `'end'` → focus at end.
    */
@@ -66,6 +67,9 @@ export class Editor {
     this.compactParagraphs = options.compactParagraphs ?? true;
 
     const editable = options.editable ?? true;
+    const clipboardSerializer = createClipboardSerializer(this.schema, {
+      compactParagraphs: this.compactParagraphs,
+    });
     this.view = new EditorView(options.element, {
       state: this.createState(parseHTML(this.schema, options.content ?? '')),
       editable: () => editable,
@@ -76,6 +80,7 @@ export class Editor {
         ...(options.ariaLabel ? { 'aria-label': options.ariaLabel } : {}),
       },
       transformPastedHTML: (html) => sanitizeToString(html),
+      clipboardSerializer,
       dispatchTransaction: (tr) => this.dispatch(tr),
       handleDOMEvents: {
         focus: (_view, event) => this.emitter.emit('focus', { editor: this, event }),
