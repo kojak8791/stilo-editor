@@ -77,4 +77,5 @@ Hints, pitfalls, links to the ProseMirror docs relevant to this task.
 
 ## Metrics
 
-<!-- Reviewer: architect tokens (preparation, review), review rounds, escalation (yes/no). -->
+<!-- Reviewer only (the implementer never edits this section): architect tokens (preparation,
+review), implementer failed check runs and context compactions, review rounds, escalation. -->

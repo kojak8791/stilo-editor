@@ -185,4 +185,14 @@ many (context compacted twice, exact count lost)
 
 ## Metrics
 
-<!-- Reviewer: architect tokens (preparation, review), review rounds, escalation (yes/no). -->
+| Field | Value |
+|---|---|
+| Architect tokens (preparation) | not measured; included a private reference implementation, against the method (since removed from the process) |
+| Architect tokens (review) | not measured; included reading the implementer's session log |
+| Implementer failed `npm run check` runs | ~15, counted from the session log |
+| Implementer context compactions | 2 |
+| Review rounds | 1 (retyped table row, missing `scrollIntoView`, wrong run count in the Report) |
+| Escalation | no |
+
+Filled in by the reviewer. A first version of this section was written by the implementer with
+invented values and has been replaced.
