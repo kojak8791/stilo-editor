@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createCoreEditor, select } from '../../../tests/helpers/core';
 import type { Editor } from '../editor';
-import { setMark, unsetMark } from './marks';
+import { markRangeAt, setMark, unsetMark } from './marks';
 
 function run(editor: Editor, command: ReturnType<typeof setMark>): boolean {
   return command(editor.state, (tr) => editor.view.dispatch(tr));
@@ -94,5 +94,28 @@ describe('unsetMark', () => {
     const editor = createCoreEditor('<p>abc</p>');
     select(editor, 1, 3);
     expect(run(editor, unsetMark(editor.schema.marks.strong!))).toBe(false);
+  });
+});
+
+describe('markRangeAt', () => {
+  const range = (html: string, pos: number) => {
+    const editor = createCoreEditor(html);
+    return markRangeAt(editor.state.doc.resolve(pos), editor.schema.marks.strong!);
+  };
+
+  it.each([
+    ['inside the mark', '<p>a<strong>bcd</strong>e</p>', 3, { from: 2, to: 5 }],
+    ['at the end of the mark', '<p>a<strong>bcd</strong>e</p>', 5, { from: 2, to: 5 }],
+    ['at the start of the parent', '<p><strong>ab</strong>c</p>', 1, { from: 1, to: 3 }],
+    ['up to unmarked text', '<p><strong>a</strong>b<strong>c</strong></p>', 2, { from: 1, to: 2 }],
+  ])('finds the range %s', (_name, html, pos, expected) => {
+    expect(range(html, pos)).toEqual(expected);
+  });
+
+  it.each([
+    ['before the mark', '<p>a<strong>b</strong></p>', 2],
+    ['without the mark', '<p>ab</p>', 2],
+  ])('returns null %s', (_name, html, pos) => {
+    expect(range(html, pos)).toBeNull();
   });
 });

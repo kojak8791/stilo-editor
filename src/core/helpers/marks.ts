@@ -1,4 +1,4 @@
-import type { Attrs, Mark, MarkType } from 'prosemirror-model';
+import type { Attrs, Mark, MarkType, ResolvedPos } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
 import { isMarkActive } from './active';
 
@@ -89,4 +89,28 @@ export function toggleMark(type: MarkType, attrs: Attrs | null = null): Command 
     isMarkActive(state, type, attrs ?? undefined)
       ? unsetMark(type)(state, dispatch)
       : setMark(type, attrs)(state, dispatch);
+}
+
+/**
+ * The range of the mark of `type` at `$pos` (the one in `$pos.marks()`), extended over the
+ * adjacent inline nodes that carry the same mark with the same attributes. `null` if there is no
+ * such mark at `$pos`. Lets a command edit or remove a whole link with the cursor inside it.
+ */
+export function markRangeAt(
+  $pos: ResolvedPos,
+  type: MarkType,
+): { from: number; to: number } | null {
+  const mark = type.isInSet($pos.marks());
+  if (!mark) return null;
+  const { parent } = $pos;
+  // Between two nodes, `marks()` reads the node before the position (if any).
+  let start = $pos.textOffset === 0 && $pos.index() > 0 ? $pos.index() - 1 : $pos.index();
+  let end = start + 1;
+  while (start > 0 && mark.isInSet(parent.child(start - 1).marks)) start--;
+  while (end < parent.childCount && mark.isInSet(parent.child(end).marks)) end++;
+  let from = $pos.start();
+  for (let i = 0; i < start; i++) from += parent.child(i).nodeSize;
+  let to = from;
+  for (let i = start; i < end; i++) to += parent.child(i).nodeSize;
+  return { from, to };
 }

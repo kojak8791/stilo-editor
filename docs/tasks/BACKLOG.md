@@ -31,5 +31,5 @@ the context serves several implementations.
 | T-011 | `Placeholder`, `DropCursor`, `GapCursor` | F-011, F-012 | Implementer | todo |
 | T-012 | Clipboard: paste HTML and plain text, canonical copy | F-701, F-702, F-706 | Implementer | todo |
 | T-013 | Default UI: toolbar and heading dropdown (needs a UI design pass first) | F-801, F-802 | Architect + Implementer | todo |
-| T-014 | Default UI: link popover | F-803 | Implementer | todo |
+| T-014 | Default UI: link popover, also bound to `Mod-k` (the headless `Link` has no shortcut) | F-803 | Implementer | todo |
 | T-015 | Demo page and NFR-1 benchmark harness | NFR-1 | Architect + Implementer | todo |

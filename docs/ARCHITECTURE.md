@@ -372,7 +372,8 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
    `Paragraph` has priority 1000 so it is the first `block` node (ProseMirror's default block).
 4. Schema mark order (affects nesting in HTML output, outermost first):
    `link`, `textStyle`, `highlight`, `bold`, `italic`, `underline`, `strike`, `subscript`,
-   `superscript`, `code`. This is enforced by the priorities of these extensions.
+   `superscript`, `code`. The first three have priorities 103, 102, 101 (the other marks keep
+   the default 100 and follow the `StarterKit` order).
 5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
    an input rule, so it may take precedence over every extension), then keymaps (by priority),
    then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last.
@@ -416,7 +417,7 @@ configured with `{ <name>: { ...options } }`.
 
 | Mark | Output | Also parsed from |
 |---|---|---|
-| `link` | `<a href target rel>` | `a[href]`; when `target="_blank"`, `rel="noopener noreferrer nofollow"` is enforced |
+| `link` | `<a href target rel>` | `a[href]` with a non-empty allowed `href` (`isAllowedHref`). Attributes `href` and `target` (`_blank` or none); `rel` is not stored: it is written as `noopener noreferrer nofollow` when `target="_blank"`, and dropped on input. Not inclusive (typing at its end does not extend it) |
 | `textStyle` (M2) | `<span style="font-family; font-size; color">` | `span[style]`, `font[face/size/color]`; dropped when no allowed property remains |
 | `highlight` (M2) | `<mark>` or `<mark style="background-color: x">` | `mark`, `span[style*=background-color]` |
 | `bold` | `<strong>` | `strong`, `b` (except Google Docs `<b style="font-weight:normal">`), `font-weight: bold \| ≥600` |

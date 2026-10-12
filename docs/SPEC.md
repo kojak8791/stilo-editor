@@ -47,7 +47,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-203 | Underline | M1 | `Mod-u` | — |
 | F-204 | Strikethrough | M1 | `Mod-Shift-s` | `~~text~~` |
 | F-205 | Inline code | M1 | `Mod-e` | `` `text` `` |
-| F-206 | Link (add/edit/remove, `target`, auto `rel`) | M1 | `Mod-k` | Autolink on typing URL + space (M2) |
+| F-206 | Link (add/edit/remove, `target`, auto `rel`) | M1 | `Mod-k` (opens the link popover, F-803) | Autolink on typing URL + space (M2) |
 | F-207 | Subscript / Superscript (mutually exclusive) | M2 | `Mod-,` / `Mod-.` | — |
 | F-208 | Text color | M2 | — | — |
 | F-209 | Highlight (background color) | M2 | `Mod-Shift-h` | `==text==` |
@@ -140,7 +140,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 |---|---|---|
 | F-801 | Toolbar, configurable item list and groups, active/disabled states | M1 |
 | F-802 | Heading/paragraph dropdown | M1 |
-| F-803 | Link dialog (popover) | M1 |
+| F-803 | Link dialog (popover), opened by the toolbar button or `Mod-k` | M1 |
 | F-804 | Font family / size dropdowns, color pickers | M2 |
 | F-805 | Table menu (insert grid picker + operations) | M2 |
 | F-806 | Image dialog: local file / remote URL, preview, `alt`, `title`, caption | M2 |
