@@ -49,6 +49,7 @@ type**, not after `npm run check` fails.
   warning; read the full output, which is never truncated.
 - **Do not change existing tests to make them pass.** If a provided test looks wrong, ask.
 - **Do not change `docs/`**, except the `## Questions` and `## Report` sections of your task file.
+  Never fill in `## Metrics`: the reviewer does. Never invent numbers anywhere: write "unknown".
 - **Do not invent features.** Implement what the task says, no extras, no "improvements".
 - **Respect the import directions** (`docs/ARCHITECTURE.md` §2.2): `src/core/` and
   `src/extensions/` never import from `src/ui/` or `lucide`; `src/ui/` imports the core only via
