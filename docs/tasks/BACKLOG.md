@@ -33,4 +33,4 @@ implementations.
 | T-012 | Clipboard: paste HTML and plain text, canonical copy | F-701, F-702, F-706 | Implementer | todo |
 | T-013 | Default UI: toolbar and heading dropdown (needs a UI design pass first) | F-801, F-802 | Architect + Implementer | todo |
 | T-014 | Default UI: link popover, also bound to `Mod-k` (the headless `Link` has no shortcut) | F-803 | Implementer | todo |
-| T-015 | Demo page and NFR-1 benchmark harness | NFR-1 | Architect + Implementer | todo |
+| T-015 | Demo page and NFR-1 benchmark harness; `content.css` with ProseMirror and gap cursor base CSS and the placeholder rule (`.stilo-placeholder::before` showing `attr(data-placeholder)`, hidden when not editable) | NFR-1 | Architect + Implementer | todo |
