@@ -19,6 +19,7 @@ describe('StarterKit', () => {
       'underline',
       'strike',
       'code',
+      'link',
     ]);
   });
 
@@ -38,6 +39,7 @@ describe('StarterKit', () => {
       'underline',
       'strike',
       'code',
+      'link',
     ]);
   });
 });

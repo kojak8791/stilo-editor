@@ -8,6 +8,7 @@ import { HardBreak } from '../hard-break';
 import { Heading, type HeadingOptions } from '../heading';
 import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
+import { Link } from '../link';
 import { ListItem } from '../list-item';
 import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
@@ -35,6 +36,7 @@ export interface StarterKitOptions {
   underline?: false;
   strike?: false;
   code?: false;
+  link?: false;
 }
 
 /** Returns the extension unless its option is `false`. */
@@ -70,5 +72,6 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Underline, options.underline),
     ...include(Strike, options.strike),
     ...include(Code, options.code),
+    ...include(Link, options.link),
   ];
 }
