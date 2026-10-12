@@ -72,10 +72,10 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 
 ### F-309 — Move block: exact behavior
 
-- The *movable unit* is determined from the selection:
-  1. if the selection is inside a `listItem`/`taskItem` → the innermost list item;
-  2. otherwise → the block that is a direct child of the innermost container among
-     `doc`, `blockquote`, `tableCell`, `tableHeader`.
+- The *movable unit* is a direct child of the innermost ancestor of the selection that is a
+  list (`bulletList`, `orderedList`, `taskList`: the unit is a list item) or a container
+  (`doc`, `blockquote`, `tableCell`, `tableHeader`: the unit is a block). So a paragraph in a
+  blockquote inside a list item moves within the blockquote.
 - If the selection spans several sibling units, all of them move together.
 - Moving past the first/last sibling is a **no-op** (command returns `false`); units never jump
   out of their container.
@@ -149,7 +149,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-809 | Light/dark theme via CSS custom properties | M2 |
 | F-810 | Fullscreen mode | M2 |
 | F-811 | Slash command menu (`/`) | M3 |
-| F-812 | Block drag handle | M3 |
+| F-812 | Block drag handle (BlockNote-like): drag a block or list item anywhere; a list item dropped outside its list gets wrapped in a new list of the same type, at the drop level | M3 |
 
 ## 10. Productivity tools (`F-9xx`)
 
