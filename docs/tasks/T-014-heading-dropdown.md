@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-802, NFR-4 |
 | Milestone | M1 |
 | Depends on | T-013 |
