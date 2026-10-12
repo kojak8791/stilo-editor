@@ -30,6 +30,10 @@ jsdom implements neither, so it would split behavior between unit tests and brow
   handled by the popover component.
 - M1 tooltips are native (`title`); a Floating UI tooltip with an arrow and a light animation
   replaces them later.
+- Positioning strategy (revised in T-016): `absolute`, inside a positioned container that
+  scrolls with the anchor — the toolbar for its menus, the element of the editor for popovers
+  anchored to the content. The first version used `fixed`, which had to be repositioned by
+  script on every scroll and visibly lagged behind the anchor.
 
 ## Consequences
 
@@ -38,3 +42,5 @@ jsdom implements neither, so it would split behavior between unit tests and brow
 - Positioning cannot be verified in jsdom (no layout): unit tests cover open/close, keyboard and
   focus behavior; position is checked in the demo and, later, in E2E tests.
 - ARCHITECTURE §1.1 and §2.2 list the new dependency.
+- With `absolute`, an ancestor with `overflow: hidden` can clip a popover; `flip()` keeps it on
+  the side with room when possible.

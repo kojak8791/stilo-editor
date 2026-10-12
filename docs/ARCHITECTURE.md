@@ -243,6 +243,7 @@ class Editor {
   readonly commands: CommandRunners;       // editor.commands.toggleBold() -> boolean
   can(): CommandRunners;                   // dry run, no dispatch
   isActive(name: string, attrs?: Record<string, unknown>): boolean;
+  getAttributes(name: string): Record<string, unknown>;
 
   setEditable(editable: boolean): void;
   focus(position?: 'start' | 'end'): void;
@@ -287,6 +288,9 @@ Semantics:
 - `getText()` separates top-level blocks with `\n\n`, hard breaks with `\n`.
 - `isActive(name)` works for both marks (active across the selection or in stored marks) and nodes
   (an ancestor of the selection with that type and matching `attrs`).
+- `getAttributes(name)`: for a mark, the attributes of the mark at the cursor (stored marks
+  first) or of the first one in the selected range; for a node, the selected node or the deepest
+  ancestor of that type. `{}` when there is none or the name is unknown.
 - The editable element gets class `stilo-content`, `role="textbox"`, `aria-multiline="true"`.
 
 ---
@@ -537,7 +541,8 @@ plain text is `textBetween(…, '
 The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`](UI.md).
 
 - Separate entry `stilo-editor/ui`, fully optional (see §2.2). It uses only the public core API
-  (`editor.commands`, `editor.can()`, `editor.isActive()`, events). It touches `editor.view` only
+  (`editor.commands`, `editor.can()`, `editor.isActive()`, `editor.getAttributes()`, events).
+  It touches `editor.view` only
   to anchor popovers to the selection and to listen to DOM events on `view.dom`.
 - Customization levels, from least to most effort:
   1. CSS custom properties / overriding `ui.css`;
@@ -546,7 +551,8 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
   4. no default UI at all: core only + `content.css`, custom UI on the public API.
 - `createToolbar(editor, { container, items, messages })`. `items` is an array of groups; each
   entry is the ID of a default item or a custom item object (UI.md §3).
-- Toolbar items have a fixed shape (`kind: 'button' | 'dropdown'`, label key, `run(editor)`,
+- Toolbar items have a fixed shape (`kind: 'button' | 'dropdown'`, label key, `run(editor)`
+  (buttons also get a `context` with UI services such as `openLinkPopover()`),
   optional `isActive`, `isEnabled`, `isAvailable`). State refresh on `transaction` events,
   batched with `requestAnimationFrame`.
 - Icons from `lucide`; floating elements positioned by `@floating-ui/dom` through one popover

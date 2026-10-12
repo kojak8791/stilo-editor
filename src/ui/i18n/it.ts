@@ -15,6 +15,7 @@ export const it: Messages = {
   'toolbar.orderedList': 'Elenco numerato',
   'toolbar.blockquote': 'Citazione',
   'toolbar.horizontalRule': 'Linea orizzontale',
+  'toolbar.link': 'Collegamento',
   'toolbar.heading': 'Stile testo',
   'heading.paragraph': 'Paragrafo',
   'heading.h1': 'Titolo 1',
@@ -23,4 +24,10 @@ export const it: Messages = {
   'heading.h4': 'Titolo 4',
   'heading.h5': 'Titolo 5',
   'heading.h6': 'Titolo 6',
+  'link.url': 'URL',
+  'link.newTab': 'Apri in una nuova scheda',
+  'link.apply': 'Applica',
+  'link.remove': 'Rimuovi collegamento',
+  'link.edit': 'Modifica collegamento',
+  'link.open': 'Apri il collegamento in una nuova scheda',
 };

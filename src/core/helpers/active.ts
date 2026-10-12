@@ -57,3 +57,35 @@ export function isNodeActive(
   }
   return nodes.some((node) => node.type === type && attrsMatch(node.attrs, attrs));
 }
+
+/**
+ * Attributes of the mark of `type` at the selection, `{}` when there is none: for an empty
+ * selection the mark in `state.storedMarks` (or `$from.marks()`), otherwise the first one found
+ * in the selected range.
+ */
+export function getMarkAttributes(state: EditorState, type: MarkType): Attrs {
+  const { empty, from, to, $from } = state.selection;
+  if (empty) return type.isInSet(state.storedMarks ?? $from.marks())?.attrs ?? {};
+  let attrs: Attrs | undefined;
+  state.doc.nodesBetween(from, to, (node) => {
+    attrs ??= type.isInSet(node.marks)?.attrs;
+    return !attrs;
+  });
+  return attrs ?? {};
+}
+
+/**
+ * Attributes of the node of `type` at the selection, `{}` when there is none: the selected node
+ * (`NodeSelection`), or the deepest ancestor of `selection.$from`.
+ */
+export function getNodeAttributes(state: EditorState, type: NodeType): Attrs {
+  const { selection } = state;
+  if (selection instanceof NodeSelection && selection.node.type === type) {
+    return selection.node.attrs;
+  }
+  for (let depth = selection.$from.depth; depth >= 0; depth--) {
+    const node = selection.$from.node(depth);
+    if (node.type === type) return node.attrs;
+  }
+  return {};
+}

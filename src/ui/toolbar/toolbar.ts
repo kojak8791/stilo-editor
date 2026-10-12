@@ -3,11 +3,13 @@ import { StiloError } from '../../index';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
 import { createIcon } from '../components/icon';
+import { createLinkBubble } from '../components/link-bubble';
+import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
 import { DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
-import type { ToolbarButton, ToolbarDropdown, ToolbarItem } from './types';
+import type { ToolbarButton, ToolbarContext, ToolbarDropdown, ToolbarItem } from './types';
 
 /** Options of {@link createToolbar}. */
 export interface ToolbarOptions {
@@ -53,6 +55,7 @@ function resolveItem(
 /** Creates the toolbar element and buttons, and registers event handlers. */
 export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar {
   const { container, items = DEFAULT_TOOLBAR, messages = en } = options;
+  const mac = isMacPlatform();
 
   // Resolve all items, keeping one group per original group
   const resolvedGroups: Array<Array<ToolbarItem>> = [];
@@ -86,7 +89,6 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
       if (item.kind === 'dropdown') {
         const dd = item;
         const optionViews: DropdownOptionView[] = dd.options.map((opt) => {
-          const mac = isMacPlatform();
           const label = messages[opt.labelKey] ?? opt.labelKey;
           const shortcut = opt.shortcut ? formatShortcut(opt.shortcut, mac) : undefined;
           return { id: opt.id, label, shortcut };
@@ -118,7 +120,6 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const btnItem = item;
         const label = messages[btnItem.labelKey] ?? btnItem.labelKey;
         const hasShortcut = btnItem.shortcut !== undefined;
-        const mac = isMacPlatform();
         const title = hasShortcut ? `${label} (${formatShortcut(btnItem.shortcut!, mac)})` : label;
 
         const button = document.createElement('button');
@@ -145,6 +146,25 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
     element.appendChild(groupEl);
   }
+
+  // One link popover and link bubble per toolbar, mounted next to the editable element so that
+  // they scroll with the content. The popover opens with the link button, Mod-k in the editor
+  // and the edit button of the bubble.
+  const editorHost = editor.view.dom.parentElement ?? element;
+  const linkPopover =
+    'setLink' in editor.commands
+      ? createLinkPopover(editor, { container: editorHost, messages })
+      : null;
+  const linkBubble = linkPopover
+    ? createLinkBubble(editor, {
+        container: editorHost,
+        messages,
+        onEdit: () => linkPopover.open(),
+      })
+    : null;
+  const context: ToolbarContext = {
+    openLinkPopover: () => linkPopover?.open(),
+  };
 
   container.appendChild(element);
 
@@ -254,8 +274,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (!item) return;
     if (item.kind !== 'button') return;
     if (item.isEnabled && !item.isEnabled(editor)) return;
-    item.run(editor);
     editor.focus();
+    item.run(editor, context);
   };
   element.addEventListener('click', onButtonClick);
 
@@ -306,9 +326,15 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   };
   element.addEventListener('keydown', onToolbarKeydown);
 
-  // Alt-F10 on editor view.dom: focus toolbar
+  // Alt-F10 on editor view.dom: focus toolbar; Mod-k: open the link popover
   const onEditorKeydown = (e: KeyboardEvent): void => {
     if (isDestroyed) return;
+    const mod = mac ? e.metaKey : e.ctrlKey;
+    if (linkPopover && mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      linkPopover.open();
+      return;
+    }
     if (e.key === 'F10' && e.altKey) {
       e.preventDefault();
       editor.focus();
@@ -345,6 +371,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     for (const ddInstance of dropdownMap.values()) {
       ddInstance.destroy();
     }
+    linkPopover?.destroy();
+    linkBubble?.destroy();
 
     if (container.contains(element)) {
       container.removeChild(element);

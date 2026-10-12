@@ -11,13 +11,20 @@ export interface ToolbarButton {
   labelKey: string;
   /** Keymap notation shown in the tooltip, e.g. 'Mod-b'. */
   shortcut?: string;
-  run(editor: Editor): void;
+  /** Runs on click, after the editor got the focus back. */
+  run(editor: Editor, context: ToolbarContext): void;
   /** Present = toggle button (`aria-pressed`). */
   isActive?(editor: Editor): boolean;
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
   /** False = not rendered (e.g. its extension is disabled). Default: available. */
   isAvailable?(editor: Editor): boolean;
+}
+
+/** UI services the toolbar offers to {@link ToolbarButton.run}. */
+export interface ToolbarContext {
+  /** Opens the link popover under the selection (no-op without the `Link` extension). */
+  openLinkPopover(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */

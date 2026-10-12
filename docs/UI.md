@@ -9,9 +9,11 @@ through the architect.
 ## 1. Principles
 
 - The UI is optional and uses only the public core API (`src/index.ts`): `editor.commands`,
-  `editor.can()`, `editor.isActive()`, `editor.on/off`, `editor.focus()`, and `editor.view`
-  for two things only: anchoring popovers to the selection (`view.coordsAtPos`) and listening to
-  DOM events on `view.dom`.
+  `editor.can()`, `editor.isActive()`, `editor.getAttributes()`, `editor.on/off`,
+  `editor.focus()`, and `editor.view`
+  for two things only: anchoring popovers to the selection (`view.coordsAtPos`,
+  `view.domAtPos`, `view.hasFocus()`, and mounting next to `view.dom`) and listening to DOM
+  events on `view.dom`.
 - Plain DOM, no framework, no global mutable state: every piece of state lives in the closure of
   the object that owns it (`createToolbar`, `createPopover`, `createDropdown`).
 - Everything the UI creates is removed by its `destroy()`: elements, editor handlers, DOM
@@ -33,7 +35,9 @@ src/ui/
 │   ├── icon.ts              createIcon
 │   ├── shortcut.ts          formatShortcut, isMacPlatform
 │   ├── popover.ts           createPopover (T-014)
-│   └── dropdown.ts          createDropdown (T-014)
+│   ├── dropdown.ts          createDropdown (T-014)
+│   ├── link-popover.ts      createLinkPopover, canEditLink (T-016)
+│   └── link-bubble.ts       createLinkBubble (T-016)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014)
@@ -48,8 +52,8 @@ Tests are colocated (`src/ui/**/<name>.test.ts`).
 
 ```ts
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
-export type { ToolbarButton, ToolbarDropdown, ToolbarDropdownOption, ToolbarItem }
-  from './toolbar/types';
+export type { ToolbarButton, ToolbarContext, ToolbarDropdown, ToolbarDropdownOption,
+  ToolbarItem } from './toolbar/types';
 export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown } from './toolbar/items';
 export type { MessageKey, Messages } from './i18n/types';
 export { en } from './i18n/en';
@@ -96,13 +100,20 @@ export interface ToolbarButton {
   labelKey: string;
   /** Keymap notation shown in the tooltip, e.g. 'Mod-b'. */
   shortcut?: string;
-  run(editor: Editor): void;
+  /** Runs on click, after the editor got the focus back. */
+  run(editor: Editor, context: ToolbarContext): void;
   /** Present = toggle button (`aria-pressed`). */
   isActive?(editor: Editor): boolean;
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
   /** False = not rendered (e.g. its extension is disabled). Default: available. */
   isAvailable?(editor: Editor): boolean;
+}
+
+/** UI services the toolbar offers to `run` (T-016). */
+export interface ToolbarContext {
+  /** Opens the link popover under the selection (no-op without the `Link` extension). */
+  openLinkPopover(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */
@@ -159,6 +170,7 @@ no functions.
 | `toolbar.blockquote` | Quote | Citazione |
 | `toolbar.horizontalRule` | Horizontal line | Linea orizzontale |
 | `toolbar.heading` | Text style | Stile testo |
+| `toolbar.link` | Link | Collegamento |
 | `heading.paragraph` | Paragraph | Paragrafo |
 | `heading.h1` | Heading 1 | Titolo 1 |
 | `heading.h2` | Heading 2 | Titolo 2 |
@@ -166,6 +178,12 @@ no functions.
 | `heading.h4` | Heading 4 | Titolo 4 |
 | `heading.h5` | Heading 5 | Titolo 5 |
 | `heading.h6` | Heading 6 | Titolo 6 |
+| `link.url` | URL | URL |
+| `link.newTab` | Open in new tab | Apri in una nuova scheda |
+| `link.apply` | Apply | Applica |
+| `link.remove` | Remove link | Rimuovi collegamento |
+| `link.edit` | Edit link | Modifica collegamento |
+| `link.open` | Open link in a new tab | Apri il collegamento in una nuova scheda |
 
 ### 3.3 Default items
 
@@ -175,12 +193,10 @@ no functions.
 [
   ['undo', 'redo'],
   ['heading'],
-  ['bold', 'italic', 'underline', 'strike', 'code', 'clearFormatting'],
+  ['bold', 'italic', 'underline', 'strike', 'code', 'link', 'clearFormatting'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
 ]
 ```
-
-The link button joins in T-015.
 
 Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` calls
 `editor.can().<command>()`, `isAvailable` is `'<command>' in editor.commands`.
@@ -199,6 +215,10 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 | `orderedList` | `ListOrdered` | `toolbar.orderedList` | `Mod-Shift-7` | `toggleOrderedList` | `isActive('orderedList')` |
 | `blockquote` | `TextQuote` | `toolbar.blockquote` | `Mod-Shift-b` | `toggleBlockquote` | `isActive('blockquote')` |
 | `horizontalRule` | `Minus` | `toolbar.horizontalRule` | — | `setHorizontalRule` | — |
+
+`link` (T-016) differs: `icon` `Link`, `labelKey` `toolbar.link`, shortcut `Mod-k`, `run` calls
+`context.openLinkPopover()`, `isActive` is `isActive('link')`, `isEnabled` is
+`canEditLink(editor)` (§5.1), `isAvailable` is `'setLink' in editor.commands`.
 
 `heading` (T-014) is `headingDropdown()`, see §6.
 
@@ -232,7 +252,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 
 - `mousedown` on the toolbar calls `preventDefault()`: the editor keeps focus and its DOM
   selection, so clicking a button never blurs the editor.
-- `click` on an enabled button: `item.run(editor)`, then `editor.focus()`.
+- `click` on an enabled button: `editor.focus()`, then `item.run(editor, context)` (a `run`
+  that opens a popover moves the focus into it).
 
 ### 4.3 Keyboard (roving tabindex)
 
@@ -245,6 +266,11 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 - `Escape` in the toolbar: `editor.focus()`.
 - `Alt-F10` in the editor (`keydown` on `editor.view.dom`, `altKey` and `key === 'F10'`):
   `preventDefault()`, then focus the item with `tabindex="0"`.
+- `Mod-k` in the editor (`metaKey` on Mac, `ctrlKey` elsewhere, no `Alt`/`Shift`, key `k`),
+  when the `Link` extension is present: `preventDefault()`, then open the link popover (§5.1).
+  The toolbar owns the link popover and the link bubble (§5.2) even when the `link` button is
+  not in its items. Both are mounted in the parent of `view.dom` (the element given to the
+  `Editor`), so that they scroll with the content.
 
 ### 4.4 State refresh
 
@@ -283,7 +309,7 @@ export interface PopoverOptions {
   anchor: Element | VirtualElement;
   /** The floating element; the popover appends it to `container`. */
   content: HTMLElement;
-  /** Inside the UI root, so that `--stilo-*` custom properties are inherited. */
+  /** The element the popover scrolls with (it gets the class `stilo-popover-host`). */
   container: HTMLElement;
   /** Default: 'bottom-start'. */
   placement?: Placement;
@@ -304,9 +330,10 @@ export function createPopover(options: PopoverOptions): Popover;
 ```
 
 - Created closed: `content` gets the class `stilo-popover` and the `hidden` attribute and is
-  appended to `container`.
+  appended to `container`, which gets the class `stilo-popover-host` (`position: relative`).
+  `destroy()` removes that class when no other popover is left in `container`.
 - `open()`: removes `hidden`, starts `autoUpdate(anchor, content, position)`; `position` calls
-  `computePosition` with `strategy: 'fixed'`, the placement and the middleware
+  `computePosition` with `strategy: 'absolute'`, the placement and the middleware
   `[offset(n), flip(), shift({ padding: 8 })]`, and writes `left` / `top` in px on
   `content.style`. A result that arrives after the popover closed is ignored. Opening an open
   popover does nothing.
@@ -317,8 +344,74 @@ export function createPopover(options: PopoverOptions): Popover;
   listeners, calls `onClose(reason)`. Closing a closed popover does nothing.
 - `destroy()`: closes if open, removes `content`. Idempotent.
 
-`strategy: 'fixed'` lets the popover escape `overflow: hidden` ancestors while staying inside the
-UI root for CSS inheritance.
+`strategy: 'absolute'` inside a positioned `container` that scrolls with the anchor (the toolbar
+for its menus, the editor element for popovers anchored to the content): the browser moves the
+popover on scroll in the same frame as the anchor. With `fixed`, every scroll waited for an
+asynchronous `computePosition` and the popover visibly lagged and trembled (T-016). Trade-off: an
+ancestor with `overflow: hidden` can clip a popover; `flip()` limits the cases. The
+`--stilo-*` custom properties must be declared on a common ancestor of the toolbar and the
+editor (or on `:root`).
+
+### 5.1 Link popover (T-016)
+
+`createLinkPopover(editor, { container, messages })` (internal, created by the toolbar with its
+element as container) and `canEditLink(editor)`: `isActive('link') ||
+can().setLink({ href: 'https://example.com' })`, i.e. false only at a cursor outside a link.
+
+```html
+<div class="stilo-popover stilo-link-popover" role="dialog" aria-label="Link" hidden>
+  <form class="stilo-link-popover__form">
+    <input class="stilo-link-popover__url" type="text" inputmode="url" aria-label="URL"
+      placeholder="https://" autocomplete="off" spellcheck="false">
+    <label class="stilo-link-popover__new-tab"><input type="checkbox"> Open in new tab</label>
+    <div class="stilo-link-popover__actions">
+      <button type="submit" class="stilo-link-popover__button
+        stilo-link-popover__button--primary">Apply</button>
+      <button type="button" class="stilo-link-popover__button">Remove link</button>
+    </div>
+  </form>
+</div>
+```
+
+- Anchor: a virtual element (`contextElement: view.dom`) spanning `view.coordsAtPos(from)` and
+  `view.coordsAtPos(to)` of the selection, placement `bottom-start`.
+- Mounted in the editor element (§4.3).
+- `open()`: nothing when already open or `canEditLink` is false. Prefills the URL and the
+  checkbox from `getAttributes('link')` (`href`, `target === '_blank'`), shows *Remove link*
+  only when `isActive('link')`, opens, focuses and selects the URL.
+- Submit (`Enter` in the URL or *Apply*): trimmed URL not empty → `setLink({ href, target })`;
+  empty → `unsetLink()` when a link is active, otherwise nothing. When the command returns
+  `false` (URL refused by the `Link` extension) the URL gets `aria-invalid="true"` and keeps
+  the focus; editing it removes the attribute. On success: close, `editor.focus()`.
+- *Remove link*: `unsetLink()`, close, `editor.focus()`.
+- `Escape`: close, `editor.focus()`. Pointer down outside: close, focus does not move.
+
+### 5.2 Link bubble (T-016)
+
+`createLinkBubble(editor, { container, messages, onEdit })` (internal): a small popover under
+the link at the cursor, like the link preview of webmail editors.
+
+```html
+<div class="stilo-popover stilo-link-bubble" role="group" aria-label="Link" hidden>
+  <a class="stilo-link-bubble__button" href="https://x.com" target="_blank"
+    rel="noopener noreferrer" aria-label="Open link in a new tab"
+    title="Open link in a new tab: https://x.com">…ExternalLink…</a>
+  <button type="button" class="stilo-link-bubble__button" aria-label="Edit link"
+    title="Edit link">…Pencil…</button>
+  <button type="button" class="stilo-link-bubble__button" aria-label="Remove link"
+    title="Remove link">…Unlink…</button>
+</div>
+```
+
+- Shown while the selection is empty, `isActive('link')` and the editor has the focus
+  (`view.hasFocus()`); refreshed on the `transaction`, `focus` and `blur` events. Anchor: the
+  `<a>` of the cursor (`view.domAtPos(from)`). Moving to another link closes and reopens it,
+  so that it is positioned again.
+- `mousedown` on the bubble is prevented: the editor keeps the focus while its buttons are
+  clicked. The URL opens in a new tab; *Edit link* closes the bubble and opens the link popover
+  (focus to the URL field, so the bubble stays hidden); *Remove link* runs `unsetLink()`.
+- Keyboard users reach the same actions with `Mod-k`; the bubble is not focusable on purpose.
+- Pointer down outside or `Escape` hide it until the next transaction.
 
 ## 6. Dropdown and heading dropdown (T-014)
 
@@ -396,7 +489,8 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-color-border` | `#d1d9e0` | Toolbar bottom border, group separators, popover border |
 | `--stilo-color-hover` | `#eef1f4` | Button / option hover |
 | `--stilo-color-active` | `#dde4ee` | Pressed button, checked option |
-| `--stilo-color-focus` | `#0969da` | Focus ring |
+| `--stilo-color-focus` | `#0969da` | Focus ring, primary button |
+| `--stilo-color-error` | `#d1242f` | Border of an invalid field |
 | `--stilo-radius` | `6px` | Buttons, popover |
 | `--stilo-toolbar-padding` | `4px` | Toolbar padding and gap |
 | `--stilo-button-size` | `32px` | Button height and min width |
@@ -413,11 +507,19 @@ Layout:
   icon centered; hover → `--stilo-color-hover`; `--active` → `--stilo-color-active`;
   `[aria-disabled="true"]` → opacity 0.4, `cursor: default`, no hover color.
 - Dropdown trigger: auto width, `min-width: 120px`, text left, chevron right.
-- Popover: `position: fixed`, background, border, radius, shadow, `z-index`, `padding: 4px`.
+- Popover host: `position: relative`. Popover: `position: absolute`, `top: 0`, `left: 0`,
+  `width: max-content`, background, border, radius, shadow, `z-index`, `padding: 4px`.
+  `.stilo-popover[hidden]` is `display: none`, so that a component class setting `display`
+  (the link bubble is `flex`) never shows a closed popover.
 - Option: flex row, label left, shortcut right in `--stilo-color-muted` at `0.85em`;
   hover/focus → `--stilo-color-hover`; checked → `--stilo-color-active`; disabled → opacity 0.4.
 - Heading preview: `.stilo-dropdown__option--h<n> .stilo-dropdown__label` uses
   `--stilo-menu-h<n>-size` and `font-weight: 600`; the shortcut keeps the normal size.
+- Link popover: 320px wide form; URL on its own row with border and radius, focus ring,
+  `--stilo-color-error` border when invalid; checkbox label and actions on the second row;
+  buttons with border and radius, the primary one filled with `--stilo-color-focus`.
+- Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
+  open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
 
 ## 8. Later
 
@@ -425,4 +527,5 @@ Layout:
   replaces it later (ADR 0002).
 - `setEditable` emits no event: the toolbar does not reflect read-only mode yet (call
   `toolbar.update()` and handle it when the core gets an event).
-- Link popover (T-015) reuses `createPopover` with a virtual anchor from `view.coordsAtPos`.
+- Link popover: inserting a new linked text at a cursor outside a link (today the button is
+  disabled there); exporting `createLinkPopover` for custom toolbars.

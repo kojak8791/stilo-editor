@@ -9,7 +9,10 @@ export interface PopoverOptions {
   anchor: Element | VirtualElement;
   /** The floating element; the popover appends it to `container`. */
   content: HTMLElement;
-  /** Inside the UI root, so that `--stilo-*` custom properties are inherited. */
+  /**
+   * The element the popover scrolls with: it gets the class `stilo-popover-host`
+   * (`position: relative`), so the browser moves the popover with it on scroll.
+   */
   container: HTMLElement;
   /** Default: 'bottom-start'. */
   placement?: Placement;
@@ -44,6 +47,7 @@ export function createPopover(options: PopoverOptions): Popover {
   // Initial state: closed
   content.classList.add('stilo-popover');
   content.setAttribute('hidden', '');
+  container.classList.add('stilo-popover-host');
   container.appendChild(content);
 
   function position(): void {
@@ -51,7 +55,7 @@ export function createPopover(options: PopoverOptions): Popover {
     const gen = ++positionGeneration;
     Promise.resolve(
       computePosition(anchor, content, {
-        strategy: 'fixed',
+        strategy: 'absolute',
         placement,
         middleware: [offset(offsetValue), flip(), shift({ padding: 8 })],
       }).then((coords) => {
@@ -102,6 +106,9 @@ export function createPopover(options: PopoverOptions): Popover {
     }
     if (container.contains(content)) {
       container.removeChild(content);
+    }
+    if (!container.querySelector(':scope > .stilo-popover')) {
+      container.classList.remove('stilo-popover-host');
     }
   }
 

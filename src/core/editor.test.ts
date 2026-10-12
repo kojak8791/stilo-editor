@@ -212,6 +212,19 @@ describe('Editor: isActive', () => {
   });
 });
 
+describe('Editor: getAttributes', () => {
+  it('reads the selected node or the nearest ancestor; {} when absent or unknown', () => {
+    const editor = createCoreEditor('<h2>t</h2><hr>');
+    select(editor, 2);
+    expect(editor.getAttributes('title')).toEqual({ level: 2 });
+    expect(editor.getAttributes('strong')).toEqual({});
+    expect(editor.getAttributes('unknown')).toEqual({});
+    selectNode(editor, 3);
+    expect(editor.getAttributes('rule')).toEqual({});
+    expect(editor.getAttributes('title')).toEqual({});
+  });
+});
+
 describe('Editor: editable, focus and events', () => {
   it('switches read-only mode', () => {
     const editor = createCoreEditor('<p>a</p>');
