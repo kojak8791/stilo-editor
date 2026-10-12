@@ -341,3 +341,14 @@ Implemented the default UI toolbar with:
 
 <!-- Reviewer only (the implementer never edits this section): architect tokens (preparation,
 review), implementer failed check runs and context compactions, review rounds, escalation. -->
+
+- Architect preparation: unknown (baseline 37.7K messages at the start, includes the UI design
+  pass, ADR 0002, Vite config and demo page).
+- Implementer: 2 context compactions, about 40 minutes looping on test 7; failed check runs
+  unknown (the Report says 1, which is not accurate).
+- Review rounds: 1 during the task (architect prompt to unblock test 7: the test did not follow
+  the case and out-of-scope files had been changed). Post-merge review found 2 defects, fixed in
+  T-014: a `stilo-toolbar__groups` wrapper not in the design (test 1 was misread to require it;
+  the groups stack vertically), and `ArrowLeft` doing nothing on the last item (test 17 asserted
+  that behavior). `isMacPlatform` was exported though internal.
+- Escalation: none. Outcome: from T-014 the architect writes the tests.
