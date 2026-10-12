@@ -31,7 +31,7 @@ may be split or merged when a task starts.
 | T-015 | `content.css` (ProseMirror and gap cursor base CSS, lists, blockquote, placeholder rule `.stilo-placeholder::before` showing `attr(data-placeholder)`, hidden when not editable); fix `insertBlock` throwing on a document-level selection; remove the toolbar `try/catch` around `isEnabled` | NFR-5 | done |
 | T-016 | Default UI: link popover, also bound to `Mod-k` (the headless `Link` has no shortcut), link bubble, popovers positioned `absolute` (ADR 0002), `Editor.getAttributes` | F-803 | done |
 | T-017 | Demo benchmark mode (`/demo/?bench`) and NFR-1 harness; `content-visibility` and calibrated budgets (ADR 0003) | NFR-1 | done |
-| T-018 | Documentation cleanup: the local-model experiment is closed; task files and template removed, `BACKLOG.md` moved to `docs/`, `AGENTS.md` rewritten for any contributor, README "How it is built" | — | review |
+| T-018 | Documentation cleanup: the local-model experiment is closed; task files and template removed, `BACKLOG.md` moved to `docs/`, `AGENTS.md` rewritten for any contributor, README "How it is built" | — | done |
 | T-019 | Lists: Backspace at the start of an empty paragraph after a list deletes it and puts the cursor at the end of the last item (today it becomes an empty item again); check a non-empty paragraph too | F-401, F-402 | todo |
 | T-020 | Toolbar placement: sticky when the editor flows in the page, static when the editor scrolls inside its own container | F-801 | todo |
 
