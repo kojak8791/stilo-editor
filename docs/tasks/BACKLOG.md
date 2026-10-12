@@ -28,7 +28,7 @@ implementations.
 | T-007 | Lists: `BulletList`, `OrderedList`, `ListItem` | F-401…F-405 | Implementer | done |
 | T-008 | `Link` | F-206 | Implementer | done |
 | T-009 | `History`, `ClearFormatting` | F-101…F-103, F-212 | Implementer | done |
-| T-010 | `MoveBlock` | F-309 | Implementer | todo |
+| T-010 | `MoveBlock` | F-309 | Implementer | done |
 | T-011 | `Placeholder`, `DropCursor`, `GapCursor` | F-011, F-012 | Implementer | todo |
 | T-012 | Clipboard: paste HTML and plain text, canonical copy | F-701, F-702, F-706 | Implementer | todo |
 | T-013 | Default UI: toolbar and heading dropdown (needs a UI design pass first) | F-801, F-802 | Architect + Implementer | todo |

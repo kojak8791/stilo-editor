@@ -12,6 +12,7 @@ import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
 import { Link } from '../link';
 import { ListItem } from '../list-item';
+import { MoveBlock } from '../move-block';
 import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
 import { Strike } from '../strike';
@@ -41,6 +42,7 @@ export interface StarterKitOptions {
   link?: false;
   clearFormatting?: false;
   history?: false | Partial<HistoryOptions>;
+  moveBlock?: false;
 }
 
 /** Returns the extension unless its option is `false`. */
@@ -79,5 +81,6 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Link, options.link),
     ...include(ClearFormatting, options.clearFormatting),
     ...include(History, options.history),
+    ...include(MoveBlock, options.moveBlock),
   ];
 }

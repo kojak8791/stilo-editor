@@ -22,6 +22,7 @@ describe('StarterKit', () => {
       'link',
       'clearFormatting',
       'history',
+      'moveBlock',
     ]);
   });
 
@@ -44,6 +45,7 @@ describe('StarterKit', () => {
       'link',
       'clearFormatting',
       'history',
+      'moveBlock',
     ]);
   });
 });
