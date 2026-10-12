@@ -11,6 +11,7 @@ export { HorizontalRule } from './horizontal-rule';
 export { Italic } from './italic';
 export { Link, type LinkAttributes } from './link';
 export { ListItem } from './list-item';
+export { MoveBlock } from './move-block';
 export { OrderedList } from './ordered-list';
 export { Paragraph } from './paragraph';
 export { StarterKit, type StarterKitOptions } from './starter-kit';
