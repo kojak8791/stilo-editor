@@ -505,6 +505,30 @@ setHTML(html)           paste (transformPastedHTML)          drop
 container of a detached document (`document.implementation.createHTMLDocument()`), then
 `innerHTML`.
 
+Plain-text paste uses ProseMirror's default: every line becomes a paragraph, runs of empty lines
+collapse (so `getText()` pasted back gives the same blocks), whitespace is kept as typed.
+
+ProseMirror's `data-pm-slice` attribute (open depths and wrapping nodes of a copied slice) is
+**not** in `ALLOWED_ATTR`: its context carries arbitrary node attributes, so pasted HTML is
+never trusted with it. Accepted cost: a single whole list item (or the paragraph of a blockquote)
+copied and pasted into an empty paragraph arrives as a plain paragraph.
+
+### 8.1 Output pipeline (copy)
+
+```
+getHTML()                                  copy / cut / drag
+     │                                            │
+DOMSerializer (schema toDOM)          clipboardSerializer (same, per call)
+     │                                            │
+     └──────► canonical post-processing ◄─────────┘
+              (styles via css.ts; compactParagraphs, ADR 0001)
+```
+
+Copied HTML follows §7 exactly, plus ProseMirror's `data-pm-slice` on the first element; the
+plain text is `textBetween(…, '
+
+')`, the same rule as `getText()`.
+
 ---
 
 ## 9. Default UI (`src/ui/`)

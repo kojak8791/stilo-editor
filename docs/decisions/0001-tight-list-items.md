@@ -37,6 +37,8 @@ distinction: *tight* lists (`<li>one</li>`) and *loose* lists (`<li><p>one</p>�
 - One generic rule in `src/core/html/serialize.ts`, independent of the list extensions; it also
   applies to task items and, when added to its container list, table cells (M2).
 - New public option `EditorOptions.compactParagraphs` (default `true`).
-- The clipboard (`copy`) uses ProseMirror's own serializer and still writes `<li><p>`. This is
-  harmless: pasting it back parses to the same document.
+- The clipboard (`copy`) applies the same rule and the same option (amended 2026-10-12, T-012):
+  copied HTML goes through the canonical post-processing of `serializeHTML`, so lists pasted into
+  mail clients or word processors are not spaced out. Pasting it back parses to the same
+  document.
 - ARCHITECTURE §5 (`EditorOptions`), §7.1 (`listItem` row) and §13 (D-12) reflect this ADR.
