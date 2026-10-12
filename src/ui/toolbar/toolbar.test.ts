@@ -74,6 +74,7 @@ describe('toolbar', () => {
       'orderedList',
       'blockquote',
       'horizontalRule',
+      'characters',
     ]);
 
     toolbar.destroy();
@@ -428,11 +429,12 @@ describe('toolbar', () => {
     expect(byId('redo').getAttribute('tabindex')).toBe('0');
     expect(byId('undo').getAttribute('tabindex')).toBe('-1');
     expect(from('redo', 'ArrowLeft')).toBe('undo');
-    expect(from('undo', 'ArrowLeft')).toBe('horizontalRule');
+    expect(from('undo', 'ArrowLeft')).toBe('characters');
+    expect(from('characters', 'ArrowLeft')).toBe('horizontalRule');
     expect(from('horizontalRule', 'ArrowLeft')).toBe('blockquote');
-    expect(from('horizontalRule', 'ArrowRight')).toBe('undo');
+    expect(from('characters', 'ArrowRight')).toBe('undo');
     expect(from('redo', 'ArrowRight')).toBe('heading');
-    expect(from('bold', 'End')).toBe('horizontalRule');
+    expect(from('bold', 'End')).toBe('characters');
     expect(from('bold', 'Home')).toBe('undo');
     expect(items.filter((el) => el.getAttribute('tabindex') === '0')).toEqual([byId('undo')]);
 

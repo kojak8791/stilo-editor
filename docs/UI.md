@@ -37,7 +37,9 @@ src/ui/
 │   ├── popover.ts           createPopover (T-014)
 │   ├── dropdown.ts          createDropdown (T-014)
 │   ├── link-popover.ts      createLinkPopover, canEditLink (T-016)
-│   └── link-bubble.ts       createLinkBubble (T-016)
+│   ├── link-bubble.ts       createLinkBubble (T-016)
+│   ├── character-picker.ts  createCharacterPicker (T-024)
+│   └── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014)
@@ -119,6 +121,8 @@ export interface ToolbarButton {
 export interface ToolbarContext {
   /** Opens the link popover under the selection (no-op without the `Link` extension). */
   openLinkPopover(): void;
+  /** Opens or closes the character picker (no-op without the `characters` item). T-024. */
+  toggleCharacterPicker(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */
@@ -191,6 +195,26 @@ no functions.
 | `link.remove` | Remove link | Rimuovi collegamento |
 | `link.edit` | Edit link | Modifica collegamento |
 | `link.open` | Open link in a new tab | Apri il collegamento in una nuova scheda |
+| `toolbar.characters` | Insert character | Inserisci carattere |
+| `characters.search` | Search | Cerca |
+| `characters.noResults` | No results | Nessun risultato |
+| `characters.symbols` | Symbols | Simboli |
+| `characters.emoji` | Emoji | Emoji |
+| `characters.punctuation` | Punctuation | Punteggiatura |
+| `characters.currency` | Currency | Valute |
+| `characters.math` | Math | Matematica |
+| `characters.arrows` | Arrows | Frecce |
+| `characters.greek` | Greek | Greco |
+| `characters.latin` | Accented letters | Lettere accentate |
+| `characters.signs` | Signs and shapes | Segni e forme |
+| `characters.smileys` | Smileys | Faccine |
+| `characters.people` | People and gestures | Persone e gesti |
+| `characters.nature` | Animals and nature | Animali e natura |
+| `characters.food` | Food and drink | Cibo e bevande |
+| `characters.travel` | Travel and places | Viaggi e luoghi |
+| `characters.activities` | Activities | Attività |
+| `characters.objects` | Objects | Oggetti |
+| `characters.emojiSymbols` | Symbols | Simboli |
 
 ### 3.3 Default items
 
@@ -202,7 +226,7 @@ no functions.
   ['heading'],
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
     'clearFormatting'],
-  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
+  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ]
 ```
 
@@ -231,6 +255,10 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 `canEditLink(editor)` (§5.1), `isAvailable` is `'setLink' in editor.commands`.
 
 `heading` (T-014) is `headingDropdown()`, see §6.
+
+`characters` (T-024): `icon` `FaceSlightlySmilingPlus`, `labelKey` `toolbar.characters`, no shortcut, `run` calls
+`context.toggleCharacterPicker()` (§5.3), always enabled, `isAvailable` is
+`'insertText' in editor.commands` (the `Text` extension).
 
 ## 4. Toolbar behavior
 
@@ -423,6 +451,55 @@ the link at the cursor, like the link preview of webmail editors.
 - Keyboard users reach the same actions with `Mod-k`; the bubble is not focusable on purpose.
 - Pointer down outside or `Escape` hide it until the next transaction.
 
+### 5.3 Character picker (T-024)
+
+`createCharacterPicker(editor, { anchor, container, messages })` (internal), created by the
+toolbar when it has the `characters` item: anchored to that button, `container` the toolbar
+(it scrolls with it). Special characters and emoji (SPEC F-904, F-905).
+
+```html
+<div class="stilo-popover stilo-char-picker" role="dialog" aria-label="Insert character" hidden>
+  <input type="search" class="stilo-char-picker__search" placeholder="Search" aria-label="Search">
+  <div class="stilo-char-picker__tabs" role="tablist">
+    <button type="button" class="stilo-char-picker__tab" role="tab" aria-selected="true">Symbols</button>
+    <button type="button" class="stilo-char-picker__tab" role="tab" aria-selected="false">Emoji</button>
+  </div>
+  <div class="stilo-char-picker__panel" role="tabpanel">
+    <div class="stilo-char-picker__heading">Currency</div>
+    <div class="stilo-char-picker__grid" role="group" aria-label="Currency">
+      <button type="button" class="stilo-char-picker__char" title="Euro sign" aria-label="Euro sign"
+        data-character="€" tabindex="-1">€</button>
+      …
+    </div>
+    …
+  </div>
+</div>
+```
+
+- **Data**: `characters.ts` (`SYMBOLS`, `EMOJI`: categories of `[character, English name]`) is
+  loaded with a dynamic `import()` on the first opening, so it is a separate chunk that an app
+  downloads only when the picker is used. 254 symbols in 7 categories and 519 emoji in 8 categories,
+  chosen by hand; no flags (Windows does not draw them). Names follow Unicode /
+  CLDR and serve the tooltip, the accessible name and the search.
+- **Opening**: the button gets `aria-haspopup="dialog"` and `aria-expanded`. Opening shows the
+  last tab, clears the search and focuses the search field (`preventScroll`, as in §5.1).
+  The button toggles it.
+- **Inserting**: a click (or `Enter` / `Space` on a focused character) runs
+  `insertText(character)` at the editor selection, with the marks active there; the picker
+  **stays open** and keeps the focus on the character, so several characters go in a row.
+- **Search**: filters both tabs by name (case-insensitive substring) or by the character
+  itself; the tabs are hidden while searching; no match shows `characters.noResults`. Names are
+  English only.
+- **Keyboard**: `Tab` goes search → selected tab → grid (roving tabindex, one character
+  tabbable). `ArrowDown` in the search field goes to the first character. On the tabs,
+  `ArrowLeft` / `ArrowRight` switch tab. In the grids (10 columns, `COLUMNS` in the code and in
+  `ui.css`), `ArrowLeft` / `ArrowRight` move in reading order across categories,
+  `ArrowUp` / `ArrowDown` move by row, also into the previous / next category, keeping the
+  column where possible.
+- **Closing**: `Escape` and the button give the focus back to the editor; pointer down outside
+  closes without moving the focus.
+- The toolbar does not prevent `mousedown` inside the picker (its fields take the focus).
+
 ## 6. Dropdown and heading dropdown (T-014)
 
 ### 6.1 DOM
@@ -546,6 +623,10 @@ Layout:
 - Link popover: 320px wide form; URL on its own row with border and radius, focus ring,
   `--stilo-color-error` border when invalid; checkbox label and actions on the second row;
   buttons with border and radius, the primary one filled with `--stilo-color-focus`.
+- Character picker: column with search field (border, radius), tabs (selected one underlined in
+  `--stilo-color-focus`), a panel up to 280px high that scrolls, muted category headings at
+  `0.85em`, grids of 10 columns of 32px buttons with an 18px character, hover color as
+  buttons.
 - Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
   open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
 

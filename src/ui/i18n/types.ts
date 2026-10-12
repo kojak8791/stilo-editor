@@ -29,7 +29,27 @@ export type MessageKey =
   | 'link.apply'
   | 'link.remove'
   | 'link.edit'
-  | 'link.open';
+  | 'link.open'
+  | 'toolbar.characters'
+  | 'characters.search'
+  | 'characters.noResults'
+  | 'characters.symbols'
+  | 'characters.emoji'
+  | 'characters.punctuation'
+  | 'characters.currency'
+  | 'characters.math'
+  | 'characters.arrows'
+  | 'characters.greek'
+  | 'characters.latin'
+  | 'characters.signs'
+  | 'characters.smileys'
+  | 'characters.people'
+  | 'characters.nature'
+  | 'characters.food'
+  | 'characters.travel'
+  | 'characters.activities'
+  | 'characters.objects'
+  | 'characters.emojiSymbols';
 
 /** UI strings: every {@link MessageKey}, plus the label keys of custom toolbar items. */
 export type Messages = Readonly<Record<MessageKey, string>> & Readonly<Record<string, string>>;

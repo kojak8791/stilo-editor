@@ -86,10 +86,11 @@ What an app built with Vite downloads, measured on 2026-10-12 with `npm run size
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.0 kB | 77.5 kB |
-| Core and `StarterKit` | 271.1 kB | 85.1 kB |
-| Core, `StarterKit` and the default UI | 308.2 kB | 97.1 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.1 kB | 77.5 kB |
+| Core and `StarterKit` | 272.1 kB | 85.3 kB |
+| Core, `StarterKit` and the default UI | 317.1 kB | 99.6 kB |
+| … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
-styles add 2.6 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
+styles add 2.9 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
 consumer would, and fails if the minimal app contains packages that only unused extensions need.

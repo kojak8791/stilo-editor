@@ -379,6 +379,8 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
 2. Duplicate extension names, node/mark names or command names → `StiloError`.
 3. The schema requires `doc`, `paragraph` and `text`; otherwise → `StiloError`.
    `Paragraph` has priority 1000 so it is the first `block` node (ProseMirror's default block).
+   `Text`, always present, also provides `insertText(text)`: it replaces the selection with
+   `text`, with the marks active at the cursor (`false` for an empty string).
 4. Schema mark order (affects nesting in HTML output, outermost first):
    `link`, `textStyle`, `highlight`, `bold`, `italic`, `underline`, `strike`, `subscript`,
    `superscript`, `code`. The first three have priorities 103, 102, 101 (the other marks keep

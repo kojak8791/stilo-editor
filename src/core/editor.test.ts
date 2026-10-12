@@ -13,7 +13,7 @@ function runners(commands: CommandRunners): Runners {
   return commands as unknown as Runners;
 }
 
-const insertText: (text: string) => Command = (text) => (state, dispatch) => {
+const insertTestText: (text: string) => Command = (text) => (state, dispatch) => {
   if (text === '') return false;
   dispatch?.(state.tr.insertText(text));
   return true;
@@ -21,7 +21,7 @@ const insertText: (text: string) => Command = (text) => (state, dispatch) => {
 
 const TestCommands = defineExtension({
   name: 'testCommands',
-  commands: () => ({ insertText }) as never,
+  commands: () => ({ insertTestText }) as never,
 });
 
 describe('Editor: creation', () => {
@@ -181,17 +181,17 @@ describe('Editor: commands', () => {
   it('runs a command and returns its result', () => {
     const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
     select(editor, 2);
-    expect(runners(editor.commands).insertText?.('b')).toBe(true);
+    expect(runners(editor.commands).insertTestText?.('b')).toBe(true);
     expect(editor.getHTML()).toBe('<p>ab</p>');
-    expect(runners(editor.commands).insertText?.('')).toBe(false);
+    expect(runners(editor.commands).insertTestText?.('')).toBe(false);
   });
 
   it('dry-runs a command with can() without dispatching', () => {
     const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
     const transaction = vi.fn();
     editor.on('transaction', transaction);
-    expect(runners(editor.can()).insertText?.('b')).toBe(true);
-    expect(runners(editor.can()).insertText?.('')).toBe(false);
+    expect(runners(editor.can()).insertTestText?.('b')).toBe(true);
+    expect(runners(editor.can()).insertTestText?.('')).toBe(false);
     expect(editor.getHTML()).toBe('<p>a</p>');
     expect(transaction).not.toHaveBeenCalled();
   });

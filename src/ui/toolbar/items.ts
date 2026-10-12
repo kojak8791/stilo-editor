@@ -1,6 +1,7 @@
 import {
   Bold,
   Code,
+  FaceSlightlySmilingPlus,
   Italic,
   Link,
   List,
@@ -35,7 +36,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'link',
     'clearFormatting',
   ],
-  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
+  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ];
 
 /** The default toolbar items, by ID. */
@@ -227,6 +228,16 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     },
     isEnabled: (e) => 'setHorizontalRule' in e.commands && e.can().setHorizontalRule(),
     isAvailable: (e) => 'setHorizontalRule' in e.commands,
+  },
+  characters: {
+    id: 'characters',
+    kind: 'button',
+    icon: FaceSlightlySmilingPlus,
+    labelKey: 'toolbar.characters',
+    run: (_e, toolbar) => {
+      toolbar.toggleCharacterPicker();
+    },
+    isAvailable: (e) => 'insertText' in e.commands,
   },
   heading: headingDropdown(),
 };

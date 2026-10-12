@@ -1,5 +1,6 @@
 import type { Editor } from '../../index';
 import { StiloError } from '../../index';
+import { createCharacterPicker } from '../components/character-picker';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
 import { createIcon } from '../components/icon';
@@ -167,8 +168,14 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         onEdit: () => linkPopover.open(),
       })
     : null;
+  // The character picker hangs from its button and scrolls with the toolbar.
+  const charactersButton = element.querySelector<HTMLElement>('[data-item="characters"]');
+  const characterPicker = charactersButton
+    ? createCharacterPicker(editor, { anchor: charactersButton, container: element, messages })
+    : null;
   const context: ToolbarContext = {
     openLinkPopover: () => linkPopover?.open(),
+    toggleCharacterPicker: () => characterPicker?.toggle(),
   };
 
   container.appendChild(element);
@@ -276,9 +283,10 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   editor.on('transaction', onTransaction);
 
-  // mousedown on toolbar: preventDefault to keep editor focus
+  // mousedown on toolbar: preventDefault to keep editor focus, except in the character picker,
+  // whose search field and buttons take the focus.
   const onToolbarMousedown = (e: MouseEvent): void => {
-    if (isDestroyed) return;
+    if (isDestroyed || (e.target as Element).closest('.stilo-char-picker')) return;
     e.preventDefault();
   };
   element.addEventListener('mousedown', onToolbarMousedown);
@@ -394,6 +402,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     }
     linkPopover?.destroy();
     linkBubble?.destroy();
+    characterPicker?.destroy();
 
     if (container.contains(element)) {
       container.removeChild(element);

@@ -294,3 +294,91 @@
   width: 16px;
   height: 16px;
 }
+
+/* Character picker: 10 columns (COLUMNS in character-picker.ts) */
+.stilo-char-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--stilo-font-family, system-ui, sans-serif);
+  font-size: var(--stilo-font-size, 14px);
+  color: var(--stilo-color-text, #1f2328);
+}
+
+.stilo-char-picker__search {
+  padding: 6px 8px;
+  border: 1px solid var(--stilo-color-border, #d1d9e0);
+  border-radius: var(--stilo-radius, 6px);
+  font: inherit;
+}
+
+.stilo-char-picker__search:focus-visible,
+.stilo-char-picker__tab:focus-visible,
+.stilo-char-picker__char:focus-visible {
+  outline: 2px solid var(--stilo-color-focus, #0969da);
+  outline-offset: -2px;
+}
+
+.stilo-char-picker__tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--stilo-color-border, #d1d9e0);
+}
+
+.stilo-char-picker__tabs[hidden] {
+  display: none;
+}
+
+.stilo-char-picker__tab {
+  padding: 6px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--stilo-color-muted, #59636e);
+  font: inherit;
+  cursor: pointer;
+}
+
+.stilo-char-picker__tab[aria-selected="true"] {
+  border-bottom-color: var(--stilo-color-focus, #0969da);
+  color: var(--stilo-color-text, #1f2328);
+}
+
+.stilo-char-picker__panel {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.stilo-char-picker__heading {
+  margin: 8px 0 4px;
+  color: var(--stilo-color-muted, #59636e);
+  font-size: 0.85em;
+}
+
+.stilo-char-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(10, 32px);
+  gap: 2px;
+}
+
+.stilo-char-picker__char {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--stilo-radius, 6px);
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stilo-char-picker__char:hover {
+  background: var(--stilo-color-hover, #eef1f4);
+}
+
+.stilo-char-picker__empty {
+  margin: 8px 0;
+  color: var(--stilo-color-muted, #59636e);
+}

@@ -25,6 +25,8 @@ export interface ToolbarButton {
 export interface ToolbarContext {
   /** Opens the link popover under the selection (no-op without the `Link` extension). */
   openLinkPopover(): void;
+  /** Opens or closes the character picker (no-op without the `characters` item). */
+  toggleCharacterPicker(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */

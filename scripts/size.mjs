@@ -31,7 +31,11 @@ createToolbar(editor, { container: document.body });`,
   },
 ];
 
-/** Bundles `code` minified, in memory: the JavaScript and the IDs of the modules it contains. */
+/**
+ * Bundles `code` minified, in memory. Returns the JavaScript loaded at startup (the entry and
+ * its static imports), the JavaScript loaded on demand (dynamic imports) and the IDs of the
+ * modules loaded at startup.
+ */
 async function bundle(code) {
   const output = await build({
     configFile: false,
@@ -54,21 +58,30 @@ async function bundle(code) {
   const chunks = (Array.isArray(output) ? output : [output])
     .flatMap((result) => result.output)
     .filter((file) => file.type === 'chunk');
-  const modules = chunks.flatMap((chunk) =>
+  const startup = new Set(chunks.filter((chunk) => chunk.isEntry));
+  for (const chunk of startup) {
+    for (const name of chunk.imports) startup.add(chunks.find((c) => c.fileName === name));
+  }
+  const onDemand = chunks.filter((chunk) => !startup.has(chunk));
+  const modules = [...startup].flatMap((chunk) =>
     Object.entries(chunk.modules)
       .filter(([, module]) => module.renderedLength > 0)
       .map(([id]) => id.replaceAll('\\', '/')),
   );
-  return { js: chunks.map((chunk) => chunk.code).join('\n'), modules };
+  const join = (list) => list.map((chunk) => chunk.code).join('\n');
+  return { js: join([...startup]), lazy: join(onDemand), modules };
 }
 
 const kB = (bytes) => `${(bytes / 1000).toFixed(1)} kB`.padStart(9);
+const sizes = (js) => `${kB(Buffer.byteLength(js))}${kB(gzipSync(js, { level: 9 }).length)}`;
 
-console.log(`${'App'.padEnd(44)}${'Minified'.padStart(9)}${'Gzip'.padStart(9)}`);
+console.log(
+  `${'App (loaded at startup)'.padEnd(44)}${'Minified'.padStart(9)}${'Gzip'.padStart(9)}`,
+);
 for (const app of apps) {
-  const { js, modules } = await bundle(app.code);
-  const sizes = `${kB(Buffer.byteLength(js))}${kB(gzipSync(js, { level: 9 }).length)}`;
-  console.log(`${app.name.padEnd(44)}${sizes}`);
+  const { js, lazy, modules } = await bundle(app.code);
+  console.log(`${app.name.padEnd(44)}${sizes(js)}`);
+  if (lazy) console.log(`${'  + loaded on demand'.padEnd(44)}${sizes(lazy)}`);
   const found = app.absent.filter((name) =>
     modules.some((id) => id.includes(`/node_modules/${name}/`)),
   );
