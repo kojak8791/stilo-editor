@@ -703,4 +703,20 @@ describe('heading dropdown', () => {
     expect(document.querySelector('[role="menu"]')).toBeNull();
     expect(() => press(document.body, 'Escape')).not.toThrow();
   });
+  it('keeps the order of a group that mixes buttons and the dropdown', () => {
+    const { toolbar } = setup('<p>ab</p>', { items: [['bold', 'heading', 'italic']] });
+    const groups = toolbar.element.querySelectorAll('[role="group"]');
+    expect(groups.length).toBe(1);
+    const ids = [...groups[0]!.querySelectorAll('[data-item]')].map((el) =>
+      el.getAttribute('data-item'),
+    );
+    expect(ids).toEqual(['bold', 'heading', 'italic']);
+  });
+
+  it('keeps the dropdown component internal', async () => {
+    const names = Object.keys(await import('../index'));
+    expect(names).toContain('headingDropdown');
+    expect(names).not.toContain('createDropdown');
+    expect(names).not.toContain('isMacPlatform');
+  });
 });
