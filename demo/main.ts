@@ -2,7 +2,9 @@
 import 'prosemirror-view/style/prosemirror.css';
 import 'prosemirror-gapcursor/style/gapcursor.css';
 import './demo.css';
+import '../src/styles/ui.css';
 import { Editor, StarterKit } from '../src';
+import { createToolbar } from '../src/ui';
 
 const content = [
   '<h2>Welcome to Stilo</h2>',
@@ -29,3 +31,5 @@ const showHTML = () => {
 };
 editor.on('update', showHTML);
 showHTML();
+
+createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });

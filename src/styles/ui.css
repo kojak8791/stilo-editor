@@ -1,0 +1,70 @@
+/* Stilo default UI styles. */
+
+/* Toolbar */
+.stilo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stilo-toolbar-padding, 4px);
+  padding: var(--stilo-toolbar-padding, 4px);
+  border-bottom: 1px solid var(--stilo-color-border, #d1d9e0);
+}
+
+/* Group */
+.stilo-toolbar__group {
+  display: flex;
+  gap: var(--stilo-toolbar-padding, 4px);
+}
+
+.stilo-toolbar__group:not(:first-child) {
+  border-left: 1px solid var(--stilo-color-border, #d1d9e0);
+  padding-left: var(--stilo-toolbar-padding, 4px);
+}
+
+/* Button */
+.stilo-toolbar__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--stilo-button-size, 32px);
+  min-width: var(--stilo-button-size, 32px);
+  height: var(--stilo-button-size, 32px);
+  border: none;
+  border-radius: var(--stilo-radius, 6px);
+  background: transparent;
+  color: var(--stilo-color-text, #1f2328);
+  cursor: pointer;
+  font-family: var(--stilo-font-family, system-ui, sans-serif);
+  font-size: var(--stilo-font-size, 14px);
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.15s;
+}
+
+.stilo-toolbar__button:hover {
+  background: var(--stilo-color-hover, #eef1f4);
+}
+
+.stilo-toolbar__button:focus-visible {
+  outline: 2px solid var(--stilo-color-focus, #0969da);
+  outline-offset: 2px;
+}
+
+.stilo-toolbar__button.stilo-toolbar__button--active {
+  background: var(--stilo-color-active, #dde4ee);
+}
+
+.stilo-toolbar__button[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stilo-toolbar__button[aria-disabled="true"]:hover {
+  background: transparent;
+}
+
+/* Icon */
+.stilo-icon {
+  width: var(--stilo-icon-size, 18px);
+  height: var(--stilo-icon-size, 18px);
+  color: var(--stilo-color-text, #1f2328);
+}

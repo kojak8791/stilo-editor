@@ -1,0 +1,26 @@
+import type { Messages } from './types';
+
+/** English UI strings. */
+export const en: Messages = {
+  'toolbar.label': 'Formatting',
+  'toolbar.undo': 'Undo',
+  'toolbar.redo': 'Redo',
+  'toolbar.bold': 'Bold',
+  'toolbar.italic': 'Italic',
+  'toolbar.underline': 'Underline',
+  'toolbar.strike': 'Strikethrough',
+  'toolbar.code': 'Code',
+  'toolbar.clearFormatting': 'Clear formatting',
+  'toolbar.bulletList': 'Bulleted list',
+  'toolbar.orderedList': 'Numbered list',
+  'toolbar.blockquote': 'Quote',
+  'toolbar.horizontalRule': 'Horizontal line',
+  'toolbar.heading': 'Text style',
+  'heading.paragraph': 'Paragraph',
+  'heading.h1': 'Heading 1',
+  'heading.h2': 'Heading 2',
+  'heading.h3': 'Heading 3',
+  'heading.h4': 'Heading 4',
+  'heading.h5': 'Heading 5',
+  'heading.h6': 'Heading 6',
+};
