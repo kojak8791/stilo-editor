@@ -31,38 +31,14 @@ CKEditor 5, while being **entirely open source**: no paid tiers, no closed "pro"
 - Canvas-based rendering or document virtualization (see the performance notes in SPEC.md).
 - Legacy browsers (no IE, no pre-Chromium Edge).
 
-## Project meta-goals
+## How Stilo is developed
 
-Stilo is also a learning project and an experiment: can a **local LLM** take a real share of the
-work on a medium-complexity library, and where does it pay off? It is developed by a project
-manager (human), an "architect" model (Claude) and a local implementer model (Qwen3.6-35B-A3B /
-Bonsai27B via opencode + LM Studio).
-
-**The product comes first.** Only code that passes the quality gate and the review is merged,
-whoever wrote it. Within that limit:
-
-- **Project manager**: goals, priorities, trade-offs, merges. Decides who takes a borderline task,
-  and every escalation.
-- **Architect**: architecture, decisions ([decisions/](decisions/)), contracts (types,
-  signatures, HTML output), and task files that describe behavior and acceptance cases. It writes
-  no implementation code, except where the backlog or a task Report says so.
-- **Implementer**: writes the code and the tests of each task, chooses the internal design within
-  the contract, and iterates until the quality gate passes ([AGENTS.md](../AGENTS.md)). It never
-  makes architectural decisions.
-
-The split is **hybrid and declared**. The local model takes the work where it saves something:
-long, repetitive, well-testable tasks. A task whose specification would cost as much as its code
-may go to the architect, openly (Owner column in [tasks/BACKLOG.md](tasks/BACKLOG.md)). If the
-implementer still fails after three review rounds, the project manager decides: re-specify,
-split, or escalate to the architect; the task Report records it.
-
-Each task records what it cost (architect tokens for preparation and review, implementer fix
-rounds), so that the project can answer with data where a local model saves tokens or time, and
-where it does not.
-
-Because of this, all decisions (dependencies, configuration, file layout, APIs, HTML output) are
-written down **before** implementation, in `docs/`, and implementation work is split into tasks
-([tasks/](tasks/)) whose acceptance cases are the contract.
+Stilo is designed and owned by one person and developed with AI assistance (Claude). The owner
+sets goals and priorities, makes the decisions, tries every change in the demo and decides the
+merge. Decisions (dependencies, configuration, file layout, APIs, HTML output) are written down
+**before** the code, in `docs/`; changes to them get an ADR ([decisions/](decisions/)). Every
+change passes the quality gate ([AGENTS.md](../AGENTS.md)), and performance is measured against
+explicit budgets.
 
 ## Document map
 
@@ -72,6 +48,7 @@ written down **before** implementation, in `docs/`, and implementation work is s
 | [SPEC.md](SPEC.md) | Features, priorities, non-functional requirements, roadmap |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical design, stack, file layout, extension API, HTML contract |
 | [decisions/](decisions/) | Architecture Decision Records (changes to decisions) |
-| [tasks/](tasks/) | Implementation tasks for the local model |
-| [guides/](guides/) | How-to guides for implementers (e.g. ProseMirror positions) |
-| [../AGENTS.md](../AGENTS.md) | Rules for the implementing agent |
+| [UI.md](UI.md) | Design of the default UI |
+| [BACKLOG.md](BACKLOG.md) | Tasks done and planned |
+| [guides/](guides/) | How-to guides (e.g. ProseMirror positions) |
+| [../AGENTS.md](../AGENTS.md) | Rules for contributors and coding agents |

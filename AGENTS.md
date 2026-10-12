@@ -1,15 +1,14 @@
-# AGENTS.md — Rules for the implementing agent
+# AGENTS.md — Rules for contributors and coding agents
 
-You are the **implementer** on the Stilo project, an HTML5 WYSIWYG editor library built on
-ProseMirror. A project manager and an architect have fixed everything that matters outside your
-task: dependencies, configuration, file layout, public APIs, HTML output. Inside a task, **you
-design and write the code and its tests**, within the task's contract, and you iterate until the
-quality gate passes. Implement **exactly one task at a time**, and nothing else.
+Stilo is an HTML5 WYSIWYG editor library built on ProseMirror. These rules apply to anyone who
+changes the code, human or AI agent. The decisions that matter outside a single change
+(dependencies, configuration, file layout, public APIs, HTML output) are written down in
+`docs/`; a change that needs a new decision updates those documents first, or adds an ADR
+(`docs/decisions/`).
 
-## 0. Iron constraints: write it right the first time
+## 0. Write it right the first time
 
-The toolchain enforces these. Every violation costs a fix round, so respect them **while you
-type**, not after `npm run check` fails.
+The toolchain enforces these. Respect them while you type, not after `npm run check` fails.
 
 - **Format** (Biome): 2-space indent, max **100** columns, single quotes, semicolons, trailing
   commas. Lines that would exceed 100 columns: break them yourself.
@@ -21,41 +20,35 @@ type**, not after `npm run check` fails.
 - **Smallest correct code**: one anchored regex per accepted form, no duplicated blocks (use a
   private helper), no comments that repeat the code.
 - **Loop**: write the code → `npm run format` → `npm run check` → fix **all** reported issues in
-  one pass → repeat. Aim for one round.
+  one pass → repeat.
 
-## 1. Before you write any code
+## 1. Before you write code
 
-1. Read the task file you were assigned: `docs/tasks/T-NNN-*.md`.
-2. Read every document and file listed in its **Context** section.
-3. Read the reference extension `src/extensions/bold/` if the task creates or changes an extension.
-   If the task moves, deletes, inserts or wraps nodes, read `docs/guides/prosemirror-positions.md`.
-4. If anything in the task is ambiguous, contradictory, or impossible, or an expected result
-   contradicts the behavior the task describes: **stop**. Write your question in the task's
-   `## Questions` section and do not guess.
+1. Read the documents that cover the change: `docs/ARCHITECTURE.md`, `docs/UI.md` for the
+   default UI, `docs/SPEC.md` for the requirement, the ADRs it touches.
+2. Read the reference extension `src/extensions/bold/` if the change creates or changes an
+   extension. If it moves, deletes, inserts or wraps nodes, read
+   `docs/guides/prosemirror-positions.md`.
+3. If something is ambiguous or contradicts the documents, ask the project owner instead of
+   guessing.
 
-## 2. Hard rules (never break these)
+## 2. Hard rules
 
-- **Do not install, remove or upgrade dependencies.** Never run `npm install <package>`. Use only
-  the packages already in `package.json`.
-- **Do not change configuration files**: `package.json`, `tsconfig*.json`, `vite.config.ts`,
-  `vitest.config.ts`, `playwright*.config.ts`, `biome.json`, `.gitignore`.
-- **Only touch the files listed in the task's Scope.** Files listed under "Do not touch" are
-  read-only. If you believe another file must change, ask (see §1.4).
-- **Do not change public APIs, types or signatures** already defined in `src/core/` or in the
-  task's Contract section.
-  Exception: stubs prefix unused parameters with `_` (`_html`, `_options`) only to silence lint.
-  When you implement a stub, remove the `_` from every parameter you now use. This is not a
-  signature change.
-- **Lint warnings fail the build** (`npm run check` uses `--error-on-warnings`). Fix every
-  warning; read the full output, which is never truncated.
-- **Do not change existing tests to make them pass.** If a provided test looks wrong, ask.
-- **Do not change `docs/`**, except the `## Questions` and `## Report` sections of your task file.
-  Never fill in `## Metrics`: the reviewer does. Never invent numbers anywhere: write "unknown".
-- **Do not invent features.** Implement what the task says, no extras, no "improvements".
-- **Respect the import directions** (`docs/ARCHITECTURE.md` §2.2): `src/core/` and
-  `src/extensions/` never import from `src/ui/` or `lucide`; `src/ui/` imports the core only via
-  `src/index.ts`.
+- **Dependencies** change only by decision (ADR). Never run `npm install <package>` on your own.
+- **Configuration files** (`package.json`, `tsconfig*.json`, `vite.config.ts`,
+  `vitest.config.ts`, `playwright*.config.ts`, `biome.json`, `.gitignore`) change only when the
+  change is about them.
+- **Public APIs, types and HTML output** follow `docs/ARCHITECTURE.md` and `docs/UI.md`; changing
+  them means updating those documents in the same change.
+- **Lint warnings fail the build** (`npm run check` uses `--error-on-warnings`).
 - **Never disable lint rules** (`biome-ignore`) or use `@ts-ignore` / `@ts-expect-error` / `any`.
+- **Never weaken a test to make it pass.** A test changes only when the behavior it describes
+  changes on purpose.
+- **No invented features.** Implement what was asked; propose extras separately.
+- **Import directions** (`docs/ARCHITECTURE.md` §2.2): `src/core/` and `src/extensions/` never
+  import from `src/ui/`, `lucide` or `@floating-ui/dom`; `src/ui/` imports the core only via
+  `src/index.ts`.
+- **Never invent numbers** (measurements, costs): write "unknown".
 
 ## 3. Coding rules
 
@@ -73,49 +66,48 @@ type**, not after `npm run check` fails.
 - HTML output must match `docs/ARCHITECTURE.md` §7 exactly.
 - Public functions and types get a short JSDoc comment. Inside function bodies, comment only
   non-obvious logic.
-- Code, comments and identifiers in English.
+- Code, comments, identifiers and documentation in English.
 
-## 4. Performance rules
+## 4. Performance rules (SPEC NFR-1, ADR 0003)
 
 - Never traverse the whole document (`doc.descendants`, `doc.nodesBetween(0, doc.content.size)`)
-  inside plugin `apply`, `view.update`, or decoration code, unless the task explicitly allows it.
+  inside plugin `apply`, `view.update`, or decoration code.
 - Decorations: map with `DecorationSet.map` and recompute only the changed ranges.
 - Never call `getHTML()` / serialization on every transaction.
 - Expensive derived data (counts, search results) is computed on demand or debounced.
+- A change that may affect performance is measured with `npm run bench` before and after.
 
 ## 5. Tests
 
 - Unit tests are colocated: `src/extensions/<name>/<name>.test.ts`.
 - Use the helpers in `tests/helpers/` (`createTestEditor`, selection markers `|` and `[ ]`,
   `getHTMLWithSelection`).
+- Test in layers: dense where the risk is high (HTML in/out, sanitizing, commands), essential
+  behaviors for the UI; layout and visual details are checked in the demo.
 - Every extension needs tests for: parse (each accepted HTML source), serialize, idempotence
   (`setHTML(getHTML())` then `getHTML()` is identical), every command, every shortcut, every
   input rule.
-- Write the tests the task asks for. Keep the provided tests unchanged.
-- Copy the cases of the task's tables into your tests by copy-paste, character by character. Never
-  retype them: a retyped case is a different case.
 - When a position or structure bug resists, print the real positions with a throwaway test
   (`docs/guides/prosemirror-positions.md` §6) instead of reasoning at length. Delete it before
   committing.
-- When a test fails, fix the code, not the expected result. If the same failure survives three
-  attempts, stop: write in `## Questions` the failing case, the output, and what you tried.
+- jsdom has no layout and loads no CSS: positioning, visibility and styles are checked in the
+  demo (and later in E2E tests).
 
 ## 6. Definition of done
 
-A task is done only when **all** of these are true:
-
 1. `npm run check` passes (typecheck + lint + unit tests). Run `npm run format` first.
-2. Every acceptance criterion in the task is satisfied.
-3. Only files in the task's Scope were changed (`git status` to verify).
-4. You filled in the task's `## Report` section: files changed, what you did, anything the
-   reviewer should look at, and how many `npm run check` runs failed before the final one.
+2. The behavior is tried in the demo when it is visible there.
+3. The documents in `docs/` describe the new behavior or decision.
+4. `docs/BACKLOG.md` shows the task status.
 
 ## 7. Git
 
-- Work on the branch named in the task (`task/T-NNN-short-title`), created from `main`.
+- Work on a branch `task/T-NNN-short-title` (the task ID from `docs/BACKLOG.md`), created from
+  `main`.
 - Commit messages follow Conventional Commits and reference the task:
-  `feat(bold): add bold extension (T-003)`.
-- Do not merge, rebase or push. The reviewer merges.
+  `feat(bold): add bold extension (T-003)`. The body explains what changed and why: it is the
+  record of the task.
+- The project owner tries the change and decides the merge.
 
 ## 8. Useful commands
 
@@ -124,5 +116,6 @@ A task is done only when **all** of these are true:
 | `npm run check` | Quality gate (must pass) |
 | `npm run format` | Auto-fix formatting and safe lint issues |
 | `npm run test:watch` | Unit tests in watch mode |
-| `npm run test:e2e` | Playwright E2E (only if the task asks) |
+| `npm run bench` | Performance benchmarks (needs `npx playwright install chromium`) |
+| `npm run test:e2e` | Playwright E2E |
 | `npm run dev` | Demo page |

@@ -1,8 +1,8 @@
 # Stilo — Default UI design
 
 Status: **draft v0.1** (2026-10-12). Contract of the default UI (`stilo-editor/ui`,
-ARCHITECTURE §9). Like ARCHITECTURE, the implementer does not deviate from it; changes go
-through the architect.
+ARCHITECTURE §9). Like ARCHITECTURE, it is the contract: a change to the UI updates this
+document in the same change.
 
 ---
 

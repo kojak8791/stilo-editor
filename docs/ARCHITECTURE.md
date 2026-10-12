@@ -1,7 +1,7 @@
 # Stilo — Architecture
 
-Status: **draft v0.1** (2026-10-10). This document is the technical contract. The implementing
-agent must not deviate from it; changes go through an ADR (`docs/decisions/`).
+Status: **draft v0.1** (2026-10-10). This document is the technical contract; changes go
+through an ADR (`docs/decisions/`).
 
 ---
 
@@ -39,7 +39,7 @@ typescript  vite  vitest  jsdom  @playwright/test  @biomejs/biome  @types/node
 ```
 
 Exact versions are pinned by `package-lock.json`. **Adding, removing or upgrading a dependency
-requires a decision by PM + architect** (ADR). The implementing agent never runs `npm install <pkg>`.
+requires a decision** (ADR); never run `npm install <pkg>` as a side effect of other work.
 
 ProseMirror packages are regular `dependencies` (not peer). If wrappers or third-party extensions
 later need shared instances, we will re-export them from `stilo-editor/pm/*` (ADR when needed).
@@ -105,7 +105,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 
 ```
 stilo-editor/
-├── AGENTS.md                     Rules for the implementing agent
+├── AGENTS.md                     Rules for contributors and coding agents
 ├── README.md
 ├── LICENSE                       MIT
 ├── package.json / package-lock.json
@@ -117,9 +117,9 @@ stilo-editor/
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
 ├── docs/
-│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md
+│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  BACKLOG.md
 │   ├── decisions/                ADRs: NNNN-short-title.md
-│   └── tasks/                    T-NNN-short-title.md + _TEMPLATE.md
+│   └── guides/                   How-to guides
 ├── src/
 │   ├── index.ts                  Public API of the core (re-exports only)
 │   ├── core/
@@ -617,4 +617,5 @@ layout, plus real key presses through Event Timing. Every document is measured f
 | D-09 | Performance verified by benchmarks with budgets (NFR-1) | 2026-10-10 |
 | D-10 | Code and docs in English | 2026-10-10 |
 | D-12 | Single-paragraph list items are written without `<p>`; option `compactParagraphs` ([ADR 0001](decisions/0001-tight-list-items.md)) | 2026-10-11 |
-| D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1 ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
+| D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1; `absolute` strategy in a host that scrolls with the anchor ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
+| D-14 | Top-level blocks use `content-visibility: auto`; performance budgets calibrated on the first measurement ([ADR 0003](decisions/0003-performance-baseline.md)) | 2026-10-12 |
