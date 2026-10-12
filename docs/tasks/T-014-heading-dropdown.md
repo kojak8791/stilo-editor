@@ -173,5 +173,16 @@ Report sections of this file).
 
 ## Metrics
 
-<!-- Reviewer only (the implementer never edits this section): architect tokens (preparation,
-review), implementer failed check runs and context compactions, review rounds, escalation. -->
+- Architect: T-014 preparation (provided tests + task) not measured separately (session total
+  37.7K → 183.5K covers T-013 prep, T-013 review and T-014 prep); review and review tests
+  183.5K → 222.4K (~39K, includes the method discussion).
+- Implementer: 1 context compaction; 6 check runs with failing tests in the session log (the
+  Report says 5). Provided tests unchanged (verified).
+- Review rounds: 2. During the task: elements mapped to items by position, shifted by the
+  dropdown trigger (prompt to use a map). After the task: groups mixing buttons and dropdowns
+  were split, `createDropdown` exported, `heading` special-cased, `number[]` levels (2 review
+  tests added).
+- Left open: the `try/catch` around `isEnabled` hides a real core bug (`insertBlock` throws on
+  a document-level selection, e.g. a selected `<hr>`): fixed in T-015.
+- Escalation: none. Last task implemented by the local model; from T-015 the architect
+  implements.
