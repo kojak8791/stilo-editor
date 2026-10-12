@@ -140,3 +140,22 @@ li.ProseMirror-selectednode:after {
   color: var(--stilo-color-muted, #59636e);
   pointer-events: none;
 }
+
+/*
+ * Large documents (ADR 0003): the browser skips style, layout and paint of the top-level blocks
+ * outside the viewport. Real typing in 10k paragraphs went from 144 ms to 24 ms per key (median,
+ * Chromium). A skipped block is 3em tall until it has been rendered once.
+ */
+.stilo-content > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 3em;
+}
+
+/* Containment stops margins from collapsing through a block: trim them inside a blockquote. */
+.stilo-content blockquote > :first-child {
+  margin-top: 0;
+}
+
+.stilo-content blockquote > :last-child {
+  margin-bottom: 0;
+}

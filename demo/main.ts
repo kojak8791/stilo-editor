@@ -25,10 +25,16 @@ const editor = new Editor({
   ariaLabel: 'Demo editor',
 });
 
-const showHTML = () => {
-  output.textContent = editor.getHTML();
-};
-editor.on('update', showHTML);
-showHTML();
-
 createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
+
+// Bench mode (ARCHITECTURE §11): no getHTML() per update, the API on window.__stilo.
+if (new URLSearchParams(location.search).has('bench')) {
+  const { createBenchApi } = await import('./bench');
+  window.__stilo = createBenchApi(editor);
+} else {
+  const showHTML = () => {
+    output.textContent = editor.getHTML();
+  };
+  editor.on('update', showHTML);
+  showHTML();
+}

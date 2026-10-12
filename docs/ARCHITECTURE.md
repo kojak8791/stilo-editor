@@ -584,9 +584,12 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
 ## 11. Benchmarks
 
 `bench/` per SPEC NFR-1. Generators are deterministic (seeded). Benchmarks load the demo page in a
-special mode (`/demo/?bench`), drive the editor through `window.__stilo` and record metrics
-via `performance.now()`. Results go to `bench/results/<date>.json`; budgets live in
-`bench/budgets.ts`.
+special mode (`/demo/?bench`: no `getHTML()` per update), drive the editor through
+`window.__stilo` (`demo/bench.ts`) and record metrics via `performance.now()` with a forced
+layout, plus real key presses through Event Timing. Every document is measured first; a final
+`budgets` test writes `bench/results/<date>.json` and checks `bench/budgets.ts`.
+`bench/results/baseline.json` is the committed reference run (ADR 0003). Config:
+`playwright.bench.config.ts` (Chromium, Vite dev server on port 5179).
 
 ## 12. Collaboration readiness (M3)
 
