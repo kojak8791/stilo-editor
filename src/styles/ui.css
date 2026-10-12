@@ -9,6 +9,14 @@
   border-bottom: 1px solid var(--stilo-color-border, #d1d9e0);
 }
 
+/* Sticky toolbar container (option `sticky`) */
+.stilo-toolbar-host {
+  position: sticky;
+  top: var(--stilo-toolbar-sticky-top, 0);
+  z-index: var(--stilo-z-toolbar, 10);
+  background: var(--stilo-color-bg, #ffffff);
+}
+
 /* Group */
 .stilo-toolbar__group {
   display: flex;

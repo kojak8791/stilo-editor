@@ -19,6 +19,11 @@ export interface ToolbarOptions {
   items?: ReadonlyArray<ReadonlyArray<string | ToolbarItem>>;
   /** UI strings. Default: `en`. */
   messages?: Messages;
+  /**
+   * Keeps the toolbar visible at the top of the scrolling area: `container` gets the class
+   * `stilo-toolbar-host` (`position: sticky`). Default: `true`.
+   */
+  sticky?: boolean;
 }
 
 /** A toolbar created by {@link createToolbar}. */
@@ -54,7 +59,7 @@ function resolveItem(
 
 /** Creates the toolbar element and buttons, and registers event handlers. */
 export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar {
-  const { container, items = DEFAULT_TOOLBAR, messages = en } = options;
+  const { container, items = DEFAULT_TOOLBAR, messages = en, sticky = true } = options;
   const mac = isMacPlatform();
 
   // Resolve all items, keeping one group per original group
@@ -167,6 +172,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   };
 
   container.appendChild(element);
+  // Sticky on the container: a sticky element only moves inside its parent.
+  if (sticky) container.classList.add('stilo-toolbar-host');
 
   // State tracking
   let pendingFrame = 0;
@@ -377,6 +384,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (container.contains(element)) {
       container.removeChild(element);
     }
+    container.classList.remove('stilo-toolbar-host');
   }
 
   return {

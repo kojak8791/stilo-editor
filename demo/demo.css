@@ -45,3 +45,20 @@ body {
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+/* The sticky toolbar container has a background: keep the wrapper's rounded corners. */
+.demo__editor > .stilo-toolbar-host {
+  border-radius: 6px 6px 0 0;
+}
+
+/* `?fixed`: the editor has a fixed height and scrolls inside its own container. */
+.demo--fixed .demo__editor {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.demo--fixed .demo__content {
+  flex: 1;
+  overflow: auto;
+}

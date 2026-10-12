@@ -17,6 +17,12 @@ const content = [
 ].join('');
 
 const output = document.querySelector<HTMLElement>('#output')!;
+const params = new URLSearchParams(location.search);
+
+// `?fixed`: the editor scrolls inside its own container instead of with the page.
+if (params.has('fixed')) {
+  document.querySelector('.demo')!.classList.add('demo--fixed');
+}
 
 const editor = new Editor({
   element: document.querySelector<HTMLElement>('#editor')!,
@@ -28,7 +34,7 @@ const editor = new Editor({
 createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
 
 // Bench mode (ARCHITECTURE §11): no getHTML() per update, the API on window.__stilo.
-if (new URLSearchParams(location.search).has('bench')) {
+if (params.has('bench')) {
   const { createBenchApi } = await import('./bench');
   window.__stilo = createBenchApi(editor);
 } else {

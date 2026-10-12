@@ -247,6 +247,22 @@ describe('toolbar', () => {
     editor2.destroy();
   });
 
+  it.each([
+    [{}, true],
+    [{ sticky: true }, true],
+    [{ sticky: false }, false],
+  ])('sticky option %j: container has stilo-toolbar-host = %s', (option, expected) => {
+    const editor = createTestEditor({ html: '<p>ab</p>' });
+    attachEditor(editor);
+    const container = createToolbarContainer();
+    const toolbar = createToolbar(editor, { container, ...option });
+
+    expect(container.classList.contains('stilo-toolbar-host')).toBe(expected);
+    toolbar.destroy();
+    expect(container.classList.contains('stilo-toolbar-host')).toBe(false);
+    editor.destroy();
+  });
+
   it('9: active state', () => {
     const editor = createTestEditor({ html: '<p><strong>a|b</strong></p>' });
     attachEditor(editor);
