@@ -117,7 +117,7 @@ stilo-editor/
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
 ├── docs/
-│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  BACKLOG.md
+│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── decisions/                ADRs: NNNN-short-title.md
 │   └── guides/                   How-to guides
 ├── src/
@@ -589,7 +589,8 @@ special mode (`/demo/?bench`: no `getHTML()` per update), drive the editor throu
 layout, plus real key presses through Event Timing. Every document is measured first; a final
 `budgets` test writes `bench/results/<date>.json` and checks `bench/budgets.ts`.
 `bench/results/baseline.json` is the committed reference run (ADR 0003). Config:
-`playwright.bench.config.ts` (Chromium, Vite dev server on port 5179).
+`playwright.bench.config.ts` (Chromium, Vite dev server on port 5179). For readers:
+[`docs/PERFORMANCE.md`](PERFORMANCE.md).
 
 ## 12. Collaboration readiness (M3)
 
