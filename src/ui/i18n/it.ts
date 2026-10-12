@@ -9,6 +9,8 @@ export const it: Messages = {
   'toolbar.italic': 'Corsivo',
   'toolbar.underline': 'Sottolineato',
   'toolbar.strike': 'Barrato',
+  'toolbar.subscript': 'Pedice',
+  'toolbar.superscript': 'Apice',
   'toolbar.code': 'Codice',
   'toolbar.clearFormatting': 'Cancella formattazione',
   'toolbar.bulletList': 'Elenco puntato',

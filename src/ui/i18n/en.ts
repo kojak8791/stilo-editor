@@ -9,6 +9,8 @@ export const en: Messages = {
   'toolbar.italic': 'Italic',
   'toolbar.underline': 'Underline',
   'toolbar.strike': 'Strikethrough',
+  'toolbar.subscript': 'Subscript',
+  'toolbar.superscript': 'Superscript',
   'toolbar.code': 'Code',
   'toolbar.clearFormatting': 'Clear formatting',
   'toolbar.bulletList': 'Bulleted list',

@@ -158,8 +158,8 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-901 | Word and character count (computed on demand / debounced) | M2 |
 | F-902 | Find & replace (match case, whole word) | M2 |
 | F-903 | HTML source view (edit and apply) | M2 |
-| F-904 | Special characters picker | M3 |
-| F-905 | Emoji picker | M3 |
+| F-904 | Special characters picker | M2 |
+| F-905 | Emoji picker | M2 |
 | F-906 | Video / iframe embeds (allowlisted providers) | M3 |
 | F-907 | Markdown export | M3 |
 | F-908 | Print | M3 |

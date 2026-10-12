@@ -7,6 +7,8 @@ export type MessageKey =
   | 'toolbar.italic'
   | 'toolbar.underline'
   | 'toolbar.strike'
+  | 'toolbar.subscript'
+  | 'toolbar.superscript'
   | 'toolbar.code'
   | 'toolbar.clearFormatting'
   | 'toolbar.bulletList'

@@ -37,6 +37,13 @@ may be split or merged when a task starts.
 | T-021 | Toolbar placement: sticky when the editor flows in the page, static when the editor scrolls inside its own container | F-801 | done |
 | T-022 | Tree-shaking: unused extensions stay in the consumer bundle because `defineExtension({...})` runs at module top level without `/* @__PURE__ */`; fix it and add a bundle-size check (core + StarterKit + UI is about 97 KB gzip today, mostly ProseMirror and DOMPurify) | NFR-6 | done |
 
+## M2 — v1.0
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-023 | `Subscript`, `Superscript` (mutually exclusive), in `StarterKit` and in the default toolbar | F-207 | done |
+| T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | todo |
+
 ## Notes for later milestones
 
 - First npm release: `SECURITY.md` (private vulnerability reports, response time),

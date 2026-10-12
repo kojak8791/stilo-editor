@@ -66,6 +66,8 @@ describe('toolbar', () => {
       'underline',
       'strike',
       'code',
+      'subscript',
+      'superscript',
       'link',
       'clearFormatting',
       'bulletList',

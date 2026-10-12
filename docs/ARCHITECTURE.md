@@ -389,10 +389,10 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
 
 ### 6.3 StarterKit
 
-`StarterKit(options?)` returns the M1 extension set: `Document`, `Text`, `Paragraph`, `Heading`,
-`Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`, `Bold`,
-`Italic`, `Underline`, `Strike`, `Code`, `Link`, `ClearFormatting`, `History`, `MoveBlock`,
-`Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`StarterKit(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
+`Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
+`Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`,
+`ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -433,13 +433,15 @@ configured with `{ <name>: { ...options } }`.
 | `italic` | `<em>` | `em`, `i`, `font-style: italic` |
 | `underline` | `<u>` | `u`, `text-decoration: underline` |
 | `strike` | `<s>` | `s`, `del`, `strike`, `text-decoration: line-through` |
-| `subscript` / `superscript` (M2) | `<sub>` / `<sup>` | same, `vertical-align: sub/super`; mutually exclusive |
+| `subscript` / `superscript` | `<sub>` / `<sup>` | same, `vertical-align: sub/super`; mutually exclusive |
 | `code` | `<code>` | `code`; excludes all other marks except `link` (see below) |
 
 Mark exclusion: every mark except `link` declares `group: 'formatting'`, and `code` declares
 `excludes: 'formatting'`. Naming the group instead of the marks keeps the schema valid when some
 marks are disabled. `setMark` (and so every `set*`/`toggle*` command) returns `false` where an
-existing mark excludes the new one, so `can().toggleBold()` is `false` inside code.
+existing mark excludes the new one, so `can().toggleBold()` is `false` inside code. Marks that
+exclude each other replace each other instead: `subscript` and `superscript` are both in the
+group `script` and declare `excludes: 'script'`, so setting one removes the other.
 
 ### 7.3 Inline styles: allowlist and normalization
 

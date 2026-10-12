@@ -19,6 +19,8 @@ import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
 import { Placeholder, type PlaceholderOptions } from '../placeholder';
 import { Strike } from '../strike';
+import { Subscript } from '../subscript';
+import { Superscript } from '../superscript';
 import { Text } from '../text';
 import { Underline } from '../underline';
 
@@ -41,6 +43,8 @@ export interface StarterKitOptions {
   italic?: false;
   underline?: false;
   strike?: false;
+  subscript?: false;
+  superscript?: false;
   code?: false;
   link?: false;
   clearFormatting?: false;
@@ -83,6 +87,8 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Italic, options.italic),
     ...include(Underline, options.underline),
     ...include(Strike, options.strike),
+    ...include(Subscript, options.subscript),
+    ...include(Superscript, options.superscript),
     ...include(Code, options.code),
     ...include(Link, options.link),
     ...include(ClearFormatting, options.clearFormatting),

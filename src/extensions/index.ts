@@ -19,5 +19,7 @@ export { Paragraph } from './paragraph';
 export { Placeholder, type PlaceholderOptions } from './placeholder';
 export { StarterKit, type StarterKitOptions } from './starter-kit';
 export { Strike } from './strike';
+export { Subscript } from './subscript';
+export { Superscript } from './superscript';
 export { Text } from './text';
 export { Underline } from './underline';

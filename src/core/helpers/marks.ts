@@ -2,13 +2,19 @@ import type { Attrs, Mark, MarkType, ResolvedPos } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
 import { isMarkActive } from './active';
 
-/** Whether one of `marks` (other than `type` itself) excludes marks of `type`. */
+/**
+ * Whether one of `marks` (other than `type` itself) excludes marks of `type` one way. Marks that
+ * exclude each other (subscript and superscript) replace each other instead.
+ */
 function isExcluded(marks: readonly Mark[], type: MarkType): boolean {
-  return marks.some((mark) => mark.type !== type && mark.type.excludes(type));
+  return marks.some(
+    (mark) => mark.type !== type && mark.type.excludes(type) && !type.excludes(mark.type),
+  );
 }
 
 /**
- * Command: adds a mark of `type` with `attrs` to the selection.
+ * Command: adds a mark of `type` with `attrs` to the selection. A mark that `type` excludes
+ * and that excludes `type` is replaced (superscript becomes subscript).
  *
  * - Empty selection: adds the mark to the stored marks (applies to the next typed text).
  *   Returns `false` if the parent node does not allow the mark, or a mark at the cursor

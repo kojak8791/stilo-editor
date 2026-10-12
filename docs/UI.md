@@ -168,6 +168,8 @@ no functions.
 | `toolbar.italic` | Italic | Corsivo |
 | `toolbar.underline` | Underline | Sottolineato |
 | `toolbar.strike` | Strikethrough | Barrato |
+| `toolbar.subscript` | Subscript | Pedice |
+| `toolbar.superscript` | Superscript | Apice |
 | `toolbar.code` | Code | Codice |
 | `toolbar.clearFormatting` | Clear formatting | Cancella formattazione |
 | `toolbar.bulletList` | Bulleted list | Elenco puntato |
@@ -198,7 +200,8 @@ no functions.
 [
   ['undo', 'redo'],
   ['heading'],
-  ['bold', 'italic', 'underline', 'strike', 'code', 'link', 'clearFormatting'],
+  ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
+    'clearFormatting'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
 ]
 ```
@@ -215,6 +218,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 | `underline` | `Underline` | `toolbar.underline` | `Mod-u` | `toggleUnderline` | `isActive('underline')` |
 | `strike` | `Strikethrough` | `toolbar.strike` | `Mod-Shift-s` | `toggleStrike` | `isActive('strike')` |
 | `code` | `Code` | `toolbar.code` | `Mod-e` | `toggleCode` | `isActive('code')` |
+| `subscript` | `Subscript` | `toolbar.subscript` | `Mod-,` | `toggleSubscript` | `isActive('subscript')` |
+| `superscript` | `Superscript` | `toolbar.superscript` | `Mod-.` | `toggleSuperscript` | `isActive('superscript')` |
 | `clearFormatting` | `RemoveFormatting` | `toolbar.clearFormatting` | `Mod-\` | `clearFormatting` | — |
 | `bulletList` | `List` | `toolbar.bulletList` | `Mod-Shift-8` | `toggleBulletList` | `isActive('bulletList')` |
 | `orderedList` | `ListOrdered` | `toolbar.orderedList` | `Mod-Shift-7` | `toggleOrderedList` | `isActive('orderedList')` |

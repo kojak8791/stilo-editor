@@ -9,6 +9,8 @@ import {
   Redo2,
   RemoveFormatting,
   Strikethrough,
+  Subscript,
+  Superscript,
   TextQuote,
   Underline,
   Undo2,
@@ -22,7 +24,17 @@ import type { ToolbarDropdown, ToolbarItem } from './types';
 export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ['undo', 'redo'],
   ['heading'],
-  ['bold', 'italic', 'underline', 'strike', 'code', 'link', 'clearFormatting'],
+  [
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'code',
+    'subscript',
+    'superscript',
+    'link',
+    'clearFormatting',
+  ],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
 ];
 
@@ -114,6 +126,32 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isActive: (e) => e.isActive('code'),
     isEnabled: (e) => 'toggleCode' in e.commands && e.can().toggleCode(),
     isAvailable: (e) => 'toggleCode' in e.commands,
+  },
+  subscript: {
+    id: 'subscript',
+    kind: 'button',
+    icon: Subscript,
+    labelKey: 'toolbar.subscript',
+    shortcut: 'Mod-,',
+    run: (e) => {
+      e.commands.toggleSubscript();
+    },
+    isActive: (e) => e.isActive('subscript'),
+    isEnabled: (e) => 'toggleSubscript' in e.commands && e.can().toggleSubscript(),
+    isAvailable: (e) => 'toggleSubscript' in e.commands,
+  },
+  superscript: {
+    id: 'superscript',
+    kind: 'button',
+    icon: Superscript,
+    labelKey: 'toolbar.superscript',
+    shortcut: 'Mod-.',
+    run: (e) => {
+      e.commands.toggleSuperscript();
+    },
+    isActive: (e) => e.isActive('superscript'),
+    isEnabled: (e) => 'toggleSuperscript' in e.commands && e.can().toggleSuperscript(),
+    isAvailable: (e) => 'toggleSuperscript' in e.commands,
   },
   link: {
     id: 'link',
