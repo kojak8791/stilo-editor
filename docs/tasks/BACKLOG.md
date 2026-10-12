@@ -35,7 +35,7 @@ implementations.
 | T-014 | Default UI: popover component (Floating UI, ADR 0002) and heading dropdown | F-802 | Implementer | done |
 | T-015 | `content.css` (ProseMirror and gap cursor base CSS, lists, blockquote, placeholder rule `.stilo-placeholder::before` showing `attr(data-placeholder)`, hidden when not editable); fix `insertBlock` throwing on a document-level selection; remove the toolbar `try/catch` around `isEnabled` | NFR-5 | Architect | done |
 | T-016 | Default UI: link popover, also bound to `Mod-k` (the headless `Link` has no shortcut) | F-803 | Architect | done |
-| T-017 | Demo benchmark mode (`/demo/?bench`) and NFR-1 harness | NFR-1 | Architect | review |
+| T-017 | Demo benchmark mode (`/demo/?bench`) and NFR-1 harness | NFR-1 | Architect | done |
 | T-018 | Lists: Backspace at the start of an empty paragraph after a list deletes it and puts the cursor at the end of the last item (today it becomes an empty item again); check a non-empty paragraph too | F-401, F-402 | Architect | todo |
 | T-019 | Toolbar placement: sticky when the editor flows in the page, static when the editor scrolls inside its own container | F-801 | Architect | todo |
 

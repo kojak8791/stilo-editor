@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `review` |
+| Status | `done` |
 | Spec | NFR-1 |
 | Milestone | M1 |
 | Depends on | T-016 |
@@ -101,8 +101,8 @@ typing and block moves were raised to a known ProseMirror limit (ADR 0003).
 
 ## Metrics
 
-- Architect = implementer, same session as T-015 and T-016. `/context` Messages at start: 204K;
-  at end: unknown (to be measured by the PM).
+- Architect = implementer, same session as T-015 and T-016. `/context` Messages: 204K at start,
+  283.7K at the end, so about 80K for the task (includes the profiling and the README section).
 - Bench runs during the task: several (first PM run, profiling probes, comparisons), all on the
   PM's machine.
 - Review rounds: 1 (PM demo check of large documents, during the task). Escalation: none.
