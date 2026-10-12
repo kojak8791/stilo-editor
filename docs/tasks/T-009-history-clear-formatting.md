@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-101, F-102, F-103, F-212 |
 | Milestone | M1 |
 | Depends on | T-008 |
@@ -282,4 +282,19 @@ Multi-step cases, one `it` each:
 
 ## Report
 
-<!-- Implementer: files changed, what you did, points for the reviewer. -->
+Files changed:
+- `src/extensions/history/index.ts` — created
+- `src/extensions/history/history.test.ts` — created
+- `src/extensions/clear-formatting/index.ts` — created
+- `src/extensions/clear-formatting/clear-formatting.test.ts` — created
+- `src/extensions/index.ts` — added exports for `ClearFormatting` and `History` (alphabetical order)
+- `src/extensions/starter-kit/index.ts` — imported `ClearFormatting` and `History, type HistoryOptions`; added `clearFormatting` and `history` to `StarterKitOptions`; added both to the `StarterKit` return array
+- `src/extensions/starter-kit/starter-kit.test.ts` — added `'clearFormatting', 'history'` after `'link'` in both expected name lists
+
+What was done:
+- Implemented the `History` extension wrapping `prosemirror-history` with `undo`/`redo` commands, keymap (`Mod-z`, `Mod-Shift-z`, `Mod-y`), and configurable `depth`/`newGroupDelay` options.
+- Implemented the `ClearFormatting` extension with a `clearFormatting` command that removes all marks in the `formatting` group (preserving links), keymap (`Mod-\`), and `can().clearFormatting()` support.
+- Added 7 base history tests + 2 option tests (covering `newGroupDelay` and `depth`).
+- Added 13 `clearFormatting()` single-case tests + 4 multi-step tests covering selection, stored marks, `can()`, `pressKey`, and undo.
+- Updated `StarterKit` to include both extensions with options.
+- `npm run check` passes (705 tests).
