@@ -178,13 +178,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
         for (const opt of dd.options) {
           const isActive = opt.isActive(editor);
-          let isEnabled: boolean;
-          try {
-            isEnabled = opt.isEnabled === undefined ? true : opt.isEnabled(editor);
-          } catch {
-            isEnabled = false;
-          }
-          if (!isEnabled) {
+          if (opt.isEnabled !== undefined && !opt.isEnabled(editor)) {
             disabledIds.add(opt.id);
           }
           if (isActive && activeId === null) {
@@ -213,13 +207,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         }
 
         if (btnItem.isEnabled) {
-          let enabled: boolean;
-          try {
-            enabled = btnItem.isEnabled(editor);
-          } catch {
-            enabled = false;
-          }
-          if (enabled) {
+          if (btnItem.isEnabled(editor)) {
             btn.removeAttribute('aria-disabled');
           } else {
             btn.setAttribute('aria-disabled', 'true');

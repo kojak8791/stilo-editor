@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
-import 'prosemirror-view/style/prosemirror.css';
-import 'prosemirror-gapcursor/style/gapcursor.css';
+import '../src/styles/content.css';
 import './demo.css';
 import '../src/styles/ui.css';
 import { Editor, StarterKit } from '../src';

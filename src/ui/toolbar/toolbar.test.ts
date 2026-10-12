@@ -111,6 +111,20 @@ describe('toolbar', () => {
     editor.destroy();
   });
 
+  it('3b: buttons refresh on a selected horizontal rule', () => {
+    const editor = createTestEditor({ html: '<p>a</p><hr>' });
+    attachEditor(editor);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 3)));
+    toolbar.update();
+
+    const btn = toolbar.element.querySelector('[data-item="horizontalRule"]') as HTMLButtonElement;
+    expect(btn.hasAttribute('aria-disabled')).toBe(false);
+
+    toolbar.destroy();
+    editor.destroy();
+  });
+
   it('4: button titles', () => {
     const editor = createTestEditor({ html: '<p>ab</p>' });
     attachEditor(editor);

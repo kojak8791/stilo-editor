@@ -1,5 +1,6 @@
+import { AllSelection } from 'prosemirror-state';
 import { describe, expect, it } from 'vitest';
-import { createCoreEditor, select } from '../../../tests/helpers/core';
+import { createCoreEditor, select, selectNode } from '../../../tests/helpers/core';
 import type { Editor } from '../editor';
 import { insertBlock } from './nodes';
 
@@ -29,6 +30,21 @@ describe('insertBlock', () => {
     select(editor, 2, 3);
     expect(insertRule(editor)).toBe(true);
     expect(editor.getHTML()).toBe('<p>a</p><hr><p>c</p>');
+  });
+
+  it('replaces a selected block node at the document level', () => {
+    const editor = createCoreEditor('<p>a</p><hr><p>b</p>');
+    selectNode(editor, 3);
+    expect(insertRule(editor)).toBe(true);
+    expect(editor.getHTML()).toBe('<p>a</p><hr><p>b</p>');
+    expect(editor.state.selection.from).toBe(5);
+  });
+
+  it('replaces the whole document when everything is selected', () => {
+    const editor = createCoreEditor('<p>a</p><p>b</p>');
+    editor.view.dispatch(editor.state.tr.setSelection(new AllSelection(editor.state.doc)));
+    expect(insertRule(editor)).toBe(true);
+    expect(editor.getHTML()).toBe('<hr><p></p>');
   });
 
   it('does not dispatch in a dry run', () => {

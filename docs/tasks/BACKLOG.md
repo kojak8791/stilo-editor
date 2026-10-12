@@ -33,6 +33,6 @@ implementations.
 | T-012 | Clipboard: paste HTML and plain text, canonical copy | F-701, F-702, F-706 | Implementer | done |
 | T-013 | Default UI: toolbar, `lucide` icons, i18n (`en`, `it`), `ui.css`, import-rules test (design: `docs/UI.md`; Vite config and minimal demo page done by the architect) | F-801, NFR-4 | Implementer | done |
 | T-014 | Default UI: popover component (Floating UI, ADR 0002) and heading dropdown | F-802 | Implementer | done |
-| T-015 | `content.css` (ProseMirror and gap cursor base CSS, lists, blockquote, placeholder rule `.stilo-placeholder::before` showing `attr(data-placeholder)`, hidden when not editable); fix `insertBlock` throwing on a document-level selection; remove the toolbar `try/catch` around `isEnabled` | NFR-5 | Architect | todo |
+| T-015 | `content.css` (ProseMirror and gap cursor base CSS, lists, blockquote, placeholder rule `.stilo-placeholder::before` showing `attr(data-placeholder)`, hidden when not editable); fix `insertBlock` throwing on a document-level selection; remove the toolbar `try/catch` around `isEnabled` | NFR-5 | Architect | review |
 | T-016 | Default UI: link popover, also bound to `Mod-k` (the headless `Link` has no shortcut) | F-803 | Architect | todo |
 | T-017 | Demo benchmark mode (`/demo/?bench`) and NFR-1 harness | NFR-1 | Architect | todo |

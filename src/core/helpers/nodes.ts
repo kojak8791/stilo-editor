@@ -22,12 +22,15 @@ export function insertBlockNode(tr: Transaction, node: Node): Transaction {
 
 /**
  * Command: inserts a block of `type` with {@link insertBlockNode}. Returns `false` where the
- * parent of the selected textblock does not allow `type`.
+ * container of the selection (the parent of the selected textblock, or the parent of a selected
+ * block node) does not allow `type`.
  */
 export function insertBlock(type: NodeType, attrs: Attrs | null = null): Command {
   return (state, dispatch) => {
     const { $from } = state.selection;
-    if (!$from.node(-1).canReplaceWith($from.index(-1), $from.indexAfter(-1), type)) return false;
+    const depth = $from.parent.isTextblock ? $from.depth - 1 : $from.depth;
+    const container = $from.node(depth);
+    if (!container.canReplaceWith($from.index(depth), $from.indexAfter(depth), type)) return false;
     dispatch?.(insertBlockNode(state.tr, type.create(attrs)));
     return true;
   };

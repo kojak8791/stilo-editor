@@ -1,4 +1,4 @@
-/* Demo page only. Content defaults move to src/styles/content.css (T-016). */
+/* Demo page only. Content defaults live in src/styles/content.css. */
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
@@ -44,12 +44,4 @@ body {
   font-size: 0.8125rem;
   white-space: pre-wrap;
   word-break: break-all;
-}
-
-.stilo-placeholder::before {
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  color: #8c959f;
-  pointer-events: none;
 }
