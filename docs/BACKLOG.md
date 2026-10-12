@@ -34,7 +34,7 @@ may be split or merged when a task starts.
 | T-018 | Documentation cleanup: the local-model experiment is closed; task files and template removed, `BACKLOG.md` moved to `docs/`, `AGENTS.md` rewritten for any contributor, README "How it is built" | — | done |
 | T-019 | `docs/PERFORMANCE.md` (performance in practice, measurement method, numbers, limits); README performance in plain language | NFR-1 | done |
 | T-020 | Lists: Backspace at the start of an empty paragraph after a list deletes it and puts the cursor at the end of the last item (today it becomes an empty item again); check a non-empty paragraph too | F-401, F-402 | done |
-| T-021 | Toolbar placement: sticky when the editor flows in the page, static when the editor scrolls inside its own container | F-801 | todo |
+| T-021 | Toolbar placement: sticky when the editor flows in the page, static when the editor scrolls inside its own container | F-801 | done |
 | T-022 | Tree-shaking: unused extensions stay in the consumer bundle because `defineExtension({...})` runs at module top level without `/* @__PURE__ */`; fix it and add a bundle-size check (core + StarterKit + UI is about 97 KB gzip today, mostly ProseMirror and DOMPurify) | NFR-6 | todo |
 
 ## Notes for later milestones
