@@ -103,6 +103,9 @@ Biome lint on the verbatim ProseMirror CSS (see above).
 
 ## Metrics
 
-- Architect = implementer. Session `/context` Messages at start: 130 tokens; at end: unknown
-  (to be measured by the PM).
-- Review rounds: unknown. Escalation: none.
+- Architect = implementer, one fresh session. `/context` Messages: 130 tokens at start, 60.7K
+  at the end (includes the PM demo check discussion), so about 60.6K for the task.
+- Failed `npm run check` runs: 1 (Biome lint on the ProseMirror CSS). Context compactions: 0.
+- Review rounds: 1 (PM demo check, no code change: the horizontal rule button has no active
+  state by design; the gap cursor needs a position between non-text blocks, which the demo
+  content does not have). Escalation: none.
