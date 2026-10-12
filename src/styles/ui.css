@@ -68,3 +68,107 @@
   height: var(--stilo-icon-size, 18px);
   color: var(--stilo-color-text, #1f2328);
 }
+
+/* Popover */
+.stilo-popover {
+  position: fixed;
+  background: var(--stilo-color-bg, #ffffff);
+  border: 1px solid var(--stilo-color-border, #d1d9e0);
+  border-radius: var(--stilo-radius, 6px);
+  box-shadow: var(--stilo-popover-shadow, 0 8px 24px rgb(0 0 0 / 0.12));
+  z-index: var(--stilo-z-popover, 1000);
+  padding: 4px;
+}
+
+/* Dropdown */
+.stilo-dropdown__trigger {
+  width: auto;
+  min-width: 120px;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.stilo-dropdown__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stilo-dropdown__menu {
+  min-width: 160px;
+}
+
+.stilo-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--stilo-radius, 6px);
+  cursor: pointer;
+  font-family: var(--stilo-font-family, system-ui, sans-serif);
+  font-size: var(--stilo-font-size, 14px);
+  color: var(--stilo-color-text, #1f2328);
+}
+
+.stilo-dropdown__option:hover,
+.stilo-dropdown__option:focus-visible {
+  background: var(--stilo-color-hover, #eef1f4);
+}
+
+.stilo-dropdown__option:focus-visible {
+  outline: 2px solid var(--stilo-color-focus, #0969da);
+  outline-offset: -2px;
+}
+
+.stilo-dropdown__option[aria-checked="true"] {
+  background: var(--stilo-color-active, #dde4ee);
+}
+
+.stilo-dropdown__option[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stilo-dropdown__option[aria-disabled="true"]:hover {
+  background: transparent;
+}
+
+.stilo-dropdown__label {
+  flex: 1;
+}
+
+.stilo-dropdown__shortcut {
+  font-size: 0.85em;
+  color: var(--stilo-color-muted, #59636e);
+}
+
+/* Heading preview */
+.stilo-dropdown__option--h1 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h1-size, 1.5em);
+  font-weight: 600;
+}
+
+.stilo-dropdown__option--h2 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h2-size, 1.3em);
+  font-weight: 600;
+}
+
+.stilo-dropdown__option--h3 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h3-size, 1.15em);
+  font-weight: 600;
+}
+
+.stilo-dropdown__option--h4 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h4-size, 1em);
+  font-weight: 600;
+}
+
+.stilo-dropdown__option--h5 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h5-size, 1em);
+  font-weight: 600;
+}
+
+.stilo-dropdown__option--h6 .stilo-dropdown__label {
+  font-size: var(--stilo-menu-h6-size, 1em);
+  font-weight: 600;
+}

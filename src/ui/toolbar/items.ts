@@ -12,11 +12,14 @@ import {
   Underline,
   Undo2,
 } from 'lucide';
-import type { ToolbarItem } from './types';
+import type { Editor, HeadingLevel } from '../../index';
+import type { MessageKey } from '../i18n/types';
+import type { ToolbarDropdown, ToolbarItem } from './types';
 
 /** Default toolbar item IDs for the `items` configuration. */
 export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ['undo', 'redo'],
+  ['heading'],
   ['bold', 'italic', 'underline', 'strike', 'code', 'clearFormatting'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
 ];
@@ -172,4 +175,39 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isEnabled: (e) => 'setHorizontalRule' in e.commands && e.can().setHorizontalRule(),
     isAvailable: (e) => 'setHorizontalRule' in e.commands,
   },
+  heading: headingDropdown(),
 };
+
+/** A heading dropdown toolbar item. */
+export function headingDropdown(levels: HeadingLevel[] = [1, 2, 3, 4, 5, 6]): ToolbarDropdown {
+  const options: ToolbarDropdown['options'] = [
+    {
+      id: 'paragraph',
+      labelKey: 'heading.paragraph',
+      shortcut: 'Mod-Alt-0',
+      run: (e: Editor) => {
+        e.commands.setParagraph();
+      },
+      isActive: (e: Editor) => e.isActive('paragraph'),
+      isEnabled: (e: Editor) => e.isActive('paragraph') || e.can().setParagraph(),
+    },
+    ...levels.map((level) => ({
+      id: `h${level}`,
+      labelKey: `heading.h${level}` as MessageKey,
+      shortcut: `Mod-Alt-${level}`,
+      run: (e: Editor) => {
+        e.commands.setHeading({ level });
+      },
+      isActive: (e: Editor) => e.isActive('heading', { level }),
+      isEnabled: (e: Editor) => e.isActive('heading', { level }) || e.can().setHeading({ level }),
+    })),
+  ];
+
+  return {
+    id: 'heading',
+    kind: 'dropdown',
+    labelKey: 'toolbar.heading',
+    options,
+    isAvailable: (e: Editor) => 'setHeading' in e.commands,
+  };
+}

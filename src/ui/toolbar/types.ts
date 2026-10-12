@@ -43,4 +43,4 @@ export interface ToolbarDropdownOption {
 }
 
 /** A single item in the toolbar (T-013: `ToolbarButton` only). */
-export type ToolbarItem = ToolbarButton;
+export type ToolbarItem = ToolbarButton | ToolbarDropdown;
