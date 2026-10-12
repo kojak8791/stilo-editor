@@ -310,5 +310,19 @@ Reviewer points:
 
 ## Metrics
 
-<!-- Reviewer only (the implementer never edits this section): architect tokens (preparation,
-review), implementer failed check runs and context compactions, review rounds, escalation. -->
+| Field | Value |
+|---|---|
+| Architect tokens (preparation) | ~99K messages (116.9K − 17.5K baseline), including 3 ProseMirror probes and the decision round with the PM (copy compaction, `data-pm-slice`) |
+| Architect tokens (review) | unknown (no `/context` taken after the review) |
+| Implementer failed `npm run check` runs | 1 per the Report (type of the `clipboardSerializer` prop), not verified |
+| Implementer context | ~23% of 128K after reading and initial reasoning, ~63% at the end; no compaction reported |
+| Review rounds | 0 |
+| Escalation | no |
+
+Filled in by the reviewer. All 39 table cases present and identical (checked by script), scope
+respected, `npm run check` green (836 tests). Accepted with nits not sent back: the
+`serializeHTML` JSDoc keeps the post-processing list and adds "is now handled by" instead of
+moving it; the `serializeFragment` override names a used parameter `_options` and types it
+`Record<string, unknown>`; a useless `as boolean | undefined` cast in `serialize.test.ts`; the
+`pasteHTML` helper JSDoc is 104 columns (the contract snippet given in this file was already
+that long).
