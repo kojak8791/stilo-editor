@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `review` |
+| Status | `done` |
 | Spec | F-206, F-803 |
 | Milestone | M1 |
 | Depends on | T-008, T-014 |
@@ -125,6 +125,12 @@ None.
 
 ## Metrics
 
-- Architect = implementer, same session as T-015. `/context` Messages at start: 73.9K; at
-  end: unknown (to be measured by the PM).
-- Review rounds: unknown. Escalation: none.
+- Architect = implementer, same session as T-015. `/context` Messages: 73.9K at start, 204K at
+  the end, so about 130K for the task (includes three PM review rounds and the design
+  discussions on the bubble and on positioning).
+- Failed `npm run check` runs: 0. Context compactions: 0.
+- Review rounds: 3 PM demo checks. (1) Ideas: link bubble; the popover trembled on scroll with
+  `strategy: 'fixed'` → `absolute` in a host that scrolls with the anchor. (2) Bubble icons
+  only, smaller. (3) Bug: the bubble never hid, because its `display: flex` overrode `[hidden]`
+  (jsdom loads no CSS, so unit tests could not see it) → `.stilo-popover[hidden]` rule.
+- Escalation: none.
