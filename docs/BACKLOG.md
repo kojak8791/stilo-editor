@@ -42,7 +42,7 @@ may be split or merged when a task starts.
 | Task | Content | Spec | Status |
 |---|---|---|---|
 | T-023 | `Subscript`, `Superscript` (mutually exclusive), in `StarterKit` and in the default toolbar | F-207 | done |
-| T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | todo |
+| T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | done |
 
 ## Notes for later milestones
 
