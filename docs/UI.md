@@ -499,7 +499,7 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-radius` | `6px` | Buttons, popover |
 | `--stilo-toolbar-padding` | `4px` | Toolbar padding and gap |
 | `--stilo-toolbar-sticky-top` | `0` | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
-| `--stilo-z-toolbar` | `10` | Sticky toolbar `z-index` (above the content, below popovers) |
+| `--stilo-z-toolbar` | `1001` | Sticky toolbar `z-index`: above the content and the popovers anchored to it |
 | `--stilo-button-size` | `32px` | Button height and min width |
 | `--stilo-icon-size` | `18px` | Icons |
 | `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | Popover |
@@ -519,6 +519,13 @@ Layout:
   element). An ancestor with `overflow: hidden` or `auto` between the container and the
   scrolling area stops it from sticking (a CSS limit). In the demo, `/demo/?fixed` shows the
   fixed-height layout.
+  - The toolbar sets the view prop `scrollMargin` (top: container height + 5, other sides: 5,
+    ProseMirror's default), updated by a `ResizeObserver` and removed on `destroy()`: the
+    selection scrolled into view stays below the toolbar, and at the first line the scrolling
+    area reaches its top (beyond the content padding).
+  - Popovers anchored to the content (link popover, link bubble) pass under the stuck toolbar,
+    as they do when the content scrolls in its own container; the toolbar's own menus stay
+    above the content.
 - Button: transparent background, no border, `--stilo-radius`, size `--stilo-button-size`,
   icon centered; hover → `--stilo-color-hover`; `--active` → `--stilo-color-active`;
   `[aria-disabled="true"]` → opacity 0.4, `cursor: default`, no hover color.

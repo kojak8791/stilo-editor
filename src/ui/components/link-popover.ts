@@ -137,7 +137,9 @@ export function createLinkPopover(editor: Editor, options: LinkPopoverOptions): 
     newTab.checked = target === '_blank';
     remove.hidden = !editor.isActive('link');
     popover.open();
-    url.focus();
+    // The position arrives asynchronously: until then the popover is at the top of its
+    // container, and a scrolling focus would jump there.
+    url.focus({ preventScroll: true });
     url.select();
   }
 

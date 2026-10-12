@@ -82,6 +82,13 @@ describe('link popover', () => {
     expect(document.activeElement).toBe(url);
   });
 
+  it('focuses the URL field without scrolling (the position is not computed yet)', () => {
+    const { url, modK } = setup('<p>[ab]</p>');
+    const focus = vi.spyOn(url!, 'focus');
+    modK();
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
   it('does not open at a cursor outside a link, but still takes Mod-k', () => {
     const { dialog, modK } = setup('<p>a|b</p>');
     expect(modK().defaultPrevented).toBe(true);

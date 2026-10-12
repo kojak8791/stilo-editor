@@ -258,8 +258,12 @@ describe('toolbar', () => {
     const toolbar = createToolbar(editor, { container, ...option });
 
     expect(container.classList.contains('stilo-toolbar-host')).toBe(expected);
+    // jsdom has no layout: the toolbar height is 0, the margin is ProseMirror's default.
+    const margin = expected ? { top: 5, right: 5, bottom: 5, left: 5 } : undefined;
+    expect(editor.view.props.scrollMargin).toEqual(margin);
     toolbar.destroy();
     expect(container.classList.contains('stilo-toolbar-host')).toBe(false);
+    expect(editor.view.props.scrollMargin).toBeUndefined();
     editor.destroy();
   });
 

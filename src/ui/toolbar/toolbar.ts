@@ -172,8 +172,22 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   };
 
   container.appendChild(element);
-  // Sticky on the container: a sticky element only moves inside its parent.
-  if (sticky) container.classList.add('stilo-toolbar-host');
+  // Sticky on the container: a sticky element only moves inside its parent. ProseMirror scrolls
+  // the selection into view without knowing that the toolbar covers the top: the scroll margin
+  // keeps it below the toolbar (5 is ProseMirror's default margin).
+  let resizeObserver: ResizeObserver | null = null;
+  if (sticky) {
+    container.classList.add('stilo-toolbar-host');
+    const setScrollMargin = (): void => {
+      const top = container.offsetHeight + 5;
+      editor.view.setProps({ scrollMargin: { top, right: 5, bottom: 5, left: 5 } });
+    };
+    setScrollMargin();
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(setScrollMargin);
+      resizeObserver.observe(container);
+    }
+  }
 
   // State tracking
   let pendingFrame = 0;
@@ -384,7 +398,11 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (container.contains(element)) {
       container.removeChild(element);
     }
-    container.classList.remove('stilo-toolbar-host');
+    if (sticky) {
+      resizeObserver?.disconnect();
+      container.classList.remove('stilo-toolbar-host');
+      editor.view.setProps({ scrollMargin: undefined });
+    }
   }
 
   return {

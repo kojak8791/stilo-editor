@@ -13,7 +13,7 @@
 .stilo-toolbar-host {
   position: sticky;
   top: var(--stilo-toolbar-sticky-top, 0);
-  z-index: var(--stilo-z-toolbar, 10);
+  z-index: var(--stilo-z-toolbar, 1001);
   background: var(--stilo-color-bg, #ffffff);
 }
 
