@@ -28,6 +28,7 @@ type**, not after `npm run check` fails.
 1. Read the task file you were assigned: `docs/tasks/T-NNN-*.md`.
 2. Read every document and file listed in its **Context** section.
 3. Read the reference extension `src/extensions/bold/` if the task creates or changes an extension.
+   If the task moves, deletes, inserts or wraps nodes, read `docs/guides/prosemirror-positions.md`.
 4. If anything in the task is ambiguous, contradictory, or impossible, or an expected result
    contradicts the behavior the task describes: **stop**. Write your question in the task's
    `## Questions` section and do not guess.
@@ -90,6 +91,11 @@ type**, not after `npm run check` fails.
   (`setHTML(getHTML())` then `getHTML()` is identical), every command, every shortcut, every
   input rule.
 - Write the tests the task asks for. Keep the provided tests unchanged.
+- Copy the cases of the task's tables into your tests by copy-paste, character by character. Never
+  retype them: a retyped case is a different case.
+- When a position or structure bug resists, print the real positions with a throwaway test
+  (`docs/guides/prosemirror-positions.md` §6) instead of reasoning at length. Delete it before
+  committing.
 - When a test fails, fix the code, not the expected result. If the same failure survives three
   attempts, stop: write in `## Questions` the failing case, the output, and what you tried.
 

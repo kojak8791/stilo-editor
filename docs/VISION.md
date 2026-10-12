@@ -73,4 +73,5 @@ written down **before** implementation, in `docs/`, and implementation work is s
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical design, stack, file layout, extension API, HTML contract |
 | [decisions/](decisions/) | Architecture Decision Records (changes to decisions) |
 | [tasks/](tasks/) | Implementation tasks for the local model |
+| [guides/](guides/) | How-to guides for implementers (e.g. ProseMirror positions) |
 | [../AGENTS.md](../AGENTS.md) | Rules for the implementing agent |
