@@ -23,6 +23,9 @@ describe('StarterKit', () => {
       'clearFormatting',
       'history',
       'moveBlock',
+      'placeholder',
+      'dropCursor',
+      'gapCursor',
     ]);
   });
 
@@ -46,6 +49,9 @@ describe('StarterKit', () => {
       'clearFormatting',
       'history',
       'moveBlock',
+      'placeholder',
+      'dropCursor',
+      'gapCursor',
     ]);
   });
 });

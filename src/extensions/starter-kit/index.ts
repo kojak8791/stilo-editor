@@ -5,6 +5,8 @@ import { BulletList } from '../bullet-list';
 import { ClearFormatting } from '../clear-formatting';
 import { Code } from '../code';
 import { Document } from '../document';
+import { DropCursor, type DropCursorOptions } from '../drop-cursor';
+import { GapCursor } from '../gap-cursor';
 import { HardBreak } from '../hard-break';
 import { Heading, type HeadingOptions } from '../heading';
 import { History, type HistoryOptions } from '../history';
@@ -15,6 +17,7 @@ import { ListItem } from '../list-item';
 import { MoveBlock } from '../move-block';
 import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
+import { Placeholder, type PlaceholderOptions } from '../placeholder';
 import { Strike } from '../strike';
 import { Text } from '../text';
 import { Underline } from '../underline';
@@ -43,6 +46,9 @@ export interface StarterKitOptions {
   clearFormatting?: false;
   history?: false | Partial<HistoryOptions>;
   moveBlock?: false;
+  placeholder?: false | Partial<PlaceholderOptions>;
+  dropCursor?: false | Partial<DropCursorOptions>;
+  gapCursor?: false;
 }
 
 /** Returns the extension unless its option is `false`. */
@@ -82,5 +88,8 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(ClearFormatting, options.clearFormatting),
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),
+    ...include(Placeholder, options.placeholder),
+    ...include(DropCursor, options.dropCursor),
+    ...include(GapCursor, options.gapCursor),
   ];
 }

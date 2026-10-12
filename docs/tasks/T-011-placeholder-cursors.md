@@ -197,8 +197,36 @@ Drag-and-drop cannot run in jsdom: test only the wiring and the options.
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer, failed
-`npm run check` runs before the final one (write "unknown" if you did not count them). -->
+Files changed:
+
+- `src/extensions/placeholder/index.ts` — new, `Placeholder` extension with `PlaceholderOptions`.
+  Plugin uses `new Plugin({ props: { decorations(state) { ... } }})` to apply a node decoration
+  (`class="stilo-placeholder"`, `data-placeholder`) to the empty paragraph.
+- `src/extensions/placeholder/placeholder.test.ts` — new, tests for shown/hidden states, undo/redo,
+  backspace, setHTML, setEditable, and default-options-hidden.
+- `src/extensions/drop-cursor/index.ts` — new, `DropCursor` extension with `DropCursorOptions`
+  (`color`, `width`, `class`). Wraps `prosemirror-dropcursor`.
+- `src/extensions/drop-cursor/drop-cursor.test.ts` — new, tests options defaults/custom and plugin
+  count.
+- `src/extensions/gap-cursor/index.ts` — new, `GapCursor` extension. Wraps `prosemirror-gapcursor`.
+- `src/extensions/gap-cursor/gap-cursor.test.ts` — new, tests gap cursor between `<hr>`s, disabled
+  gap cursor, replacement by text selection, Enter key conversion, and plugin count.
+- `src/extensions/index.ts` — added alphabetical exports for `DropCursor`, `DropCursorOptions`,
+  `GapCursor`, `Placeholder`, `PlaceholderOptions`.
+- `src/extensions/starter-kit/index.ts` — added `placeholder`, `dropCursor`, `gapCursor` to
+  `StarterKitOptions` and to the `StarterKit()` return array after `MoveBlock`.
+- `src/extensions/starter-kit/starter-kit.test.ts` — added `'placeholder', 'dropCursor',
+  'gapCursor'` to both expected name lists.
+
+Points for the reviewer:
+
+- The placeholder plugin required `new Plugin({ props: { decorations } })` (not a top-level
+  `decorations` key) to actually render decorations in jsdom.
+- Gap cursor tests set the selection by hand (not via arrow keys) because jsdom does not support
+  arrow-key-to-gap-cursor behavior.
+
+`npm run check` runs before the final one: 1 (the first run had the `decorations` bug; the fix
+and import cleanup caused one additional run).
 
 ## Metrics
 
