@@ -20,6 +20,8 @@ describe('StarterKit', () => {
       'strike',
       'code',
       'link',
+      'clearFormatting',
+      'history',
     ]);
   });
 
@@ -40,6 +42,8 @@ describe('StarterKit', () => {
       'strike',
       'code',
       'link',
+      'clearFormatting',
+      'history',
     ]);
   });
 });

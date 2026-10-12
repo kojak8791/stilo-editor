@@ -2,10 +2,12 @@ import type { Extension } from '../../core/extension';
 import { Blockquote } from '../blockquote';
 import { Bold } from '../bold';
 import { BulletList } from '../bullet-list';
+import { ClearFormatting } from '../clear-formatting';
 import { Code } from '../code';
 import { Document } from '../document';
 import { HardBreak } from '../hard-break';
 import { Heading, type HeadingOptions } from '../heading';
+import { History, type HistoryOptions } from '../history';
 import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
 import { Link } from '../link';
@@ -37,6 +39,8 @@ export interface StarterKitOptions {
   strike?: false;
   code?: false;
   link?: false;
+  clearFormatting?: false;
+  history?: false | Partial<HistoryOptions>;
 }
 
 /** Returns the extension unless its option is `false`. */
@@ -73,5 +77,7 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Strike, options.strike),
     ...include(Code, options.code),
     ...include(Link, options.link),
+    ...include(ClearFormatting, options.clearFormatting),
+    ...include(History, options.history),
   ];
 }

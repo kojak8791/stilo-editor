@@ -1,10 +1,12 @@
 export { Blockquote } from './blockquote';
 export { Bold } from './bold';
 export { BulletList } from './bullet-list';
+export { ClearFormatting } from './clear-formatting';
 export { Code } from './code';
 export { Document } from './document';
 export { HardBreak } from './hard-break';
 export { Heading, type HeadingLevel, type HeadingOptions } from './heading';
+export { History, type HistoryOptions } from './history';
 export { HorizontalRule } from './horizontal-rule';
 export { Italic } from './italic';
 export { Link, type LinkAttributes } from './link';
