@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-802, NFR-4 |
 | Milestone | M1 |
 | Depends on | T-013 |
@@ -136,8 +136,40 @@ Report sections of this file).
 
 ## Report
 
-<!-- Implementer: fill in when done. Files changed, summary, points for the reviewer, failed
-`npm run check` runs before the final one. -->
+### Files changed
+
+| File | Action |
+|---|---|
+| `src/ui/components/popover.ts` | Created — Floating UI popover with `computePosition`, `autoUpdate`, `offset`, `flip`, `shift` |
+| `src/ui/components/dropdown.ts` | Created — dropdown with trigger, menu, popover integration, keyboard navigation |
+| `src/ui/toolbar/toolbar.ts` | Modified — group building, `Map<HTMLElement, ToolbarItem>` item lookup, `Map<string, Dropdown>` dropdown tracking, active = first, try/catch on `isEnabled` |
+| `src/ui/toolbar/types.ts` | Modified — `ToolbarItem = ToolbarButton | ToolbarDropdown` |
+| `src/ui/toolbar/items.ts` | Modified — `heading: headingDropdown()` in `DEFAULT_ITEMS`, `headingDropdown(levels: HeadingLevel[] = ...)` signature, removed `as HeadingLevel` casts |
+| `src/ui/index.ts` | Modified — removed `createDropdown` export, kept `headingDropdown` and dropdown types |
+| `src/ui/components/icon.ts` | Modified — uses `createElement` from `lucide` with `viewBox` |
+| `src/styles/ui.css` | Modified — popover, dropdown, heading-preview rules |
+
+### Summary
+
+- **Popover** (`popover.ts`): reusable component using Floating UI `computePosition` with `autoUpdate`, `offset`, `flip`, `shift`. Appends content to container, listens for outside pointer-down and Escape in capture phase.
+- **Dropdown** (`dropdown.ts`): creates a trigger button (`stilo-dropdown__trigger`) and a menu (`[role="menu"]`) with `menuitemradio` options. Menu is appended to the toolbar element at creation. Popover opens on click/ArrowDown/ArrowUp, closes on Escape/Tab/outside-pointer. Closes before `onSelect` fires.
+- **Groups**: one `<div role="group">` per original group config; buttons and dropdowns rendered in their configured order inside the same group element.
+- **Item lookup**: `Map<HTMLElement, ToolbarItem>` maps each DOM element to its resolved item — used in `update()` and `onButtonClick` instead of position arithmetic.
+- **Dropdown tracking**: `Map<string, Dropdown>` keyed by `dd.id` — used in `update()` and `destroy()` instead of `querySelector`.
+- **Active option**: first active option wins (breaks on first match in the loop).
+- **`heading` in `DEFAULT_ITEMS`**: `heading: headingDropdown()` replaces the special-case in `resolveItem`.
+- **`headingDropdown` signature**: `levels: HeadingLevel[] = [1, 2, 3, 4, 5, 6]` — removed all `as HeadingLevel` casts.
+- **`createDropdown` removed from exports**: dropdown is internal to the toolbar.
+- **`isEnabled` try/catch**: retained as a necessary safeguard — `isEnabled` can throw when the selection is on a block node (e.g. `<hr>` via `NodeSelection`).
+
+### Points for the reviewer
+
+- `update()` iterates `itemElements` and dispatches via `item.kind` type guard — no position arithmetic.
+- `destroy()` iterates `dropdownMap.values()` to clean up all dropdown instances.
+- `headingDropdown` parameter type changed from `number[]` to `HeadingLevel[]`.
+- All dropdown options in `items.ts` have `isEnabled` that returns `isActive || can()` per the spec.
+
+### Failed `npm run check` runs before final: 5
 
 ## Metrics
 

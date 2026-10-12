@@ -1,11 +1,13 @@
 import type { Editor } from '../../index';
 import { StiloError } from '../../index';
+import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
+import { createDropdown } from '../components/dropdown';
 import { createIcon } from '../components/icon';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
 import { DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
-import type { ToolbarButton, ToolbarItem } from './types';
+import type { ToolbarButton, ToolbarDropdown, ToolbarItem } from './types';
 
 /** Options of {@link createToolbar}. */
 export interface ToolbarOptions {
@@ -28,7 +30,10 @@ export interface Toolbar {
 }
 
 /** Resolves an item from a string ID or a custom item object. */
-function resolveItem(item: string | ToolbarItem, editor: Editor): ToolbarButton | undefined {
+function resolveItem(
+  item: string | ToolbarItem,
+  editor: Editor,
+): ToolbarButton | ToolbarDropdown | undefined {
   if (typeof item === 'string') {
     const resolved = DEFAULT_ITEMS[item];
     if (!resolved) {
@@ -49,15 +54,15 @@ function resolveItem(item: string | ToolbarItem, editor: Editor): ToolbarButton 
 export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar {
   const { container, items = DEFAULT_TOOLBAR, messages = en } = options;
 
-  // Resolve all items
-  const resolvedItems: Array<{ group: ToolbarButton[] }> = [];
+  // Resolve all items, keeping one group per original group
+  const resolvedGroups: Array<Array<ToolbarItem>> = [];
   for (const group of items) {
-    const resolved: ToolbarButton[] = [];
+    const resolved: ToolbarItem[] = [];
     for (const item of group) {
-      const button = resolveItem(item, editor);
-      if (button) resolved.push(button);
+      const resolvedItem = resolveItem(item, editor);
+      if (resolvedItem) resolved.push(resolvedItem);
     }
-    if (resolved.length > 0) resolvedItems.push({ group: resolved });
+    if (resolved.length > 0) resolvedGroups.push(resolved);
   }
 
   // Build the DOM
@@ -67,48 +72,79 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   element.setAttribute('aria-label', messages?.['toolbar.label'] ?? 'Formatting');
   element.setAttribute('aria-orientation', 'horizontal');
 
-  const buttonElements: HTMLButtonElement[] = [];
-  const allButtons: ToolbarButton[] = [];
+  // Collect all item elements for roving tabindex
+  const itemElements: HTMLElement[] = [];
+  const itemMap = new Map<HTMLElement, ToolbarItem>();
+  const dropdownMap = new Map<string, DropdownInstance>();
 
-  const groupsContainer = document.createElement('div');
-  groupsContainer.className = 'stilo-toolbar__groups';
-
-  for (const { group } of resolvedItems) {
+  for (const group of resolvedGroups) {
     const groupEl = document.createElement('div');
     groupEl.className = 'stilo-toolbar__group';
     groupEl.setAttribute('role', 'group');
 
     for (const item of group) {
-      const label = messages[item.labelKey] ?? item.labelKey;
-      const hasShortcut = item.shortcut !== undefined;
-      const mac = isMacPlatform();
-      const title = hasShortcut ? `${label} (${formatShortcut(item.shortcut!, mac)})` : label;
+      if (item.kind === 'dropdown') {
+        const dd = item;
+        const optionViews: DropdownOptionView[] = dd.options.map((opt) => {
+          const mac = isMacPlatform();
+          const label = messages[opt.labelKey] ?? opt.labelKey;
+          const shortcut = opt.shortcut ? formatShortcut(opt.shortcut, mac) : undefined;
+          return { id: opt.id, label, shortcut };
+        });
 
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'stilo-toolbar__button';
-      button.setAttribute('data-item', item.id);
-      button.setAttribute('aria-label', label);
-      button.setAttribute('title', title);
-      button.setAttribute('tabindex', '-1');
+        const ddInstance = createDropdown({
+          label: messages[dd.labelKey] ?? dd.labelKey,
+          options: optionViews,
+          container: element,
+          onSelect: (id: string) => {
+            const option = dd.options.find((o) => o.id === id);
+            if (option) {
+              option.run(editor);
+              editor.focus();
+            }
+          },
+        });
 
-      // Toggle button: aria-pressed
-      if (item.isActive) {
-        button.setAttribute('aria-pressed', 'false');
+        // Set data-item on the trigger (the spec says this comes from the toolbar)
+        ddInstance.trigger.setAttribute('data-item', dd.id);
+
+        groupEl.appendChild(ddInstance.trigger);
+
+        // Store the trigger in itemElements for roving tabindex
+        itemElements.push(ddInstance.trigger);
+        itemMap.set(ddInstance.trigger, dd);
+        dropdownMap.set(dd.id, ddInstance);
+      } else {
+        const btnItem = item;
+        const label = messages[btnItem.labelKey] ?? btnItem.labelKey;
+        const hasShortcut = btnItem.shortcut !== undefined;
+        const mac = isMacPlatform();
+        const title = hasShortcut ? `${label} (${formatShortcut(btnItem.shortcut!, mac)})` : label;
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'stilo-toolbar__button';
+        button.setAttribute('data-item', btnItem.id);
+        button.setAttribute('aria-label', label);
+        button.setAttribute('title', title);
+        button.setAttribute('tabindex', '-1');
+
+        // Toggle button: aria-pressed
+        if (btnItem.isActive) {
+          button.setAttribute('aria-pressed', 'false');
+        }
+
+        const icon = createIcon(btnItem.icon);
+        button.appendChild(icon);
+
+        groupEl.appendChild(button);
+        itemElements.push(button);
+        itemMap.set(button, btnItem);
       }
-
-      const icon = createIcon(item.icon);
-      button.appendChild(icon);
-
-      groupEl.appendChild(button);
-      buttonElements.push(button);
-      allButtons.push(item);
     }
 
-    groupsContainer.appendChild(groupEl);
+    element.appendChild(groupEl);
   }
-
-  element.appendChild(groupsContainer);
 
   container.appendChild(element);
 
@@ -120,8 +156,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   let focusedIndex = 0;
 
   function setRovingFocus(index: number): void {
-    buttonElements.forEach((btn, i) => {
-      btn.setAttribute('tabindex', i === index ? '0' : '-1');
+    itemElements.forEach((el, i) => {
+      el.setAttribute('tabindex', i === index ? '0' : '-1');
     });
     focusedIndex = index;
   }
@@ -130,35 +166,67 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   // Update function: refresh active/enabled states
   function update(): void {
-    for (let i = 0; i < allButtons.length; i++) {
-      const item = allButtons[i]!;
-      const btn = buttonElements[i]!;
+    for (const el of itemElements) {
+      const item = itemMap.get(el);
+      if (!item) continue;
 
-      // isActive
-      if (item.isActive) {
-        const active = item.isActive(editor);
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        if (active) {
-          btn.classList.add('stilo-toolbar__button--active');
+      if (item.kind === 'dropdown') {
+        // Update dropdown
+        const dd = item;
+        let activeId: string | null = null;
+        const disabledIds = new Set<string>();
+
+        for (const opt of dd.options) {
+          const isActive = opt.isActive(editor);
+          let isEnabled: boolean;
+          try {
+            isEnabled = opt.isEnabled === undefined ? true : opt.isEnabled(editor);
+          } catch {
+            isEnabled = false;
+          }
+          if (!isEnabled) {
+            disabledIds.add(opt.id);
+          }
+          if (isActive && activeId === null) {
+            activeId = opt.id;
+          }
+        }
+
+        const ddInstance = dropdownMap.get(dd.id);
+        ddInstance?.update({ activeId, disabledIds });
+      } else {
+        // Update button
+        const btn = el as HTMLButtonElement;
+        const btnItem = item as ToolbarButton;
+
+        if (btnItem.isActive) {
+          const active = btnItem.isActive(editor);
+          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+          if (active) {
+            btn.classList.add('stilo-toolbar__button--active');
+          } else {
+            btn.classList.remove('stilo-toolbar__button--active');
+          }
         } else {
+          btn.removeAttribute('aria-pressed');
           btn.classList.remove('stilo-toolbar__button--active');
         }
-      } else {
-        // Non-toggle buttons: no aria-pressed
-        btn.removeAttribute('aria-pressed');
-        btn.classList.remove('stilo-toolbar__button--active');
-      }
 
-      // isEnabled
-      if (item.isEnabled) {
-        const enabled = item.isEnabled(editor);
-        if (enabled) {
-          btn.removeAttribute('aria-disabled');
+        if (btnItem.isEnabled) {
+          let enabled: boolean;
+          try {
+            enabled = btnItem.isEnabled(editor);
+          } catch {
+            enabled = false;
+          }
+          if (enabled) {
+            btn.removeAttribute('aria-disabled');
+          } else {
+            btn.setAttribute('aria-disabled', 'true');
+          }
         } else {
-          btn.setAttribute('aria-disabled', 'true');
+          btn.removeAttribute('aria-disabled');
         }
-      } else {
-        btn.removeAttribute('aria-disabled');
       }
     }
   }
@@ -190,15 +258,16 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onButtonClick = (e: Event): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
-    const btn = target.closest<HTMLButtonElement>('[data-item]');
+    const btn = target.closest<HTMLElement>('[data-item]');
     if (!btn) return;
-    const index = buttonElements.indexOf(btn);
-    if (index === -1) return;
-    const item = allButtons[index]!;
-    if (item.isEnabled === undefined || item.isEnabled(editor)) {
-      item.run(editor);
-      editor.focus();
-    }
+
+    // Find the corresponding resolved item
+    const item = itemMap.get(btn);
+    if (!item) return;
+    if (item.kind !== 'button') return;
+    if (item.isEnabled && !item.isEnabled(editor)) return;
+    item.run(editor);
+    editor.focus();
   };
   element.addEventListener('click', onButtonClick);
 
@@ -206,44 +275,38 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onToolbarKeydown = (e: KeyboardEvent): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
-    const btn = target.closest<HTMLButtonElement>('[data-item]');
+    const btn = target.closest<HTMLElement>('[data-item]');
     if (!btn) return;
 
-    const index = buttonElements.indexOf(btn);
+    const index = itemElements.indexOf(btn);
     if (index === -1) return;
 
     switch (e.key) {
       case 'ArrowRight': {
         e.preventDefault();
-        const next = (index + 1) % buttonElements.length;
+        const next = (index + 1) % itemElements.length;
         setRovingFocus(next);
-        buttonElements[next]!.focus();
+        itemElements[next]!.focus();
         break;
       }
       case 'ArrowLeft': {
         e.preventDefault();
-        if (index === 0) {
-          // Wrap from first to last
-          setRovingFocus(buttonElements.length - 1);
-          buttonElements[buttonElements.length - 1]!.focus();
-        } else if (index < buttonElements.length - 1) {
-          const prev = index - 1;
-          setRovingFocus(prev);
-          buttonElements[prev]!.focus();
-        }
+        const prev = (index - 1 + itemElements.length) % itemElements.length;
+        setRovingFocus(prev);
+        itemElements[prev]!.focus();
         break;
       }
       case 'Home': {
         e.preventDefault();
         setRovingFocus(0);
-        buttonElements[0]!.focus();
+        itemElements[0]!.focus();
         break;
       }
       case 'End': {
         e.preventDefault();
-        const last = buttonElements.length - 1;
+        const last = itemElements.length - 1;
         setRovingFocus(last);
-        buttonElements[last]!.focus();
+        itemElements[last]!.focus();
         break;
       }
       case 'Escape': {
@@ -261,8 +324,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (e.key === 'F10' && e.altKey) {
       e.preventDefault();
       editor.focus();
-      if (focusedIndex >= 0 && focusedIndex < buttonElements.length) {
-        buttonElements[focusedIndex]!.focus();
+      if (focusedIndex >= 0 && focusedIndex < itemElements.length) {
+        itemElements[focusedIndex]!.focus();
       }
     }
   };
@@ -290,6 +353,10 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     element.removeEventListener('click', onButtonClick);
     element.removeEventListener('keydown', onToolbarKeydown);
     editor.view.dom.removeEventListener('keydown', onEditorKeydown);
+
+    for (const ddInstance of dropdownMap.values()) {
+      ddInstance.destroy();
+    }
 
     if (container.contains(element)) {
       container.removeChild(element);
