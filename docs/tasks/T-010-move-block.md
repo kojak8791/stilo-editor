@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `todo` |
+| Status | `done` |
 | Spec | F-309 |
 | Milestone | M1 |
 | Depends on | T-009 |
