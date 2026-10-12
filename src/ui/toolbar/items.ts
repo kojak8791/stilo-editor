@@ -2,6 +2,7 @@ import {
   Bold,
   Code,
   Italic,
+  Link,
   List,
   ListOrdered,
   Minus,
@@ -13,6 +14,7 @@ import {
   Undo2,
 } from 'lucide';
 import type { Editor, HeadingLevel } from '../../index';
+import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
 import type { ToolbarDropdown, ToolbarItem } from './types';
 
@@ -20,11 +22,11 @@ import type { ToolbarDropdown, ToolbarItem } from './types';
 export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ['undo', 'redo'],
   ['heading'],
-  ['bold', 'italic', 'underline', 'strike', 'code', 'clearFormatting'],
+  ['bold', 'italic', 'underline', 'strike', 'code', 'link', 'clearFormatting'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
 ];
 
-/** The 12 default toolbar buttons. */
+/** The default toolbar items, by ID. */
 export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
   undo: {
     id: 'undo',
@@ -112,6 +114,19 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isActive: (e) => e.isActive('code'),
     isEnabled: (e) => 'toggleCode' in e.commands && e.can().toggleCode(),
     isAvailable: (e) => 'toggleCode' in e.commands,
+  },
+  link: {
+    id: 'link',
+    kind: 'button',
+    icon: Link,
+    labelKey: 'toolbar.link',
+    shortcut: 'Mod-k',
+    run: (_e, toolbar) => {
+      toolbar.openLinkPopover();
+    },
+    isActive: (e) => e.isActive('link'),
+    isEnabled: (e) => 'setLink' in e.commands && canEditLink(e),
+    isAvailable: (e) => 'setLink' in e.commands,
   },
   clearFormatting: {
     id: 'clearFormatting',

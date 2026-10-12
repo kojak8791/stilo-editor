@@ -22,6 +22,7 @@ export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/tool
 /** Toolbar item types. */
 export type {
   ToolbarButton,
+  ToolbarContext,
   ToolbarDropdown,
   ToolbarDropdownOption,
   ToolbarItem,

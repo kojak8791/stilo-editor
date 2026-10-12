@@ -13,6 +13,7 @@ export type MessageKey =
   | 'toolbar.orderedList'
   | 'toolbar.blockquote'
   | 'toolbar.horizontalRule'
+  | 'toolbar.link'
   | 'toolbar.heading'
   | 'heading.paragraph'
   | 'heading.h1'
@@ -20,7 +21,11 @@ export type MessageKey =
   | 'heading.h3'
   | 'heading.h4'
   | 'heading.h5'
-  | 'heading.h6';
+  | 'heading.h6'
+  | 'link.url'
+  | 'link.newTab'
+  | 'link.apply'
+  | 'link.remove';
 
 /** UI strings: every {@link MessageKey}, plus the label keys of custom toolbar items. */
 export type Messages = Readonly<Record<MessageKey, string>> & Readonly<Record<string, string>>;

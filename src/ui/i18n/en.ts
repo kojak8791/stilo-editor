@@ -15,6 +15,7 @@ export const en: Messages = {
   'toolbar.orderedList': 'Numbered list',
   'toolbar.blockquote': 'Quote',
   'toolbar.horizontalRule': 'Horizontal line',
+  'toolbar.link': 'Link',
   'toolbar.heading': 'Text style',
   'heading.paragraph': 'Paragraph',
   'heading.h1': 'Heading 1',
@@ -23,4 +24,8 @@ export const en: Messages = {
   'heading.h4': 'Heading 4',
   'heading.h5': 'Heading 5',
   'heading.h6': 'Heading 6',
+  'link.url': 'URL',
+  'link.newTab': 'Open in new tab',
+  'link.apply': 'Apply',
+  'link.remove': 'Remove link',
 };

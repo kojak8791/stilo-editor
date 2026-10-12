@@ -4,7 +4,7 @@ import { EditorState, type Plugin, Selection, type Transaction } from 'prosemirr
 import { EditorView } from 'prosemirror-view';
 import { EventEmitter, type EventHandler } from './events';
 import { ExtensionManager } from './extension-manager';
-import { isMarkActive, isNodeActive } from './helpers/active';
+import { getMarkAttributes, getNodeAttributes, isMarkActive, isNodeActive } from './helpers/active';
 import { parseHTML } from './html/parse';
 import { sanitizeToString } from './html/sanitize';
 import { createClipboardSerializer, serializeHTML } from './html/serialize';
@@ -169,6 +169,18 @@ export class Editor {
     if (markType) return isMarkActive(this.state, markType, attrs);
     const nodeType = this.schema.nodes[name];
     return nodeType ? isNodeActive(this.state, nodeType, attrs) : false;
+  }
+
+  /**
+   * Attributes of the mark or node named `name` at the selection (`getMarkAttributes` /
+   * `getNodeAttributes`), e.g. the `href` of the link at the cursor. `{}` when there is none or
+   * the name is unknown.
+   */
+  getAttributes(name: string): Record<string, unknown> {
+    const markType = this.schema.marks[name];
+    if (markType) return getMarkAttributes(this.state, markType);
+    const nodeType = this.schema.nodes[name];
+    return nodeType ? getNodeAttributes(this.state, nodeType) : {};
   }
 
   /** Switches read-only mode on/off. */

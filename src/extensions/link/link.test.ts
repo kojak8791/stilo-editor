@@ -186,6 +186,19 @@ describe('Link: commands', () => {
   });
 });
 
+describe('Link: getAttributes', () => {
+  it.each([
+    [
+      '<p><a href="https://x.com" target="_blank">a|b</a></p>',
+      { href: 'https://x.com', target: '_blank' },
+    ],
+    ['<p>[a<a href="https://x.com">b</a>]</p>', { href: 'https://x.com', target: null }],
+    ['<p>a|b</p>', {}],
+  ])('in %j', (html, expected) => {
+    expect(createTestEditor({ html }).getAttributes('link')).toEqual(expected);
+  });
+});
+
 describe('Link: security', () => {
   it.each(XSS_VECTORS)('writes only safe links for %s', (html) => {
     const container = document.createElement('div');
