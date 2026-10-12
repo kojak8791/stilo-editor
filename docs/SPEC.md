@@ -206,9 +206,12 @@ Therefore:
   - *load*: `setHTML()` time until the view is rendered;
   - *export*: `getHTML()` time;
   - *move block*: time of F-309 in the middle of the document;
+  - *key to paint*: real key presses (one every 33 ms) in the middle of the document, Event
+    Timing duration of `keydown` up to the next paint, median and p95 — informative (ADR 0003);
   - *memory*: JS heap after load (Chromium only).
-- **NFR-1.4 Initial budgets (Chromium, reference machine).** These are starting values to be
-  **calibrated by an ADR after the first measurement**:
+- **NFR-1.4 Initial budgets (Chromium, reference machine).** These were the starting values;
+  ADR 0003 calibrated them after the first measurement (50k paragraphs: typing p95 50 ms, move
+  block 100 ms). The values in force live in `bench/budgets.ts`:
 
   | Metric | 10k paragraphs | 50k paragraphs |
   |---|---|---|

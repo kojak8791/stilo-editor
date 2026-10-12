@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-12T16:27:38.319Z",
+  "browser": "chromium 156.0.8078.4",
+  "results": {
+    "paragraphs-1k": {
+      "load": 128.3,
+      "getHTML": 12.9,
+      "typingP95": 0.7,
+      "typingMedian": 0.2,
+      "moveBlockP95": 1.4,
+      "moveBlockMedian": 1.1,
+      "keyToPaintMedian": 16,
+      "keyToPaintP95": 16,
+      "heapMB": 24.8
+    },
+    "paragraphs-10k": {
+      "load": 1104.2,
+      "getHTML": 125.2,
+      "typingP95": 6.6,
+      "typingMedian": 1,
+      "moveBlockP95": 14,
+      "moveBlockMedian": 12.9,
+      "keyToPaintMedian": 24,
+      "keyToPaintP95": 40,
+      "heapMB": 82.4
+    },
+    "paragraphs-50k": {
+      "load": 5649.2,
+      "getHTML": 673.9,
+      "typingP95": 39,
+      "typingMedian": 6.1,
+      "moveBlockP95": 79.7,
+      "moveBlockMedian": 73.9,
+      "keyToPaintMedian": 152,
+      "keyToPaintP95": 312,
+      "heapMB": 307.08
+    },
+    "nested-list": {
+      "load": 87.7,
+      "getHTML": 11.9,
+      "typingP95": 0.2,
+      "typingMedian": 0.1,
+      "moveBlockP95": 0.2,
+      "moveBlockMedian": 0.1,
+      "keyToPaintMedian": 16,
+      "keyToPaintP95": 16,
+      "heapMB": 20.69
+    }
+  }
+}
