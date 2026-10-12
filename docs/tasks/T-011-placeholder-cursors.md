@@ -230,5 +230,15 @@ and import cleanup caused one additional run).
 
 ## Metrics
 
-<!-- Reviewer only (the implementer never edits this section): architect tokens (preparation,
-review), implementer failed check runs and context compactions, review rounds, escalation. -->
+| Field | Value |
+|---|---|
+| Architect tokens (preparation) | ~83K messages (105.9K session total, of which ~23K fixed session overhead) |
+| Architect tokens (review) | ~23K (129.1K − 105.9K), including the mid-task diagnosis |
+| Implementer failed `npm run check` runs | 1 per the Report, not verified (a loop on the decoration bug was observed) |
+| Implementer context | peak ~67% of 128K; compactions: probably 0 |
+| Review rounds | 0 after delivery; 1 mid-task intervention (`decorations` placed outside `props`) |
+| Escalation | no |
+
+Filled in by the reviewer. Accepted with nits not sent back: a JSDoc line of 107 columns in
+`drop-cursor/index.ts`, unneeded import aliases in `placeholder/index.ts`, the default-options
+placeholder case checks only `.stilo-placeholder`.
