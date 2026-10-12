@@ -78,17 +78,20 @@ Full feature list and priorities in [docs/SPEC.md](docs/SPEC.md).
 
 ## How it is built
 
-Stilo is also an experiment in AI-assisted development. A human project manager and an
-"architect" model (Claude) write every decision down first, in [docs/](docs/). A **local LLM**
-then implements small, closed tasks ([docs/tasks/](docs/tasks/)), with tests as the contract and
-the rules in [AGENTS.md](AGENTS.md). Every task is reviewed before it is merged.
+Stilo is designed and owned by Alessio Coggiola and developed with AI assistance
+([Claude](https://claude.com/claude-code)). Every decision is written down before the code
+([docs/](docs/), [ADRs](docs/decisions/)), every change goes through the quality gate
+(typecheck, lint, about 950 unit tests including XSS vectors) and is tried in the demo before
+it is merged, and performance is measured against explicit budgets (`npm run bench`).
 
 | Document | Content |
 |---|---|
 | [VISION.md](docs/VISION.md) | Why and what |
 | [SPEC.md](docs/SPEC.md) | Features, non-functional requirements, roadmap |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, file layout, extension API, HTML contract |
-| [AGENTS.md](AGENTS.md) | Rules for the implementing agent |
+| [UI.md](docs/UI.md) | Design of the default UI |
+| [BACKLOG.md](docs/BACKLOG.md) | Tasks done and planned |
+| [AGENTS.md](AGENTS.md) | Rules for contributors and coding agents |
 
 ## Development
 

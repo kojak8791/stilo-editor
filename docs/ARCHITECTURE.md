@@ -39,7 +39,7 @@ typescript  vite  vitest  jsdom  @playwright/test  @biomejs/biome  @types/node
 ```
 
 Exact versions are pinned by `package-lock.json`. **Adding, removing or upgrading a dependency
-requires a decision by PM + architect** (ADR). The implementing agent never runs `npm install <pkg>`.
+requires a decision** (ADR); never run `npm install <pkg>` as a side effect of other work.
 
 ProseMirror packages are regular `dependencies` (not peer). If wrappers or third-party extensions
 later need shared instances, we will re-export them from `stilo-editor/pm/*` (ADR when needed).
@@ -105,7 +105,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 
 ```
 stilo-editor/
-├── AGENTS.md                     Rules for the implementing agent
+├── AGENTS.md                     Rules for contributors and coding agents
 ├── README.md
 ├── LICENSE                       MIT
 ├── package.json / package-lock.json
@@ -117,9 +117,9 @@ stilo-editor/
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
 ├── docs/
-│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md
+│   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  BACKLOG.md
 │   ├── decisions/                ADRs: NNNN-short-title.md
-│   └── tasks/                    T-NNN-short-title.md + _TEMPLATE.md
+│   └── guides/                   How-to guides
 ├── src/
 │   ├── index.ts                  Public API of the core (re-exports only)
 │   ├── core/
