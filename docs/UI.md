@@ -709,7 +709,8 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-font-size` | `14px` | UI text |
 | `--stilo-color-text` | `#1f2328` | Text and icons |
 | `--stilo-color-muted` | `#59636e` | Shortcuts in menus |
-| `--stilo-color-bg` | `#ffffff` | Toolbar and popover background |
+| `--stilo-color-bg` | `#ffffff` | Popover and sticky container background |
+| `--stilo-color-toolbar-bg` | `#f9fbfd` | Toolbar background: barely darker than the content, lighter than the hover, so that the eye sees where the toolbar ends |
 | `--stilo-color-border` | `#d1d9e0` | Popover border, field borders |
 | `--stilo-color-separator` | `#e4e8ec` | Group separators (lighter than the borders) |
 | `--stilo-color-hover` | `#eef1f4` | Button / option hover |
@@ -734,7 +735,9 @@ refuses a block that already has the type, and the active option must stay selec
 Layout:
 
 - Toolbar: flex row, wraps, `padding` `--stilo-toolbar-padding-y` `--stilo-toolbar-padding-x`,
-  `gap` `--stilo-toolbar-group-gap`, no border (T-027: the editor's outer border is enough).
+  `gap` `--stilo-toolbar-group-gap`, background `--stilo-color-toolbar-bg`, no border (T-027:
+  the editor's outer border is enough; a host with rounded corners rounds the toolbar too,
+  rather than `overflow` on the wrapper, which would cut the popovers).
   Groups: flex row with `gap` `--stilo-toolbar-gap`; every group after the first has
   `padding-left` `--stilo-toolbar-group-gap` and, as separator, a `::before` line 1px wide,
   `--stilo-toolbar-separator-height` high, vertically centered, in `--stilo-color-separator`.

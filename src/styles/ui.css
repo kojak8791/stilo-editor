@@ -11,6 +11,7 @@
   --stilo-color-text: #1f2328;
   --stilo-color-muted: #59636e;
   --stilo-color-bg: #ffffff;
+  --stilo-color-toolbar-bg: #f9fbfd;
   --stilo-color-border: #d1d9e0;
   --stilo-color-separator: #e4e8ec;
   --stilo-color-hover: #eef1f4;
@@ -49,6 +50,7 @@
   flex-wrap: wrap;
   gap: var(--stilo-toolbar-group-gap);
   padding: var(--stilo-toolbar-padding-y) var(--stilo-toolbar-padding-x);
+  background: var(--stilo-color-toolbar-bg);
 }
 
 /* Sticky toolbar container (option `sticky`) */
