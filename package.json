@@ -1,16 +1,21 @@
 {
   "name": "stilo-editor",
   "version": "0.1.0",
-  "description": "Stilo is a modern and powerful open-source HTML5 WYSIWYG editor built on ProseMirror",
+  "description": "Open-source HTML5 WYSIWYG rich text editor built on ProseMirror: clean HTML, headless core, fast on very large documents.",
   "keywords": [
-    "typescript",
-    "html5",
-    "editor",
     "wysiwyg",
-    "browser",
-    "productivity",
+    "wysiwyg-editor",
+    "rich-text",
+    "rich-text-editor",
+    "text-editor",
+    "html-editor",
+    "editor",
     "prosemirror",
-    "rich-text"
+    "contenteditable",
+    "html5",
+    "typescript",
+    "headless",
+    "framework-agnostic"
   ],
   "author": "Alessio Coggiola <alessio.coggiola@gmail.com>",
   "license": "MIT",
