@@ -45,6 +45,7 @@ may be split or merged when a task starts.
 | T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | done |
 | T-025 | `TextStyle` (mark `textStyle`, `color` only for now) and `Highlight` (`<mark>`, optional background color): parse, serialize, commands, `Mod-Shift-h`, `==text==`, in `StarterKit` | F-208, F-209 | done |
 | T-026 | Default UI: text color and highlight split buttons (the main part applies the last used color, the arrow opens a popover with "no color", a fixed palette replaceable with `textColorButton(palette)` and `highlightButton(palette)`, and a custom color) | F-804 | done |
+| T-027 | Toolbar restyle, first part: custom property defaults in one `:where(:root)` block of `ui.css` (no fallbacks), toolbar padding x/y, item gap and group gap split, 30px buttons, 2px gaps; later: a borderless look (only the outer editor border) | F-801, F-809 | todo |
 
 ## Notes for later milestones
 

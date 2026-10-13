@@ -448,7 +448,7 @@ for its menus, the editor element for popovers anchored to the content): the bro
 popover on scroll in the same frame as the anchor. With `fixed`, every scroll waited for an
 asynchronous `computePosition` and the popover visibly lagged and trembled (T-016). Trade-off: an
 ancestor with `overflow: hidden` can clip a popover; `flip()` limits the cases. The
-`--stilo-*` custom properties must be declared on a common ancestor of the toolbar and the
+`--stilo-*` custom properties must be overridden on a common ancestor of the toolbar and the
 editor (or on `:root`).
 
 ### 5.1 Link popover (T-016)
@@ -695,9 +695,12 @@ refuses a block that already has the type, and the active option must stay selec
 
 - Classes: `stilo-` prefix, BEM (ARCHITECTURE §4.1). Only classes, never IDs or element
   selectors outside a class scope.
-- Custom properties are **read with fallbacks and never declared by the UI**:
-  `var(--stilo-color-border, #d1d9e0)`. Declaring them on a component would block overrides
-  set on an ancestor or on `:root`.
+- Custom properties have their defaults in **one block at the top of `ui.css`**,
+  `:where(:root) { … }` (T-027), and are read without fallbacks (`var(--stilo-color-border)`).
+  `:where()` has no specificity: a host rule that sets a property, on `:root` or on any ancestor
+  of the toolbar and the editor, wins whatever the order of the stylesheets. Components never
+  declare them, which would block those overrides. `content.css` keeps its own fallbacks
+  (`var(--stilo-color-border, #d1d9e0)`), because it is also used without `ui.css`.
 - Visible focus: `:focus-visible` outline in `--stilo-color-focus`.
 
 | Property | Default | Use |
@@ -714,10 +717,13 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-color-focus` | `#0969da` | Focus ring, primary button |
 | `--stilo-color-error` | `#d1242f` | Border of an invalid field |
 | `--stilo-radius` | `6px` | Buttons, popover |
-| `--stilo-toolbar-padding` | `4px` | Toolbar padding and gap |
+| `--stilo-toolbar-padding-y` | `4px` | Toolbar padding, top and bottom |
+| `--stilo-toolbar-padding-x` | `2px` | Toolbar padding, left and right |
+| `--stilo-toolbar-gap` | `2px` | Space between the items of a group |
+| `--stilo-toolbar-group-gap` | `4px` | Space on each side of a group separator |
 | `--stilo-toolbar-sticky-top` | `0` | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
 | `--stilo-z-toolbar` | `1001` | Sticky toolbar `z-index`: above the content and the popovers anchored to it |
-| `--stilo-button-size` | `32px` | Button height and min width |
+| `--stilo-button-size` | `30px` | Button height and min width |
 | `--stilo-icon-size` | `18px` | Icons |
 | `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | Popover |
 | `--stilo-z-popover` | `1000` | Popover `z-index` |
@@ -725,8 +731,10 @@ refuses a block that already has the type, and the active option must stay selec
 
 Layout:
 
-- Toolbar: flex row, wraps, `gap` and `padding` `--stilo-toolbar-padding`, bottom border.
-  Groups: flex row; every group after the first has a left border as separator.
+- Toolbar: flex row, wraps, `padding` `--stilo-toolbar-padding-y` `--stilo-toolbar-padding-x`,
+  `gap` `--stilo-toolbar-group-gap`, bottom border. Groups: flex row with `gap`
+  `--stilo-toolbar-gap`; every group after the first has a left border as separator and
+  `padding-left` `--stilo-toolbar-group-gap`.
 - Sticky toolbar (option `sticky`, T-021): the class `stilo-toolbar-host` goes on `container`,
   not on the toolbar, because a sticky element only moves inside its parent. It has
   `position: sticky`, `top: --stilo-toolbar-sticky-top`, `z-index: --stilo-z-toolbar` and the
