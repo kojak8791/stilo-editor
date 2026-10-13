@@ -99,6 +99,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 | `bench` | `playwright test -c playwright.bench.config.ts` | Performance benchmarks |
 | `size` | `npm run build && node scripts/size.mjs` | Bundle size of typical apps, tree-shaking check |
 | `check` | `npm run typecheck && npm run lint && npm run test` | **Quality gate** |
+| `prepublishOnly` | `npm run check && npm run build` | Run by `npm publish`: never publish an old or failing build |
 
 ---
 

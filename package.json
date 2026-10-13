@@ -56,7 +56,8 @@
     "test:e2e": "playwright test",
     "bench": "playwright test -c playwright.bench.config.ts",
     "size": "npm run build && node scripts/size.mjs",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "prepublishOnly": "npm run check && npm run build"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.8.0",

@@ -1,7 +1,7 @@
 <h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-    <img src="assets/logo.svg" alt="Stilo" width="300">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/logo-dark.svg">
+    <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/logo.svg" alt="Stilo" width="300">
   </picture>
 </h1>
 
