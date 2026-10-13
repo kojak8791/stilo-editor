@@ -1,4 +1,9 @@
-# Stilo
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="Stilo" width="300">
+  </picture>
+</h1>
 
 Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net).
 Clean HTML in and out, headless core, no paid tiers.
@@ -138,3 +143,6 @@ npm run bench   # performance benchmarks (needs: npx playwright install chromium
 ## License
 
 [MIT](LICENSE) © 2026 Alessio Coggiola
+
+The logo wordmark is drawn from [Outfit](https://github.com/Outfitio/Outfit-Fonts), licensed
+under the [SIL Open Font License 1.1](https://openfontlicense.org).

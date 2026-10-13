@@ -117,6 +117,7 @@ stilo-editor/
 ├── playwright.config.ts          E2E
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
+├── assets/                     Brand: logo and symbol (light/dark), favicon; source/ has the black shapes
 ├── docs/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── decisions/                ADRs: NNNN-short-title.md

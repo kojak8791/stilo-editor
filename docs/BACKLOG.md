@@ -47,6 +47,7 @@ may be split or merged when a task starts.
 | T-026 | Default UI: text color and highlight split buttons (the main part applies the last used color, the arrow opens a popover with "no color", a fixed palette replaceable with `textColorButton(palette)` and `highlightButton(palette)`, and a custom color) | F-804 | done |
 | T-027 | Toolbar restyle, first part: custom property defaults in one `:where(:root)` block of `ui.css` (no fallbacks), toolbar padding x/y, item gap and group gap split, 30px buttons, 2px gaps; later: a borderless look (only the outer editor border) | F-801, F-809 | todo |
 | T-028 | README "Features" table for users (feature, keyboard shortcut, Markdown shortcut, notes on popovers; keyboard and accessibility summary); `AGENTS.md` definition of done keeps it in sync | — | done |
+| T-029 | Logo: bicolor nib symbol (`assets/`, light and dark, adaptive favicon in the demo) and the `st\|lo` wordmark with a blinking caret, in the README header (`<picture>` for light and dark) | — | done |
 
 ## Notes for later milestones
 
