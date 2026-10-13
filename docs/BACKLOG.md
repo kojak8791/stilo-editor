@@ -46,11 +46,12 @@ may be split or merged when a task starts.
 | T-025 | `TextStyle` (mark `textStyle`, `color` only for now) and `Highlight` (`<mark>`, optional background color): parse, serialize, commands, `Mod-Shift-h`, `==text==`, in `StarterKit` | F-208, F-209 | done |
 | T-026 | Default UI: text color and highlight split buttons (the main part applies the last used color, the arrow opens a popover with "no color", a fixed palette replaceable with `textColorButton(palette)` and `highlightButton(palette)`, and a custom color) | F-804 | done |
 | T-027 | Toolbar restyle, first part: custom property defaults in one `:where(:root)` block of `ui.css` (no fallbacks), toolbar padding x/y, item gap and group gap split, 30px buttons, 2px gaps; later: a borderless look (only the outer editor border) | F-801, F-809 | todo |
+| T-028 | README "Features" table for users (feature, keyboard shortcut, Markdown shortcut, notes on popovers; keyboard and accessibility summary); `AGENTS.md` definition of done keeps it in sync | — | done |
 
 ## Notes for later milestones
 
 - First npm release: `SECURITY.md` (private vulnerability reports, response time),
-  `CONTRIBUTING.md`, issue templates (steps to reproduce, version, browser), and a "Support"
+  `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), and a "Support"
   section in the README with a concrete promise the owner can keep (for example, a first
   answer to every issue within 7 days, confirmed bugs before new features).
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.

@@ -34,6 +34,51 @@ between a key press and the character on screen; every change is checked against
 budgets. What it means in practice, the numbers and the limits:
 [Performance](docs/PERFORMANCE.md).
 
+## Features
+
+What the editor does today, with `StarterKit` and the default toolbar. On macOS, use
+<kbd>⌘</kbd> for <kbd>Ctrl</kbd> and <kbd>Option</kbd> for <kbd>Alt</kbd>. The *Markdown*
+column is what you type to get the format as you write.
+
+| Feature | Keyboard | Markdown | Notes |
+|---|---|---|---|
+| **Text** | | | |
+| Bold | <kbd>Ctrl</kbd>+<kbd>B</kbd> | `**text**` | |
+| Italic | <kbd>Ctrl</kbd>+<kbd>I</kbd> | `*text*` `_text_` | |
+| Underline | <kbd>Ctrl</kbd>+<kbd>U</kbd> | | |
+| Strikethrough | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> | `~~text~~` | |
+| Inline code | <kbd>Ctrl</kbd>+<kbd>E</kbd> | `` `text` `` | |
+| Subscript | <kbd>Ctrl</kbd>+<kbd>,</kbd> | | Subscript and superscript exclude each other |
+| Superscript | <kbd>Ctrl</kbd>+<kbd>.</kbd> | | |
+| Text color | | | The button applies the last color; its arrow opens a palette, "No color" and a custom color |
+| Highlight | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | `==text==` | Same button as text color; the shortcut applies the default highlight |
+| Clear formatting | <kbd>Ctrl</kbd>+<kbd>\\</kbd> | | Links stay |
+| **Links** | | | |
+| Link | <kbd>Ctrl</kbd>+<kbd>K</kbd> | | A popover sets the URL and "open in new tab"; on a link, a small bubble offers open, edit and remove |
+| **Blocks** | | | |
+| Paragraph | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>0</kbd> | | |
+| Headings 1–6 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>6</kbd> | `# ` … `###### ` | Also in the toolbar dropdown |
+| Quote | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> | `> ` | |
+| Horizontal line | | `---` | |
+| Line break | <kbd>Shift</kbd>+<kbd>Enter</kbd> | | New line in the same paragraph |
+| Move block up / down | <kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>Alt</kbd>+<kbd>↓</kbd> | | The block or list item at the cursor, or all the selected ones; sub-items move along |
+| **Lists** | | | |
+| Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | `- ` `* ` `+ ` | |
+| Numbered list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | `1. ` | Starts from the number you type |
+| Indent / outdent item | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | |
+| **Insert** | | | |
+| Special characters and emoji | | | A popover with search, symbols and emoji; it stays open to insert several in a row |
+| **Editing** | | | |
+| Undo | <kbd>Ctrl</kbd>+<kbd>Z</kbd> | | <kbd>Backspace</kbd> right after a Markdown shortcut undoes it |
+| Redo | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | | |
+| Paste | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | HTML is cleaned up; plain text lines become paragraphs |
+
+**Keyboard and accessibility.** Most shortcuts are the ones of Google Docs; the others follow
+the usual conventions of web editors, and every toolbar tooltip shows its shortcut. The toolbar
+follows the WAI-ARIA *Toolbar* pattern: <kbd>Alt</kbd>+<kbd>F10</kbd> moves the focus from the
+text to the toolbar, the arrow keys move between buttons, <kbd>Esc</kbd> goes back to the text.
+Every popover works with the keyboard alone and <kbd>Esc</kbd> closes it.
+
 ## Usage
 
 The API is usable in the demo page; the package is not on npm yet.
