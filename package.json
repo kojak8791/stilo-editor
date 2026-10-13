@@ -1,6 +1,6 @@
 {
   "name": "stilo-editor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Stilo is a modern and powerful open-source HTML5 WYSIWYG editor built on ProseMirror",
   "keywords": [
     "typescript",
@@ -14,6 +14,14 @@
   ],
   "author": "alessiocoggiola",
   "license": "MIT",
+  "homepage": "https://github.com/kojak8791/stilo-editor#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kojak8791/stilo-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kojak8791/stilo-editor/issues"
+  },
   "type": "module",
   "files": [
     "dist"
