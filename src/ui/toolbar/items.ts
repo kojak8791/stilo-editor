@@ -2,6 +2,7 @@ import {
   Bold,
   Code,
   FaceSlightlySmilingPlus,
+  Highlighter,
   Italic,
   Link,
   List,
@@ -13,13 +14,15 @@ import {
   Subscript,
   Superscript,
   TextQuote,
+  Type,
   Underline,
   Undo2,
 } from 'lucide';
 import type { Editor, HeadingLevel } from '../../index';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
-import type { ToolbarDropdown, ToolbarItem } from './types';
+import { DEFAULT_PALETTE } from './palette';
+import type { ToolbarColor, ToolbarColorButton, ToolbarDropdown, ToolbarItem } from './types';
 
 /** Default toolbar item IDs for the `items` configuration. */
 export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
@@ -36,6 +39,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'link',
     'clearFormatting',
   ],
+  ['textColor', 'highlight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ];
 
@@ -240,7 +244,59 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isAvailable: (e) => 'insertText' in e.commands,
   },
   heading: headingDropdown(),
+  textColor: textColorButton(),
+  highlight: highlightButton(),
 };
+
+/** The `color` attribute of a mark at the selection, `null` when there is none. */
+function markColor(editor: Editor, mark: string): string | null {
+  const { color } = editor.getAttributes(mark);
+  return typeof color === 'string' ? color : null;
+}
+
+/** The text color split button (`TextStyle` extension), default color red. */
+export function textColorButton(
+  palette: readonly ToolbarColor[] = DEFAULT_PALETTE,
+): ToolbarColorButton {
+  return {
+    id: 'textColor',
+    kind: 'color',
+    icon: Type,
+    labelKey: 'toolbar.textColor',
+    palette,
+    defaultColor: '#ef4444',
+    setColor: (e, color) => color !== null && e.commands.setColor(color),
+    unsetColor: (e) => {
+      e.commands.unsetColor();
+    },
+    hasColor: (e, color) => e.isActive('textStyle', { color }),
+    getColor: (e) => markColor(e, 'textStyle'),
+    isEnabled: (e) => 'setColor' in e.commands && e.can().setColor('#000000'),
+    isAvailable: (e) => 'setColor' in e.commands,
+  };
+}
+
+/** The highlight split button (`Highlight` extension), default a plain `<mark>`. */
+export function highlightButton(
+  palette: readonly ToolbarColor[] = DEFAULT_PALETTE,
+): ToolbarColorButton {
+  return {
+    id: 'highlight',
+    kind: 'color',
+    icon: Highlighter,
+    labelKey: 'toolbar.highlight',
+    palette,
+    defaultColor: null,
+    setColor: (e, color) => e.commands.setHighlight({ color }),
+    unsetColor: (e) => {
+      e.commands.unsetHighlight();
+    },
+    hasColor: (e, color) => e.isActive('highlight', { color }),
+    getColor: (e) => markColor(e, 'highlight'),
+    isEnabled: (e) => 'setHighlight' in e.commands && e.can().setHighlight(),
+    isAvailable: (e) => 'setHighlight' in e.commands,
+  };
+}
 
 /** A heading dropdown toolbar item. */
 export function headingDropdown(levels: HeadingLevel[] = [1, 2, 3, 4, 5, 6]): ToolbarDropdown {

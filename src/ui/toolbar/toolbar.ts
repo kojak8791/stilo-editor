@@ -1,6 +1,7 @@
 import type { Editor } from '../../index';
 import { StiloError } from '../../index';
 import { createCharacterPicker } from '../components/character-picker';
+import { type ColorButton, createColorButton } from '../components/color-button';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
 import { createIcon } from '../components/icon';
@@ -10,7 +11,7 @@ import { formatShortcut, isMacPlatform } from '../components/shortcut';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
 import { DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
-import type { ToolbarButton, ToolbarContext, ToolbarDropdown, ToolbarItem } from './types';
+import type { ToolbarButton, ToolbarContext, ToolbarItem } from './types';
 
 /** Options of {@link createToolbar}. */
 export interface ToolbarOptions {
@@ -38,10 +39,7 @@ export interface Toolbar {
 }
 
 /** Resolves an item from a string ID or a custom item object. */
-function resolveItem(
-  item: string | ToolbarItem,
-  editor: Editor,
-): ToolbarButton | ToolbarDropdown | undefined {
+function resolveItem(item: string | ToolbarItem, editor: Editor): ToolbarItem | undefined {
   if (typeof item === 'string') {
     const resolved = DEFAULT_ITEMS[item];
     if (!resolved) {
@@ -85,6 +83,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const itemElements: HTMLElement[] = [];
   const itemMap = new Map<HTMLElement, ToolbarItem>();
   const dropdownMap = new Map<string, DropdownInstance>();
+  const colorButtons: ColorButton[] = [];
 
   for (const group of resolvedGroups) {
     const groupEl = document.createElement('div');
@@ -122,6 +121,15 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         itemElements.push(ddInstance.trigger);
         itemMap.set(ddInstance.trigger, dd);
         dropdownMap.set(dd.id, ddInstance);
+      } else if (item.kind === 'color') {
+        // The split button handles its own clicks; its popover scrolls with the toolbar.
+        const colorButton = createColorButton(editor, item, { container: element, messages });
+        groupEl.appendChild(colorButton.element);
+        for (const part of [colorButton.main, colorButton.arrow]) {
+          itemElements.push(part);
+          itemMap.set(part, item);
+        }
+        colorButtons.push(colorButton);
       } else {
         const btnItem = item;
         const label = messages[btnItem.labelKey] ?? btnItem.labelKey;
@@ -214,9 +222,10 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   // Update function: refresh active/enabled states
   function update(): void {
+    for (const colorButton of colorButtons) colorButton.update();
     for (const el of itemElements) {
       const item = itemMap.get(el);
-      if (!item) continue;
+      if (!item || item.kind === 'color') continue;
 
       if (item.kind === 'dropdown') {
         // Update dropdown
@@ -283,10 +292,12 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   editor.on('transaction', onTransaction);
 
-  // mousedown on toolbar: preventDefault to keep editor focus, except in the character picker,
-  // whose search field and buttons take the focus.
+  // mousedown on toolbar: preventDefault to keep editor focus, except in the character and color
+  // pickers, whose fields and buttons take the focus.
   const onToolbarMousedown = (e: MouseEvent): void => {
-    if (isDestroyed || (e.target as Element).closest('.stilo-char-picker')) return;
+    if (isDestroyed || (e.target as Element).closest('.stilo-char-picker, .stilo-color-picker')) {
+      return;
+    }
     e.preventDefault();
   };
   element.addEventListener('mousedown', onToolbarMousedown);
@@ -400,6 +411,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     for (const ddInstance of dropdownMap.values()) {
       ddInstance.destroy();
     }
+    for (const colorButton of colorButtons) colorButton.destroy();
     linkPopover?.destroy();
     linkBubble?.destroy();
     characterPicker?.destroy();

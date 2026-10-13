@@ -39,10 +39,13 @@ src/ui/
 │   ├── link-popover.ts      createLinkPopover, canEditLink (T-016)
 │   ├── link-bubble.ts       createLinkBubble (T-016)
 │   ├── character-picker.ts  createCharacterPicker (T-024)
-│   └── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
+│   ├── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
+│   └── color-button.ts      createColorButton: split button and color popover (T-026)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
-    ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014)
+    ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014),
+    │                        textColorButton, highlightButton (T-026)
+    ├── palette.ts           DEFAULT_PALETTE (T-026)
     └── toolbar.ts           createToolbar
 src/styles/ui.css            All UI styles
 tests/architecture.test.ts   Import rules of ARCHITECTURE §2.2
@@ -54,9 +57,11 @@ Tests are colocated (`src/ui/**/<name>.test.ts`).
 
 ```ts
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
-export type { ToolbarButton, ToolbarContext, ToolbarDropdown, ToolbarDropdownOption,
-  ToolbarItem } from './toolbar/types';
-export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown } from './toolbar/items';
+export type { ToolbarButton, ToolbarColor, ToolbarColorButton, ToolbarContext,
+  ToolbarDropdown, ToolbarDropdownOption, ToolbarItem } from './toolbar/types';
+export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown, highlightButton,
+  textColorButton } from './toolbar/items';
+export { DEFAULT_PALETTE } from './toolbar/palette';
 export type { MessageKey, Messages } from './i18n/types';
 export { en } from './i18n/en';
 export { it } from './i18n/it';
@@ -147,7 +152,36 @@ export interface ToolbarDropdownOption {
   isEnabled?(editor: Editor): boolean;
 }
 
-export type ToolbarItem = ToolbarButton | ToolbarDropdown;   // T-013: ToolbarButton only
+/** A color of a ToolbarColorButton palette (T-026). */
+export interface ToolbarColor {
+  /** A CSS color, written as the editor stores it (e.g. lowercase `#rrggbb`). */
+  color: string;
+  /** Key of the color name in `messages`; a missing key is shown as is. */
+  labelKey: string;
+}
+
+/** A split button that applies a color (T-026, §5.4). */
+export interface ToolbarColorButton {
+  /** Unique within the toolbar; written as `data-item` on both parts. */
+  id: string;
+  kind: 'color';
+  icon: IconNode;
+  labelKey: string;
+  palette: readonly ToolbarColor[];
+  /** The color the main part applies until one is picked (`null`: the mark without a color). */
+  defaultColor: string | null;
+  /** Applies `color` to the selection; `false` when the color is refused. */
+  setColor(editor: Editor, color: string | null): boolean;
+  unsetColor(editor: Editor): void;
+  /** Whether the whole selection has `color`. */
+  hasColor(editor: Editor, color: string | null): boolean;
+  /** The color at the selection, `null` when there is none. */
+  getColor(editor: Editor): string | null;
+  isEnabled?(editor: Editor): boolean;
+  isAvailable?(editor: Editor): boolean;
+}
+
+export type ToolbarItem = ToolbarButton | ToolbarDropdown | ToolbarColorButton;
 ```
 
 ### 3.2 i18n
@@ -215,6 +249,14 @@ no functions.
 | `characters.activities` | Activities | Attività |
 | `characters.objects` | Objects | Oggetti |
 | `characters.emojiSymbols` | Symbols | Simboli |
+| `toolbar.textColor` | Text color | Colore testo |
+| `toolbar.highlight` | Highlight | Evidenziatore |
+| `color.more` | more colors | altri colori |
+| `color.none` | No color | Nessun colore |
+| `color.pick` | Pick a color | Scegli un colore |
+| `color.custom` | Custom color | Colore personalizzato |
+| `color.apply` | Apply | Applica |
+| `color.<name>` | the 32 color names of `DEFAULT_PALETTE` (`color.black`, `color.red`, `color.lightRed`, `color.darkRed`, …) | Nero, Rosso, Rosso chiaro, Rosso scuro, … |
 
 ### 3.3 Default items
 
@@ -226,6 +268,7 @@ no functions.
   ['heading'],
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
     'clearFormatting'],
+  ['textColor', 'highlight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ]
 ```
@@ -255,6 +298,21 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 `canEditLink(editor)` (§5.1), `isAvailable` is `'setLink' in editor.commands`.
 
 `heading` (T-014) is `headingDropdown()`, see §6.
+
+`textColor` and `highlight` (T-026) are color split buttons (§5.4), created by
+`textColorButton(palette = DEFAULT_PALETTE)` and `highlightButton(palette = DEFAULT_PALETTE)`;
+pass them with another palette as custom items to replace the colors
+(`textColorButton([{ color: '#0b5394', labelKey: 'Brand blue' }])`).
+
+| ID | Icon | `labelKey` | `defaultColor` | `setColor` / `unsetColor` | `hasColor` / `getColor` | `isAvailable` |
+|---|---|---|---|---|---|---|
+| `textColor` | `Type` | `toolbar.textColor` | `#ef4444` (red) | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
+| `highlight` | `Highlighter` | `toolbar.highlight` | `null` (plain `<mark>`) | `setHighlight({ color })` / `unsetHighlight()` | `isActive('highlight', { color })` / `getAttributes('highlight').color` | `'setHighlight' in editor.commands` |
+
+`isEnabled`: `can().setColor('#000000')` and `can().setHighlight()` (false inside code).
+
+`DEFAULT_PALETTE`: 8 columns; grays from black to white, then 8 hues (red, orange, yellow, green,
+cyan, blue, purple, pink) in a vivid, a light and a dark row (Tailwind shades 500, 200, 800).
 
 `characters` (T-024): `icon` `FaceSlightlySmilingPlus`, `labelKey` `toolbar.characters`, no shortcut, `run` calls
 `context.toggleCharacterPicker()` (§5.3), always enabled, `isAvailable` is
@@ -500,6 +558,67 @@ toolbar when it has the `characters` item: anchored to that button, `container` 
   closes without moving the focus.
 - The toolbar does not prevent `mousedown` inside the picker (its fields take the focus).
 
+### 5.4 Color split button (T-026)
+
+`createColorButton(editor, item, { container, messages })` (internal), created by the toolbar for
+every `kind: 'color'` item; the popover is mounted in the toolbar (it scrolls with it). Text color
+and highlight (SPEC F-208, F-209, F-804).
+
+```html
+<span class="stilo-split">
+  <button type="button" class="stilo-toolbar__button stilo-split__main" data-item="textColor"
+    aria-label="Text color" title="Text color" aria-pressed="false" tabindex="-1">
+    <svg class="stilo-icon" aria-hidden="true">…Type…</svg>
+    <span class="stilo-split__color" style="background-color: #ef4444"></span>
+  </button>
+  <button type="button" class="stilo-toolbar__button stilo-split__arrow" data-item="textColor"
+    aria-label="Text color: more colors" title="Text color: more colors" aria-haspopup="dialog"
+    aria-expanded="false" tabindex="-1">
+    <svg class="stilo-icon" aria-hidden="true">…ChevronDown…</svg>
+  </button>
+</span>
+<!-- appended to the toolbar element by createPopover -->
+<div class="stilo-popover stilo-color-picker" role="dialog" aria-label="Text color" hidden>
+  <button type="button" class="stilo-color-picker__none">No color</button>
+  <div class="stilo-color-picker__grid" role="group" aria-label="Text color">
+    <button type="button" class="stilo-color-picker__swatch" aria-label="Black" title="Black"
+      data-color="#000000" aria-pressed="false" tabindex="-1"
+      style="background-color: #000000"></button>
+    …
+  </div>
+  <form class="stilo-color-picker__custom">
+    <input type="color" class="stilo-color-picker__native" aria-label="Pick a color">
+    <input type="text" class="stilo-color-picker__value" aria-label="Custom color"
+      placeholder="#000000" autocomplete="off" spellcheck="false">
+    <button type="submit" class="stilo-color-picker__apply">Apply</button>
+  </form>
+</div>
+```
+
+- **Two items for the keyboard**: both parts are toolbar items (roving tabindex, §4.3) with the
+  same `data-item`; they share `aria-disabled` (`isEnabled`).
+- **Last used color**: starts as `defaultColor`, and changes when a swatch or a custom color is
+  applied (read back with `getColor`, so it is the normalized value). It is shown by the bar
+  under the icon (`Mark`, the browser's `<mark>` color, for `null`) and lives in the toolbar
+  only (not saved).
+- **Main part**: `hasColor(last)` → `unsetColor`, otherwise `setColor(last)`; `aria-pressed`
+  and `--active` follow `hasColor(last)`. It closes the popover if open. No shortcut in the
+  tooltip: `Mod-Shift-h` toggles a plain `<mark>`, not the last color.
+- **Arrow**: toggles the popover. Opening marks the swatch of `getColor` with
+  `aria-pressed="true"`, prefills the custom field with it (and the native picker when it is a
+  `#rrggbb`), and focuses that swatch or the first one (`preventScroll`, as in §5.1).
+- **Swatch** (click, `Enter`, `Space`): `setColor(color)`, close, `editor.focus()`. Arrow keys
+  move in the grid (8 columns, `COLUMNS` in the code and in `ui.css`): left/right by one,
+  up/down by a row, no wrapping.
+- ***No color***: `unsetColor`, close, `editor.focus()`.
+- **Custom color**: the native picker copies its value into the text field; *Apply* (or `Enter`)
+  runs `setColor` with the trimmed text. When it returns `false` the field gets
+  `aria-invalid="true"` and the focus; editing it removes the attribute. On success: close,
+  `editor.focus()`.
+- **Closing**: `Escape` closes and gives the focus to the editor; pointer down outside closes
+  without moving the focus. The toolbar does not prevent `mousedown` inside the popover (its
+  fields take the focus).
+
 ## 6. Dropdown and heading dropdown (T-014)
 
 ### 6.1 DOM
@@ -627,6 +746,12 @@ Layout:
   `--stilo-color-focus`), a panel up to 280px high that scrolls, muted category headings at
   `0.85em`, grids of 10 columns of 32px buttons with an 18px character, hover color as
   buttons.
+- Color split button: the two parts touch (inner corners square); the main part stacks a 16px
+  icon over a 16×4px color bar, the arrow is 16px wide with a 12px chevron. Color popover:
+  *No color* as a text button, a grid of 8 columns of 22px swatches (thin inner border so that
+  white shows, slight zoom on hover, the pressed one outlined in `--stilo-color-text`), and a
+  row with the native picker, the text field (`--stilo-color-error` border when invalid) and a
+  primary *Apply* button.
 - Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
   open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
 

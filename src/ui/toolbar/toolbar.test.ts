@@ -51,7 +51,7 @@ describe('toolbar', () => {
     const groups = [...toolbar.element.children].filter(
       (el) => el.getAttribute('role') === 'group',
     );
-    expect(groups.length).toBe(4);
+    expect(groups.length).toBe(5);
     expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
     const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
@@ -70,6 +70,10 @@ describe('toolbar', () => {
       'superscript',
       'link',
       'clearFormatting',
+      'textColor',
+      'textColor',
+      'highlight',
+      'highlight',
       'bulletList',
       'orderedList',
       'blockquote',

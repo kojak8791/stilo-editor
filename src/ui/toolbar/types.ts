@@ -51,5 +51,39 @@ export interface ToolbarDropdownOption {
   isEnabled?(editor: Editor): boolean;
 }
 
-/** A single item in the toolbar (T-013: `ToolbarButton` only). */
-export type ToolbarItem = ToolbarButton | ToolbarDropdown;
+/** A color of a {@link ToolbarColorButton} palette. */
+export interface ToolbarColor {
+  /** A CSS color, written as the editor stores it (e.g. lowercase `#rrggbb`). */
+  color: string;
+  /** Key of the color name in `messages`; a missing key is shown as is. */
+  labelKey: string;
+}
+
+/**
+ * A split button that applies a color (T-026): the main part applies the last used color (or
+ * removes it when the whole selection has it), the arrow opens a popover with the palette.
+ */
+export interface ToolbarColorButton {
+  /** Unique within the toolbar; written as `data-item` on both parts. */
+  id: string;
+  kind: 'color';
+  icon: IconNode;
+  labelKey: string;
+  palette: readonly ToolbarColor[];
+  /** The color the main part applies until one is picked (`null`: the mark without a color). */
+  defaultColor: string | null;
+  /** Applies `color` to the selection; `false` when the color is refused. */
+  setColor(editor: Editor, color: string | null): boolean;
+  /** Removes the color from the selection. */
+  unsetColor(editor: Editor): void;
+  /** Whether the whole selection has `color`. */
+  hasColor(editor: Editor, color: string | null): boolean;
+  /** The color at the selection, `null` when there is none. */
+  getColor(editor: Editor): string | null;
+  /** Default: always enabled. */
+  isEnabled?(editor: Editor): boolean;
+  isAvailable?(editor: Editor): boolean;
+}
+
+/** A single item in the toolbar. */
+export type ToolbarItem = ToolbarButton | ToolbarDropdown | ToolbarColorButton;
