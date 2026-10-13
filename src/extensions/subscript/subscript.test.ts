@@ -57,7 +57,7 @@ describe('Subscript: commands', () => {
 
   it('cannot be set inside code', () => {
     const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
-    expect(editor.can().toggleSubscript()).toBe(false);
+    expect(editor.commands.toggleSubscript.can()).toBe(false);
   });
 
   it('reports the active state', () => {

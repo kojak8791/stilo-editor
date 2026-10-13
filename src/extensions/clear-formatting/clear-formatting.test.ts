@@ -38,11 +38,11 @@ describe('clearFormatting: multi-step', () => {
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });
 
-  it('can().clearFormatting is true/false as expected', () => {
+  it('clearFormatting.can() is true/false as expected', () => {
     const editor1 = createTestEditor({ html: '<p><strong>[ab]</strong></p>' });
-    expect(editor1.can().clearFormatting()).toBe(true);
+    expect(editor1.commands.clearFormatting.can()).toBe(true);
     const editor2 = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor2.can().clearFormatting()).toBe(false);
+    expect(editor2.commands.clearFormatting.can()).toBe(false);
   });
 
   it('applies stored marks after clearFormatting', () => {

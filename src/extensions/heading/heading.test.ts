@@ -15,7 +15,7 @@ describe('Heading: parse and serialize', () => {
   it('ignores h4 when levels are [1,2,3]', () => {
     const editor = createTestEditor({
       html: '<h1>a</h1><h4>d</h4>',
-      extensions: [StarterKit({ heading: { levels: [1, 2, 3] } })],
+      extensions: [defaultExtensions({ heading: { levels: [1, 2, 3] } })],
     });
     expect(editor.getHTML()).toBe('<h1>a</h1><p>d</p>');
   });
@@ -50,7 +50,7 @@ describe('Heading: commands', () => {
   it('returns false for setHeading with disallowed level', () => {
     const editor = createTestEditor({
       html: '<p>a|b</p>',
-      extensions: [StarterKit({ heading: { levels: [1, 2, 3] } })],
+      extensions: [defaultExtensions({ heading: { levels: [1, 2, 3] } })],
     });
     expect(editor.commands.setHeading({ level: 4 as HeadingLevel })).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>a|b</p>');
@@ -70,7 +70,7 @@ describe('Heading: keymap', () => {
   it('returns false for Mod-Alt-4 when levels are [1,2,3]', () => {
     const editor = createTestEditor({
       html: '<p>a|b</p>',
-      extensions: [StarterKit({ heading: { levels: [1, 2, 3] } })],
+      extensions: [defaultExtensions({ heading: { levels: [1, 2, 3] } })],
     });
     expect(pressKey(editor, 'Mod-Alt-4')).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>a|b</p>');
@@ -101,12 +101,12 @@ describe('Heading: input rule', () => {
   it('ignores #### when levels are [1,2,3]', () => {
     const editor = createTestEditor({
       html: '<p>|</p>',
-      extensions: [StarterKit({ heading: { levels: [1, 2, 3] } })],
+      extensions: [defaultExtensions({ heading: { levels: [1, 2, 3] } })],
     });
     typeText(editor, '#### a');
     expect(getHTMLWithSelection(editor)).toBe('<p>#### a|</p>');
   });
 });
 
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 import type { HeadingLevel } from './index';

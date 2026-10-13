@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { createCoreEditor, select, selectNode } from '../../tests/helpers/core';
 import type { Editor } from './editor';
 import { defineExtension } from './extension';
-import type { CommandRunners } from './types';
+import type { CommandRunner, CommandRunners } from './types';
 
-type Runners = Record<string, (...args: unknown[]) => boolean>;
+type Runners = Record<string, CommandRunner<unknown[]>>;
 
-/** `commands`/`can()` without module augmentation of `Commands`. */
+/** `commands` without module augmentation of `Commands`. */
 function runners(commands: CommandRunners): Runners {
   return commands as unknown as Runners;
 }
@@ -126,41 +126,41 @@ describe('Editor: content', () => {
 });
 
 describe('Editor: setHTML', () => {
-  it('replaces the content in one transaction, puts the selection at start and emits update', () => {
+  it('replaces the content in one transaction, puts the selection at start and emits input', () => {
     const editor = createCoreEditor('<p>old</p>');
     select(editor, 3);
     const transaction = vi.fn();
-    const update = vi.fn();
+    const input = vi.fn();
     editor.on('transaction', transaction);
-    editor.on('update', update);
+    editor.on('input', input);
     editor.setHTML('<p>new</p><p>text</p>');
     expect(editor.getHTML()).toBe('<p>new</p><p>text</p>');
     expect(editor.state.selection.from).toBe(1);
     expect(transaction).toHaveBeenCalledTimes(1);
-    expect(update).toHaveBeenCalledTimes(1);
-    expect(update.mock.calls[0]?.[0].transaction).toBe(transaction.mock.calls[0]?.[0].transaction);
+    expect(input).toHaveBeenCalledTimes(1);
+    expect(input.mock.calls[0]?.[0].transaction).toBe(transaction.mock.calls[0]?.[0].transaction);
   });
 
-  it('does not emit update with emitUpdate: false', () => {
+  it('does not emit input with emitInput: false', () => {
     const editor = createCoreEditor('<p>old</p>');
-    const update = vi.fn();
-    editor.on('update', update);
-    editor.setHTML('<p>new</p>', { emitUpdate: false });
-    editor.setHTML('<p>newer</p>', { emitUpdate: false, resetHistory: true });
+    const input = vi.fn();
+    editor.on('input', input);
+    editor.setHTML('<p>new</p>', { emitInput: false });
+    editor.setHTML('<p>newer</p>', { emitInput: false, resetHistory: true });
     expect(editor.getHTML()).toBe('<p>newer</p>');
-    expect(update).not.toHaveBeenCalled();
+    expect(input).not.toHaveBeenCalled();
   });
 
   it('creates a fresh state with the same plugins with resetHistory: true', () => {
     const editor = createCoreEditor('<p>old</p>');
     const previous = editor.state;
-    const update = vi.fn();
-    editor.on('update', update);
+    const input = vi.fn();
+    editor.on('input', input);
     editor.setHTML('<p>new</p>', { resetHistory: true });
     expect(editor.state).not.toBe(previous);
     expect(editor.state.plugins).toEqual(previous.plugins);
     expect(editor.getHTML()).toBe('<p>new</p>');
-    expect(update).toHaveBeenCalledWith({ editor, transaction: null });
+    expect(input).toHaveBeenCalledWith({ editor, transaction: null });
   });
 
   it('is undone as its own step, not grouped with the changes just before it', () => {
@@ -186,12 +186,12 @@ describe('Editor: commands', () => {
     expect(runners(editor.commands).insertTestText?.('')).toBe(false);
   });
 
-  it('dry-runs a command with can() without dispatching', () => {
+  it('dry-runs a command with .can() without dispatching', () => {
     const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
     const transaction = vi.fn();
     editor.on('transaction', transaction);
-    expect(runners(editor.can()).insertTestText?.('b')).toBe(true);
-    expect(runners(editor.can()).insertTestText?.('')).toBe(false);
+    expect(runners(editor.commands).insertTestText?.can('b')).toBe(true);
+    expect(runners(editor.commands).insertTestText?.can('')).toBe(false);
     expect(editor.getHTML()).toBe('<p>a</p>');
     expect(transaction).not.toHaveBeenCalled();
   });
@@ -259,32 +259,32 @@ describe('Editor: editable, focus and events', () => {
     expect(editor.state.selection.from).toBe(expected);
   });
 
-  it('emits update for document changes and selectionUpdate for selection-only changes', () => {
+  it('emits input for document changes and selectionchange for selection-only changes', () => {
     const editor = createCoreEditor('<p>ab</p>');
-    const update = vi.fn();
-    const selectionUpdate = vi.fn();
-    editor.on('update', update);
-    editor.on('selectionUpdate', selectionUpdate);
+    const input = vi.fn();
+    const selectionChange = vi.fn();
+    editor.on('input', input);
+    editor.on('selectionchange', selectionChange);
     select(editor, 2);
-    expect(selectionUpdate).toHaveBeenCalledTimes(1);
-    expect(update).not.toHaveBeenCalled();
+    expect(selectionChange).toHaveBeenCalledTimes(1);
+    expect(input).not.toHaveBeenCalled();
     editor.view.dispatch(editor.state.tr.insertText('x'));
-    expect(update).toHaveBeenCalledTimes(1);
-    expect(selectionUpdate).toHaveBeenCalledTimes(1);
+    expect(input).toHaveBeenCalledTimes(1);
+    expect(selectionChange).toHaveBeenCalledTimes(1);
   });
 
   it('emits no event for a transaction that changes nothing but metadata', () => {
     const editor = createCoreEditor('<p>ab</p>');
-    const update = vi.fn();
-    const selectionUpdate = vi.fn();
+    const input = vi.fn();
+    const selectionChange = vi.fn();
     const transaction = vi.fn();
-    editor.on('update', update);
-    editor.on('selectionUpdate', selectionUpdate);
+    editor.on('input', input);
+    editor.on('selectionchange', selectionChange);
     editor.on('transaction', transaction);
     editor.view.dispatch(editor.state.tr.setMeta('x', 1));
     expect(transaction).toHaveBeenCalledTimes(1);
-    expect(update).not.toHaveBeenCalled();
-    expect(selectionUpdate).not.toHaveBeenCalled();
+    expect(input).not.toHaveBeenCalled();
+    expect(selectionChange).not.toHaveBeenCalled();
   });
 
   it('emits focus and blur with the DOM event', () => {
@@ -302,11 +302,11 @@ describe('Editor: editable, focus and events', () => {
 
   it('removes a handler with off', () => {
     const editor = createCoreEditor('<p>ab</p>');
-    const update = vi.fn();
-    editor.on('update', update);
-    editor.off('update', update);
+    const input = vi.fn();
+    editor.on('input', input);
+    editor.off('input', input);
     editor.setHTML('<p>x</p>');
-    expect(update).not.toHaveBeenCalled();
+    expect(input).not.toHaveBeenCalled();
   });
 });
 
@@ -338,10 +338,10 @@ describe('Editor: destroy', () => {
 
   it('ignores transactions after destroy', () => {
     const { editor } = destroyed();
-    const update = vi.fn();
-    editor.on('update', update);
+    const input = vi.fn();
+    editor.on('input', input);
     expect(() => editor.view.dispatch(editor.state.tr.insertText('x'))).not.toThrow();
-    expect(update).not.toHaveBeenCalled();
+    expect(input).not.toHaveBeenCalled();
   });
 });
 

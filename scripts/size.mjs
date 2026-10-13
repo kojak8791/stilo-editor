@@ -16,16 +16,16 @@ new Editor({ element: document.body, extensions: [Document(), Text(), Paragraph(
     absent: ['prosemirror-dropcursor', 'prosemirror-gapcursor', 'prosemirror-schema-list'],
   },
   {
-    name: 'Core + StarterKit',
-    code: `import { Editor, StarterKit } from 'stilo-editor';
-new Editor({ element: document.body, extensions: [StarterKit()] });`,
+    name: 'Core + defaultExtensions',
+    code: `import { Editor, defaultExtensions } from 'stilo-editor';
+new Editor({ element: document.body, extensions: [defaultExtensions()] });`,
     absent: [],
   },
   {
-    name: 'Core + StarterKit + UI',
-    code: `import { Editor, StarterKit } from 'stilo-editor';
+    name: 'Core + defaultExtensions + UI',
+    code: `import { Editor, defaultExtensions } from 'stilo-editor';
 import { createToolbar } from 'stilo-editor/ui';
-const editor = new Editor({ element: document.body, extensions: [StarterKit()] });
+const editor = new Editor({ element: document.body, extensions: [defaultExtensions()] });
 createToolbar(editor, { container: document.body });`,
     absent: [],
   },

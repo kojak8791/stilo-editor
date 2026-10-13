@@ -118,7 +118,7 @@ describe('TextStyle: commands', () => {
 
   it('cannot be set inside code', () => {
     const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
-    expect(editor.can().setColor('red')).toBe(false);
+    expect(editor.commands.setColor.can('red')).toBe(false);
   });
 
   it('is removed by clearFormatting', () => {

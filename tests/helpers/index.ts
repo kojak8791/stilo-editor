@@ -3,7 +3,7 @@ import { EditorState, TextSelection } from 'prosemirror-state';
 import { Editor } from '../../src/core/editor';
 import type { Extension } from '../../src/core/extension';
 import { serializeHTML } from '../../src/core/html/serialize';
-import { StarterKit } from '../../src/extensions';
+import { defaultExtensions } from '../../src/extensions';
 
 /**
  * Selection markers in test HTML: `|` is the cursor, `[` and `]` delimit a range.
@@ -15,7 +15,7 @@ type Marker = (typeof MARKERS)[number];
 
 /** Options of {@link createTestEditor}. */
 export interface TestEditorOptions {
-  /** Default: `[StarterKit()]`. */
+  /** Default: `[defaultExtensions()]`. */
   extensions?: Array<Extension | Extension[]>;
   /** Initial HTML, optionally with selection markers. Default: empty document. */
   html?: string;
@@ -35,7 +35,7 @@ export interface TestEditorOptions {
 export function createTestEditor(options: TestEditorOptions = {}): Editor {
   const editor = new Editor({
     element: document.createElement('div'),
-    extensions: options.extensions ?? [StarterKit()],
+    extensions: options.extensions ?? [defaultExtensions()],
     content: options.html ?? '',
   });
   const { state } = editor;

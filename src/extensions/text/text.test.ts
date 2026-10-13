@@ -16,7 +16,7 @@ describe('Text: insertText', () => {
 
   it('returns false for an empty string, without changes', () => {
     const editor = createTestEditor({ html: '<p>a|</p>' });
-    expect(editor.can().insertText('')).toBe(false);
+    expect(editor.commands.insertText.can('')).toBe(false);
     expect(editor.commands.insertText('')).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>a|</p>');
   });

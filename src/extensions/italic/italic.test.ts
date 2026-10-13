@@ -55,7 +55,7 @@ describe('Italic: commands', () => {
 
   it('returns false for unsetItalic where there is no italic, without changes', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor.can().unsetItalic()).toBe(false);
+    expect(editor.commands.unsetItalic.can()).toBe(false);
     expect(editor.commands.unsetItalic()).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });

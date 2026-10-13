@@ -55,7 +55,7 @@ describe('Strike: commands', () => {
 
   it('returns false for unsetStrike where there is no strike, without changes', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor.can().unsetStrike()).toBe(false);
+    expect(editor.commands.unsetStrike.can()).toBe(false);
     expect(editor.commands.unsetStrike()).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });

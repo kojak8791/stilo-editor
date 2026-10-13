@@ -147,7 +147,7 @@ describe('Highlight: commands', () => {
 
   it('cannot be set inside code', () => {
     const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
-    expect(editor.can().toggleHighlight()).toBe(false);
+    expect(editor.commands.toggleHighlight.can()).toBe(false);
   });
 
   it('is removed by clearFormatting', () => {

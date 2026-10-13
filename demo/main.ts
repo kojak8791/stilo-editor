@@ -2,7 +2,7 @@
 import '../src/styles/content.css';
 import './demo.css';
 import '../src/styles/ui.css';
-import { Editor, StarterKit } from '../src';
+import { defaultExtensions, Editor } from '../src';
 import { createToolbar } from '../src/ui';
 
 const content = [
@@ -26,7 +26,7 @@ if (params.has('fixed')) {
 
 const editor = new Editor({
   element: document.querySelector<HTMLElement>('#editor')!,
-  extensions: [StarterKit({ placeholder: { placeholder: 'Write something…' } })],
+  extensions: [defaultExtensions({ placeholder: { placeholder: 'Write something…' } })],
   content,
   ariaLabel: 'Demo editor',
 });
@@ -41,6 +41,6 @@ if (params.has('bench')) {
   const showHTML = () => {
     output.textContent = editor.getHTML();
   };
-  editor.on('update', showHTML);
+  editor.on('input', showHTML);
   showHTML();
 }

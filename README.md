@@ -41,7 +41,7 @@ budgets. What it means in practice, the numbers and the limits:
 
 ## Features
 
-What the editor does today, with `StarterKit` and the default toolbar. On macOS, use
+What the editor does today, with `defaultExtensions` and the default toolbar. On macOS, use
 <kbd>⌘</kbd> for <kbd>Ctrl</kbd> and <kbd>Option</kbd> for <kbd>Alt</kbd>. The *Markdown*
 column is what you type to get the format as you write.
 
@@ -89,11 +89,11 @@ Every popover works with the keyboard alone and <kbd>Esc</kbd> closes it.
 The API is usable in the demo page; the package is not on npm yet.
 
 ```ts
-import { Editor, StarterKit } from 'stilo-editor';
+import { Editor, defaultExtensions } from 'stilo-editor';
 
 const editor = new Editor({
   element: document.querySelector('#editor')!,
-  extensions: [StarterKit()],
+  extensions: [defaultExtensions()],
   content: '<p>Hello <strong>world</strong></p>',
 });
 

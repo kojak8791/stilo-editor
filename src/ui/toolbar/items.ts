@@ -54,7 +54,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     run: (e) => {
       e.commands.undo();
     },
-    isEnabled: (e) => e.can().undo(),
+    isEnabled: (e) => e.commands.undo.can(),
   },
   redo: {
     id: 'redo',
@@ -65,7 +65,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     run: (e) => {
       e.commands.redo();
     },
-    isEnabled: (e) => e.can().redo(),
+    isEnabled: (e) => e.commands.redo.can(),
   },
   bold: {
     id: 'bold',
@@ -77,7 +77,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleBold();
     },
     isActive: (e) => e.isActive('bold'),
-    isEnabled: (e) => 'toggleBold' in e.commands && e.can().toggleBold(),
+    isEnabled: (e) => 'toggleBold' in e.commands && e.commands.toggleBold.can(),
     isAvailable: (e) => 'toggleBold' in e.commands,
   },
   italic: {
@@ -90,7 +90,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleItalic();
     },
     isActive: (e) => e.isActive('italic'),
-    isEnabled: (e) => 'toggleItalic' in e.commands && e.can().toggleItalic(),
+    isEnabled: (e) => 'toggleItalic' in e.commands && e.commands.toggleItalic.can(),
     isAvailable: (e) => 'toggleItalic' in e.commands,
   },
   underline: {
@@ -103,7 +103,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleUnderline();
     },
     isActive: (e) => e.isActive('underline'),
-    isEnabled: (e) => 'toggleUnderline' in e.commands && e.can().toggleUnderline(),
+    isEnabled: (e) => 'toggleUnderline' in e.commands && e.commands.toggleUnderline.can(),
     isAvailable: (e) => 'toggleUnderline' in e.commands,
   },
   strike: {
@@ -116,7 +116,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleStrike();
     },
     isActive: (e) => e.isActive('strike'),
-    isEnabled: (e) => 'toggleStrike' in e.commands && e.can().toggleStrike(),
+    isEnabled: (e) => 'toggleStrike' in e.commands && e.commands.toggleStrike.can(),
     isAvailable: (e) => 'toggleStrike' in e.commands,
   },
   code: {
@@ -129,7 +129,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleCode();
     },
     isActive: (e) => e.isActive('code'),
-    isEnabled: (e) => 'toggleCode' in e.commands && e.can().toggleCode(),
+    isEnabled: (e) => 'toggleCode' in e.commands && e.commands.toggleCode.can(),
     isAvailable: (e) => 'toggleCode' in e.commands,
   },
   subscript: {
@@ -142,7 +142,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleSubscript();
     },
     isActive: (e) => e.isActive('subscript'),
-    isEnabled: (e) => 'toggleSubscript' in e.commands && e.can().toggleSubscript(),
+    isEnabled: (e) => 'toggleSubscript' in e.commands && e.commands.toggleSubscript.can(),
     isAvailable: (e) => 'toggleSubscript' in e.commands,
   },
   superscript: {
@@ -155,7 +155,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleSuperscript();
     },
     isActive: (e) => e.isActive('superscript'),
-    isEnabled: (e) => 'toggleSuperscript' in e.commands && e.can().toggleSuperscript(),
+    isEnabled: (e) => 'toggleSuperscript' in e.commands && e.commands.toggleSuperscript.can(),
     isAvailable: (e) => 'toggleSuperscript' in e.commands,
   },
   link: {
@@ -180,7 +180,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     run: (e) => {
       e.commands.clearFormatting();
     },
-    isEnabled: (e) => 'clearFormatting' in e.commands && e.can().clearFormatting(),
+    isEnabled: (e) => 'clearFormatting' in e.commands && e.commands.clearFormatting.can(),
     isAvailable: (e) => 'clearFormatting' in e.commands,
   },
   bulletList: {
@@ -193,7 +193,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleBulletList();
     },
     isActive: (e) => e.isActive('bulletList'),
-    isEnabled: (e) => 'toggleBulletList' in e.commands && e.can().toggleBulletList(),
+    isEnabled: (e) => 'toggleBulletList' in e.commands && e.commands.toggleBulletList.can(),
     isAvailable: (e) => 'toggleBulletList' in e.commands,
   },
   orderedList: {
@@ -206,7 +206,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleOrderedList();
     },
     isActive: (e) => e.isActive('orderedList'),
-    isEnabled: (e) => 'toggleOrderedList' in e.commands && e.can().toggleOrderedList(),
+    isEnabled: (e) => 'toggleOrderedList' in e.commands && e.commands.toggleOrderedList.can(),
     isAvailable: (e) => 'toggleOrderedList' in e.commands,
   },
   blockquote: {
@@ -219,7 +219,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       e.commands.toggleBlockquote();
     },
     isActive: (e) => e.isActive('blockquote'),
-    isEnabled: (e) => 'toggleBlockquote' in e.commands && e.can().toggleBlockquote(),
+    isEnabled: (e) => 'toggleBlockquote' in e.commands && e.commands.toggleBlockquote.can(),
     isAvailable: (e) => 'toggleBlockquote' in e.commands,
   },
   horizontalRule: {
@@ -230,7 +230,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     run: (e) => {
       e.commands.setHorizontalRule();
     },
-    isEnabled: (e) => 'setHorizontalRule' in e.commands && e.can().setHorizontalRule(),
+    isEnabled: (e) => 'setHorizontalRule' in e.commands && e.commands.setHorizontalRule.can(),
     isAvailable: (e) => 'setHorizontalRule' in e.commands,
   },
   characters: {
@@ -271,7 +271,7 @@ export function textColorButton(
     },
     hasColor: (e, color) => e.isActive('textStyle', { color }),
     getColor: (e) => markColor(e, 'textStyle'),
-    isEnabled: (e) => 'setColor' in e.commands && e.can().setColor('#000000'),
+    isEnabled: (e) => 'setColor' in e.commands && e.commands.setColor.can('#000000'),
     isAvailable: (e) => 'setColor' in e.commands,
   };
 }
@@ -294,7 +294,7 @@ export function highlightButton(
     },
     hasColor: (e, color) => e.isActive('highlight', { color }),
     getColor: (e) => markColor(e, 'highlight'),
-    isEnabled: (e) => 'setHighlight' in e.commands && e.can().setHighlight(),
+    isEnabled: (e) => 'setHighlight' in e.commands && e.commands.setHighlight.can(),
     isAvailable: (e) => 'setHighlight' in e.commands,
   };
 }
@@ -310,7 +310,7 @@ export function headingDropdown(levels: HeadingLevel[] = [1, 2, 3, 4, 5, 6]): To
         e.commands.setParagraph();
       },
       isActive: (e: Editor) => e.isActive('paragraph'),
-      isEnabled: (e: Editor) => e.isActive('paragraph') || e.can().setParagraph(),
+      isEnabled: (e: Editor) => e.isActive('paragraph') || e.commands.setParagraph.can(),
     },
     ...levels.map((level) => ({
       id: `h${level}`,
@@ -320,7 +320,8 @@ export function headingDropdown(levels: HeadingLevel[] = [1, 2, 3, 4, 5, 6]): To
         e.commands.setHeading({ level });
       },
       isActive: (e: Editor) => e.isActive('heading', { level }),
-      isEnabled: (e: Editor) => e.isActive('heading', { level }) || e.can().setHeading({ level }),
+      isEnabled: (e: Editor) =>
+        e.isActive('heading', { level }) || e.commands.setHeading.can({ level }),
     })),
   ];
 

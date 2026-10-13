@@ -2,7 +2,7 @@ import { GapCursor as GapCursorSelection } from 'prosemirror-gapcursor';
 import { TextSelection } from 'prosemirror-state';
 import { describe, expect, it } from 'vitest';
 import { createTestEditor, pressKey } from '../../../tests/helpers';
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 
 function setGapCursor(editor: ReturnType<typeof createTestEditor>, pos: number): void {
   editor.view.dispatch(
@@ -25,7 +25,7 @@ describe('GapCursor: gap cursor selection', () => {
   it('gap cursor hidden when disabled', () => {
     const editor = createTestEditor({
       html: '<hr><hr>',
-      extensions: [StarterKit({ gapCursor: false })],
+      extensions: [defaultExtensions({ gapCursor: false })],
     });
     setGapCursor(editor, 1);
     expect(gapElements(editor)).toBe(0);
@@ -52,8 +52,8 @@ describe('GapCursor: gap cursor selection', () => {
 
   it('adds one plugin', () => {
     const withPlugin = createTestEditor().state.plugins.length;
-    const without = createTestEditor({ extensions: [StarterKit({ gapCursor: false })] }).state
-      .plugins.length;
+    const without = createTestEditor({ extensions: [defaultExtensions({ gapCursor: false })] })
+      .state.plugins.length;
     expect(withPlugin).toBe(without + 1);
   });
 });

@@ -1,10 +1,10 @@
 import { TextSelection } from 'prosemirror-state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestEditor } from '../../../tests/helpers';
-import { StarterKit } from '../../index';
+import { defaultExtensions } from '../../index';
 import { createToolbar } from '../index';
 
-function setup(html: string, extensions = [StarterKit()]) {
+function setup(html: string, extensions = [defaultExtensions()]) {
   const editor = createTestEditor({ html, extensions });
   document.body.append(editor.view.dom.parentElement!);
   // jsdom has no layout: coordsAtPos needs Range.getClientRects.
@@ -53,7 +53,9 @@ describe('link button', () => {
   });
 
   it('is not rendered without the Link extension, and Mod-k is left alone', () => {
-    const { toolbar, dialog, bubble, modK } = setup('<p>ab</p>', [StarterKit({ link: false })]);
+    const { toolbar, dialog, bubble, modK } = setup('<p>ab</p>', [
+      defaultExtensions({ link: false }),
+    ]);
     expect(toolbar.element.querySelector('[data-item="link"]')).toBeNull();
     expect(dialog).toBeNull();
     expect(bubble).toBeNull();

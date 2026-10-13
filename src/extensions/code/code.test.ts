@@ -52,7 +52,7 @@ describe('Code: commands', () => {
 
   it('returns false for unsetCode where there is no code, without changes', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor.can().unsetCode()).toBe(false);
+    expect(editor.commands.unsetCode.can()).toBe(false);
     expect(editor.commands.unsetCode()).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });
@@ -71,8 +71,8 @@ describe('Code: commands', () => {
 
   it('blocks formatting marks inside code', () => {
     const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
-    expect(editor.can().toggleBold()).toBe(false);
-    expect(editor.can().setItalic()).toBe(false);
+    expect(editor.commands.toggleBold.can()).toBe(false);
+    expect(editor.commands.setItalic.can()).toBe(false);
   });
 });
 

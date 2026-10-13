@@ -8,8 +8,8 @@ document in the same change.
 
 ## 1. Principles
 
-- The UI is optional and uses only the public core API (`src/index.ts`): `editor.commands`,
-  `editor.can()`, `editor.isActive()`, `editor.getAttributes()`, `editor.on/off`,
+- The UI is optional and uses only the public core API (`src/index.ts`): `editor.commands`
+  and their `.can()`, `editor.isActive()`, `editor.getAttributes()`, `editor.on/off`,
   `editor.focus()`, and `editor.view`
   for two things only: anchoring popovers to the selection (`view.coordsAtPos`,
   `view.domAtPos`, `view.hasFocus()`, and mounting next to `view.dom`) and listening to DOM
@@ -277,7 +277,7 @@ no functions.
 ```
 
 Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` calls
-`editor.can().<command>()`, `isAvailable` is `'<command>' in editor.commands`.
+`editor.commands.<command>.can()`, `isAvailable` is `'<command>' in editor.commands`.
 
 | ID | Icon (`lucide`) | `labelKey` | Shortcut | Command | `isActive` |
 |---|---|---|---|---|---|
@@ -312,7 +312,7 @@ pass them with another palette as custom items to replace the colors
 | `textColor` | `Type` | `toolbar.textColor` | `#000000` (black), no `defaultChoice` | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
 | `highlight` | `Highlighter` | `toolbar.highlight` | `null` (plain `<mark>`), `defaultChoice: true` | `setHighlight({ color })` / `unsetHighlight()` | `isActive('highlight', { color })` / `getAttributes('highlight').color` | `'setHighlight' in editor.commands` |
 
-`isEnabled`: `can().setColor('#000000')` and `can().setHighlight()` (false inside code).
+`isEnabled`: `commands.setColor.can('#000000')` and `commands.setHighlight.can()` (false inside code).
 
 `DEFAULT_PALETTE`: 8 columns; grays from black to white, then 8 hues (red, orange, yellow, green,
 cyan, blue, purple, pink) in a vivid, a light and a dark row (Tailwind shades 500, 200, 800).
@@ -455,7 +455,7 @@ editor (or on `:root`).
 
 `createLinkPopover(editor, { container, messages })` (internal, created by the toolbar with its
 element as container) and `canEditLink(editor)`: `isActive('link') ||
-can().setLink({ href: 'https://example.com' })`, i.e. false only at a cursor outside a link.
+commands.setLink.can({ href: 'https://example.com' })`, i.e. false only at a cursor outside a link.
 
 ```html
 <div class="stilo-popover stilo-link-popover" role="dialog" aria-label="Link" hidden>
@@ -688,7 +688,7 @@ with fewer levels.
 | `paragraph` | `heading.paragraph` | `Mod-Alt-0` | `setParagraph()` | `isActive('paragraph')` |
 | `h<n>` | `heading.h<n>` | `Mod-Alt-<n>` | `setHeading({ level: n })` | `isActive('heading', { level: n })` |
 
-`isEnabled` of each option: `isActive(editor) || editor.can().<run command>`. `setBlockType`
+`isEnabled` of each option: `isActive(editor) || editor.commands.<run command>.can()`. `setBlockType`
 refuses a block that already has the type, and the active option must stay selectable.
 
 ## 7. Styles (`src/styles/ui.css`)

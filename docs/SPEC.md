@@ -18,12 +18,12 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | ID | Feature | M | Notes |
 |---|---|---|---|
 | F-001 | `Editor` class: create on a DOM element with HTML content and a list of extensions | M1 | See ARCHITECTURE §5 |
-| F-002 | `getHTML()` / `setHTML(html, { resetHistory?, emitUpdate? })` | M1 | Canonical output, see ARCHITECTURE §7. Replacement is undoable unless `resetHistory: true` |
+| F-002 | `getHTML()` / `setHTML(html, { resetHistory?, emitInput? })` | M1 | Canonical output, see ARCHITECTURE §7. Replacement is undoable unless `resetHistory: true` |
 | F-003 | `getJSON()` / `setJSON(json)` | M1 | ProseMirror JSON, optional format |
 | F-004 | `getText()` plain text export | M1 | Blocks separated by `\n\n` |
 | F-005 | `isEmpty`, `isEditable`, `setEditable(bool)` (read-only mode) | M1 | |
-| F-006 | Events: `update`, `selectionUpdate`, `transaction`, `focus`, `blur`, `destroy` | M1 | `on/off` API |
-| F-007 | `commands.*`, `can().*`, `isActive(name, attrs?)` | M1 | |
+| F-006 | Events: `input`, `selectionchange`, `transaction`, `focus`, `blur`, `destroy` | M1 | `on/off` API |
+| F-007 | `commands.*`, `commands.*.can()`, `isActive(name, attrs?)`, selection commands `select`, `selectNode`, `selectAll` | M1 | |
 | F-008 | `focus(position?)`, `blur()`, `destroy()` | M1 | |
 | F-009 | Multiple independent editors on the same page | M1 | No global state |
 | F-010 | HTML sanitization of all input (setHTML, paste, drop) with DOMPurify | M1 | See ARCHITECTURE §8 |

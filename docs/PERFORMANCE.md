@@ -82,13 +82,13 @@ document by hand.
 
 ## Download size
 
-What an app built with Vite downloads, measured on 2026-10-12 with `npm run size`:
+What an app built with Vite downloads, measured on 2026-10-13 with `npm run size`:
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.1 kB | 77.5 kB |
-| Core and `StarterKit` | 272.1 kB | 85.3 kB |
-| Core, `StarterKit` and the default UI | 317.1 kB | 99.6 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.4 kB | 77.6 kB |
+| Core and `defaultExtensions` | 274.1 kB | 85.8 kB |
+| Core, `defaultExtensions` and the default UI | 327.2 kB | 102.4 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The

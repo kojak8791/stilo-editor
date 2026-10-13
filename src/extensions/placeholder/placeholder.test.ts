@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createTestEditor, getHTMLWithSelection, pressKey, typeText } from '../../../tests/helpers';
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 
 function assertPlaceholder(editor: ReturnType<typeof createTestEditor>, shown: boolean): void {
   const placeholderElements = editor.view.dom.querySelectorAll('.stilo-placeholder');
@@ -17,7 +17,7 @@ function assertPlaceholder(editor: ReturnType<typeof createTestEditor>, shown: b
 }
 
 describe('Placeholder: shown / hidden', () => {
-  const base = { extensions: [StarterKit({ placeholder: { placeholder: 'Write here' } })] };
+  const base = { extensions: [defaultExtensions({ placeholder: { placeholder: 'Write here' } })] };
 
   it.each([
     ['', true, '<p></p>'],
@@ -38,7 +38,7 @@ describe('Placeholder: multi-step', () => {
   it('typeText then undo', () => {
     const editor = createTestEditor({
       html: '',
-      extensions: [StarterKit({ placeholder: { placeholder: 'Write here' } })],
+      extensions: [defaultExtensions({ placeholder: { placeholder: 'Write here' } })],
     });
     assertPlaceholder(editor, true);
     typeText(editor, 'a');
@@ -52,7 +52,7 @@ describe('Placeholder: multi-step', () => {
   it('pressKey Backspace', () => {
     const editor = createTestEditor({
       html: '<p>[a]</p>',
-      extensions: [StarterKit({ placeholder: { placeholder: 'Write here' } })],
+      extensions: [defaultExtensions({ placeholder: { placeholder: 'Write here' } })],
     });
     assertPlaceholder(editor, false);
     expect(pressKey(editor, 'Backspace')).toBe(true);
@@ -63,7 +63,7 @@ describe('Placeholder: multi-step', () => {
   it('setHTML', () => {
     const editor = createTestEditor({
       html: '<p>a</p>',
-      extensions: [StarterKit({ placeholder: { placeholder: 'Write here' } })],
+      extensions: [defaultExtensions({ placeholder: { placeholder: 'Write here' } })],
     });
     assertPlaceholder(editor, false);
     editor.setHTML('');
@@ -77,7 +77,7 @@ describe('Placeholder: multi-step', () => {
   it('setEditable(false) → still shown', () => {
     const editor = createTestEditor({
       html: '',
-      extensions: [StarterKit({ placeholder: { placeholder: 'Write here' } })],
+      extensions: [defaultExtensions({ placeholder: { placeholder: 'Write here' } })],
     });
     assertPlaceholder(editor, true);
     editor.setEditable(false);

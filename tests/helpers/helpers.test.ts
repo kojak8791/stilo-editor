@@ -11,7 +11,7 @@ import {
 } from '.';
 
 describe('createTestEditor', () => {
-  it('uses StarterKit and an empty document by default', () => {
+  it('uses defaultExtensions and an empty document by default', () => {
     const editor = createTestEditor();
     expect(editor.getHTML()).toBe('<p></p>');
     expect(editor.schema.marks.bold).toBeDefined();

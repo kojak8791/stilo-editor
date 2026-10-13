@@ -28,11 +28,17 @@ export type CommandFactories = {
   [K in CommandName]: Commands[K];
 };
 
-/** Executable commands: same arguments as the factory, returns whether the command applied. */
+/**
+ * An executable command: same arguments as its factory, returns whether the command applied.
+ * `can(...args)` runs it without dispatching: whether it would apply.
+ */
+export type CommandRunner<A extends unknown[]> = ((...args: A) => boolean) & {
+  can: (...args: A) => boolean;
+};
+
+/** Executable commands, by name. */
 export type CommandRunners = {
-  [K in CommandName]: Commands[K] extends (...args: infer A) => Command
-    ? (...args: A) => boolean
-    : never;
+  [K in CommandName]: Commands[K] extends (...args: infer A) => Command ? CommandRunner<A> : never;
 };
 
 /** ProseMirror JSON representation of a document or node. */
@@ -48,7 +54,7 @@ export interface JSONContent {
 export interface EditorOptions {
   /** Container element; the editor appends its own DOM inside it. */
   element: HTMLElement;
-  /** Extensions to load. Nested arrays (e.g. `StarterKit()`) are flattened. */
+  /** Extensions to load. Nested arrays (e.g. `defaultExtensions()`) are flattened. */
   extensions: Array<Extension | Extension[]>;
   /** Initial HTML content. Default: empty document. */
   content?: string;
@@ -73,8 +79,8 @@ export interface SetContentOptions {
    * `true`: create a fresh state; history and all plugin states start from scratch.
    */
   resetHistory?: boolean;
-  /** Emit the `update` event. Default: `true`. */
-  emitUpdate?: boolean;
+  /** Emit the `input` event. Default: `true`. */
+  emitInput?: boolean;
 }
 
 /** Events emitted by the {@link Editor}. */
@@ -82,9 +88,9 @@ export interface EditorEvents {
   /** Every applied transaction. */
   transaction: { editor: Editor; transaction: Transaction };
   /** The document changed. `transaction` is `null` when the state was replaced (`resetHistory`). */
-  update: { editor: Editor; transaction: Transaction | null };
+  input: { editor: Editor; transaction: Transaction | null };
   /** The selection changed while the document did not. */
-  selectionUpdate: { editor: Editor; transaction: Transaction };
+  selectionchange: { editor: Editor; transaction: Transaction };
   focus: { editor: Editor; event: FocusEvent };
   blur: { editor: Editor; event: FocusEvent };
   destroy: { editor: Editor };

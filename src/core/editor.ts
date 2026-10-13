@@ -9,6 +9,7 @@ import { parseHTML } from './html/parse';
 import { sanitizeToString } from './html/sanitize';
 import { createClipboardSerializer, serializeHTML } from './html/serialize';
 import type {
+  CommandRunner,
   CommandRunners,
   EditorEvents,
   EditorOptions,
@@ -16,8 +17,8 @@ import type {
   SetContentOptions,
 } from './types';
 
-/** Transaction meta key: when `true`, the transaction does not emit `update`. */
-const SKIP_UPDATE_META = 'stiloSkipUpdate';
+/** Transaction meta key: when `true`, the transaction does not emit `input`. */
+const SKIP_INPUT_META = 'stiloSkipInput';
 
 /**
  * The Stilo editor. See docs/ARCHITECTURE.md §5.
@@ -25,7 +26,7 @@ const SKIP_UPDATE_META = 'stiloSkipUpdate';
  * ```ts
  * const editor = new Editor({
  *   element: document.querySelector('#editor')!,
- *   extensions: [StarterKit()],
+ *   extensions: [defaultExtensions()],
  *   content: '<p>Hello <strong>world</strong></p>',
  * });
  * ```
@@ -35,12 +36,14 @@ export class Editor {
   readonly view: EditorView;
   /** The schema built from the extensions. */
   readonly schema: Schema;
-  /** Runs a command: `editor.commands.toggleBold()` returns whether it applied. */
+  /**
+   * Runs a command: `editor.commands.toggleBold()` returns whether it applied;
+   * `editor.commands.toggleBold.can()` tells whether it would apply, without applying it.
+   */
   readonly commands: CommandRunners;
 
   private readonly manager: ExtensionManager;
   private readonly plugins: Plugin[];
-  private readonly dryRunners: CommandRunners;
   private readonly emitter = new EventEmitter<EditorEvents>();
   private readonly compactParagraphs: boolean;
   private destroyed = false;
@@ -62,8 +65,7 @@ export class Editor {
     this.manager = new ExtensionManager(options.extensions);
     this.schema = this.manager.schema;
     this.plugins = this.manager.createPlugins(this);
-    this.commands = this.createRunners(true);
-    this.dryRunners = this.createRunners(false);
+    this.commands = this.createRunners();
     this.compactParagraphs = options.compactParagraphs ?? true;
 
     const editable = options.editable ?? true;
@@ -128,9 +130,9 @@ export class Editor {
    * - `resetHistory: false` (default): one transaction replacing the whole content
    *   (`tr.replaceWith(0, doc.content.size, newDoc.content)`), selection at document start;
    *   undoable as its own step (`closeHistory`: never grouped with the changes before it).
-   * - `resetHistory: true`: a new `EditorState` with the same plugins; `update` is emitted with
+   * - `resetHistory: true`: a new `EditorState` with the same plugins; `input` is emitted with
    *   `transaction: null`.
-   * - `emitUpdate: false` suppresses the `update` event.
+   * - `emitInput: false` suppresses the `input` event.
    */
   setHTML(html: string, options?: SetContentOptions): void {
     this.setContent(parseHTML(this.schema, html), options);
@@ -153,11 +155,6 @@ export class Editor {
   getText(): string {
     const { doc } = this.state;
     return doc.textBetween(0, doc.content.size, '\n\n');
-  }
-
-  /** Command runners that do not dispatch: `editor.can().toggleBold()`. */
-  can(): CommandRunners {
-    return this.dryRunners;
   }
 
   /**
@@ -226,31 +223,29 @@ export class Editor {
     return EditorState.create({ schema: this.schema, doc, plugins: this.plugins });
   }
 
-  /** Builds `commands` (dispatching) or `can()` (dry run) from the extension commands. */
-  private createRunners(shouldDispatch: boolean): CommandRunners {
-    const runners: Record<string, (...args: never[]) => boolean> = {};
+  /** Builds `commands` from the extension commands; `can` runs without `dispatch`. */
+  private createRunners(): CommandRunners {
+    const runners: Record<string, CommandRunner<never[]>> = {};
     for (const [name, factory] of this.manager.commands) {
-      runners[name] = (...args) =>
-        factory(...args)(
-          this.state,
-          shouldDispatch ? (tr) => this.view.dispatch(tr) : undefined,
-          this.view,
-        );
+      const run = (...args: never[]) =>
+        factory(...args)(this.state, (tr) => this.view.dispatch(tr), this.view);
+      const can = (...args: never[]) => factory(...args)(this.state, undefined, this.view);
+      runners[name] = Object.assign(run, { can });
     }
     return runners as CommandRunners;
   }
 
   private setContent(doc: Node, options: SetContentOptions = {}): void {
-    const { resetHistory = false, emitUpdate = true } = options;
+    const { resetHistory = false, emitInput = true } = options;
     if (resetHistory) {
       this.view.updateState(this.createState(doc));
-      if (emitUpdate) this.emitter.emit('update', { editor: this, transaction: null });
+      if (emitInput) this.emitter.emit('input', { editor: this, transaction: null });
       return;
     }
     const tr = this.state.tr.replaceWith(0, this.state.doc.content.size, doc.content);
     tr.setSelection(Selection.atStart(tr.doc));
     closeHistory(tr);
-    if (!emitUpdate) tr.setMeta(SKIP_UPDATE_META, true);
+    if (!emitInput) tr.setMeta(SKIP_INPUT_META, true);
     this.view.dispatch(tr);
   }
 
@@ -263,9 +258,9 @@ export class Editor {
     const payload = { editor: this, transaction: tr };
     this.emitter.emit('transaction', payload);
     if (transactions.some((applied) => applied.docChanged)) {
-      if (!tr.getMeta(SKIP_UPDATE_META)) this.emitter.emit('update', payload);
+      if (!tr.getMeta(SKIP_INPUT_META)) this.emitter.emit('input', payload);
     } else if (!previous.selection.eq(state.selection)) {
-      this.emitter.emit('selectionUpdate', payload);
+      this.emitter.emit('selectionchange', payload);
     }
   }
 }

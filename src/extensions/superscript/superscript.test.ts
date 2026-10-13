@@ -47,7 +47,7 @@ describe('Superscript: commands', () => {
 
   it('cannot be set inside code', () => {
     const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
-    expect(editor.can().toggleSuperscript()).toBe(false);
+    expect(editor.commands.toggleSuperscript.can()).toBe(false);
   });
 
   it('reports the active state', () => {

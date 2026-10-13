@@ -1,6 +1,6 @@
 import { AllSelection } from 'prosemirror-state';
 import { describe, expect, it } from 'vitest';
-import { StarterKit } from '../../src/extensions';
+import { defaultExtensions } from '../../src/extensions';
 import { XSS_VECTORS } from '../../tests/fixtures/xss/vectors';
 import {
   copySelection,
@@ -59,7 +59,7 @@ describe('copy', () => {
 function makeEditor(content: string, compactParagraphs?: boolean) {
   return new Editor({
     element: document.createElement('div'),
-    extensions: [StarterKit()],
+    extensions: [defaultExtensions()],
     content,
     compactParagraphs,
   });

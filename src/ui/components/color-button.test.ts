@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestEditor, getHTMLWithSelection } from '../../../tests/helpers';
-import { StarterKit } from '../../index';
+import { defaultExtensions } from '../../index';
 import {
   createToolbar,
   DEFAULT_PALETTE,
@@ -10,7 +10,11 @@ import {
   textColorButton,
 } from '../index';
 
-function setup(html: string, options: Partial<ToolbarOptions> = {}, extensions = [StarterKit()]) {
+function setup(
+  html: string,
+  options: Partial<ToolbarOptions> = {},
+  extensions = [defaultExtensions()],
+) {
   const editor = createTestEditor({ html, extensions });
   document.body.append(editor.view.dom.parentElement!);
   // jsdom has no layout: scrolling the selection into view needs coordsAtPos.
@@ -91,7 +95,9 @@ describe('color buttons: rendering', () => {
   });
 
   it('is not rendered without its extension', () => {
-    const { parts } = setup('<p>a</p>', {}, [StarterKit({ textStyle: false, highlight: false })]);
+    const { parts } = setup('<p>a</p>', {}, [
+      defaultExtensions({ textStyle: false, highlight: false }),
+    ]);
     expect(parts('textColor').main).toBeUndefined();
     expect(parts('highlight').main).toBeUndefined();
   });

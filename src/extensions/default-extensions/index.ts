@@ -27,10 +27,10 @@ import { TextStyle } from '../text-style';
 import { Underline } from '../underline';
 
 /**
- * Options of {@link StarterKit}, by extension name: `false` disables the extension, an object
+ * Options of {@link defaultExtensions}, by extension name: `false` disables the extension, an object
  * configures it. Extensions without options accept only `false`.
  */
-export interface StarterKitOptions {
+export interface DefaultExtensionsOptions {
   doc?: false;
   text?: false;
   paragraph?: false;
@@ -72,10 +72,10 @@ function include<O extends object>(
  * are implemented.
  *
  * ```ts
- * new Editor({ element, extensions: [StarterKit({ bold: false })] });
+ * new Editor({ element, extensions: [defaultExtensions({ bold: false })] });
  * ```
  */
-export function StarterKit(options: StarterKitOptions = {}): Extension[] {
+export function defaultExtensions(options: DefaultExtensionsOptions = {}): Extension[] {
   return [
     ...include(Document, options.doc),
     ...include(Text, options.text),

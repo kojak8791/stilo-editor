@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestEditor, getHTMLWithSelection, pressKey, typeText } from '../../../tests/helpers';
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 
 describe('History: undo/redo', () => {
   it('returns false when nothing to undo/redo', () => {
     const editor = createTestEditor({ html: '<p>a|</p>' });
-    expect(editor.can().undo()).toBe(false);
-    expect(editor.can().redo()).toBe(false);
+    expect(editor.commands.undo.can()).toBe(false);
+    expect(editor.commands.redo.can()).toBe(false);
     expect(editor.commands.undo()).toBe(false);
   });
 
@@ -54,13 +54,13 @@ describe('History: undo/redo', () => {
   it('resetHistory clears the history', () => {
     const editor = createTestEditor({ html: '<p>a|</p>' });
     editor.setHTML('<p>y</p>', { resetHistory: true });
-    expect(editor.can().undo()).toBe(false);
+    expect(editor.commands.undo.can()).toBe(false);
   });
 
   it('returns false when history is disabled', () => {
     const editor = createTestEditor({
       html: '<p>a|</p>',
-      extensions: [StarterKit({ history: false })],
+      extensions: [defaultExtensions({ history: false })],
     });
     expect(pressKey(editor, 'Mod-z')).toBe(false);
   });
@@ -81,7 +81,10 @@ describe('History: options', () => {
     [{}, 1000, '<p>ab|</p>'],
     [{ newGroupDelay: 2000 }, 1000, '<p>a|</p>'],
   ])('with %j and %i ms between two characters, undo gives %j', (history, ms, expected) => {
-    const editor = createTestEditor({ html: '<p>a|</p>', extensions: [StarterKit({ history })] });
+    const editor = createTestEditor({
+      html: '<p>a|</p>',
+      extensions: [defaultExtensions({ history })],
+    });
     typeText(editor, 'b');
     vi.advanceTimersByTime(ms);
     typeText(editor, 'c');
@@ -93,7 +96,7 @@ describe('History: options', () => {
     const undoSteps = (depth: number) => {
       const editor = createTestEditor({
         html: '<p>|</p>',
-        extensions: [StarterKit({ history: { depth } })],
+        extensions: [defaultExtensions({ history: { depth } })],
       });
       for (let i = 0; i < 60; i++) {
         typeText(editor, 'a');

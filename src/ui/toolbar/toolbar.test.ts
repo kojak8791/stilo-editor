@@ -2,7 +2,7 @@ import { Star } from 'lucide';
 import { NodeSelection } from 'prosemirror-state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestEditor } from '../../../tests/helpers';
-import { StarterKit, StiloError } from '../../index';
+import { defaultExtensions, StiloError } from '../../index';
 import {
   createToolbar,
   en,
@@ -182,7 +182,7 @@ describe('toolbar', () => {
   it('7: extensions disabled', () => {
     const editor = createTestEditor({
       html: '<p>ab</p>',
-      extensions: [StarterKit({ bold: false })],
+      extensions: [defaultExtensions({ bold: false })],
     });
     attachEditor(editor);
     const container = createToolbarContainer();
@@ -583,7 +583,11 @@ describe('toolbar', () => {
 });
 
 describe('heading dropdown', () => {
-  function setup(html: string, options: Partial<ToolbarOptions> = {}, starter = StarterKit()) {
+  function setup(
+    html: string,
+    options: Partial<ToolbarOptions> = {},
+    starter = defaultExtensions(),
+  ) {
     const editor = createTestEditor({ html, extensions: [starter] });
     attachEditor(editor);
     const container = createToolbarContainer();
@@ -682,7 +686,7 @@ describe('heading dropdown', () => {
     const { trigger, menu, option, focused } = setup(
       '<p>a|b</p>',
       {},
-      StarterKit({ heading: { levels: [1, 2] } }),
+      defaultExtensions({ heading: { levels: [1, 2] } }),
     );
     expect(option('h2').hasAttribute('aria-disabled')).toBe(false);
     expect(option('h3').getAttribute('aria-disabled')).toBe('true');
@@ -734,7 +738,7 @@ describe('heading dropdown', () => {
     );
     expect(ids).toEqual(['paragraph', 'h1', 'h2']);
 
-    const { toolbar } = setup('<p>ab</p>', {}, StarterKit({ heading: false }));
+    const { toolbar } = setup('<p>ab</p>', {}, defaultExtensions({ heading: false }));
     expect(toolbar.element.querySelector('[data-item="heading"]')).toBeNull();
   });
 

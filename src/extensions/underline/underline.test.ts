@@ -54,7 +54,7 @@ describe('Underline: commands', () => {
 
   it('returns false for unsetUnderline where there is no underline, without changes', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor.can().unsetUnderline()).toBe(false);
+    expect(editor.commands.unsetUnderline.can()).toBe(false);
     expect(editor.commands.unsetUnderline()).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });

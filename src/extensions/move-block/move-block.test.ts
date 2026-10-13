@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createTestEditor, getHTMLWithSelection, pressKey } from '../../../tests/helpers';
 import { selectNode } from '../../../tests/helpers/core';
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 
 describe('MoveBlock: commands', () => {
   it.each([
@@ -156,11 +156,11 @@ describe('MoveBlock: undo', () => {
   });
 });
 
-describe('MoveBlock: can()', () => {
+describe('MoveBlock: .can()', () => {
   it('reports correct state', () => {
     const editor = createTestEditor({ html: '<p>a|</p><p>b</p>' });
-    expect(editor.can().moveBlockUp()).toBe(false);
-    expect(editor.can().moveBlockDown()).toBe(true);
+    expect(editor.commands.moveBlockUp.can()).toBe(false);
+    expect(editor.commands.moveBlockDown.can()).toBe(true);
     expect(getHTMLWithSelection(editor)).toBe('<p>a|</p><p>b</p>');
   });
 });
@@ -169,7 +169,7 @@ describe('MoveBlock: node selection', () => {
   it('moves a node-selected hr', () => {
     const editor = createTestEditor({
       html: '<p>a</p><p>b</p><hr><p>c</p>',
-      extensions: [StarterKit()],
+      extensions: [defaultExtensions()],
     });
     selectNode(editor, 6);
     expect(editor.commands.moveBlockUp()).toBe(true);

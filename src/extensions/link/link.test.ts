@@ -155,11 +155,11 @@ describe('Link: commands', () => {
     expect(getHTMLWithSelection(editor)).toBe(expected);
   });
 
-  it('can() reports availability', () => {
+  it('setLink.can() reports availability', () => {
     const editor1 = createTestEditor({ html: '<p>a[b]c</p>' });
-    expect(editor1.can().setLink({ href: 'x' })).toBe(true);
+    expect(editor1.commands.setLink.can({ href: 'x' })).toBe(true);
     const editor2 = createTestEditor({ html: '<p>a|b</p>' });
-    expect(editor2.can().setLink({ href: 'x' })).toBe(false);
+    expect(editor2.commands.setLink.can({ href: 'x' })).toBe(false);
     expect(getHTMLWithSelection(editor1)).toBe('<p>a[b]c</p>');
     expect(getHTMLWithSelection(editor2)).toBe('<p>a|b</p>');
   });

@@ -14,7 +14,7 @@ describe('Paragraph', () => {
   it('returns false when the textblock is already a paragraph', () => {
     const editor = createCoreEditor('<p>a</p>');
     select(editor, 1);
-    expect(editor.can().setParagraph()).toBe(false);
+    expect(editor.commands.setParagraph.can()).toBe(false);
   });
 
   it('runs setParagraph with Mod-Alt-0', () => {

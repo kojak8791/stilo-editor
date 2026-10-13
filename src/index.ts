@@ -13,6 +13,7 @@ export type {
   CommandFactories,
   CommandFactory,
   CommandName,
+  CommandRunner,
   CommandRunners,
   Commands,
   EditorEvents,

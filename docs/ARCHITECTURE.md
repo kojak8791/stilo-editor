@@ -52,7 +52,7 @@ Single npm package `stilo-editor` with subpath exports:
 
 | Import | Content |
 |---|---|
-| `stilo-editor` | Core: `Editor`, `defineExtension`, all extensions, `StarterKit`, types |
+| `stilo-editor` | Core: `Editor`, `defineExtension`, all extensions, `defaultExtensions`, types |
 | `stilo-editor/ui` | Default UI: toolbar, menus, dialogs, i18n |
 | `stilo-editor/content.css` | Content styles only (includes ProseMirror and prosemirror-tables base CSS) — for headless use |
 | `stilo-editor/ui.css` | Default UI styles only |
@@ -78,7 +78,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 - `src/core/` and `src/extensions/` **never** import from `src/ui/`, `lucide` or `@floating-ui/dom`.
 - `src/ui/` imports the core **only** through `src/index.ts`, never from `src/core/**` or
   `src/extensions/**` directly.
-- Everything a UI needs (command execution, `can()`, `isActive()`, events, node attributes of the
+- Everything a UI needs (command execution, `.can()`, `isActive()`, events, node attributes of the
   selection) must be available in the public core API. If our UI needs something that is not
   public, the core API is extended — the UI never takes a shortcut.
 - These rules are enforced by `tests/architecture.test.ts` (scans import statements), part of
@@ -140,7 +140,7 @@ stilo-editor/
 │   │       └── paste/            Word / Google Docs cleanup (M2)
 │   ├── extensions/
 │   │   ├── index.ts              Re-exports all extensions
-│   │   ├── starter-kit/          StarterKit() bundle
+│   │   ├── default-extensions/ defaultExtensions() bundle
 │   │   ├── document/  text/  paragraph/  heading/  blockquote/  ...
 │   │   └── <name>/
 │   │       ├── index.ts          export const <Name> = defineExtension({...})
@@ -182,10 +182,15 @@ stilo-editor/
 | Extension `name` | camelCase, equal to its main node/mark | `bulletList` |
 | Node / mark names | camelCase | `listItem`, `tableHeader`, `textStyle` |
 | Commands | camelCase verb | `toggleBold`, `setHeading`, `moveBlockUp` |
+| Extension sets (function returning extensions) | camelCase | `defaultExtensions` |
+| Events | lowercase | `input`, `selectionchange` |
 | Types / interfaces | PascalCase | `EditorOptions` |
 | CSS classes | `stilo-` prefix, BEM | `stilo-toolbar__button--active` |
 | CSS custom properties | `--stilo-` prefix | `--stilo-toolbar-bg` |
 | i18n keys | dot.case | `toolbar.bold` |
+
+Public API names use the web platform term when one exists (`getHTML`, `select`, `input`),
+otherwise they describe what the thing does.
 
 ### 4.2 Code rules
 
@@ -208,11 +213,11 @@ stilo-editor/
 ## 5. Editor API
 
 ```ts
-import { Editor, StarterKit } from 'stilo-editor';
+import { Editor, defaultExtensions } from 'stilo-editor';
 
 const editor = new Editor({
   element: document.querySelector('#editor')!,
-  extensions: [StarterKit()],
+  extensions: [defaultExtensions()],
   content: '<p>Hello <strong>world</strong></p>',
 });
 ```
@@ -245,7 +250,7 @@ class Editor {
   getText(): string;
 
   readonly commands: CommandRunners;       // editor.commands.toggleBold() -> boolean
-  can(): CommandRunners;                   // dry run, no dispatch
+                                           // editor.commands.toggleBold.can(): dry run
   isActive(name: string, attrs?: Record<string, unknown>): boolean;
   getAttributes(name: string): Record<string, unknown>;
 
@@ -261,8 +266,9 @@ class Editor {
 
 interface EditorEvents {
   transaction: { editor: Editor; transaction: Transaction };
-  update: { editor: Editor; transaction: Transaction };          // doc changed
-  selectionUpdate: { editor: Editor; transaction: Transaction }; // selection changed, doc not
+  input: { editor: Editor; transaction: Transaction | null };    // doc changed (null: state
+                                                                 // replaced, resetHistory)
+  selectionchange: { editor: Editor; transaction: Transaction }; // selection changed, doc not
   focus: { editor: Editor; event: FocusEvent };
   blur: { editor: Editor; event: FocusEvent };
   destroy: { editor: Editor };
@@ -276,7 +282,7 @@ Semantics:
   ```ts
   interface SetContentOptions {
     resetHistory?: boolean; // default false
-    emitUpdate?: boolean;   // default true
+    emitInput?: boolean;    // default true
   }
   ```
 
@@ -286,7 +292,8 @@ Semantics:
   - `resetHistory: true`: a fresh `EditorState` is created with the same plugins (all plugin
     states, history included, start from scratch). Typical use: a "New document" button calls
     `setHTML('', { resetHistory: true })`, or loading a different document.
-  - `update` is emitted unless `emitUpdate: false`.
+  - `input` is emitted unless `emitInput: false`; with `resetHistory: true` its `transaction`
+    is `null`.
   - `setHTML('')` produces the empty document (`<p></p>`).
 - Empty document `getHTML()` returns `<p></p>`; use `isEmpty` to test emptiness.
 - `getText()` separates top-level blocks with `\n\n`, hard breaks with `\n`.
@@ -372,7 +379,7 @@ export const Bold = defineExtension({
 ```
 
 `editor.commands.x(...args)` runs `factory(...args)(state, dispatch, view)` and returns the boolean
-result. `editor.can().x(...args)` runs it without `dispatch`.
+result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 
 ### 6.2 ExtensionManager rules
 
@@ -381,20 +388,23 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
 3. The schema requires `doc`, `paragraph` and `text`; otherwise → `StiloError`.
    `Paragraph` has priority 1000 so it is the first `block` node (ProseMirror's default block).
    `Text`, always present, also provides `insertText(text)`: it replaces the selection with
-   `text`, with the marks active at the cursor (`false` for an empty string).
+   `text`, with the marks active at the cursor (`false` for an empty string). `Document`,
+   always present, provides the selection commands: `select(from, to?)` (a text selection
+   between document positions, moved to the nearest text position; `false` outside the
+   document), `selectNode(pos)` (`false` without a selectable node at `pos`) and `selectAll()`.
 4. Schema mark order (affects nesting in HTML output, outermost first):
    `link`, `highlight`, `textStyle`, `bold`, `italic`, `underline`, `strike`, `subscript`,
    `superscript`, `code`. `textStyle` is inside `highlight` because browsers give `<mark>` its
    own text color (`MarkText`), which would hide a color set outside it. The first three have
    priorities 103, 102, 101 (the other marks keep
-   the default 100 and follow the `StarterKit` order).
+   the default 100 and follow the `defaultExtensions` order).
 5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
    an input rule, so it may take precedence over every extension), then keymaps (by priority),
    then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last.
 
-### 6.3 StarterKit
+### 6.3 Default extensions
 
-`StarterKit(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
+`defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
 `Highlight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
@@ -444,7 +454,7 @@ configured with `{ <name>: { ...options } }`.
 Mark exclusion: every mark except `link` declares `group: 'formatting'`, and `code` declares
 `excludes: 'formatting'`. Naming the group instead of the marks keeps the schema valid when some
 marks are disabled. `setMark` (and so every `set*`/`toggle*` command) returns `false` where an
-existing mark excludes the new one, so `can().toggleBold()` is `false` inside code. Marks that
+existing mark excludes the new one, so `commands.toggleBold.can()` is `false` inside code. Marks that
 exclude each other replace each other instead: `subscript` and `superscript` are both in the
 group `script` and declare `excludes: 'script'`, so setting one removes the other.
 
@@ -551,7 +561,7 @@ plain text is `textBetween(…, '
 The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`](UI.md).
 
 - Separate entry `stilo-editor/ui`, fully optional (see §2.2). It uses only the public core API
-  (`editor.commands`, `editor.can()`, `editor.isActive()`, `editor.getAttributes()`, events).
+  (`editor.commands` and their `.can()`, `editor.isActive()`, `editor.getAttributes()`, events).
   It touches `editor.view` only
   to anchor popovers to the selection and to listen to DOM events on `view.dom`.
 - Customization levels, from least to most effort:
@@ -574,7 +584,7 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
 ## 10. Testing
 
 - **Unit** (Vitest + jsdom), colocated `*.test.ts`. Use `tests/helpers`:
-  - `createTestEditor({ extensions?, html? })`: defaults to `StarterKit()`; returns an `Editor`.
+  - `createTestEditor({ extensions?, html? })`: defaults to `defaultExtensions()`; returns an `Editor`.
   - Selection markers in `html`: `|` = cursor, `[` … `]` = range. Test content must not contain
     these characters as text.
   - `getHTMLWithSelection(editor)`: canonical HTML with the selection markers re-inserted. `|`

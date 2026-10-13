@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createTestEditor } from '../../../tests/helpers';
-import { StarterKit } from '../starter-kit';
+import { defaultExtensions } from '../default-extensions';
 import { DropCursor } from '.';
 
 describe('DropCursor: options', () => {
@@ -20,8 +20,8 @@ describe('DropCursor: options', () => {
 describe('DropCursor: plugin count', () => {
   it('adds one plugin', () => {
     const withPlugin = createTestEditor().state.plugins.length;
-    const without = createTestEditor({ extensions: [StarterKit({ dropCursor: false })] }).state
-      .plugins.length;
+    const without = createTestEditor({ extensions: [defaultExtensions({ dropCursor: false })] })
+      .state.plugins.length;
     expect(withPlugin).toBe(without + 1);
   });
 });

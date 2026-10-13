@@ -54,7 +54,7 @@ describe('Bold: commands', () => {
 
   it('returns false for unsetBold where there is no bold, without changes', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
-    expect(editor.can().unsetBold()).toBe(false);
+    expect(editor.commands.unsetBold.can()).toBe(false);
     expect(editor.commands.unsetBold()).toBe(false);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });
