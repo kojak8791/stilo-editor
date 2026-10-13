@@ -1,0 +1,304 @@
+# Stilo — API reference
+
+The public API of the `stilo-editor` package, for applications that use it. Versions `0.x` are
+previews: names and behaviors may still change in any minor version; the release notes on
+GitHub say what changed. Contributors find the design and the internals in
+[ARCHITECTURE.md](ARCHITECTURE.md) and [UI.md](UI.md).
+
+## 1. Install and import
+
+```sh
+npm install stilo-editor
+```
+
+| Import | Content |
+|---|---|
+| `stilo-editor` | The core: `Editor`, `defaultExtensions`, every extension, helpers, types |
+| `stilo-editor/ui` | The default UI: toolbar, popovers, UI strings |
+| `stilo-editor/style.css` | `content.css` + `ui.css` |
+| `stilo-editor/content.css` | Styles of the editable content only, for a custom UI |
+| `stilo-editor/ui.css` | Styles of the default UI only |
+
+The package is ESM only and ships its TypeScript types. The core works without the default UI:
+import `content.css` instead of `style.css` and build your own controls on the API below.
+
+```ts
+import 'stilo-editor/style.css';
+import { Editor, defaultExtensions } from 'stilo-editor';
+import { createToolbar } from 'stilo-editor/ui';
+
+const editor = new Editor({
+  element: document.querySelector<HTMLElement>('#editor')!,
+  extensions: [defaultExtensions()],
+  content: '<p>Hello <strong>world</strong></p>',
+});
+
+createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
+```
+
+## 2. Editor
+
+### 2.1 Options
+
+`new Editor(options)` creates the editor inside `options.element`.
+
+| Option | Type | Default | Meaning |
+|---|---|---|---|
+| `element` | `HTMLElement` | required | Container; the editor appends its own element inside it |
+| `extensions` | `Array<Extension \| Extension[]>` | required | Extensions to load; nested arrays (such as `defaultExtensions()`) are flattened |
+| `content` | `string` | empty document | Initial HTML |
+| `editable` | `boolean` | `true` | Whether the content can be edited |
+| `autofocus` | `boolean \| 'start' \| 'end'` | `false` | Focus the editor after creation, optionally with the cursor at the start or end |
+| `ariaLabel` | `string` | none | `aria-label` of the editable area |
+| `compactParagraphs` | `boolean` | `true` | Write a list item holding one plain paragraph as `<li>text</li>`; `false` writes `<li><p>text</p></li>` |
+
+The editable element has the class `stilo-content`, `role="textbox"` and
+`aria-multiline="true"`.
+
+### 2.2 Content
+
+| Member | Returns | Meaning |
+|---|---|---|
+| `getHTML()` | `string` | The content as clean HTML (§5). The empty document is `<p></p>` |
+| `setHTML(html, options?)` | `void` | Replaces the content; the HTML is sanitized first. `setHTML('')` empties the editor |
+| `getJSON()` | `JSONContent` | The ProseMirror JSON of the document |
+| `setJSON(json, options?)` | `void` | Replaces the content from ProseMirror JSON |
+| `getText()` | `string` | Plain text: top-level blocks separated by a blank line, line breaks as `\n` |
+| `isEmpty` | `boolean` | Whether the document is a single empty paragraph |
+
+`setHTML` and `setJSON` take `SetContentOptions`:
+
+| Option | Default | Meaning |
+|---|---|---|
+| `resetHistory` | `false` | `false`: the replacement is one step that the user can undo. `true`: the editor starts fresh, with an empty undo history (to load another document, or for a "New" button) |
+| `emitInput` | `true` | Emit the `input` event |
+
+`getHTML()` serializes the whole document: in a large document, call it when you need it (on
+save, or debounced after `input`), not on every change.
+
+### 2.3 Selection state and focus
+
+| Member | Meaning |
+|---|---|
+| `isActive(name, attrs?)` | Whether a mark (`'bold'`, `'link'`, …) is active on the selection, or the selection is inside a node (`'heading'`, `'bulletList'`, …). With `attrs`, those attributes must match too: `isActive('heading', { level: 2 })` |
+| `getAttributes(name)` | The attributes of the mark or node at the selection: `getAttributes('link').href`. `{}` when there is none |
+| `focus(position?)` | Focuses the editor; `'start'` or `'end'` also move the cursor there |
+| `blur()` | Removes the focus |
+| `setEditable(editable)` | Makes the content editable or read-only |
+| `isEditable` | Whether the content is editable |
+| `destroy()` | Removes the editor and every event handler; calling it twice does nothing |
+| `isDestroyed` | Whether `destroy()` was called |
+
+For needs that this API does not cover yet, `editor.view` (the ProseMirror `EditorView`),
+`editor.state` and `editor.schema` give access to ProseMirror. They are an escape hatch: their
+use is not covered by the guarantees of this document.
+
+### 2.4 Events
+
+```ts
+editor.on('input', ({ editor }) => save(editor.getHTML()));
+```
+
+`editor.off(event, handler)` removes a handler registered with the same function.
+
+| Event | Payload | When |
+|---|---|---|
+| `input` | `{ editor, transaction }` | The document changed. `transaction` is `null` after `setHTML` / `setJSON` with `resetHistory: true` |
+| `selectionchange` | `{ editor, transaction }` | The selection changed and the document did not |
+| `transaction` | `{ editor, transaction }` | Every change of the editor state, including the two above |
+| `focus` | `{ editor, event }` | The editor got the focus |
+| `blur` | `{ editor, event }` | The editor lost the focus |
+| `destroy` | `{ editor }` | `destroy()` was called |
+
+## 3. Commands
+
+`editor.commands` holds one function per command of the loaded extensions. A command applies
+to the current selection and returns `true` when it did something, `false` when it could not
+(for example bold inside inline code). Every command also has `.can()`, which takes the same
+arguments and tells whether it would apply, without changing anything: use it to enable or
+disable your buttons.
+
+```ts
+editor.commands.toggleBold();               // true: the selection is now bold
+editor.commands.setHeading({ level: 2 });
+editor.commands.setLink({ href: 'https://example.com', target: '_blank' });
+editor.commands.undo.can();                 // false: nothing to undo
+```
+
+A command whose extension is not loaded is `undefined`: `'setLink' in editor.commands` tells
+whether it is available.
+
+| Extension | Commands |
+|---|---|
+| `Document` | `select(from, to?)`, `selectNode(pos)`, `selectAll()` |
+| `Text` | `insertText(text)`: replaces the selection with `text`, keeping the marks at the cursor |
+| `Paragraph` | `setParagraph()` |
+| `Heading` | `setHeading({ level })`, `toggleHeading({ level })`, `level` 1–6 |
+| `Blockquote` | `setBlockquote()`, `unsetBlockquote()`, `toggleBlockquote()` |
+| `HorizontalRule` | `setHorizontalRule()` |
+| `HardBreak` | `setHardBreak()` |
+| `BulletList` | `toggleBulletList()` |
+| `OrderedList` | `toggleOrderedList()` |
+| `ListItem` | `splitListItem()`, `sinkListItem()` (indent), `liftListItem()` (outdent) |
+| `Bold`, `Italic`, `Underline`, `Strike`, `Code`, `Subscript`, `Superscript` | `set<Name>()`, `unset<Name>()`, `toggle<Name>()`: `toggleBold()`, `setItalic()`, `unsetCode()`, … |
+| `Link` | `setLink({ href, target? })`: links the selection or updates the link at the cursor; `false` for an empty or unsafe `href`. `unsetLink()` |
+| `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()` |
+| `Highlight` | `setHighlight({ color? })`, `unsetHighlight()`, `toggleHighlight({ color? })`; without `color`, a plain `<mark>` |
+| `ClearFormatting` | `clearFormatting()`: removes every mark except links |
+| `History` | `undo()`, `redo()` |
+| `MoveBlock` | `moveBlockUp()`, `moveBlockDown()` |
+
+`select(from, to?)` and `selectNode(pos)` take ProseMirror document positions.
+
+## 4. Extensions
+
+Every feature is an extension. `defaultExtensions(options?)` returns the whole set used by the
+demo and the default toolbar. Each extension can be turned off with `false`, and those that have
+options take an object:
+
+```ts
+defaultExtensions({
+  code: false,
+  heading: { levels: [1, 2, 3] },
+  placeholder: { placeholder: 'Write something…' },
+});
+```
+
+| Name in `defaultExtensions` | Extension | Options |
+|---|---|---|
+| `doc`, `text`, `paragraph` | `Document`, `Text`, `Paragraph` | — (required: the editor does not start without them) |
+| `heading` | `Heading` | `levels`: allowed levels, default `[1, 2, 3, 4, 5, 6]` |
+| `blockquote`, `horizontalRule`, `hardBreak` | `Blockquote`, `HorizontalRule`, `HardBreak` | — |
+| `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
+| `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
+| `link` | `Link` | — |
+| `textStyle`, `highlight` | `TextStyle` (text color), `Highlight` | — |
+| `clearFormatting` | `ClearFormatting` | — |
+| `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
+| `moveBlock` | `MoveBlock` | — |
+| `placeholder` | `Placeholder` | `placeholder`: hint shown in the empty editor, default `''` (none) |
+| `dropCursor` | `DropCursor` | `color`: CSS color, default `'currentColor'` (`false`: none, style it with `class`). `width` in pixels, default `1`. `class`: extra CSS class |
+| `gapCursor` | `GapCursor` | — |
+
+The extensions are also exported one by one, for an editor with only some features. An
+extension factory takes its options directly:
+
+```ts
+import { Bold, Document, History, Paragraph, Text } from 'stilo-editor';
+
+new Editor({
+  element,
+  extensions: [Document(), Text(), Paragraph(), Bold(), History({ depth: 50 })],
+});
+```
+
+The package also exports what extensions are built with (`defineExtension` and helpers such as
+`toggleMark`, `isMarkActive`, `markInputRule`). Writing your own extensions is not documented
+for users yet; [ARCHITECTURE.md §6](ARCHITECTURE.md#6-extension-api) describes how the built-in
+ones work.
+
+## 5. HTML in and out
+
+- **Out:** `getHTML()` writes semantic HTML5 (`<p>`, `<h2>`, `<strong>`, `<ul>`, `<a>`, …),
+  without classes or editor attributes. Inline `style` appears only for values that have no
+  tag: text color and highlight color (`<span style="color: #e03e2d">`). The output is stable:
+  `setHTML(getHTML())` gives back the same string.
+- **In:** every HTML that enters the editor (`setHTML`, `content`, paste, drop) is sanitized
+  first: scripts, event handlers and unsafe URLs are removed, unknown tags are unwrapped and
+  their text kept. Links accept `http:`, `https:`, `mailto:`, `tel:`, relative URLs and
+  `#fragments`.
+- The full contract, element by element: [ARCHITECTURE.md §7](ARCHITECTURE.md#7-html-contract).
+
+## 6. Default UI (`stilo-editor/ui`)
+
+### 6.1 Toolbar
+
+`createToolbar(editor, options)` appends the toolbar inside `options.container` and returns
+`{ element, update(), destroy() }`.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `container` | required | The toolbar is appended inside it |
+| `items` | `DEFAULT_TOOLBAR` | Groups of items: an ID of the default items or a custom item object |
+| `messages` | `en` | UI strings |
+| `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
+
+A button whose extension is not loaded is not shown. Default item IDs: `undo`, `redo`,
+`heading`, `bold`, `italic`, `underline`, `strike`, `code`, `subscript`, `superscript`,
+`link`, `clearFormatting`, `textColor`, `highlight`, `bulletList`, `orderedList`,
+`blockquote`, `horizontalRule`, `characters`.
+
+```ts
+createToolbar(editor, {
+  container,
+  items: [
+    ['undo', 'redo'],
+    ['bold', 'italic', 'link'],
+    [textColorButton([{ color: '#0b5394', labelKey: 'Brand blue' }])],
+  ],
+});
+```
+
+`textColorButton(palette?)` and `highlightButton(palette?)` create the color buttons with
+another palette (default `DEFAULT_PALETTE`).
+
+### 6.2 Custom buttons
+
+A custom item is an object; `icon` is an icon of the [`lucide`](https://lucide.dev) package
+(add `lucide` to your own dependencies to import it):
+
+```ts
+import { Minus } from 'lucide';
+import { createToolbar, DEFAULT_TOOLBAR, en, type ToolbarButton } from 'stilo-editor/ui';
+
+const emDash: ToolbarButton = {
+  id: 'emDash',
+  kind: 'button',
+  icon: Minus,
+  labelKey: 'myApp.emDash',
+  run: (editor) => {
+    editor.commands.insertText('—');
+  },
+};
+
+createToolbar(editor, {
+  container,
+  items: [...DEFAULT_TOOLBAR, [emDash]],
+  messages: { ...en, 'myApp.emDash': 'Em dash' },
+});
+```
+
+| Field of a button | Meaning |
+|---|---|
+| `id` | Unique in the toolbar |
+| `kind` | `'button'` |
+| `icon` | A `lucide` icon |
+| `labelKey` | Key of the label in `messages`; a missing key is shown as is |
+| `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
+| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover |
+| `isActive(editor)` | Optional: makes it a toggle button and tells when it is pressed |
+| `isEnabled(editor)` | Optional, default always enabled |
+| `isAvailable(editor)` | Optional: `false` hides the button |
+
+### 6.3 Languages
+
+`en` (default) and `it` are exported. To change a few strings, spread a locale:
+`{ ...en, 'toolbar.bold': 'Strong' }`. The keys are listed in
+[UI.md §3.2](UI.md#32-i18n).
+
+### 6.4 Styles
+
+The look of the toolbar and of the popovers is set with `--stilo-*` CSS custom properties
+(colors, font, sizes). Set them on `:root` or on any element that contains both the toolbar and
+the editor:
+
+```css
+.my-editor {
+  --stilo-color-focus: #7c3aed;
+  --stilo-font-family: 'Inter', sans-serif;
+}
+```
+
+The full list is in [UI.md §7](UI.md#7-styles-srcstylesuicss). The content is styled by
+`content.css` under the class `stilo-content`: rules such as `.stilo-content h2`, loaded after
+it, change it.

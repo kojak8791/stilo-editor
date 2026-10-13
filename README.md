@@ -9,8 +9,8 @@ Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net)
 Clean HTML in and out, headless core, no paid tiers.
 
 > [!WARNING]
-> **Work in progress.** The MVP (M1) is done and the editor works in the demo page, but nothing
-> is published on npm yet. APIs may change without notice.
+> **Preview release.** Versions `0.x` are early previews: the editor works, but APIs may change
+> in any minor version until `1.0.0`. Read the release notes before updating.
 
 ## Why Stilo
 
@@ -86,19 +86,40 @@ Every popover works with the keyboard alone and <kbd>Esc</kbd> closes it.
 
 ## Usage
 
-The API is usable in the demo page; the package is not on npm yet.
+```sh
+npm install stilo-editor
+```
 
 ```ts
+import 'stilo-editor/style.css';
 import { Editor, defaultExtensions } from 'stilo-editor';
+import { createToolbar } from 'stilo-editor/ui';
 
 const editor = new Editor({
-  element: document.querySelector('#editor')!,
+  element: document.querySelector<HTMLElement>('#editor')!,
   extensions: [defaultExtensions()],
   content: '<p>Hello <strong>world</strong></p>',
 });
 
+createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
+
 editor.getHTML(); // '<p>Hello <strong>world</strong></p>'
 ```
+
+Options, commands, events, extensions and the toolbar: **[API reference](docs/API.md)**.
+Without the default toolbar, import `stilo-editor/content.css` instead of `style.css` and build
+your own controls on the same API.
+
+## Support
+
+- **Bugs and feature requests:** open an
+  [issue](https://github.com/kojak8791/stilo-editor/issues/new/choose); the forms ask for what
+  is needed to reproduce a bug (steps, Stilo version, browser).
+- **Questions:** open an issue too, with a short title that says what you are trying to do.
+- **Security vulnerabilities:** never in a public issue; report them privately as described in
+  [SECURITY.md](SECURITY.md).
+
+Contributions are welcome: start from [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap
 
@@ -121,6 +142,7 @@ it is merged, and performance is measured against explicit budgets (`npm run ben
 
 | Document | Content |
 |---|---|
+| [API.md](docs/API.md) | API reference for applications |
 | [VISION.md](docs/VISION.md) | Why and what |
 | [SPEC.md](docs/SPEC.md) | Features, non-functional requirements, roadmap |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack, file layout, extension API, HTML contract |
@@ -128,6 +150,8 @@ it is merged, and performance is measured against explicit budgets (`npm run ben
 | [PERFORMANCE.md](docs/PERFORMANCE.md) | Performance in practice, how it is measured, limits |
 | [BACKLOG.md](docs/BACKLOG.md) | Tasks done and planned |
 | [AGENTS.md](AGENTS.md) | Rules for contributors and coding agents |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to report bugs and propose changes |
+| [SECURITY.md](SECURITY.md) | How to report a vulnerability |
 
 ## Development
 

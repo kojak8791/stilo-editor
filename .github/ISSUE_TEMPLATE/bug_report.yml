@@ -1,0 +1,67 @@
+name: Bug report
+description: Something does not work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. A security problem must not be reported here: see the
+        [security policy](https://github.com/kojak8791/stilo-editor/security/policy).
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        From a fresh editor, what you type, click, paste or drop. Include the HTML given to
+        `setHTML` or the editor options when they matter.
+      placeholder: |
+        1. Type "hello" and select it
+        2. Press Ctrl+B
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happens instead. Screenshots, the `getHTML()` output or console errors help.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Stilo version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browsers where it happens
+      multiple: true
+      options:
+        - Chrome
+        - Edge
+        - Firefox
+        - Safari
+        - Other (write it below)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser version and operating system
+      placeholder: Firefox 150, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: A framework, other libraries on the page, a link to a small reproduction.

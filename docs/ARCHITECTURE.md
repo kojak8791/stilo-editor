@@ -108,7 +108,10 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 stilo-editor/
 ├── AGENTS.md                     Rules for contributors and coding agents
 ├── README.md
+├── CONTRIBUTING.md               How to report bugs and propose changes
+├── SECURITY.md                   Private vulnerability reports
 ├── LICENSE                       MIT
+├── .github/ISSUE_TEMPLATE/       Issue forms: bug report, feature request
 ├── package.json / package-lock.json
 ├── tsconfig.json                 Dev/typecheck config (src, tests, demo, bench)
 ├── tsconfig.build.json           Declarations for src/ only
@@ -120,6 +123,7 @@ stilo-editor/
 ├── assets/                     Brand: logo and symbol (light/dark), favicon; source/ has the black shapes
 ├── docs/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
+│   ├── API.md                    API reference for applications (users of the package)
 │   ├── decisions/                ADRs: NNNN-short-title.md
 │   └── guides/                   How-to guides
 ├── src/
