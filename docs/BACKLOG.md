@@ -43,7 +43,7 @@ may be split or merged when a task starts.
 |---|---|---|---|
 | T-023 | `Subscript`, `Superscript` (mutually exclusive), in `StarterKit` and in the default toolbar | F-207 | done |
 | T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | done |
-| T-025 | `TextStyle` (mark `textStyle`, `color` only for now) and `Highlight` (`<mark>`, optional background color): parse, serialize, commands, `Mod-Shift-h`, `==text==`, in `StarterKit` | F-208, F-209 | todo |
+| T-025 | `TextStyle` (mark `textStyle`, `color` only for now) and `Highlight` (`<mark>`, optional background color): parse, serialize, commands, `Mod-Shift-h`, `==text==`, in `StarterKit` | F-208, F-209 | done |
 | T-026 | Default UI: text color and highlight split buttons (the main part applies the last used color, the arrow opens a popover with "no color", a fixed palette replaceable by a toolbar option, and a custom color) | F-804 | todo |
 
 ## Notes for later milestones
