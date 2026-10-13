@@ -70,6 +70,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-308 | Text alignment (left/center/right/justify) on paragraphs and headings | M2 | `Mod-Shift-l/e/r/j` | — |
 | F-309 | **Move block up/down** | M1 | `Alt-ArrowUp` / `Alt-ArrowDown` | — |
 | F-310 | Block indentation (non-list) | M3 | — | — |
+| F-311 | Collapsible block (`<details>` with a `<summary>` title): open and close it without moving the cursor | M3 | — | — |
 
 ### F-309 — Move block: exact behavior
 
