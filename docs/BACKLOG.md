@@ -65,6 +65,9 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 
 ## Notes for later milestones
 
+- README on the npm page: links to anchors of the README itself (`#large-documents`) do not
+  work there (they do on GitHub); links to `docs/` do. Fix with the next `0.1.x` that is
+  published for other reasons.
 - After 0.1.0: a chaining API that runs several commands in one transaction (one `input`
   event).
 - After 0.1.0: CI on GitHub Actions running `npm run check` on every push, and npm trusted
