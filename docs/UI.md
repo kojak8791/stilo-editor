@@ -606,8 +606,8 @@ and highlight (SPEC F-208, F-209, F-804).
 
 - **Two items for the keyboard**: both parts are toolbar items (roving tabindex, §4.3) with the
   same `data-item`; they share `aria-disabled` (`isEnabled`).
-- **Last used color**: starts as `defaultColor`, and changes when a swatch or a custom color is
-  applied (read back with `getColor`, so it is the normalized value). It is shown by the bar
+- **Last used color**: starts as `defaultColor`, goes back to it with *No color*, and changes
+  when a swatch, *Default* or a custom color is applied (read back with `getColor`, so it is the normalized value). It is shown by the bar
   under the icon (`Mark`, the browser's `<mark>` color, for `null`) and lives in the toolbar
   only (not saved).
 - **Main part**: `hasColor(last)` → `unsetColor`, otherwise `setColor(last)`; `aria-pressed`
@@ -619,7 +619,8 @@ and highlight (SPEC F-208, F-209, F-804).
 - **Swatch** (click, `Enter`, `Space`): `setColor(color)`, close, `editor.focus()`. Arrow keys
   move in the grid (8 columns, `COLUMNS` in the code and in `ui.css`): left/right by one,
   up/down by a row, no wrapping.
-- ***No color***: `unsetColor`, close, `editor.focus()`.
+- ***No color***: `unsetColor`, the last used color goes back to `defaultColor` (black text, plain
+  `<mark>`), close, `editor.focus()`.
 - ***Default*** (`defaultChoice`, the highlight only): `setColor(null)` (a plain `<mark>`, whose
   yellow is the browser's own style, so it differs slightly between browsers), remembered as the
   last color, close, `editor.focus()`. Its label is inside a real `<mark>`, so it shows that

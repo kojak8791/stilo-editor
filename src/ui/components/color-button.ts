@@ -210,6 +210,8 @@ export function createColorButton(
 
   const onNoneClick = (): void => {
     item.unsetColor(editor);
+    lastColor = item.defaultColor;
+    showLastColor();
     close();
   };
 

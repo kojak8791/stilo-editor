@@ -217,6 +217,23 @@ describe('color buttons: popover', () => {
     expect(swatches(picker).every((s) => s.getAttribute('aria-pressed') === 'false')).toBe(true);
   });
 
+  it('resets the last used color with "No color"', () => {
+    const { editor, parts, pickers, swatches } = setup('<p>a[b]c</p>');
+    const { main, arrow } = parts('textColor');
+    const bar = main.querySelector<HTMLElement>('.stilo-split__color')!;
+    arrow.click();
+    swatches(pickers()[0]!)
+      .find((s) => s.dataset.color === '#3b82f6')!
+      .click();
+    expect(bar.style.backgroundColor).toBe('rgb(59, 130, 246)');
+    arrow.click();
+    pickers()[0]!.querySelector<HTMLButtonElement>('.stilo-color-picker__none')!.click();
+    expect(getHTMLWithSelection(editor)).toBe('<p>a[b]c</p>');
+    expect(bar.style.backgroundColor).toBe('rgb(0, 0, 0)');
+    main.click();
+    expect(getHTMLWithSelection(editor)).toBe('<p>a<span style="color: #000000">[b]</span>c</p>');
+  });
+
   it('removes the color with "No color"', () => {
     const { editor, parts, pickers } = setup('<p><mark>a[b]c</mark></p>');
     parts('highlight').arrow.click();
