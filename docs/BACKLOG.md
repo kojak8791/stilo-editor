@@ -51,9 +51,13 @@ may be split or merged when a task starts.
 ## Notes for later milestones
 
 - First npm release: `SECURITY.md` (private vulnerability reports, response time),
-  `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), and a "Support"
-  section in the README with a concrete promise the owner can keep (for example, a first
-  answer to every issue within 7 days, confirmed bugs before new features).
+  `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue
+  templates (steps to reproduce, version, browser), and a "Support" section in the README with a
+  concrete promise the owner can keep (for example, a first answer to every issue within 7 days,
+  confirmed bugs before new features).
+- First npm release: `docs/API.md`, the reference for users (editor options, commands, events,
+  UI options), linked from the README right below the Usage example; `ARCHITECTURE.md` stays the
+  reference for contributors.
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
   `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
   refresh and of the link bubble. Measure with `npm run bench` before and after.
