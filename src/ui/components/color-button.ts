@@ -81,9 +81,23 @@ export function createColorButton(
   const content = createElement('div', 'stilo-color-picker');
   content.setAttribute('role', 'dialog');
   content.setAttribute('aria-label', label);
+  const actions = createElement('div', 'stilo-color-picker__actions');
   const none = createElement('button', 'stilo-color-picker__none');
   none.type = 'button';
   none.textContent = messages['color.none'];
+  actions.append(none);
+  // "Default" applies the color `null`; its label sits in a `<mark>` to show the browser's color.
+  let defaultButton: HTMLButtonElement | null = null;
+  if (item.defaultChoice) {
+    const separator = createElement('span', 'stilo-color-picker__separator');
+    separator.setAttribute('aria-hidden', 'true');
+    defaultButton = createElement('button', 'stilo-color-picker__default');
+    defaultButton.type = 'button';
+    const sample = document.createElement('mark');
+    sample.textContent = messages['color.default'];
+    defaultButton.append(sample);
+    actions.append(separator, defaultButton);
+  }
   const grid = createElement('div', 'stilo-color-picker__grid');
   grid.setAttribute('role', 'group');
   grid.setAttribute('aria-label', label);
@@ -109,7 +123,7 @@ export function createColorButton(
   apply.type = 'submit';
   apply.textContent = messages['color.apply'];
   form.append(native, value, apply);
-  content.append(none, grid, form);
+  content.append(actions, grid, form);
 
   const popover = createPopover({
     anchor: element,
@@ -152,6 +166,7 @@ export function createColorButton(
     for (const swatch of swatches) {
       swatch.setAttribute('aria-pressed', String(swatch.dataset.color === current));
     }
+    defaultButton?.setAttribute('aria-pressed', String(item.hasColor(editor, null)));
     value.value = current ?? '';
     value.removeAttribute('aria-invalid');
     native.value = current && HEX_COLOR.test(current) ? current : '#000000';
@@ -159,7 +174,11 @@ export function createColorButton(
     arrow.setAttribute('aria-expanded', 'true');
     // The position arrives asynchronously: a scrolling focus would jump to the container top.
     const pressed = swatches.find((swatch) => swatch.getAttribute('aria-pressed') === 'true');
-    focusSwatch(pressed ?? swatches[0], { preventScroll: true });
+    if (!pressed && defaultButton?.getAttribute('aria-pressed') === 'true') {
+      defaultButton.focus({ preventScroll: true });
+    } else {
+      focusSwatch(pressed ?? swatches[0], { preventScroll: true });
+    }
   }
 
   function close(): void {
@@ -191,6 +210,11 @@ export function createColorButton(
 
   const onNoneClick = (): void => {
     item.unsetColor(editor);
+    close();
+  };
+
+  const onDefaultClick = (): void => {
+    applyColor(null);
     close();
   };
 
@@ -237,6 +261,7 @@ export function createColorButton(
   main.addEventListener('click', onMainClick);
   arrow.addEventListener('click', onArrowClick);
   none.addEventListener('click', onNoneClick);
+  defaultButton?.addEventListener('click', onDefaultClick);
   grid.addEventListener('click', onGridClick);
   grid.addEventListener('keydown', onGridKeydown);
   native.addEventListener('input', onNativeInput);
@@ -249,6 +274,7 @@ export function createColorButton(
     main.removeEventListener('click', onMainClick);
     arrow.removeEventListener('click', onArrowClick);
     none.removeEventListener('click', onNoneClick);
+    defaultButton?.removeEventListener('click', onDefaultClick);
     grid.removeEventListener('click', onGridClick);
     grid.removeEventListener('keydown', onGridKeydown);
     native.removeEventListener('input', onNativeInput);

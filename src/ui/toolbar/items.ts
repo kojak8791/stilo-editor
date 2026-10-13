@@ -287,6 +287,7 @@ export function highlightButton(
     labelKey: 'toolbar.highlight',
     palette,
     defaultColor: null,
+    defaultChoice: true,
     setColor: (e, color) => e.commands.setHighlight({ color }),
     unsetColor: (e) => {
       e.commands.unsetHighlight();

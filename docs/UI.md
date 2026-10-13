@@ -170,6 +170,8 @@ export interface ToolbarColorButton {
   palette: readonly ToolbarColor[];
   /** The color the main part applies until one is picked (`null`: the mark without a color). */
   defaultColor: string | null;
+  /** Shows "Default" next to "No color": applies the color `null`, label inside a `<mark>`. */
+  defaultChoice?: boolean;
   /** Applies `color` to the selection; `false` when the color is refused. */
   setColor(editor: Editor, color: string | null): boolean;
   unsetColor(editor: Editor): void;
@@ -253,6 +255,7 @@ no functions.
 | `toolbar.highlight` | Highlight | Evidenziatore |
 | `color.more` | more colors | altri colori |
 | `color.none` | No color | Nessun colore |
+| `color.default` | Default | Predefinito |
 | `color.pick` | Pick a color | Scegli un colore |
 | `color.custom` | Custom color | Colore personalizzato |
 | `color.apply` | Apply | Applica |
@@ -306,8 +309,8 @@ pass them with another palette as custom items to replace the colors
 
 | ID | Icon | `labelKey` | `defaultColor` | `setColor` / `unsetColor` | `hasColor` / `getColor` | `isAvailable` |
 |---|---|---|---|---|---|---|
-| `textColor` | `Type` | `toolbar.textColor` | `#000000` (black) | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
-| `highlight` | `Highlighter` | `toolbar.highlight` | `null` (plain `<mark>`) | `setHighlight({ color })` / `unsetHighlight()` | `isActive('highlight', { color })` / `getAttributes('highlight').color` | `'setHighlight' in editor.commands` |
+| `textColor` | `Type` | `toolbar.textColor` | `#000000` (black), no `defaultChoice` | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
+| `highlight` | `Highlighter` | `toolbar.highlight` | `null` (plain `<mark>`), `defaultChoice: true` | `setHighlight({ color })` / `unsetHighlight()` | `isActive('highlight', { color })` / `getAttributes('highlight').color` | `'setHighlight' in editor.commands` |
 
 `isEnabled`: `can().setColor('#000000')` and `can().setHighlight()` (false inside code).
 
@@ -579,7 +582,13 @@ and highlight (SPEC F-208, F-209, F-804).
 </span>
 <!-- appended to the toolbar element by createPopover -->
 <div class="stilo-popover stilo-color-picker" role="dialog" aria-label="Text color" hidden>
-  <button type="button" class="stilo-color-picker__none">No color</button>
+  <div class="stilo-color-picker__actions">
+    <button type="button" class="stilo-color-picker__none">No color</button>
+    <!-- with defaultChoice only -->
+    <span class="stilo-color-picker__separator" aria-hidden="true"></span>
+    <button type="button" class="stilo-color-picker__default" aria-pressed="false">
+      <mark>Default</mark></button>
+  </div>
   <div class="stilo-color-picker__grid" role="group" aria-label="Text color">
     <button type="button" class="stilo-color-picker__swatch" aria-label="Black" title="Black"
       data-color="#000000" aria-pressed="false" tabindex="-1"
@@ -611,6 +620,11 @@ and highlight (SPEC F-208, F-209, F-804).
   move in the grid (8 columns, `COLUMNS` in the code and in `ui.css`): left/right by one,
   up/down by a row, no wrapping.
 - ***No color***: `unsetColor`, close, `editor.focus()`.
+- ***Default*** (`defaultChoice`, the highlight only): `setColor(null)` (a plain `<mark>`, whose
+  yellow is the browser's own style, so it differs slightly between browsers), remembered as the
+  last color, close, `editor.focus()`. Its label is inside a real `<mark>`, so it shows that
+  color. On opening it has `aria-pressed` = `hasColor(null)`, and the focus when it is pressed
+  and no swatch is.
 - **Custom color**: the native picker copies its value into the text field; *Apply* (or `Enter`)
   runs `setColor` with the trimmed text. When it returns `false` the field gets
   `aria-invalid="true"` and the focus; editing it removes the attribute. On success: close,
@@ -751,7 +765,9 @@ Layout:
   icon over a 16×4px color bar, the arrow is 20px wide with a 12px chevron. Hovering one part
   gives both `--stilo-color-hover-group`, and the hovered one `--stilo-color-hover` (a pressed or
   disabled part keeps its own look). Color popover:
-  *No color* as a text button, a grid of 8 columns of 22px swatches (thin inner border so that
+  a row with *No color* and, for the highlight, *Default* (half the width each, centered text,
+  a 1px separator in `--stilo-color-border` at 60% opacity, *Default* `--stilo-color-active`
+  when pressed), a grid of 8 columns of 22px swatches (thin inner border so that
   white shows, slight zoom on hover, the pressed one outlined in `--stilo-color-text`), and a
   row with the native picker, the text field (`--stilo-color-error` border when invalid) and a
   primary *Apply* button.

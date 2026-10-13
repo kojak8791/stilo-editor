@@ -55,6 +55,7 @@ export const it: Messages = {
   'toolbar.textColor': 'Colore testo',
   'toolbar.highlight': 'Evidenziatore',
   'color.more': 'altri colori',
+  'color.default': 'Predefinito',
   'color.none': 'Nessun colore',
   'color.pick': 'Scegli un colore',
   'color.custom': 'Colore personalizzato',

@@ -72,6 +72,11 @@ export interface ToolbarColorButton {
   palette: readonly ToolbarColor[];
   /** The color the main part applies until one is picked (`null`: the mark without a color). */
   defaultColor: string | null;
+  /**
+   * Shows a "Default" choice next to "No color" that applies the color `null`; its label is
+   * drawn inside a `<mark>`, the browser's look of a highlight without a color.
+   */
+  defaultChoice?: boolean;
   /** Applies `color` to the selection; `false` when the color is refused. */
   setColor(editor: Editor, color: string | null): boolean;
   /** Removes the color from the selection. */

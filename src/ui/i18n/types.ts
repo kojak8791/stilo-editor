@@ -53,6 +53,7 @@ export type MessageKey =
   | 'toolbar.textColor'
   | 'toolbar.highlight'
   | 'color.more'
+  | 'color.default'
   | 'color.none'
   | 'color.pick'
   | 'color.custom'

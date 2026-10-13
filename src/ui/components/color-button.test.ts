@@ -183,6 +183,40 @@ describe('color buttons: popover', () => {
     );
   });
 
+  it('offers "Default" only for the highlight, inside a <mark>', () => {
+    const { pickers } = setup('<p>a</p>');
+    const [textPicker, highlightPicker] = pickers();
+    expect(textPicker!.querySelector('.stilo-color-picker__default')).toBeNull();
+    const defaultButton = highlightPicker!.querySelector('.stilo-color-picker__default')!;
+    expect(defaultButton.querySelector('mark')!.textContent).toBe('Default');
+  });
+
+  it('applies a plain <mark> with "Default" and remembers it', () => {
+    const { editor, parts, pickers } = setup(
+      '<p><mark style="background-color: red">[ab]</mark></p>',
+    );
+    const { main, arrow } = parts('highlight');
+    arrow.click();
+    const picker = pickers()[1]!;
+    picker.querySelector<HTMLButtonElement>('.stilo-color-picker__default')!.click();
+    expect(getHTMLWithSelection(editor)).toBe('<p><mark>[ab]</mark></p>');
+    expect(picker.hidden).toBe(true);
+    main.click();
+    expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
+    main.click();
+    expect(getHTMLWithSelection(editor)).toBe('<p><mark>[ab]</mark></p>');
+  });
+
+  it('marks and focuses "Default" on a plain <mark>', () => {
+    const { parts, pickers, swatches } = setup('<p><mark>a[b]c</mark></p>');
+    parts('highlight').arrow.click();
+    const picker = pickers()[1]!;
+    const defaultButton = picker.querySelector('.stilo-color-picker__default')!;
+    expect(defaultButton.getAttribute('aria-pressed')).toBe('true');
+    expect(document.activeElement).toBe(defaultButton);
+    expect(swatches(picker).every((s) => s.getAttribute('aria-pressed') === 'false')).toBe(true);
+  });
+
   it('removes the color with "No color"', () => {
     const { editor, parts, pickers } = setup('<p><mark>a[b]c</mark></p>');
     parts('highlight').arrow.click();

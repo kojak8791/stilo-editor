@@ -441,19 +441,44 @@
   color: var(--stilo-color-text, #1f2328);
 }
 
-.stilo-color-picker__none {
+.stilo-color-picker__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stilo-color-picker__none,
+.stilo-color-picker__default {
+  flex: 1;
   padding: 4px 8px;
   border: none;
   border-radius: var(--stilo-radius, 6px);
   background: transparent;
   color: inherit;
   font: inherit;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 
-.stilo-color-picker__none:hover {
+.stilo-color-picker__none:hover,
+.stilo-color-picker__default:hover {
   background: var(--stilo-color-hover, #eef1f4);
+}
+
+.stilo-color-picker__default[aria-pressed="true"] {
+  background: var(--stilo-color-active, #dde4ee);
+}
+
+.stilo-color-picker__default mark {
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.stilo-color-picker__separator {
+  width: 1px;
+  height: 18px;
+  background: var(--stilo-color-border, #d1d9e0);
+  opacity: 0.6;
 }
 
 .stilo-color-picker__grid {
@@ -482,6 +507,7 @@
 }
 
 .stilo-color-picker__none:focus-visible,
+.stilo-color-picker__default:focus-visible,
 .stilo-color-picker__swatch:focus-visible,
 .stilo-color-picker__value:focus-visible,
 .stilo-color-picker__native:focus-visible,
