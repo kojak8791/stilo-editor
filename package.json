@@ -12,7 +12,7 @@
     "prosemirror",
     "rich-text"
   ],
-  "author": "alessiocoggiola",
+  "author": "Alessio Coggiola <alessio.coggiola@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/kojak8791/stilo-editor#readme",
   "repository": {
