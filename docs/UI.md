@@ -736,8 +736,10 @@ Layout:
 
 - Toolbar: flex row, wraps, `padding` `--stilo-toolbar-padding-y` `--stilo-toolbar-padding-x`,
   `gap` `--stilo-toolbar-group-gap`, background `--stilo-color-toolbar-bg`, no border (T-027:
-  the editor's outer border is enough; a host with rounded corners rounds the toolbar too,
-  rather than `overflow` on the wrapper, which would cut the popovers).
+  the editor's outer border is enough). The toolbar and the sticky container inherit their top
+  corner radii (`border-top-*-radius: inherit`), so that a rounded editor box keeps its corners
+  without `overflow` (which would cut the popovers). With `sticky: false` the container has no
+  Stilo class: round it on the host side if needed.
   Groups: flex row with `gap` `--stilo-toolbar-gap`; every group after the first has
   `padding-left` `--stilo-toolbar-group-gap` and, as separator, a `::before` line 1px wide,
   `--stilo-toolbar-separator-height` high, vertically centered, in `--stilo-color-separator`.

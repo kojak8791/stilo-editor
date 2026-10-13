@@ -53,6 +53,17 @@
   background: var(--stilo-color-toolbar-bg);
 }
 
+/*
+ * The toolbar and its sticky container have a background: their top corners follow the element
+ * that holds them, so that a rounded editor box keeps its corners (no `overflow` on the host,
+ * which would cut the popovers).
+ */
+.stilo-toolbar-host,
+.stilo-toolbar {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
 /* Sticky toolbar container (option `sticky`) */
 .stilo-toolbar-host {
   position: sticky;
