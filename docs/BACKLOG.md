@@ -63,6 +63,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section: where to open issues and ask questions, no promised response time), `SECURITY.md` (private vulnerability reports through GitHub, public advisory with the fix), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | done |
 | T-034 | Publish `0.1.0` from the owner's PC (`npm publish` with 2FA), tag `v0.1.0`, GitHub release; check the README on the npm page (logo and relative links to `docs/`). `prepublishOnly` runs the quality gate and the build. npm staged publishing: the first publish creates a public `0.0.0-stage` placeholder and waits for the owner's approval with 2FA (Staged Packages on npmjs.com) | NFR-6 | done |
 | T-036 | npm metadata for search: `description` (what sets Stilo apart instead of "modern and powerful") and `keywords` (the terms used by other editors; `browser`, `productivity` dropped). Reaches npm with the next published version | NFR-6 | done |
+| T-037 | README screenshot: the default UI with a showcase text and the link popover open (`assets/screenshot.png`, absolute URL so it shows on npm too), until the website has a live demo | — | done |
 
 ## Notes for later milestones
 

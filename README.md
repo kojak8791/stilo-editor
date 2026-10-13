@@ -8,6 +8,10 @@
 Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net).
 Clean HTML in and out, headless core, no paid tiers.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot.png" alt="Stilo with the default toolbar: formatted text, lists, colors and the link popover open" width="800">
+</p>
+
 > [!WARNING]
 > **Preview release.** Versions `0.x` are early previews: the editor works, but APIs may change
 > in any minor version until `1.0.0`. Read the release notes before updating.

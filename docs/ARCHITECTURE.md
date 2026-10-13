@@ -121,7 +121,7 @@ stilo-editor/
 ├── playwright.config.ts          E2E
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
-├── assets/                     Brand: logo and symbol (light/dark), favicon; source/ has the black shapes
+├── assets/                     Brand: logo and symbol (light/dark), favicon, README screenshot; source/ has the black shapes
 ├── docs/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── API.md                    API reference for applications (users of the package)
