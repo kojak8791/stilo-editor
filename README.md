@@ -144,5 +144,5 @@ npm run bench   # performance benchmarks (needs: npx playwright install chromium
 
 [MIT](LICENSE) © 2026 Alessio Coggiola
 
-The logo wordmark is drawn from [Outfit](https://github.com/Outfitio/Outfit-Fonts), licensed
-under the [SIL Open Font License 1.1](https://openfontlicense.org).
+The logo wordmark is drawn from [IBM Plex](https://github.com/IBM/plex), licensed under the
+[SIL Open Font License 1.1](https://openfontlicense.org).
