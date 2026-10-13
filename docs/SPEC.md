@@ -280,6 +280,6 @@ best-effort in M2, tested in M3. E2E tests run on Chromium, Firefox and WebKit.
 | Milestone | Content | Status |
 |---|---|---|
 | **M0 — Foundations** | Docs, scaffolding, config, core contracts (`Editor`, extension API, HTML pipeline skeleton, test helpers), first reference extension (`Bold`) | Done |
-| **M1 — MVP** | F-001…F-012, F-101…F-103, F-201…F-206, F-212, F-301…F-305, F-309, F-401…F-405, F-701, F-702, F-706, F-801…F-803, NFR-1 harness, demo page | In progress |
-| **M2 — v1.0** | Remaining M2 features; first npm release `1.0.0` | Planned |
+| **M1 — MVP** | F-001…F-012, F-101…F-103, F-201…F-206, F-212, F-301…F-305, F-309, F-401…F-405, F-701, F-702, F-706, F-801…F-803, NFR-1 harness, demo page | Done |
+| **M2 — v1.0** | Remaining M2 features; `0.x` previews on npm from `0.1.0`, `1.0.0` at the end of M2 | In progress |
 | **M3 — Later** | Collaboration, wrappers, advanced UI, embeds | Planned |

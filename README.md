@@ -9,8 +9,8 @@ Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net)
 Clean HTML in and out, headless core, no paid tiers.
 
 > [!WARNING]
-> **Work in progress.** Stilo is in its MVP milestone (M1): the editor works in the demo page,
-> but nothing is published on npm yet. APIs may change without notice.
+> **Work in progress.** The MVP (M1) is done and the editor works in the demo page, but nothing
+> is published on npm yet. APIs may change without notice.
 
 ## Why Stilo
 
@@ -105,8 +105,8 @@ editor.getHTML(); // '<p>Hello <strong>world</strong></p>'
 | Milestone | Content | Status |
 |---|---|---|
 | M0 — Foundations | Docs, scaffolding, core contracts, HTML pipeline, test helpers, `Bold` reference extension | Done |
-| M1 — MVP | Core editing, history, basic marks and blocks, lists, paste cleanup, default toolbar, demo, benchmarks | In progress |
-| M2 — v1.0 | Tables, images, fonts and colors, productivity tools, first npm release | Planned |
+| M1 — MVP | Core editing, history, basic marks and blocks, lists, paste cleanup, default toolbar, demo, benchmarks | Done |
+| M2 — v1.0 | Preview releases `0.x` on npm, then tables, images, fonts and colors, productivity tools up to `1.0.0` | In progress |
 | M3 — Later | Real-time collaboration (Yjs), framework wrappers, embeds | Planned |
 
 Full feature list and priorities in [docs/SPEC.md](docs/SPEC.md).

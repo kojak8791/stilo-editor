@@ -45,20 +45,27 @@ may be split or merged when a task starts.
 | T-024 | Special characters and emoji picker: toolbar button, popover with two tabs and categories, search by name, our own curated data loaded on first open (F-904, F-905 moved up from M3) | F-904, F-905 | done |
 | T-025 | `TextStyle` (mark `textStyle`, `color` only for now) and `Highlight` (`<mark>`, optional background color): parse, serialize, commands, `Mod-Shift-h`, `==text==`, in `StarterKit` | F-208, F-209 | done |
 | T-026 | Default UI: text color and highlight split buttons (the main part applies the last used color, the arrow opens a popover with "no color", a fixed palette replaceable with `textColorButton(palette)` and `highlightButton(palette)`, and a custom color) | F-804 | done |
-| T-027 | Toolbar restyle, first part: custom property defaults in one `:where(:root)` block of `ui.css` (no fallbacks), toolbar padding x/y, item gap and group gap split, 30px buttons, 2px gaps; later: a borderless look (only the outer editor border) | F-801, F-809 | todo |
+| T-027 | Toolbar restyle, first part: custom property defaults in one `:where(:root)` block of `ui.css` (no fallbacks), toolbar padding x/y, item gap and group gap split, 30px buttons, 2px gaps; borderless look (only the outer editor border), light toolbar background, short group separators, toolbar corners following the host radius, shadow on the stuck toolbar in pure CSS | F-801, F-809 | done |
 | T-028 | README "Features" table for users (feature, keyboard shortcut, Markdown shortcut, notes on popovers; keyboard and accessibility summary); `AGENTS.md` definition of done keeps it in sync | — | done |
 | T-029 | Logo: bicolor nib symbol (`assets/`, light and dark, adaptive favicon in the demo) and the `st\|lo` wordmark with a blinking caret, in the README header (`<picture>` for light and dark) | — | done |
 
+## Preview release 0.1.0
+
+Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without announcements;
+`1.0.0` stays the end of M2. Every later M2 feature block ships as a new `0.x`.
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-030 | API ergonomics before the first release: constructor shape (`new Editor(element, options?)` or today's options object) and the `StarterKit` name; ADR when they change | — | todo |
+| T-031 | Package: `package.json` metadata (`repository`, `homepage`, `bugs`, version `0.1.0`); `npm pack` and install in a clean Vite app: exports, types, CSS, tree-shaking | NFR-6 | todo |
+| T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; the owner checks macOS by hand | — | todo |
+| T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section with a promise the owner can keep, e.g. a first answer to every issue within 7 days), `SECURITY.md` (private vulnerability reports), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | todo |
+| T-034 | Publish `0.1.0` from the owner's PC (`npm publish` with 2FA), tag `v0.1.0`, GitHub release | — | todo |
+
 ## Notes for later milestones
 
-- First npm release: `SECURITY.md` (private vulnerability reports, response time),
-  `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue
-  templates (steps to reproduce, version, browser), and a "Support" section in the README with a
-  concrete promise the owner can keep (for example, a first answer to every issue within 7 days,
-  confirmed bugs before new features).
-- First npm release: `docs/API.md`, the reference for users (editor options, commands, events,
-  UI options), linked from the README right below the Usage example; `ARCHITECTURE.md` stays the
-  reference for contributors.
+- After 0.1.0: CI on GitHub Actions running `npm run check` on every push, and npm trusted
+  publishing (OIDC) with provenance instead of publishing from the owner's PC.
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
   `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
   refresh and of the link bubble. Measure with `npm run bench` before and after.
