@@ -15,8 +15,8 @@ import type { CommandFactory } from './types';
  */
 export const MARK_ORDER: readonly string[] = [
   'link',
-  'textStyle',
   'highlight',
+  'textStyle',
   'bold',
   'italic',
   'underline',

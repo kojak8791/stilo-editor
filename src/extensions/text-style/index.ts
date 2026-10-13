@@ -23,7 +23,7 @@ function colorAttrs(color: string | null): { color: string } | false {
  */
 export const TextStyle = defineExtension({
   name: 'textStyle',
-  priority: 102,
+  priority: 101,
   marks: () => ({
     textStyle: {
       attrs: { color: { default: null } },

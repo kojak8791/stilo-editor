@@ -25,7 +25,11 @@ describe('TextStyle: parse and serialize', () => {
     ],
     [
       '<p><mark><strong><span style="color: red">a</span></strong></mark></p>',
-      '<p><span style="color: red"><mark><strong>a</strong></mark></span></p>',
+      '<p><mark><span style="color: red"><strong>a</strong></span></mark></p>',
+    ],
+    [
+      '<p><span style="color: #fff"><mark style="background-color: #3b82f6">a</mark></span></p>',
+      '<p><mark style="background-color: #3b82f6"><span style="color: #ffffff">a</span></mark></p>',
     ],
     [
       '<p><span style="color: red"><a href="x">a</a></span></p>',
@@ -71,6 +75,19 @@ describe('TextStyle: commands', () => {
     const editor = createTestEditor({ html });
     expect(editor.commands.setColor(color)).toBe(true);
     expect(getHTMLWithSelection(editor)).toBe(expected);
+  });
+
+  it('colors highlighted text inside the <mark>, so that the browser color of <mark> does not hide it', () => {
+    const expected =
+      '<p>a<mark style="background-color: #3b82f6"><span style="color: #ffffff">[b]</span></mark>c</p>';
+    const first = createTestEditor({ html: '<p>a[b]c</p>' });
+    expect(first.commands.setHighlight({ color: '#3b82f6' })).toBe(true);
+    expect(first.commands.setColor('#ffffff')).toBe(true);
+    expect(getHTMLWithSelection(first)).toBe(expected);
+    const second = createTestEditor({ html: '<p>a[b]c</p>' });
+    expect(second.commands.setColor('#ffffff')).toBe(true);
+    expect(second.commands.setHighlight({ color: '#3b82f6' })).toBe(true);
+    expect(getHTMLWithSelection(second)).toBe(expected);
   });
 
   it.each(['url(x)', 'inherit', 'not a color', ''])('setColor rejects %j', (color) => {

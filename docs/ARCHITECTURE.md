@@ -382,8 +382,10 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
    `Text`, always present, also provides `insertText(text)`: it replaces the selection with
    `text`, with the marks active at the cursor (`false` for an empty string).
 4. Schema mark order (affects nesting in HTML output, outermost first):
-   `link`, `textStyle`, `highlight`, `bold`, `italic`, `underline`, `strike`, `subscript`,
-   `superscript`, `code`. The first three have priorities 103, 102, 101 (the other marks keep
+   `link`, `highlight`, `textStyle`, `bold`, `italic`, `underline`, `strike`, `subscript`,
+   `superscript`, `code`. `textStyle` is inside `highlight` because browsers give `<mark>` its
+   own text color (`MarkText`), which would hide a color set outside it. The first three have
+   priorities 103, 102, 101 (the other marks keep
    the default 100 and follow the `StarterKit` order).
 5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
    an input rule, so it may take precedence over every extension), then keymaps (by priority),

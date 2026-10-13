@@ -46,7 +46,7 @@ function highlightAttrs({ color = null }: HighlightAttributes): { color: string 
  */
 export const Highlight = defineExtension({
   name: 'highlight',
-  priority: 101,
+  priority: 102,
   marks: () => ({
     highlight: {
       attrs: { color: { default: null } },
