@@ -131,6 +131,7 @@ stilo-editor/
 │   │   ├── events.ts             Typed event emitter
 │   │   ├── types.ts              Shared public types (Commands interface, events, options)
 │   │   ├── errors.ts             StiloError
+│   │   ├── drop.ts               Drag-and-drop move cleanup (§8.2)
 │   │   ├── helpers/              Pure helpers (isMarkActive, findParentNode, ...)
 │   │   └── html/
 │   │       ├── sanitize.ts       DOMPurify instance + config + hooks
@@ -553,6 +554,18 @@ Copied HTML follows §7 exactly, plus ProseMirror's `data-pm-slice` on the first
 plain text is `textBetween(…, '
 
 ')`, the same rule as `getText()`.
+
+### 8.2 Drag and drop (move)
+
+ProseMirror moves a dragged selection by deleting it and inserting the slice at the drop point. When
+the selection covers whole textblocks (triple click, or from the start of a block to the end of
+another), the deletion keeps the emptied block: every move left an empty paragraph behind.
+`createDropMovePlugin()` (`src/core/drop.ts`, added by the `Editor` after the extension plugins)
+appends to a `uiEvent: 'drop'` transaction the deletion of that block, together with the containers
+left holding only it (list item, list, blockquote). The block stays when the selection did not cover
+whole blocks, when the drop was a copy (`Ctrl` held, `Option` on macOS: the block is not emptied),
+or when its parent cannot lose it (the only block of the document, the first paragraph of a list
+item). The deletion belongs to the same undo step as the move.
 
 ---
 

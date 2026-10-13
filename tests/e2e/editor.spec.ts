@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 
 /** Opens the demo with an empty, focused editor. */
 async function openEmpty(page: Page) {
@@ -123,4 +123,30 @@ test('undo and redo', async ({ page }) => {
   await expect(output(page)).toHaveText('<p>first</p><p></p>');
   await page.keyboard.press('ControlOrMeta+Shift+z');
   await expect(output(page)).toHaveText('<p>first</p><p>second</p>');
+});
+
+/** Drags the selection with the mouse from `source` to just above `target`. */
+async function dragAbove(page: Page, source: Locator, target: Locator) {
+  const from = (await source.boundingBox())!;
+  const to = (await target.boundingBox())!;
+  await page.mouse.move(from.x + 10, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 20, from.y + from.height / 2, { steps: 5 });
+  await page.mouse.move(to.x + 10, to.y - 2, { steps: 10 });
+  await page.mouse.up();
+}
+
+test('dragging a whole paragraph moves it without leaving an empty one', async ({ page }) => {
+  await openEmpty(page);
+  await type(page, 'Title');
+  await page.keyboard.press('Enter');
+  await type(page, 'Text');
+  const paragraphs = page.locator('.ProseMirror p');
+  await paragraphs.nth(1).click({ clickCount: 3 });
+  await dragAbove(page, paragraphs.nth(1), paragraphs.nth(0));
+  await expect(output(page)).toHaveText('<p>Text</p><p>Title</p>');
+
+  await paragraphs.nth(0).click({ clickCount: 3 });
+  await dragAbove(page, paragraphs.nth(0), paragraphs.nth(0));
+  await expect(output(page)).toHaveText('<p>Text</p><p>Title</p>');
 });

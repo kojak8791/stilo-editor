@@ -2,6 +2,7 @@ import { closeHistory } from 'prosemirror-history';
 import type { Node, Schema } from 'prosemirror-model';
 import { EditorState, type Plugin, Selection, type Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
+import { createDropMovePlugin } from './drop';
 import { EventEmitter, type EventHandler } from './events';
 import { ExtensionManager } from './extension-manager';
 import { getMarkAttributes, getNodeAttributes, isMarkActive, isNodeActive } from './helpers/active';
@@ -52,7 +53,8 @@ export class Editor {
    * Creates the editor:
    *
    * 1. `ExtensionManager` from `options.extensions` → `schema`;
-   * 2. `createPlugins(this)`; command runners are built from the manager's commands;
+   * 2. `createPlugins(this)`, then the core `createDropMovePlugin()`; command runners are built
+   *    from the manager's commands;
    * 3. initial document from `parseHTML(schema, options.content ?? '')`;
    * 4. `EditorView` mounted inside `options.element`, with attributes `class="stilo-content"`,
    *    `role="textbox"`, `aria-multiline="true"`, `aria-label` (if given); `editable` from
@@ -64,7 +66,7 @@ export class Editor {
   constructor(options: EditorOptions) {
     this.manager = new ExtensionManager(options.extensions);
     this.schema = this.manager.schema;
-    this.plugins = this.manager.createPlugins(this);
+    this.plugins = [...this.manager.createPlugins(this), createDropMovePlugin()];
     this.commands = this.createRunners();
     this.compactParagraphs = options.compactParagraphs ?? true;
 
