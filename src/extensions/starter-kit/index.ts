@@ -9,6 +9,7 @@ import { DropCursor, type DropCursorOptions } from '../drop-cursor';
 import { GapCursor } from '../gap-cursor';
 import { HardBreak } from '../hard-break';
 import { Heading, type HeadingOptions } from '../heading';
+import { Highlight } from '../highlight';
 import { History, type HistoryOptions } from '../history';
 import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
@@ -22,6 +23,7 @@ import { Strike } from '../strike';
 import { Subscript } from '../subscript';
 import { Superscript } from '../superscript';
 import { Text } from '../text';
+import { TextStyle } from '../text-style';
 import { Underline } from '../underline';
 
 /**
@@ -47,6 +49,8 @@ export interface StarterKitOptions {
   superscript?: false;
   code?: false;
   link?: false;
+  textStyle?: false;
+  highlight?: false;
   clearFormatting?: false;
   history?: false | Partial<HistoryOptions>;
   moveBlock?: false;
@@ -91,6 +95,8 @@ export function StarterKit(options: StarterKitOptions = {}): Extension[] {
     ...include(Superscript, options.superscript),
     ...include(Code, options.code),
     ...include(Link, options.link),
+    ...include(TextStyle, options.textStyle),
+    ...include(Highlight, options.highlight),
     ...include(ClearFormatting, options.clearFormatting),
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),

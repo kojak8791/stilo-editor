@@ -98,7 +98,13 @@ describe('paste HTML', () => {
   it.each([
     ['<p>x|y</p>', '<b>a</b><i>b</i>', true, '<p>x<strong>a</strong><em>b|</em>y</p>'],
     ['<p>x|y</p>', '<div>a</div><div>b</div>', true, '<p>xa</p><p>b|y</p>'],
-    ['<p>x|y</p>', '<span style="color:red">r</span>', true, '<p>xr|y</p>'],
+    [
+      '<p>x|y</p>',
+      '<span style="color:red">r</span>',
+      true,
+      '<p>x<span style="color: red">r|</span>y</p>',
+    ],
+    ['<p>x|y</p>', '<span style="letter-spacing:2px">r</span>', true, '<p>xr|y</p>'],
     ['<p>x|y</p>', '<p>a<script>alert(1)</script></p>', true, '<p>xa|y</p>'],
     ['<p>x|y</p>', '<script>alert(1)</script>', true, '<p>x|y</p>'],
     ['<p>x|y</p>', '<img src=x onerror=alert(1)>', true, '<p>x|y</p>'],

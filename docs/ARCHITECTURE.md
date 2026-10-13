@@ -393,8 +393,8 @@ result. `editor.can().x(...args)` runs it without `dispatch`.
 
 `StarterKit(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
-`Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`,
-`ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
+`Highlight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -429,8 +429,8 @@ configured with `{ <name>: { ...options } }`.
 | Mark | Output | Also parsed from |
 |---|---|---|
 | `link` | `<a href target rel>` | `a[href]` with a non-empty allowed `href` (`isAllowedHref`). Attributes `href` and `target` (`_blank` or none); `rel` is not stored: it is written as `noopener noreferrer nofollow` when `target="_blank"`, and dropped on input. Not inclusive (typing at its end does not extend it) |
-| `textStyle` (M2) | `<span style="font-family; font-size; color">` | `span[style]`, `font[face/size/color]`; dropped when no allowed property remains |
-| `highlight` (M2) | `<mark>` or `<mark style="background-color: x">` | `mark`, `span[style*=background-color]` |
+| `textStyle` | `<span style="font-family; font-size; color">` | `span[style]`, `font[face/size/color]`; dropped when no allowed property remains. Attribute `color` (F-208); `fontFamily` and `fontSize` come with F-210 and F-211. Commands `setColor(color)` (`false` for an invalid color), `unsetColor()` |
+| `highlight` | `<mark>` or `<mark style="background-color: x">` | `mark`, and a `background-color` style on any element; `transparent` counts as no color (Google Docs writes it on every span). Attribute `color` (`null` for a plain `<mark>`). `toggleHighlight()` without attributes removes any highlight; with `{ color }` it is active only for that color |
 | `bold` | `<strong>` | `strong`, `b` (except Google Docs `<b style="font-weight:normal">`), `font-weight: bold \| ≥600` |
 | `italic` | `<em>` | `em`, `i`, `font-style: italic` |
 | `underline` | `<u>` | `u`, `text-decoration: underline` |
