@@ -710,7 +710,8 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-color-text` | `#1f2328` | Text and icons |
 | `--stilo-color-muted` | `#59636e` | Shortcuts in menus |
 | `--stilo-color-bg` | `#ffffff` | Toolbar and popover background |
-| `--stilo-color-border` | `#d1d9e0` | Toolbar bottom border, group separators, popover border |
+| `--stilo-color-border` | `#d1d9e0` | Popover border, field borders |
+| `--stilo-color-separator` | `#e4e8ec` | Group separators (lighter than the borders) |
 | `--stilo-color-hover` | `#eef1f4` | Button / option hover |
 | `--stilo-color-hover-group` | `#f5f7f9` | The part of a color split button that is not hovered (lighter than the hovered one) |
 | `--stilo-color-active` | `#dde4ee` | Pressed button, checked option |
@@ -721,6 +722,7 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-toolbar-padding-x` | `2px` | Toolbar padding, left and right |
 | `--stilo-toolbar-gap` | `2px` | Space between the items of a group |
 | `--stilo-toolbar-group-gap` | `4px` | Space on each side of a group separator |
+| `--stilo-toolbar-separator-height` | `18px` | Height of a group separator |
 | `--stilo-toolbar-sticky-top` | `0` | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
 | `--stilo-z-toolbar` | `1001` | Sticky toolbar `z-index`: above the content and the popovers anchored to it |
 | `--stilo-button-size` | `30px` | Button height and min width |
@@ -732,9 +734,10 @@ refuses a block that already has the type, and the active option must stay selec
 Layout:
 
 - Toolbar: flex row, wraps, `padding` `--stilo-toolbar-padding-y` `--stilo-toolbar-padding-x`,
-  `gap` `--stilo-toolbar-group-gap`, bottom border. Groups: flex row with `gap`
-  `--stilo-toolbar-gap`; every group after the first has a left border as separator and
-  `padding-left` `--stilo-toolbar-group-gap`.
+  `gap` `--stilo-toolbar-group-gap`, no border (T-027: the editor's outer border is enough).
+  Groups: flex row with `gap` `--stilo-toolbar-gap`; every group after the first has
+  `padding-left` `--stilo-toolbar-group-gap` and, as separator, a `::before` line 1px wide,
+  `--stilo-toolbar-separator-height` high, vertically centered, in `--stilo-color-separator`.
 - Sticky toolbar (option `sticky`, T-021): the class `stilo-toolbar-host` goes on `container`,
   not on the toolbar, because a sticky element only moves inside its parent. It has
   `position: sticky`, `top: --stilo-toolbar-sticky-top`, `z-index: --stilo-z-toolbar` and the
@@ -775,7 +778,7 @@ Layout:
   gives both `--stilo-color-hover-group`, and the hovered one `--stilo-color-hover` (a pressed or
   disabled part keeps its own look). Color popover:
   a row with *No color* and, for the highlight, *Default* (half the width each, centered text,
-  a 1px separator in `--stilo-color-border` at 60% opacity, *Default* `--stilo-color-active`
+  a 1px separator in `--stilo-color-separator`, *Default* `--stilo-color-active`
   when pressed), a grid of 8 columns of 22px swatches (thin inner border so that
   white shows, slight zoom on hover, the pressed one outlined in `--stilo-color-text`), and a
   row with the native picker, the text field (`--stilo-color-error` border when invalid) and a

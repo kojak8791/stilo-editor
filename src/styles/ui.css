@@ -12,6 +12,7 @@
   --stilo-color-muted: #59636e;
   --stilo-color-bg: #ffffff;
   --stilo-color-border: #d1d9e0;
+  --stilo-color-separator: #e4e8ec;
   --stilo-color-hover: #eef1f4;
   --stilo-color-hover-group: #f5f7f9;
   --stilo-color-active: #dde4ee;
@@ -24,6 +25,7 @@
   --stilo-toolbar-padding-y: 4px;
   --stilo-toolbar-gap: 2px;
   --stilo-toolbar-group-gap: 4px;
+  --stilo-toolbar-separator-height: 18px;
   --stilo-toolbar-sticky-top: 0;
   --stilo-z-toolbar: 1001;
 
@@ -47,7 +49,6 @@
   flex-wrap: wrap;
   gap: var(--stilo-toolbar-group-gap);
   padding: var(--stilo-toolbar-padding-y) var(--stilo-toolbar-padding-x);
-  border-bottom: 1px solid var(--stilo-color-border);
 }
 
 /* Sticky toolbar container (option `sticky`) */
@@ -64,9 +65,21 @@
   gap: var(--stilo-toolbar-gap);
 }
 
+/* Separator: a short line, vertically centered, before every group after the first */
 .stilo-toolbar__group:not(:first-child) {
-  border-left: 1px solid var(--stilo-color-border);
+  position: relative;
   padding-left: var(--stilo-toolbar-group-gap);
+}
+
+.stilo-toolbar__group:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: var(--stilo-toolbar-separator-height);
+  background: var(--stilo-color-separator);
+  transform: translateY(-50%);
 }
 
 /* Button */
@@ -518,8 +531,7 @@
 .stilo-color-picker__separator {
   width: 1px;
   height: 18px;
-  background: var(--stilo-color-border);
-  opacity: 0.6;
+  background: var(--stilo-color-separator);
 }
 
 .stilo-color-picker__grid {
