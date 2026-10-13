@@ -28,6 +28,7 @@
   --stilo-toolbar-group-gap: 4px;
   --stilo-toolbar-separator-height: 18px;
   --stilo-toolbar-sticky-top: 0;
+  --stilo-toolbar-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
   --stilo-z-toolbar: 1001;
 
   --stilo-button-size: 30px;
@@ -70,6 +71,17 @@
   top: var(--stilo-toolbar-sticky-top);
   z-index: var(--stilo-z-toolbar);
   background: var(--stilo-color-bg);
+  container-type: scroll-state;
+}
+
+/*
+ * A shadow while the toolbar is stuck at the top of the scrolling page. Pure CSS: browsers
+ * without scroll-state container queries ignore it and show the toolbar without shadow.
+ */
+@container scroll-state(stuck: top) {
+  .stilo-toolbar {
+    box-shadow: var(--stilo-toolbar-shadow);
+  }
 }
 
 /* Group */

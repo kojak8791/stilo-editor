@@ -724,6 +724,7 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-toolbar-gap` | `2px` | Space between the items of a group |
 | `--stilo-toolbar-group-gap` | `4px` | Space on each side of a group separator |
 | `--stilo-toolbar-separator-height` | `18px` | Height of a group separator |
+| `--stilo-toolbar-shadow` | `0 2px 6px rgb(0 0 0 / 0.08)` | Toolbar shadow while it is stuck at the top |
 | `--stilo-toolbar-sticky-top` | `0` | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
 | `--stilo-z-toolbar` | `1001` | Sticky toolbar `z-index`: above the content and the popovers anchored to it |
 | `--stilo-button-size` | `30px` | Button height and min width |
@@ -745,7 +746,8 @@ Layout:
   `--stilo-toolbar-separator-height` high, vertically centered, in `--stilo-color-separator`.
 - Sticky toolbar (option `sticky`, T-021): the class `stilo-toolbar-host` goes on `container`,
   not on the toolbar, because a sticky element only moves inside its parent. It has
-  `position: sticky`, `top: --stilo-toolbar-sticky-top`, `z-index: --stilo-z-toolbar` and the
+  `position: sticky`, `top: --stilo-toolbar-sticky-top`, `z-index: --stilo-z-toolbar`,
+  `container-type: scroll-state` and the
   `--stilo-color-bg` background. Pure CSS, no scroll listener: the browser sticks it to the
   nearest scrolling ancestor, so the toolbar follows the page when the editor flows in it and
   stays in place when only the editor content scrolls (the toolbar outside the scrolling
@@ -759,6 +761,11 @@ Layout:
   - Popovers anchored to the content (link popover, link bubble) pass under the stuck toolbar,
     as they do when the content scrolls in its own container; the toolbar's own menus stay
     above the content.
+  - While it is stuck (`@container scroll-state(stuck: top)`, T-027) the toolbar gets
+    `--stilo-toolbar-shadow`. Pure CSS on purpose (no `IntersectionObserver`): browsers without
+    scroll-state queries (Chrome/Edge 133+ have them) simply show no shadow. It does not
+    appear when only the editor content scrolls in its own container (`?fixed`): there the
+    toolbar is never stuck, it sits outside the scrolling element.
 - Button: transparent background, no border, `--stilo-radius`, size `--stilo-button-size`,
   icon centered; hover → `--stilo-color-hover`; `--active` → `--stilo-color-active`;
   `[aria-disabled="true"]` → opacity 0.4, `cursor: default`, no hover color.

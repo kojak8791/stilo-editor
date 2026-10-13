@@ -56,5 +56,12 @@ may be split or merged when a task starts.
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
   `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
   refresh and of the link bubble. Measure with `npm run bench` before and after.
+- Toolbar icons: the owner wants our own SVG set, drawn for the toolbar (possibly starting from
+  single icons of public sets, keeping their license notices), replacing `lucide`; bold and
+  strike first. Changing or dropping the `lucide` dependency needs an ADR.
+- Sticky toolbar shadow when the editor content scrolls in its own container (`?fixed`): a
+  pure-CSS candidate is a scroll-driven animation on a named scroll timeline of the content,
+  shared with the toolbar through `timeline-scope`; it needs a common ancestor and a unique
+  name per editor. To evaluate.
 - F-809 (themes): the gap cursor line in `content.css` (`.ProseMirror-gapcursor:after`) has a
   fixed `black` color, invisible on a dark theme; use `currentColor` or a `--stilo-*` property.
