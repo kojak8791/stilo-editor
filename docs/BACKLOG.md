@@ -61,7 +61,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; the owner checks macOS by hand | — | done |
 | T-035 | Drag and drop of whole blocks is a move of blocks (ARCHITECTURE §8.2): no empty paragraph (or list item, blockquote) left behind; dropped inside text the target is split (a list item gets a new item); found by the owner while testing T-032 on macOS | F-012 | done |
 | T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section: where to open issues and ask questions, no promised response time), `SECURITY.md` (private vulnerability reports through GitHub, public advisory with the fix), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | done |
-| T-034 | Publish `0.1.0` from the owner's PC (`npm publish` with 2FA), tag `v0.1.0`, GitHub release; check the README on the npm page (logo and relative links to `docs/`) | — | todo |
+| T-034 | Publish `0.1.0` from the owner's PC (`npm publish` with 2FA), tag `v0.1.0`, GitHub release; check the README on the npm page (logo and relative links to `docs/`). `prepublishOnly` runs the quality gate and the build. npm staged publishing: the first publish creates a public `0.0.0-stage` placeholder and waits for the owner's approval with 2FA (Staged Packages on npmjs.com) | NFR-6 | done |
 
 ## Notes for later milestones
 
