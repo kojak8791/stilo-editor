@@ -1,6 +1,7 @@
+import { Slice } from 'prosemirror-model';
 import { dropPoint } from 'prosemirror-transform';
 import { describe, expect, it } from 'vitest';
-import { createTestEditor, pressKey } from '../../tests/helpers';
+import { createTestEditor, getHTMLWithSelection, pressKey } from '../../tests/helpers';
 import type { Editor } from './editor';
 
 /** Drops the selection at `target` like ProseMirror's drop handler (`move`: not a copy). */
@@ -67,5 +68,83 @@ describe('drop move', () => {
     const editor = createTestEditor({ html: '<p>[Text]</p><p>b</p>' });
     pressKey(editor, 'Backspace');
     expect(editor.getHTML()).toBe('<p></p><p>b</p>');
+  });
+});
+
+/** Drops the selection with the mouse at `pos`, through the `handleDrop` props (no layout). */
+function dropAt(editor: Editor, pos: number, move = true): boolean {
+  const { view } = editor;
+  view.posAtCoords = () => ({ pos, inside: -1 });
+  const event = new MouseEvent('drop') as DragEvent;
+  return view.someProp('handleDrop', (f) => f(view, event, Slice.empty, move)) ?? false;
+}
+
+describe('drop of whole blocks inside text', () => {
+  it.each([
+    ['in the middle of a paragraph', '<p>[x]</p><p>abcd</p>', 6, '<p>ab</p><p>[x]</p><p>cd</p>'],
+    ['at the start of a paragraph', '<p>[x]</p><p>abcd</p>', 4, '<p>[x]</p><p>abcd</p>'],
+    ['at the end of a paragraph', '<p>[x]</p><p>abcd</p>', 8, '<p>abcd</p><p>[x]</p>'],
+    ['in a heading', '<h2>abcd</h2><p>[x]</p>', 3, '<h2>ab</h2><p>[x]</p><h2>cd</h2>'],
+    ['two blocks', '<p>abcd</p><p>[x</p><p>y]</p>', 3, '<p>ab</p><p>[x</p><p>y]</p><p>cd</p>'],
+    [
+      'in a list item',
+      '<ul><li>abcd</li></ul><p>[x]</p>',
+      5,
+      '<ul><li>ab</li><li>[x]</li><li>cd</li></ul>',
+    ],
+    [
+      'at the end of a list item',
+      '<ul><li>ab</li><li>cd</li></ul><p>[x]</p>',
+      5,
+      '<ul><li>ab</li><li>[x]</li><li>cd</li></ul>',
+    ],
+    [
+      'a heading in a list item',
+      '<ul><li>abcd</li></ul><h2>[x]</h2>',
+      5,
+      '<ul><li>ab</li></ul><h2>[x]</h2><ul><li>cd</li></ul>',
+    ],
+    [
+      'at the start of the second paragraph of an item',
+      '<ul><li><p>ab</p><p>cd</p></li></ul><p>[x]</p>',
+      7,
+      '<ul><li>ab</li><li>[x]</li><li>cd</li></ul>',
+    ],
+    [
+      'in a quote',
+      '<blockquote><p>abcd</p></blockquote><p>[x]</p>',
+      4,
+      '<blockquote><p>ab</p><p>[x]</p><p>cd</p></blockquote>',
+    ],
+  ] as const)('splits the target: %s', (_name, html, pos, expected) => {
+    const editor = createTestEditor({ html });
+    expect(dropAt(editor, pos)).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(expected);
+  });
+
+  it.each([
+    ['part of a paragraph', '<p>a[b]c</p><p>abcd</p>', 7, true],
+    ['a copy', '<p>[x]</p><p>abcd</p>', 5, false],
+    ['blocks of different parents', '<ul><li>[a</li></ul><p>b]</p><p>abcd</p>', 12, true],
+  ] as const)('leaves the drop to ProseMirror: %s', (_name, html, pos, move) => {
+    const editor = createTestEditor({ html });
+    expect(dropAt(editor, pos, move)).toBe(false);
+  });
+
+  it.each([
+    ['inside', 2],
+    ['before', 0],
+    ['after', 6],
+  ])('does nothing for a drop on the dragged blocks: %s', (_name, pos) => {
+    const editor = createTestEditor({ html: '<p>[abcd]</p><p>x</p>' });
+    expect(dropAt(editor, pos)).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p>[abcd]</p><p>x</p>');
+  });
+
+  it('undoes the move in one step', () => {
+    const editor = createTestEditor({ html: '<p>[x]</p><p>abcd</p>' });
+    dropAt(editor, 6);
+    pressKey(editor, 'Mod-z');
+    expect(editor.getHTML()).toBe('<p>x</p><p>abcd</p>');
   });
 });

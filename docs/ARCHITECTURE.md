@@ -559,13 +559,23 @@ plain text is `textBetween(…, '
 
 ProseMirror moves a dragged selection by deleting it and inserting the slice at the drop point. When
 the selection covers whole textblocks (triple click, or from the start of a block to the end of
-another), the deletion keeps the emptied block: every move left an empty paragraph behind.
+another), that is a move of blocks, and ProseMirror's default treats it as a move of text: it keeps
+the emptied blocks behind, and dropped inside the text of another block it merges the text into it.
 `createDropMovePlugin()` (`src/core/drop.ts`, added by the `Editor` after the extension plugins)
-appends to a `uiEvent: 'drop'` transaction the deletion of that block, together with the containers
-left holding only it (list item, list, blockquote). The block stays when the selection did not cover
-whole blocks, when the drop was a copy (`Ctrl` held, `Option` on macOS: the block is not emptied),
-or when its parent cannot lose it (the only block of the document, the first paragraph of a list
-item). The deletion belongs to the same undo step as the move.
+makes it a move of blocks.
+
+- **Dropped inside text** (`handleDrop`, sibling blocks only): the target textblock is split at the
+  drop point and the blocks go between the halves; at the start or end of its text they go before or
+  after it, so no half is empty. Inside a list item the item is split too and every block gets its
+  own item; blocks that cannot start an item (headings) split the list instead. Dropped on
+  themselves, the blocks do not move.
+- **Emptied source** (`appendTransaction` on `uiEvent: 'drop'`, also after ProseMirror's own drops
+  between blocks): the textblock the move left empty is deleted, together with the containers left
+  holding only it (list item, list, blockquote). It stays when the selection did not cover whole
+  blocks, for a copy (`Ctrl` held, `Option` on macOS: the block is not emptied), or when its parent
+  cannot lose it (the only block of the document, the first paragraph of a list item).
+
+All of it belongs to the same undo step as the move.
 
 ---
 
@@ -618,6 +628,9 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
     puts the caret before the first character typed into it. Real Chrome is not affected.
   - Paste with a `paste` event that carries its own `DataTransfer`, never the system clipboard:
     it is shared by the parallel workers (and by the developer).
+  - Drag with the real mouse from the middle of the selected text. Playwright's WebKit on
+    Windows resolves every point of a text to offset 0 during a drop, so drops *inside* text
+    are skipped there (Safari is checked by hand); drops between blocks run everywhere.
 - **Security**: the payloads in `tests/fixtures/xss/vectors.ts` run through the sanitizer (and,
   from M1, `setHTML` and paste); output asserted clean.
 

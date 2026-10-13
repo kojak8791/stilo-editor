@@ -125,15 +125,35 @@ test('undo and redo', async ({ page }) => {
   await expect(output(page)).toHaveText('<p>first</p><p>second</p>');
 });
 
-/** Drags the selection with the mouse from `source` to just above `target`. */
-async function dragAbove(page: Page, source: Locator, target: Locator) {
-  const from = (await source.boundingBox())!;
-  const to = (await target.boundingBox())!;
-  await page.mouse.move(from.x + 10, from.y + from.height / 2);
+/** Drags the selection with the mouse, from its middle, to the point (`x`, `y`). */
+async function dragTo(page: Page, x: number, y: number) {
+  const from = await page.evaluate(() => {
+    const rect = getSelection()!.getRangeAt(0).getClientRects()[0]!;
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  });
+  await page.mouse.move(from.x, from.y);
   await page.mouse.down();
-  await page.mouse.move(from.x + 20, from.y + from.height / 2, { steps: 5 });
-  await page.mouse.move(to.x + 10, to.y - 2, { steps: 10 });
+  await page.mouse.move(from.x + 10, from.y, { steps: 5 });
+  await page.mouse.move(x, y, { steps: 10 });
   await page.mouse.up();
+}
+
+/** Drags the selection with the mouse to just above `target`. */
+async function dragAbove(page: Page, target: Locator) {
+  const to = (await target.boundingBox())!;
+  await dragTo(page, to.x + 10, to.y - 2);
+}
+
+/** Drags the selection with the mouse to the text offset `offset` of `target`. */
+async function dragIntoText(page: Page, target: Locator, offset: number) {
+  const point = await target.evaluate((element, offset) => {
+    const range = document.createRange();
+    const text = document.createTreeWalker(element, NodeFilter.SHOW_TEXT).nextNode()!;
+    range.setStart(text, offset);
+    const rect = range.getBoundingClientRect();
+    return { x: rect.x + 1, y: rect.y + rect.height / 2 };
+  }, offset);
+  await dragTo(page, point.x, point.y);
 }
 
 test('dragging a whole paragraph moves it without leaving an empty one', async ({ page }) => {
@@ -142,11 +162,44 @@ test('dragging a whole paragraph moves it without leaving an empty one', async (
   await page.keyboard.press('Enter');
   await type(page, 'Text');
   const paragraphs = page.locator('.ProseMirror p');
-  await paragraphs.nth(1).click({ clickCount: 3 });
-  await dragAbove(page, paragraphs.nth(1), paragraphs.nth(0));
+  await paragraphs.nth(1).click({ clickCount: 3, position: { x: 5, y: 5 } });
+  await dragAbove(page, paragraphs.nth(0));
   await expect(output(page)).toHaveText('<p>Text</p><p>Title</p>');
 
-  await paragraphs.nth(0).click({ clickCount: 3 });
-  await dragAbove(page, paragraphs.nth(0), paragraphs.nth(0));
+  await paragraphs.nth(0).click({ clickCount: 3, position: { x: 5, y: 5 } });
+  await dragAbove(page, paragraphs.nth(0));
   await expect(output(page)).toHaveText('<p>Text</p><p>Title</p>');
+});
+
+// Playwright's WebKit on Windows resolves every point of the target text to offset 0 during a
+// drop (`caretRangeFromPoint`), so these drops land before the target; Safari is checked by hand.
+const webkitDropPoint = 'Playwright WebKit resolves drop points to the start of the text';
+
+test('a whole paragraph dropped inside text splits the target', async ({ page, browserName }) => {
+  test.skip(browserName === 'webkit', webkitDropPoint);
+  await openEmpty(page);
+  await type(page, 'abcd');
+  await page.keyboard.press('Enter');
+  await type(page, 'xyz');
+  const paragraphs = page.locator('.ProseMirror p');
+  await paragraphs.nth(1).click({ clickCount: 3, position: { x: 5, y: 5 } });
+  await dragIntoText(page, paragraphs.nth(0), 2);
+  await expect(output(page)).toHaveText('<p>ab</p><p>xyz</p><p>cd</p>');
+});
+
+test('a whole paragraph dropped inside a list item becomes an item', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName === 'webkit', webkitDropPoint);
+  await openEmpty(page);
+  await type(page, '- abcd');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await type(page, 'xyz');
+  await expect(output(page)).toHaveText('<ul><li>abcd</li></ul><p>xyz</p>');
+  const paragraph = page.locator('.ProseMirror > p');
+  await paragraph.click({ clickCount: 3, position: { x: 5, y: 5 } });
+  await dragIntoText(page, page.locator('.ProseMirror li p'), 2);
+  await expect(output(page)).toHaveText('<ul><li>ab</li><li>xyz</li><li>cd</li></ul>');
 });
