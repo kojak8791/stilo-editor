@@ -58,8 +58,8 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 |---|---|---|---|
 | T-030 | API names before the first release: naming conventions (ARCHITECTURE §4.1), `StarterKit` → `defaultExtensions`, events `input` / `selectionchange`, `commands.<name>.can()`, selection commands `select` / `selectNode` / `selectAll`; constructor options object kept | F-006, F-007 | done |
 | T-031 | Package: `package.json` metadata (`repository`, `homepage`, `bugs`, version `0.1.0`); `npm pack` and install in a clean Vite app: exports, types, CSS, tree-shaking | NFR-6 | done |
-| T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; the owner checks macOS by hand | — | done |
-| T-035 | Drag and drop of whole blocks is a move of blocks (ARCHITECTURE §8.2): no empty paragraph (or list item, blockquote) left behind; dropped inside text the target is split (a list item gets a new item); found by the owner while testing T-032 on macOS | F-012 | done |
+| T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; Safari on macOS is checked by hand | — | done |
+| T-035 | Drag and drop of whole blocks is a move of blocks (ARCHITECTURE §8.2): no empty paragraph (or list item, blockquote) left behind; dropped inside text the target is split (a list item gets a new item) | F-012 | done |
 | T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section: where to open issues and ask questions, no promised response time), `SECURITY.md` (private vulnerability reports through GitHub, public advisory with the fix), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | done |
 | T-034 | First public release: `stilo-editor@0.1.0` on npm, tag `v0.1.0` and GitHub release | NFR-6 | done |
 
@@ -71,11 +71,11 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 - After 0.1.0: a chaining API that runs several commands in one transaction (one `input`
   event).
 - After 0.1.0: CI on GitHub Actions running `npm run check` on every push, and npm trusted
-  publishing (OIDC) with provenance instead of publishing from the owner's PC.
+  publishing (OIDC) with provenance instead of publishing by hand.
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
   `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
   refresh and of the link bubble. Measure with `npm run bench` before and after.
-- Toolbar icons: the owner wants our own SVG set, drawn for the toolbar (possibly starting from
+- Toolbar icons: our own SVG set, drawn for the toolbar (possibly starting from
   single icons of public sets, keeping their license notices), replacing `lucide`; bold and
   strike first. Changing or dropping the `lucide` dependency needs an ADR.
 - Sticky toolbar shadow when the editor content scrolls in its own container (`?fixed`): a
