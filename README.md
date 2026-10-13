@@ -138,6 +138,7 @@ npm install
 npm run check   # typecheck + lint + unit tests
 npm run dev     # demo page
 npm run bench   # performance benchmarks (needs: npx playwright install chromium)
+npm run test:e2e # E2E tests in Chromium, Firefox and WebKit (needs: npx playwright install)
 ```
 
 ## License

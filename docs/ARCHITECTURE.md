@@ -597,7 +597,14 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
 - **Per-extension minimum tests**: parse (every "also parsed from" source in §7), serialize,
   idempotence, each command (enabled/disabled cases), each keyboard shortcut, each input rule.
 - **E2E** (Playwright, `tests/e2e/`): real typing, clipboard, drag & drop, UI, anything needing
-  layout. Runs against the demo page.
+  layout. Runs against the demo page in Chromium, Firefox and WebKit (`playwright.config.ts`,
+  Vite dev server on port 5180). Two rules keep the tests faithful to real input:
+  - Type through the spec's `type()` helper, which waits for a rendered frame before each key.
+    A real key press makes the browser render; Playwright's synthetic keys do not, and without
+    a frame Chromium keeps a newly created block skipped by `content-visibility` (ADR 0003) and
+    puts the caret before the first character typed into it. Real Chrome is not affected.
+  - Paste with a `paste` event that carries its own `DataTransfer`, never the system clipboard:
+    it is shared by the parallel workers (and by the developer).
 - **Security**: the payloads in `tests/fixtures/xss/vectors.ts` run through the sanitizer (and,
   from M1, `setHTML` and paste); output asserted clean.
 

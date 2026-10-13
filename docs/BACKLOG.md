@@ -58,7 +58,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 |---|---|---|---|
 | T-030 | API names before the first release: naming conventions (ARCHITECTURE §4.1), `StarterKit` → `defaultExtensions`, events `input` / `selectionchange`, `commands.<name>.can()`, selection commands `select` / `selectNode` / `selectAll`; constructor options object kept | F-006, F-007 | done |
 | T-031 | Package: `package.json` metadata (`repository`, `homepage`, `bugs`, version `0.1.0`); `npm pack` and install in a clean Vite app: exports, types, CSS, tree-shaking | NFR-6 | done |
-| T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; the owner checks macOS by hand | — | todo |
+| T-032 | First E2E tests (Playwright, Chromium, Firefox and WebKit): typing, marks, link popover with `Mod-k`, paste, undo; the owner checks macOS by hand | — | done |
 | T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section with a promise the owner can keep, e.g. a first answer to every issue within 7 days), `SECURITY.md` (private vulnerability reports), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | todo |
 | T-034 | Publish `0.1.0` from the owner's PC (`npm publish` with 2FA), tag `v0.1.0`, GitHub release; check the README on the npm page (logo and relative links to `docs/`) | — | todo |
 
