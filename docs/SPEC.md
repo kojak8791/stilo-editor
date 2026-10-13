@@ -54,6 +54,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-210 | Font family | M2 | — | — |
 | F-211 | Font size | M2 | — | — |
 | F-212 | Clear formatting (remove all formatting marks in selection; links are kept) | M1 | `Mod-\` | — |
+| F-213 | Text case: UPPERCASE / lowercase of the selection. Changes the characters, not a style (no `text-transform`), so the HTML stays clean; marks are kept | M2 | — | — |
 
 ## 4. Blocks (`F-3xx`)
 
@@ -122,6 +123,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-609 | Upload callback `image.upload(file) => Promise<url>` instead of base64 | M3 | Option name reserved now |
 | F-610 | Figure alignment (left/center/right) | M3 | Output format to be decided by ADR |
 | F-611 | Rich-text captions (marks inside `figcaption`) | M3 | |
+| F-612 | Image editing inside the editor: crop and rotate (other edits to be decided) | M3 | |
 
 ## 8. Paste & clipboard (`F-7xx`)
 
