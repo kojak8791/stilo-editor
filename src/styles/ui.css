@@ -388,6 +388,17 @@
   display: flex;
 }
 
+/* Group hover: hovering one part lightly highlights both; the hovered part stays darker */
+.stilo-split:hover
+.stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]) {
+  background: var(--stilo-color-hover-group, #f5f7f9);
+}
+
+.stilo-split
+  .stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]):hover {
+  background: var(--stilo-color-hover, #eef1f4);
+}
+
 .stilo-toolbar__button.stilo-split__main {
   flex-direction: column;
   gap: 1px;
@@ -408,8 +419,8 @@
 }
 
 .stilo-toolbar__button.stilo-split__arrow {
-  width: 16px;
-  min-width: 16px;
+  width: 20px;
+  min-width: 20px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }

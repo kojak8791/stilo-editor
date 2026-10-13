@@ -254,7 +254,7 @@ function markColor(editor: Editor, mark: string): string | null {
   return typeof color === 'string' ? color : null;
 }
 
-/** The text color split button (`TextStyle` extension), default color red. */
+/** The text color split button (`TextStyle` extension), default color black. */
 export function textColorButton(
   palette: readonly ToolbarColor[] = DEFAULT_PALETTE,
 ): ToolbarColorButton {
@@ -264,7 +264,7 @@ export function textColorButton(
     icon: Type,
     labelKey: 'toolbar.textColor',
     palette,
-    defaultColor: '#ef4444',
+    defaultColor: '#000000',
     setColor: (e, color) => color !== null && e.commands.setColor(color),
     unsetColor: (e) => {
       e.commands.unsetColor();

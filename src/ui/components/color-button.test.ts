@@ -110,11 +110,11 @@ describe('color buttons: rendering', () => {
 });
 
 describe('color buttons: main part', () => {
-  it('applies the last used color, red by default, and removes it when present', () => {
+  it('applies the last used color, black by default, and removes it when present', () => {
     const { editor, toolbar, parts } = setup('<p>a[b]c</p>');
     const { main } = parts('textColor');
     main.click();
-    expect(getHTMLWithSelection(editor)).toBe('<p>a<span style="color: #ef4444">[b]</span>c</p>');
+    expect(getHTMLWithSelection(editor)).toBe('<p>a<span style="color: #000000">[b]</span>c</p>');
     toolbar.update();
     expect(main.getAttribute('aria-pressed')).toBe('true');
     expect(main.classList.contains('stilo-toolbar__button--active')).toBe(true);

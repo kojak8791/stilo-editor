@@ -306,7 +306,7 @@ pass them with another palette as custom items to replace the colors
 
 | ID | Icon | `labelKey` | `defaultColor` | `setColor` / `unsetColor` | `hasColor` / `getColor` | `isAvailable` |
 |---|---|---|---|---|---|---|
-| `textColor` | `Type` | `toolbar.textColor` | `#ef4444` (red) | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
+| `textColor` | `Type` | `toolbar.textColor` | `#000000` (black) | `setColor(color)` / `unsetColor()` | `isActive('textStyle', { color })` / `getAttributes('textStyle').color` | `'setColor' in editor.commands` |
 | `highlight` | `Highlighter` | `toolbar.highlight` | `null` (plain `<mark>`) | `setHighlight({ color })` / `unsetHighlight()` | `isActive('highlight', { color })` / `getAttributes('highlight').color` | `'setHighlight' in editor.commands` |
 
 `isEnabled`: `can().setColor('#000000')` and `can().setHighlight()` (false inside code).
@@ -569,7 +569,7 @@ and highlight (SPEC F-208, F-209, F-804).
   <button type="button" class="stilo-toolbar__button stilo-split__main" data-item="textColor"
     aria-label="Text color" title="Text color" aria-pressed="false" tabindex="-1">
     <svg class="stilo-icon" aria-hidden="true">…Type…</svg>
-    <span class="stilo-split__color" style="background-color: #ef4444"></span>
+    <span class="stilo-split__color" style="background-color: #000000"></span>
   </button>
   <button type="button" class="stilo-toolbar__button stilo-split__arrow" data-item="textColor"
     aria-label="Text color: more colors" title="Text color: more colors" aria-haspopup="dialog"
@@ -694,6 +694,7 @@ refuses a block that already has the type, and the active option must stay selec
 | `--stilo-color-bg` | `#ffffff` | Toolbar and popover background |
 | `--stilo-color-border` | `#d1d9e0` | Toolbar bottom border, group separators, popover border |
 | `--stilo-color-hover` | `#eef1f4` | Button / option hover |
+| `--stilo-color-hover-group` | `#f5f7f9` | The part of a color split button that is not hovered (lighter than the hovered one) |
 | `--stilo-color-active` | `#dde4ee` | Pressed button, checked option |
 | `--stilo-color-focus` | `#0969da` | Focus ring, primary button |
 | `--stilo-color-error` | `#d1242f` | Border of an invalid field |
@@ -747,7 +748,9 @@ Layout:
   `0.85em`, grids of 10 columns of 32px buttons with an 18px character, hover color as
   buttons.
 - Color split button: the two parts touch (inner corners square); the main part stacks a 16px
-  icon over a 16×4px color bar, the arrow is 16px wide with a 12px chevron. Color popover:
+  icon over a 16×4px color bar, the arrow is 20px wide with a 12px chevron. Hovering one part
+  gives both `--stilo-color-hover-group`, and the hovered one `--stilo-color-hover` (a pressed or
+  disabled part keeps its own look). Color popover:
   *No color* as a text button, a grid of 8 columns of 22px swatches (thin inner border so that
   white shows, slight zoom on hover, the pressed one outlined in `--stilo-color-text`), and a
   row with the native picker, the text field (`--stilo-color-error` border when invalid) and a
