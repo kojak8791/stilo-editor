@@ -136,6 +136,7 @@ whether it is available.
 | `Paragraph` | `setParagraph()` |
 | `Heading` | `setHeading({ level })`, `toggleHeading({ level })`, `level` 1–6 |
 | `Blockquote` | `setBlockquote()`, `unsetBlockquote()`, `toggleBlockquote()` |
+| `CodeBlock` | `setCodeBlock({ language? })`: turns the selected blocks into one code block, a line each, or changes the language of the code block; `language` is letters, digits, `_` and `-` (`'js'`, `'c-sharp'`), `false` otherwise. `unsetCodeBlock()`: a paragraph per line. `toggleCodeBlock({ language? })` |
 | `HorizontalRule` | `setHorizontalRule()` |
 | `HardBreak` | `setHardBreak()` |
 | `BulletList` | `toggleBulletList()` |
@@ -183,7 +184,7 @@ defaultExtensions({
 |---|---|---|
 | `doc`, `text`, `paragraph` | `Document`, `Text`, `Paragraph` | — (required: the editor does not start without them) |
 | `heading` | `Heading` | `levels`: allowed levels, default `[1, 2, 3, 4, 5, 6]` |
-| `blockquote`, `horizontalRule`, `hardBreak` | `Blockquote`, `HorizontalRule`, `HardBreak` | — |
+| `blockquote`, `codeBlock`, `horizontalRule`, `hardBreak` | `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak` | — |
 | `image` | `Image` (inline images: paste of image files, resize handles) | `maxInlineBytes`: largest pasted image file inserted as a data URL, default `5 * 1024 * 1024` (5 MB) |
 | `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
 | `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
@@ -247,7 +248,7 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
 `bulletList`, `orderedList`,
-`blockquote`, `horizontalRule`, `characters`, `find`.
+`blockquote`, `codeBlock`, `horizontalRule`, `characters`, `find`.
 
 The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar, a panel
 floating under the toolbar (`Search` extension); the button also closes it, and the popovers of

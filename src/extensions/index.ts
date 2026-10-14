@@ -3,6 +3,7 @@ export { Bold } from './bold';
 export { BulletList } from './bullet-list';
 export { ClearFormatting } from './clear-formatting';
 export { Code } from './code';
+export { CodeBlock, type CodeBlockAttributes } from './code-block';
 export { type DefaultExtensionsOptions, defaultExtensions } from './default-extensions';
 export { Document } from './document';
 export { DropCursor, type DropCursorOptions } from './drop-cursor';

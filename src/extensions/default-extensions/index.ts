@@ -4,6 +4,7 @@ import { Bold } from '../bold';
 import { BulletList } from '../bullet-list';
 import { ClearFormatting } from '../clear-formatting';
 import { Code } from '../code';
+import { CodeBlock } from '../code-block';
 import { Document } from '../document';
 import { DropCursor, type DropCursorOptions } from '../drop-cursor';
 import { GapCursor } from '../gap-cursor';
@@ -40,6 +41,7 @@ export interface DefaultExtensionsOptions {
   paragraph?: false;
   heading?: false | Partial<HeadingOptions>;
   blockquote?: false;
+  codeBlock?: false;
   horizontalRule?: false;
   image?: false | Partial<ImageOptions>;
   hardBreak?: false;
@@ -90,6 +92,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(Paragraph, options.paragraph),
     ...include(Heading, options.heading),
     ...include(Blockquote, options.blockquote),
+    ...include(CodeBlock, options.codeBlock),
     ...include(HorizontalRule, options.horizontalRule),
     ...include(HardBreak, options.hardBreak),
     ...include(Image, options.image),

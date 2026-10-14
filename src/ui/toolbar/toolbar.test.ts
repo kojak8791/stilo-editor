@@ -87,6 +87,7 @@ describe('toolbar', () => {
       'bulletList',
       'orderedList',
       'blockquote',
+      'codeBlock',
       'horizontalRule',
       'characters',
       'find',
@@ -447,7 +448,7 @@ describe('toolbar', () => {
     expect(from('undo', 'ArrowLeft')).toBe('find');
     expect(from('find', 'ArrowLeft')).toBe('characters');
     expect(from('characters', 'ArrowLeft')).toBe('horizontalRule');
-    expect(from('horizontalRule', 'ArrowLeft')).toBe('blockquote');
+    expect(from('horizontalRule', 'ArrowLeft')).toBe('codeBlock');
     expect(from('find', 'ArrowRight')).toBe('undo');
     expect(from('redo', 'ArrowRight')).toBe('heading');
     expect(from('bold', 'End')).toBe('find');

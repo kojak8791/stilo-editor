@@ -13,6 +13,7 @@ import {
   Redo2,
   RemoveFormatting,
   Search,
+  SquareCode,
   Strikethrough,
   Subscript,
   Superscript,
@@ -57,7 +58,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
+  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'characters'],
   ['find'],
 ];
 
@@ -239,6 +240,19 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isActive: (e) => e.isActive('blockquote'),
     isEnabled: (e) => 'toggleBlockquote' in e.commands && e.commands.toggleBlockquote.can(),
     isAvailable: (e) => 'toggleBlockquote' in e.commands,
+  },
+  codeBlock: {
+    id: 'codeBlock',
+    kind: 'button',
+    icon: SquareCode,
+    labelKey: 'toolbar.codeBlock',
+    shortcut: 'Mod-Alt-c',
+    run: (e) => {
+      e.commands.toggleCodeBlock();
+    },
+    isActive: (e) => e.isActive('codeBlock'),
+    isEnabled: (e) => 'toggleCodeBlock' in e.commands && e.commands.toggleCodeBlock.can(),
+    isAvailable: (e) => 'toggleCodeBlock' in e.commands,
   },
   horizontalRule: {
     id: 'horizontalRule',

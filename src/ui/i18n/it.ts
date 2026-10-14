@@ -16,6 +16,7 @@ export const it: Messages = {
   'toolbar.bulletList': 'Elenco puntato',
   'toolbar.orderedList': 'Elenco numerato',
   'toolbar.blockquote': 'Citazione',
+  'toolbar.codeBlock': 'Blocco di codice',
   'toolbar.horizontalRule': 'Linea orizzontale',
   'toolbar.link': 'Collegamento',
   'toolbar.heading': 'Stile testo',

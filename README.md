@@ -70,6 +70,7 @@ column is what you type to get the format as you write.
 | Paragraph | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>0</kbd> | | |
 | Headings 1–6 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>6</kbd> | `# ` … `###### ` | Also in the toolbar dropdown |
 | Quote | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> | `> ` | |
+| Code block | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd> | ```` ``` ```` + space, ```` ```js ```` + space for a language | Plain text in a monospace font, no formatting; the selected paragraphs become one block, a line each, and back. <kbd>Enter</kbd> on an empty last line, or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>, leaves it. The language is written as `class="language-js"` for syntax highlighters |
 | Horizontal line | | `---` | |
 | Line break | <kbd>Shift</kbd>+<kbd>Enter</kbd> | | New line in the same paragraph |
 | Align left / center / right / justify | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd> / <kbd>J</kbd> | | Paragraphs and headings; the toolbar button opens the four alignments; changing the block type (also with `# `) keeps the alignment |

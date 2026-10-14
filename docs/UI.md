@@ -286,6 +286,7 @@ no functions.
 | `toolbar.bulletList` | Bulleted list | Elenco puntato |
 | `toolbar.orderedList` | Numbered list | Elenco numerato |
 | `toolbar.blockquote` | Quote | Citazione |
+| `toolbar.codeBlock` | Code block | Blocco di codice |
 | `toolbar.horizontalRule` | Horizontal line | Linea orizzontale |
 | `toolbar.heading` | Text style | Stile testo |
 | `toolbar.fontFamily` | Font | Carattere |
@@ -375,7 +376,7 @@ no functions.
     'clearFormatting'],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
+  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'characters'],
   ['find'],
 ]
 ```
@@ -398,6 +399,7 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 | `bulletList` | `List` | `toolbar.bulletList` | `Mod-Shift-8` | `toggleBulletList` | `isActive('bulletList')` |
 | `orderedList` | `ListOrdered` | `toolbar.orderedList` | `Mod-Shift-7` | `toggleOrderedList` | `isActive('orderedList')` |
 | `blockquote` | `Quote` | `toolbar.blockquote` | `Mod-Shift-b` | `toggleBlockquote` | `isActive('blockquote')` |
+| `codeBlock` | `SquareCode` | `toolbar.codeBlock` | `Mod-Alt-c` | `toggleCodeBlock` | `isActive('codeBlock')` |
 | `horizontalRule` | `Minus` | `toolbar.horizontalRule` | — | `setHorizontalRule` | — |
 
 `link` (T-016) differs: `icon` `Link`, `labelKey` `toolbar.link`, shortcut `Mod-k`, `run` calls

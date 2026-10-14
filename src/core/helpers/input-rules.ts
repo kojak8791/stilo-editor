@@ -50,20 +50,24 @@ export function markInputRule(
 
 /**
  * Like `textblockTypeInputRule` from prosemirror-inputrules (turns the textblock where `regexp`
- * matches at its start into `type` with `attrs`), but the block keeps the style attributes
- * (`textAlign`, `lineHeight`) that `type` also has, as `setTextblockType` does.
+ * matches at its start into `type` with `attrs`, or with the attributes `attrs` returns for the
+ * match), but the block keeps the style attributes (`textAlign`, `lineHeight`) that `type` also
+ * has, as `setTextblockType` does.
  */
 export function textblockTypeInputRule(
   regexp: RegExp,
   type: NodeType,
-  attrs: Attrs | null = null,
+  attrs: Attrs | null | ((match: RegExpMatchArray) => Attrs | null) = null,
 ): InputRule {
-  return new InputRule(regexp, (state, _match, start, end) => {
+  return new InputRule(regexp, (state, match, start, end) => {
     const $start = state.doc.resolve(start);
     if (!$start.node(-1).canReplaceWith($start.index(-1), $start.indexAfter(-1), type)) {
       return null;
     }
     const styles = keptBlockStyles(type, $start.parent);
-    return state.tr.delete(start, end).setBlockType(start, start, type, { ...attrs, ...styles });
+    const typeAttrs = typeof attrs === 'function' ? attrs(match) : attrs;
+    return state.tr
+      .delete(start, end)
+      .setBlockType(start, start, type, { ...typeAttrs, ...styles });
   });
 }

@@ -10,6 +10,7 @@ const content = [
   '<p>This is <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s> and ',
   '<code>code</code>. Here is <a href="https://prosemirror.net">a link</a>.</p>',
   '<blockquote><p>A quote.</p></blockquote>',
+  '<pre><code class="language-js">function greet(name) {\n  return "Hello, " + name;\n}</code></pre>',
   '<ul><li>First item</li><li>Second item<ul><li>Nested item</li></ul></li></ul>',
   '<ol start="3"><li>Third</li><li>Fourth</li></ol>',
   '<hr>',

@@ -14,6 +14,7 @@ export type MessageKey =
   | 'toolbar.bulletList'
   | 'toolbar.orderedList'
   | 'toolbar.blockquote'
+  | 'toolbar.codeBlock'
   | 'toolbar.horizontalRule'
   | 'toolbar.link'
   | 'toolbar.heading'

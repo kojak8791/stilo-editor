@@ -16,6 +16,7 @@ export const en: Messages = {
   'toolbar.bulletList': 'Bulleted list',
   'toolbar.orderedList': 'Numbered list',
   'toolbar.blockquote': 'Quote',
+  'toolbar.codeBlock': 'Code block',
   'toolbar.horizontalRule': 'Horizontal line',
   'toolbar.link': 'Link',
   'toolbar.heading': 'Text style',

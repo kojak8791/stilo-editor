@@ -416,7 +416,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 ### 6.3 Default extensions
 
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
-`Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `Image`, `BulletList`, `OrderedList`, `ListItem`,
+`Heading`, `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak`, `Image`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
 `Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
@@ -441,7 +441,7 @@ configured with `{ <name>: { ...options } }`.
 | `bulletList` | `<ul>` | `ul` | content `listItem+` |
 | `orderedList` | `<ol start="n">` | `ol` | `start` (omitted when 1) |
 | `listItem` | `<li>` | `li` | content `paragraph block*`; a single paragraph without attributes is written without `<p>` (`compactParagraphs`, ADR 0001) |
-| `codeBlock` (M2) | `<pre><code class="language-x">` | `pre` | `language` (class omitted when null); no marks |
+| `codeBlock` | `<pre><code class="language-x">` | `pre` (whitespace kept, `<br>` → newline, inner elements reduced to their text) | `language` (class omitted when null), from the first `language-*` class of the `<code>` or else of the `<pre>`; content `text*`, no marks |
 | `taskList` (M2) | `<ul data-type="taskList">` | same | content `taskItem+` |
 | `taskItem` (M2) | `<li data-checked="true\|false">` | `li[data-checked]` | `checked` |
 | `table` etc. (M2) | `<table><tbody><tr><th\|td>` | same (+ `thead`, `tfoot` flattened) | `colspan`, `rowspan`, `colwidth`: details fixed by ADR in the tables task |
@@ -460,6 +460,22 @@ and `toggleHeading` use `setTextblockType`, which keeps both styles when the blo
 and so does the heading input rule (`# `…`###### `, our `textblockTypeInputRule` in
 `core/helpers/input-rules.ts`); a list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
 without attributes). Output order: `text-align` then `line-height` (§7.3).
+
+Code block (F-306): the `CodeBlock` extension. `setCodeBlock({ language? })` turns the selected
+textblocks into code blocks with `setTextblockType`, then joins the sibling code blocks of the
+selection into one, a newline between each pair; on a code block it changes the language.
+`language` must match `^[\w-]+$` (the class the sanitizer keeps), otherwise the command returns
+`false`. `unsetCodeBlock()` turns every selected code block into one paragraph per line: each
+newline becomes a split, so the cursor keeps its line and column. Other conversions (the
+paragraph or a heading from the dropdown, `Backspace` into the previous block) use ProseMirror's
+`linebreakReplacement`: `hardBreak` declares it, so a newline becomes a `<br>` and back. Keys:
+`Mod-Alt-c` toggles; `Enter` and `Shift-Enter` insert a newline (`newlineInCode`), but `Enter` on an
+empty last line removes it and adds a paragraph after the block; `Mod-Enter` (`exitCode`, from
+`baseKeymap`) also leaves it; `Backspace` in an empty code block turns it into a paragraph; `Tab`
+is not handled, so it never traps the focus. Priority 101 puts its `Enter` before the list item's,
+which would split the item. Input rule: ```` ``` ```` or ```` ```lang ```` and a space at the
+start of a textblock. `code: true` turns off input rules and marks inside it. A list item
+cannot start with a code block (content `paragraph block*`).
 
 Images (F-601, F-603, F-607, F-608): the `Image` extension. `src` follows SPEC NFR-2 (the
 sanitizer drops other URLs, SVG data URLs included). Paste: when the clipboard has HTML,
@@ -665,6 +681,9 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
     A real key press makes the browser render; Playwright's synthetic keys do not, and without
     a frame Chromium keeps a newly created block skipped by `content-visibility` (ADR 0003) and
     puts the caret before the first character typed into it. Real Chrome is not affected.
+    The same holds for every script that drives the demo (visual checks, probes): keys sent
+    faster than any person types can fail where real typing works, so a failure seen only with
+    synthetic keys is first rerun at a human pace before it is called an editor bug.
   - Paste with a `paste` event that carries its own `DataTransfer`, never the system clipboard:
     it is shared by the parallel workers (and by the developer).
   - Drag with the real mouse from the middle of the selected text. Playwright's WebKit on

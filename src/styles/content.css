@@ -132,6 +132,24 @@ li.ProseMirror-selectednode:after {
   font-size: 0.9em;
 }
 
+/* Code block: the <code> inside it drops the inline code box. */
+.stilo-content pre {
+  margin: 0.5em 0;
+  padding: 0.75em 1em;
+  border-radius: 0.375em;
+  background: var(--stilo-color-hover, #eef1f4);
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.stilo-content pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: inherit;
+}
+
 /* Images: never wider than the content; with width and height they keep their ratio. */
 .stilo-content img {
   max-width: 100%;
