@@ -4,7 +4,7 @@ import { TestRule, TestStrong, TestTitle } from '../../tests/helpers/core';
 import { Document, Paragraph, Text } from '../extensions';
 import { Editor } from './editor';
 import { StiloError } from './errors';
-import { defineExtension, type Extension } from './extension';
+import { defineExtension, type Extension, type ExtensionContext } from './extension';
 import { ExtensionManager, sortExtensions } from './extension-manager';
 
 const base = () => [Document(), Text(), Paragraph()];
@@ -74,7 +74,7 @@ describe('ExtensionManager', () => {
     ).toThrow(new StiloError('Duplicate command name "same".'));
   });
 
-  it('passes options, schema and editor to the runtime parts', () => {
+  it('passes options, schema, editor and emit to the runtime parts', () => {
     const spy = vi.fn(() => []);
     const WithOptions = defineExtension<{ value: number }>({
       name: 'withOptions',
@@ -85,7 +85,31 @@ describe('ExtensionManager', () => {
       element: document.createElement('div'),
       extensions: [...base(), WithOptions({ value: 2 })],
     });
-    expect(spy).toHaveBeenCalledWith({ options: { value: 2 }, schema: editor.schema, editor });
+    expect(spy).toHaveBeenCalledWith({
+      options: { value: 2 },
+      schema: editor.schema,
+      editor,
+      emit: expect.any(Function),
+    });
+  });
+
+  it('emit reaches the editor event handlers', () => {
+    let emit: ExtensionContext<object>['emit'] = () => {};
+    const Emitting = defineExtension({
+      name: 'emitting',
+      plugins: (ctx) => {
+        emit = ctx.emit;
+        return [];
+      },
+    });
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [...base(), Emitting()],
+    });
+    const handler = vi.fn();
+    editor.on('destroy', handler);
+    emit('destroy', { editor });
+    expect(handler).toHaveBeenCalledWith({ editor });
   });
 
   it('returns input rules, undoInputRule, keymaps, extension plugins and baseKeymap in order', () => {
@@ -97,8 +121,8 @@ describe('ExtensionManager', () => {
       TestRule(),
     ];
     // The base extensions may define keymaps too: count relative to them.
-    const baseline = new ExtensionManager(base()).createPlugins({} as Editor).length;
-    const plugins = new ExtensionManager(extensions).createPlugins({} as Editor);
+    const baseline = new ExtensionManager(base()).createPlugins({} as Editor, () => {}).length;
+    const plugins = new ExtensionManager(extensions).createPlugins({} as Editor, () => {});
     expect(plugins).toHaveLength(baseline + 2);
     expect(plugins[0]?.spec).toHaveProperty('isInputRules', true);
     expect(plugins[1]?.props.handleKeyDown).toBeTypeOf('function');

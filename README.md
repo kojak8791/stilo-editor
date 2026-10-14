@@ -79,6 +79,9 @@ column is what you type to get the format as you write.
 | Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | `- ` `* ` `+ ` | |
 | Numbered list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | `1. ` | Starts from the number you type |
 | Indent / outdent item | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | |
+| **Images** | | | |
+| Paste an image | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | A copied image or screenshot is embedded in the HTML (PNG, JPEG, GIF, WebP, up to 5 MB by default); an image copied from a web page keeps its address |
+| Resize an image | | | Select it and drag one of its side handles; the proportions stay |
 | **Insert** | | | |
 | Special characters and emoji | | | A popover with search, symbols and emoji; it stays open to insert several in a row |
 | **Editing** | | | |

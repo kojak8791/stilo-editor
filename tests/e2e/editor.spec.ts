@@ -105,6 +105,31 @@ test('pasted HTML is sanitized', async ({ page }) => {
   await expect(output(page)).toHaveText('<p>Hi <strong>there</strong>bad</p>');
 });
 
+test('a pasted image file is inserted and resized with its side handles', async ({ page }) => {
+  await openEmpty(page);
+  await page.getByRole('textbox', { name: 'Demo editor' }).evaluate(async (element) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 100;
+    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!)));
+    const clipboardData = new DataTransfer();
+    clipboardData.items.add(new File([blob], 'a.png', { type: 'image/png' }));
+    const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'clipboardData', { value: clipboardData });
+    element.dispatchEvent(event);
+  });
+  await expect(output(page)).toHaveText(/^<p><img src="data:image\/png;base64,[^"]+"><\/p>$/);
+
+  await page.locator('.stilo-image img').click();
+  const box = (await page.locator('.stilo-image__handle--right').boundingBox())!;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width / 2, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 - 100, y, { steps: 5 });
+  await page.mouse.up();
+  await expect(output(page)).toHaveText(/<img src="data:[^"]+" width="100" height="50">/);
+});
+
 test('pasted plain text becomes paragraphs', async ({ page }) => {
   await openEmpty(page);
   await paste(page, { 'text/plain': 'one\ntwo\n\n\nthree' });

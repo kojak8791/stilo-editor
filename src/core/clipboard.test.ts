@@ -107,7 +107,7 @@ describe('paste HTML', () => {
     ['<p>x|y</p>', '<span style="letter-spacing:2px">r</span>', true, '<p>xr|y</p>'],
     ['<p>x|y</p>', '<p>a<script>alert(1)</script></p>', true, '<p>xa|y</p>'],
     ['<p>x|y</p>', '<script>alert(1)</script>', true, '<p>x|y</p>'],
-    ['<p>x|y</p>', '<img src=x onerror=alert(1)>', true, '<p>x|y</p>'],
+    ['<p>x|y</p>', '<img src=x onerror=alert(1)>', true, '<p>x<img src="x">|y</p>'],
     ['<p>x|y</p>', '<a href="javascript:alert(1)">l</a>', true, '<p>xl|y</p>'],
     ['<p>x|y</p>', '', false, '<p>x|y</p>'],
     ['<p>|</p>', '<h1>T</h1><p>p</p>', true, '<h1>T</h1><p>p|</p>'],

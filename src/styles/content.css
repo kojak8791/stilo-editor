@@ -132,6 +132,56 @@ li.ProseMirror-selectednode:after {
   font-size: 0.9em;
 }
 
+/* Images: never wider than the content; with width and height they keep their ratio. */
+.stilo-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Image in the editor: two side handles, inside the image (a top-level block clips what
+   overflows it, see "Large documents" below), shown while the image is selected. */
+.stilo-image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.stilo-image img {
+  display: block;
+}
+
+.stilo-image__handle {
+  display: none;
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: min(48px, 50%);
+  min-height: 16px;
+  transform: translateY(-50%);
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  background: var(--stilo-color-text, #1f2328);
+  opacity: 0.7;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.stilo-image__handle--left {
+  left: 6px;
+}
+
+.stilo-image__handle--right {
+  right: 6px;
+}
+
+.stilo-content[contenteditable="true"] .stilo-image.ProseMirror-selectednode .stilo-image__handle {
+  display: block;
+}
+
+.stilo-image__handle:hover {
+  opacity: 1;
+}
+
 /* Placeholder: shown only while the content is editable. */
 .stilo-content[contenteditable="true"] .stilo-placeholder::before {
   content: attr(data-placeholder);

@@ -5,7 +5,7 @@ import { type MarkSpec, type NodeSpec, Schema } from 'prosemirror-model';
 import type { Plugin } from 'prosemirror-state';
 import type { Editor } from './editor';
 import { StiloError } from './errors';
-import type { Extension } from './extension';
+import type { Extension, ExtensionContext } from './extension';
 import type { CommandFactory } from './types';
 
 /**
@@ -106,7 +106,7 @@ export class ExtensionManager {
 
   /**
    * Called once by the editor. For each extension in order, with context
-   * `{ options, schema, editor }`: collects `commands` (duplicate name → `StiloError`),
+   * `{ options, schema, editor, emit }`: collects `commands` (duplicate name → `StiloError`),
    * `inputRules`, `keymap`, `plugins`. Returns, in this order:
    *
    * 1. one `inputRules({ rules })` plugin with all input rules;
@@ -116,13 +116,13 @@ export class ExtensionManager {
    * 4. all extension plugins, in extension order;
    * 5. `keymap(baseKeymap)` from prosemirror-commands.
    */
-  createPlugins(editor: Editor): Plugin[] {
+  createPlugins(editor: Editor, emit: ExtensionContext<object>['emit']): Plugin[] {
     const rules: InputRule[] = [];
     const keymaps: Plugin[] = [];
     const plugins: Plugin[] = [];
     for (const extension of this.extensions) {
       const { spec } = extension;
-      const ctx = { options: extension.options, schema: this.schema, editor };
+      const ctx = { options: extension.options, schema: this.schema, editor, emit };
       // `Commands` is filled by module augmentation, so its entries are command factories.
       const commands = Object.entries(spec.commands?.(ctx) ?? {}) as [string, CommandFactory][];
       for (const [name, factory] of commands) {

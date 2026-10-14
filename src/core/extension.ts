@@ -2,13 +2,18 @@ import type { InputRule } from 'prosemirror-inputrules';
 import type { MarkSpec, NodeSpec, Schema } from 'prosemirror-model';
 import type { Command, Plugin } from 'prosemirror-state';
 import type { Editor } from './editor';
-import type { CommandFactories } from './types';
+import type { CommandFactories, EditorEvents } from './types';
 
 /** Context passed to the runtime parts of an extension. */
 export interface ExtensionContext<Options> {
   options: Readonly<Options>;
   schema: Schema;
   editor: Editor;
+  /**
+   * Emits an editor event. An extension adds its own events to `EditorEvents` by module
+   * augmentation, as it does for `Commands`.
+   */
+  emit<E extends keyof EditorEvents>(event: E, payload: EditorEvents[E]): void;
 }
 
 /** Definition of an extension. See docs/ARCHITECTURE.md §6. */

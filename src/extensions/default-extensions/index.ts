@@ -12,6 +12,7 @@ import { Heading, type HeadingOptions } from '../heading';
 import { Highlight } from '../highlight';
 import { History, type HistoryOptions } from '../history';
 import { HorizontalRule } from '../horizontal-rule';
+import { Image, type ImageOptions } from '../image';
 import { Italic } from '../italic';
 import { LineHeight } from '../line-height';
 import { Link } from '../link';
@@ -39,6 +40,7 @@ export interface DefaultExtensionsOptions {
   heading?: false | Partial<HeadingOptions>;
   blockquote?: false;
   horizontalRule?: false;
+  image?: false | Partial<ImageOptions>;
   hardBreak?: false;
   bulletList?: false;
   orderedList?: false;
@@ -88,6 +90,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(Blockquote, options.blockquote),
     ...include(HorizontalRule, options.horizontalRule),
     ...include(HardBreak, options.hardBreak),
+    ...include(Image, options.image),
     ...include(BulletList, options.bulletList),
     ...include(OrderedList, options.orderedList),
     ...include(ListItem, options.listItem),

@@ -278,6 +278,7 @@ interface EditorEvents {
   focus: { editor: Editor; event: FocusEvent };
   blur: { editor: Editor; event: FocusEvent };
   destroy: { editor: Editor };
+  // Extensions add their own events (module augmentation), e.g. `imageRejected` (`Image`).
 }
 ```
 
@@ -336,6 +337,9 @@ interface ExtensionContext<Options> {
   options: Readonly<Options>;
   schema: Schema;
   editor: Editor;
+  // Emits an editor event. An extension adds its events to `EditorEvents` by module
+  // augmentation, as it does for `Commands` (e.g. `imageRejected` of `Image`).
+  emit<E extends keyof EditorEvents>(event: E, payload: EditorEvents[E]): void;
 }
 
 interface Extension<Options extends object = object> {
@@ -411,7 +415,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 ### 6.3 Default extensions
 
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
-`Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
+`Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `Image`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
 `Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
@@ -440,7 +444,7 @@ configured with `{ <name>: { ...options } }`.
 | `taskList` (M2) | `<ul data-type="taskList">` | same | content `taskItem+` |
 | `taskItem` (M2) | `<li data-checked="true\|false">` | `li[data-checked]` | `checked` |
 | `table` etc. (M2) | `<table><tbody><tr><th\|td>` | same (+ `thead`, `tfoot` flattened) | `colspan`, `rowspan`, `colwidth`: details fixed by ADR in the tables task |
-| `image` (M2) | `<img src alt title width height>` | `img[src]` not inside `figure` | inline atom; empty attributes omitted |
+| `image` | `<img src alt title width height>` | `img[src]` (not inside `figure`, M2) | inline atom (F-601); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
 | `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
 
 Text alignment (F-308) and line spacing (F-312): the `textAlign` and `lineHeight` attributes
@@ -455,6 +459,20 @@ and `toggleHeading` use `setTextblockType`, which keeps both styles when the blo
 and so does the heading input rule (`# `…`###### `, our `textblockTypeInputRule` in
 `core/helpers/input-rules.ts`); a list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
 without attributes). Output order: `text-align` then `line-height` (§7.3).
+
+Images (F-601, F-603, F-607, F-608): the `Image` extension. `src` follows SPEC NFR-2 (the
+sanitizer drops other URLs, SVG data URLs included). Paste: when the clipboard has HTML,
+ProseMirror pastes it, so an image copied from a web page keeps its URL; otherwise each PNG,
+JPEG, GIF or WebP file becomes an `image` with a base64 `data:` URL, in place of the selection at
+the time the files have been read. A file larger than `maxInlineBytes` (default 5 MB) or of
+another type is skipped and reported with the `imageRejected` event (`{ editor, file, reason:
+'tooLarge' | 'unsupportedType' }`). In the editor, a node view wraps the `<img>` in
+`span.stilo-image` with two side handles (`span.stilo-image__handle--left/right`), inside the
+image because a top-level block clips what overflows it (`content-visibility`, ADR 0003), shown
+by `content.css` while the image is selected and the editor editable. Dragging a handle changes
+the width (at least 32px, at most the editor width) and keeps the aspect ratio; releasing it sets
+`width` and `height` with attribute steps: one undo step, the image stays selected.
+`content.css` gives every content image `max-width: 100%; height: auto`.
 
 ### 7.2 Marks
 

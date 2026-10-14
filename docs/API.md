@@ -109,6 +109,7 @@ editor.on('input', ({ editor }) => save(editor.getHTML()));
 | `focus` | `{ editor, event }` | The editor got the focus |
 | `blur` | `{ editor, event }` | The editor lost the focus |
 | `destroy` | `{ editor }` | `destroy()` was called |
+| `imageRejected` | `{ editor, file, reason }` | A pasted image file was not inserted (`Image` extension): `reason` is `'tooLarge'` (over `maxInlineBytes`) or `'unsupportedType'` (not PNG, JPEG, GIF or WebP) |
 
 ## 3. Commands
 
@@ -171,6 +172,7 @@ defaultExtensions({
 | `doc`, `text`, `paragraph` | `Document`, `Text`, `Paragraph` | — (required: the editor does not start without them) |
 | `heading` | `Heading` | `levels`: allowed levels, default `[1, 2, 3, 4, 5, 6]` |
 | `blockquote`, `horizontalRule`, `hardBreak` | `Blockquote`, `HorizontalRule`, `HardBreak` | — |
+| `image` | `Image` (inline images: paste of image files, resize handles) | `maxInlineBytes`: largest pasted image file inserted as a data URL, default `5 * 1024 * 1024` (5 MB) |
 | `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
 | `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
 | `link` | `Link` | — |
