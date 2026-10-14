@@ -226,8 +226,12 @@ li.ProseMirror-selectednode:after {
   margin-top: 0;
 }
 
+/* The resize handle shown on hover is the last child of its cell: the block before it is the last
+   block, otherwise its margin would come back and the table grow under the mouse. */
 .stilo-content td > :last-child,
-.stilo-content th > :last-child {
+.stilo-content th > :last-child,
+.stilo-content td > :has(+ .column-resize-handle:last-child),
+.stilo-content th > :has(+ .column-resize-handle:last-child) {
   margin-bottom: 0;
 }
 

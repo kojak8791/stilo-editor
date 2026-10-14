@@ -299,3 +299,17 @@ test('tables: select cells with the mouse and merge them from the menu', async (
     '<table><tbody><tr><th colspan="2"></th></tr></tbody></table><p></p>',
   );
 });
+
+test('tables: the resize handle on hover does not change the height of the table', async ({
+  page,
+}) => {
+  await openEmpty(page);
+  await page.click('[data-item="table"]');
+  await page.click('[data-rows="2"][data-columns="2"]');
+  const table = page.locator('.stilo-content table');
+  const height = (await table.boundingBox())!.height;
+  const cell = await page.locator('.stilo-content th').first().boundingBox();
+  await page.mouse.move(cell!.x + cell!.width - 2, cell!.y + cell!.height / 2);
+  await expect(page.locator('.stilo-content .column-resize-handle').first()).toBeAttached();
+  expect((await table.boundingBox())!.height).toBe(height);
+});

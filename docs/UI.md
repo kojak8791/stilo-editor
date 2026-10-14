@@ -1259,7 +1259,9 @@ Layout:
   `--stilo-color-selected-cell`, default `rgb(9 105 218 / 0.12)`), cells with a 1px
   `--stilo-color-border` border and `6px 8px` padding, header cells semibold on
   `--stilo-color-table-header` (default `#f6f8fa`) and aligned to the start, no outer margins
-  for the first and last block of a cell, `1em` above and below the table.
+  for the first and last block of a cell (the block before the resize handle, which
+  `columnResizing` appends to the cell on hover, counts as the last one: otherwise its margin
+  comes back and the table grows under the mouse), `1em` above and below the table.
 - Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
   corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
 - Search matches (`content.css`): `.stilo-search-match` background
