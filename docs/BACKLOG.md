@@ -71,7 +71,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-039 | Text alignment (left, center, right, justify) on paragraphs and headings: `textAlign` attribute, `setTextAlign`, `Mod-Shift-l/e/r/j`, alignment kept when the block type changes, toolbar icon menu (the four alignments in a row) | F-308 | done |
 | T-040 | Line spacing on paragraphs and headings (`line-height`, values 1, 1.15, 1.5, 2), toolbar menu next to the alignment | F-312 | done |
 | T-041 | Markdown input rules that change the block type (`# `…`###### `) keep the alignment and the line spacing of the paragraph, as the toolbar and the shortcuts already do | F-302, F-308, F-312 | done |
-| T-042 | Images, first part: inline `image` node, paste of an image file (Ctrl+V) as a base64 data URL with a size limit (`maxInlineBytes`, `imageRejected` event), resize with two side handles keeping the aspect ratio | F-601, F-603, F-607, F-608 | in progress |
+| T-042 | Images, first part: inline `image` node, paste of an image file (Ctrl+V) as a base64 data URL with a size limit (`maxInlineBytes`, `imageRejected` event), resize with two side handles keeping the aspect ratio | F-601, F-603, F-607, F-608 | done |
 
 ## Notes for later milestones
 
