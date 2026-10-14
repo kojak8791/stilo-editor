@@ -86,6 +86,17 @@ column is what you type to get the format as you write.
 | Redo | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | | |
 | Paste | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | HTML is cleaned up; plain text lines become paragraphs |
 
+<table>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot2.png" alt="The font dropdown on a Times New Roman text, with lines in Georgia, Trebuchet MS, Verdana, Courier New and the generic families" width="400"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot3.png" alt="The highlight palette open, with No color, Default, the color grid and a custom color field" width="400"></td>
+  </tr>
+  <tr>
+    <td>Fonts and sizes: the toolbar shows the font and the size at the cursor.</td>
+    <td>Highlight palette: the browser's default marker stays one click away, next to the colors.</td>
+  </tr>
+</table>
+
 **Keyboard and accessibility.** Most shortcuts are the ones of Google Docs; the others follow
 the usual conventions of web editors, and every toolbar tooltip shows its shortcut. The toolbar
 follows the WAI-ARIA *Toolbar* pattern: <kbd>Alt</kbd>+<kbd>F10</kbd> moves the focus from the
