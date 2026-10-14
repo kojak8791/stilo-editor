@@ -1,5 +1,6 @@
 import { InputRule } from 'prosemirror-inputrules';
-import type { Attrs, MarkType } from 'prosemirror-model';
+import type { Attrs, MarkType, NodeType } from 'prosemirror-model';
+import { keptBlockStyles } from './block-style';
 
 /**
  * Creates an input rule that turns markdown-like syntax into a mark.
@@ -44,5 +45,25 @@ export function markInputRule(
       .addMark(textStart, textEnd, type.create(attrs))
       .delete(openStart, textStart)
       .removeStoredMark(type);
+  });
+}
+
+/**
+ * Like `textblockTypeInputRule` from prosemirror-inputrules (turns the textblock where `regexp`
+ * matches at its start into `type` with `attrs`), but the block keeps the style attributes
+ * (`textAlign`, `lineHeight`) that `type` also has, as `setTextblockType` does.
+ */
+export function textblockTypeInputRule(
+  regexp: RegExp,
+  type: NodeType,
+  attrs: Attrs | null = null,
+): InputRule {
+  return new InputRule(regexp, (state, _match, start, end) => {
+    const $start = state.doc.resolve(start);
+    if (!$start.node(-1).canReplaceWith($start.index(-1), $start.indexAfter(-1), type)) {
+      return null;
+    }
+    const styles = keptBlockStyles(type, $start.parent);
+    return state.tr.delete(start, end).setBlockType(start, start, type, { ...attrs, ...styles });
   });
 }

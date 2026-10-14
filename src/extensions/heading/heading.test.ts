@@ -98,6 +98,27 @@ describe('Heading: input rule', () => {
     expect(getHTMLWithSelection(editor)).toBe(expected);
   });
 
+  it.each([
+    ['<p style="text-align: center">|a</p>', '# ', '<h1 style="text-align: center">|a</h1>'],
+    [
+      '<p style="text-align: right; line-height: 1.5">|a</p>',
+      '## ',
+      '<h2 style="text-align: right; line-height: 1.5">|a</h2>',
+    ],
+    ['<h1 style="line-height: 2">|a</h1>', '### ', '<h3 style="line-height: 2">|a</h3>'],
+  ])('keeps the block styles: in %j, typing %j gives %j', (html, text, expected) => {
+    const editor = createTestEditor({ html });
+    typeText(editor, text);
+    expect(getHTMLWithSelection(editor)).toBe(expected);
+  });
+
+  it('Backspace right after the rule restores the paragraph with its styles', () => {
+    const editor = createTestEditor({ html: '<p style="text-align: center">|a</p>' });
+    typeText(editor, '# ');
+    expect(pressKey(editor, 'Backspace')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p style="text-align: center"># |a</p>');
+  });
+
   it('ignores #### when levels are [1,2,3]', () => {
     const editor = createTestEditor({
       html: '<p>|</p>',

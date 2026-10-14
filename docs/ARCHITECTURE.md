@@ -451,8 +451,9 @@ marks', so `Mod-Shift-e` never falls back to `Mod-e`), `setLineHeight(lineHeight
 `unsetLineHeight()` (no shortcut). Both set the attribute on every selected textblock that has it
 (`setTextblockAttr`). A block with neither style parses with the shared default attributes: one
 attribute object per paragraph cost 19 MB of heap at 50k paragraphs. `setParagraph`, `setHeading`
-and `toggleHeading` use `setTextblockType`, which keeps both styles when the block type changes; a
-list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
+and `toggleHeading` use `setTextblockType`, which keeps both styles when the block type changes,
+and so does the heading input rule (`# `…`###### `, our `textblockTypeInputRule` in
+`core/helpers/input-rules.ts`); a list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
 without attributes). Output order: `text-align` then `line-height` (§7.3).
 
 ### 7.2 Marks

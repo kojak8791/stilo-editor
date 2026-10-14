@@ -1,6 +1,6 @@
 import type { Attrs, Node, NodeType } from 'prosemirror-model';
 import { type Command, NodeSelection, TextSelection, type Transaction } from 'prosemirror-state';
-import { BLOCK_STYLE_ATTRS } from './block-style';
+import { keptBlockStyles } from './block-style';
 
 /**
  * Inserts a block `node` in place of the selection and puts the cursor at the start of the
@@ -44,11 +44,8 @@ export function insertBlock(type: NodeType, attrs: Attrs | null = null): Command
  * textblock changes.
  */
 export function setTextblockType(type: NodeType, attrs: Attrs = {}): Command {
-  const kept = BLOCK_STYLE_ATTRS.filter((name) => type.spec.attrs?.[name] !== undefined);
-  const attrsFor = (node: Node): Attrs => {
-    const styles = Object.fromEntries(kept.map((name) => [name, node.attrs[name] ?? null]));
-    return type.create({ ...attrs, ...styles }).attrs;
-  };
+  const attrsFor = (node: Node): Attrs =>
+    type.create({ ...attrs, ...keptBlockStyles(type, node) }).attrs;
 
   return (state, dispatch) => {
     let applicable = false;

@@ -1,8 +1,8 @@
-import { textblockTypeInputRule } from 'prosemirror-inputrules';
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
 import { isNodeActive } from '../../core/helpers/active';
 import { blockStyleAttrs, blockStyleDOM, parseBlockStyle } from '../../core/helpers/block-style';
+import { textblockTypeInputRule } from '../../core/helpers/input-rules';
 import { setTextblockType } from '../../core/helpers/nodes';
 
 declare module '../../core/types' {
