@@ -155,9 +155,9 @@ whether it is available.
 `select(from, to?)` and `selectNode(pos)` take ProseMirror document positions.
 
 `getSearchResults(editor)` returns `{ count, limited, current }` for the active search: the
-number of highlighted matches, `limited` when there are more than the extension option
-`maxMatches` (show `1000+`), and the 1-based index of the selected match (`0` when the
-selection is not one). The matches have the class `stilo-search-match`, the selected one also
+number of matches in the document, `limited` when only the first `maxMatches` (extension
+option) are highlighted, and the 1-based index of the selected match among all of them (`0`
+when the selection is not one). The matches have the class `stilo-search-match`, the selected one also
 `stilo-search-match--current` (colors in `content.css`).
 
 `getWordCount(editor)` returns `{ words, characters }` for the whole document: words are runs of
@@ -195,7 +195,7 @@ defaultExtensions({
 | `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
 | `moveBlock` | `MoveBlock` | — |
 | `placeholder` | `Placeholder` | `placeholder`: hint shown in the empty editor, default `''` (none) |
-| `search` | `Search` (find and replace) | `maxMatches`: matches highlighted at most, default `1000`; `findNext` and `replaceAll` also reach the others |
+| `search` | `Search` (find and replace) | `maxMatches`: only the first matches are highlighted, default `1000`; all are counted, and `findNext` and `replaceAll` reach them all |
 | `dropCursor` | `DropCursor` | `color`: CSS color, default `'currentColor'` (`false`: none, style it with `class`). `width` in pixels, default `1`. `class`: extra CSS class |
 | `gapCursor` | `GapCursor` | — |
 

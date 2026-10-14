@@ -126,7 +126,7 @@ describe('find field', () => {
     expect(count.textContent).toBe('');
   });
 
-  it('says when there is no result, and when the count is limited', () => {
+  it('says when there is no result, and counts the matches past maxMatches', () => {
     const { button, find, count } = setup('<p>ab ab</p>', [
       defaultExtensions({ search: { maxMatches: 1 } }),
     ]);
@@ -136,7 +136,10 @@ describe('find field', () => {
     expect(count.textContent).toBe('No results');
     type(find, 'ab');
     vi.advanceTimersByTime(350);
-    expect(count.textContent).toBe('Results: 1+');
+    expect(count.textContent).toBe('Results: 2');
+    press(find, 'Enter');
+    press(find, 'Enter');
+    expect(count.textContent).toBe('2 of 2');
   });
 
   it('Enter searches at once and selects the next match; Shift+Enter the previous one', () => {

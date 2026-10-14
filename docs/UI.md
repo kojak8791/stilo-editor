@@ -913,8 +913,9 @@ toolbar. Not a popover: it stays open while the user edits the text.
   fewer than 2 characters clear the search. `setSearch({ text, caseSensitive, wholeWord })`
   takes the two toggles (`aria-pressed`), which search again at once.
 - **Count**: empty without a search; `find.noResults`; `find.position` (`2 of 4`) when the
-  selection is a highlighted match; otherwise `find.results` (`Results: 4`). The total reads
-  `1000+` when `getSearchResults(editor).limited`. Refreshed on every `transaction`.
+  selection is a match, also past the highlighted ones; otherwise `find.results`
+  (`Results: 4`). Exact totals from `getSearchResults(editor)`, with `toLocaleString()`.
+  Refreshed on every `transaction`.
 - **Keys and buttons**: `Enter` in the find field runs a pending search at once and selects the
   next match (`findNext`), `Shift+Enter` the previous one; the focus stays in the field.
   `Enter` in the replace field and *Replace* run `replaceNext(replacement)`; *Replace all* runs

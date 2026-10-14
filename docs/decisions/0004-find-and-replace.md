@@ -45,14 +45,17 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
 - Its `search()` plugin, its commands and `getReplacements` are not used: the replacement text
   is inserted literally, with the marks shared by the whole match. The `Search` extension
   (`src/extensions/search/`) has its own plugin and commands:
-  - setting a query scans the document once and stops at `maxMatches` highlights (default
-    1,000); the count then reads `1000+`. The scan goes one top-level block at a time: a block
+  - setting a query scans the document once: it counts every match and highlights the first
+    `maxMatches` (default 1,000); drawing the highlights costs much more than finding the
+    matches (counting 600,000 matches at 50,000 paragraphs took 215 ms in Node). The scan
+    goes one top-level block at a time: a block
     whose text does not contain the searched text is skipped, the others are searched with
     `SearchQuery.findNext` as the document of their own `EditorState`, so the scan stays
     linear (on the whole document `findNext` walks the blocks from the first one at every
     call);
   - a transaction that changes the document rescans only the textblocks it touched, and maps the
-    other highlights (`DecorationSet.map`); a selection change only checks whether the selection
+    other highlights (`DecorationSet.map`); the total changes by the matches counted in those
+    textblocks before and after the change; a selection change only checks whether the selection
     is a match;
   - the commands (`findNext`, `findPrevious`, `replaceNext`, `replaceAll`) scan from the
     selection, once per call; the first three scroll the selected match to the middle of the
@@ -69,9 +72,11 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
 - Our plugin and commands are code to maintain and test (incremental update, wrap around,
   replacement): dense unit tests on edits inside, across and next to a match, undo, replace all.
 - With more than `maxMatches` matches, the matches after the last highlight are not
-  highlighted; `findNext` still reaches them.
-- `replaceAll` collects every match: with hundreds of thousands of matches it is slow (one user
-  action, not measured).
+  highlighted; `findNext` still reaches them and the count shows their position: moving to the
+  next or previous match counts only the matches in between, the first jump far past the
+  highlights counts from the last one (220 ms at 50,000 paragraphs).
+- `replaceAll` collects every match with the same linear scan; with hundreds of thousands of
+  matches the transaction itself is large (not measured).
 - `npm run bench` measures the search in Chromium, rendering included (informative metrics,
   no budget): setting a frequent search (1,000+ matches) 35 ms at 10,000 paragraphs and 116 ms
   at 50,000; a rare phrase 21 ms and 92 ms; typing in the middle with the frequent search

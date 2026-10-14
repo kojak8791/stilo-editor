@@ -41,17 +41,17 @@ export interface SearchTerm {
 
 /** Options of {@link Search}. */
 export interface SearchOptions {
-  /** Highlights at most this many matches; the count then says there are more. Default: 1000. */
+  /** Highlights at most the first this many matches; all are counted. Default: 1000. */
   maxMatches: number;
 }
 
 /** The matches of the active search, from {@link getSearchResults}. */
 export interface SearchResults {
-  /** The number of highlighted matches. */
+  /** The number of matches in the document. */
   count: number;
-  /** `true` when there are more matches than `maxMatches`. */
+  /** `true` when only the first `maxMatches` matches are highlighted. */
   limited: boolean;
-  /** The 1-based index of the selected match; 0 when the selection is not a highlighted match. */
+  /** The 1-based index of the selected match; 0 when the selection is not a match. */
   current: number;
 }
 
@@ -62,10 +62,14 @@ interface Range {
 
 interface SearchState {
   query: SearchQuery;
+  /** The highlights: always the first matches of the document, at most `maxMatches`. */
   matches: DecorationSet;
-  limited: boolean;
+  /** All the matches of the document, highlighted or not. */
+  total: number;
   /** The selection, when it is exactly a match. */
   current: Range | null;
+  /** The 1-based index of `current` among all the matches; 0 without `current`. */
+  index: number;
   /** The transaction asked to scroll the selected match into view. */
   reveal: boolean;
 }
@@ -79,8 +83,9 @@ const NO_QUERY = new SearchQuery({ search: '' });
 const EMPTY: SearchState = {
   query: NO_QUERY,
   matches: DecorationSet.empty,
-  limited: false,
+  total: 0,
   current: null,
+  index: 0,
   reveal: false,
 };
 
@@ -93,28 +98,46 @@ function mayMatch(block: Node, query: SearchQuery): boolean {
 }
 
 /**
- * Finds up to `max` matches between `from` and `to` of `doc`, one top-level block at a time.
- * `findNext` walks the top-level blocks from the first one at every call: on the whole document
- * that is quadratic with many blocks, so each block that may match is searched as the document
- * of its own state.
+ * Calls `f` with each match between `from` and `to` of `doc`, in order, until it returns `false`.
+ * It goes one top-level block at a time: `findNext` walks the top-level blocks from the first one
+ * at every call, quadratic on the whole document, so each block that may match is searched as
+ * the document of its own state.
  */
-function scan(doc: Node, query: SearchQuery, range: Range, max: number): Decoration[] {
-  const found: Decoration[] = [];
-  doc.forEach((block, offset) => {
+function forEachMatch(
+  doc: Node,
+  query: SearchQuery,
+  range: Range,
+  f: (match: Range) => boolean,
+): void {
+  let { index, offset } = doc.childAfter(range.from);
+  for (let going = true; going && index < doc.childCount && offset <= range.to; index++) {
+    const block = doc.child(index);
     const start = offset + 1;
+    offset += block.nodeSize;
     const from = Math.max(0, range.from - start);
     const to = Math.min(block.content.size, range.to - start);
-    if (found.length >= max || from > to || !mayMatch(block, query)) return;
+    if (from > to || !mayMatch(block, query)) continue;
     const state = EditorState.create({ doc: block });
-    for (let pos = from; found.length < max; ) {
+    for (let pos = from; going; ) {
       const match = query.findNext(state, pos, to);
       if (!match) break;
-      const deco = { class: MATCH_CLASS };
-      found.push(Decoration.inline(start + match.from, start + match.to, deco));
+      going = f({ from: start + match.from, to: start + match.to });
       pos = Math.max(match.to, pos + 1);
     }
+  }
+}
+
+function countMatches(doc: Node, query: SearchQuery, range: Range): number {
+  let count = 0;
+  forEachMatch(doc, query, range, () => {
+    count++;
+    return true;
   });
-  return found;
+  return count;
+}
+
+function highlight(match: Range): Decoration {
+  return Decoration.inline(match.from, match.to, { class: MATCH_CLASS });
 }
 
 /** The selection, when it is exactly a match of `query`. */
@@ -125,10 +148,17 @@ function selectedMatch(state: EditorState, query: SearchQuery): Range | null {
   return match && match.from === from && match.to === to ? { from, to } : null;
 }
 
-/**
- * The part of `tr.doc` changed by `tr`, widened to whole textblocks (a match never crosses a
- * textblock). `null` when no step replaced content.
- */
+/** `from`–`to` of `doc` widened to whole textblocks (a match never crosses a textblock). */
+function widen(doc: Node, from: number, to: number): Range {
+  const $from = doc.resolve(from);
+  const $to = doc.resolve(to);
+  return {
+    from: $from.parent.inlineContent ? $from.start() : from,
+    to: $to.parent.inlineContent ? $to.end() : to,
+  };
+}
+
+/** The part of `tr.doc` changed by `tr`, in whole textblocks; `null` when no content changed. */
 function changedRange(tr: Transaction): Range | null {
   let from = Number.POSITIVE_INFINITY;
   let to = Number.NEGATIVE_INFINITY;
@@ -139,49 +169,63 @@ function changedRange(tr: Transaction): Range | null {
       to = Math.max(to, rest.map(newTo, 1));
     });
   });
-  if (from > to) return null;
-  const $from = tr.doc.resolve(from);
-  const $to = tr.doc.resolve(to);
-  return {
-    from: $from.parent.inlineContent ? $from.start() : from,
-    to: $to.parent.inlineContent ? $to.end() : to,
-  };
+  return from > to ? null : widen(tr.doc, from, to);
 }
 
-/** Keeps the first `max` highlights; `limited` when some were dropped. */
-function capMatches(state: SearchState, max: number): SearchState {
-  const all = state.matches.find().sort((a, b) => a.from - b.from);
-  if (all.length <= max) return state;
-  return { ...state, matches: state.matches.remove(all.slice(max)), limited: true };
+/** The highlights sorted by position. */
+function sorted(matches: DecorationSet): Decoration[] {
+  return matches.find().sort((a, b) => a.from - b.from);
 }
 
-/** Rescans the textblocks changed by `tr`; the other highlights are mapped. */
-function update(prev: SearchState, tr: Transaction, state: EditorState, max: number): SearchState {
+/**
+ * The 1-based index of `current` among all the matches. The highlights are the first matches:
+ * past them, the matches up to `current` are counted.
+ */
+function indexOf(doc: Node, query: SearchQuery, matches: DecorationSet, current: Range): number {
+  const all = sorted(matches);
+  const found = all.findIndex((match) => match.from === current.from);
+  if (found >= 0) return found + 1;
+  const from = all[all.length - 1]?.to ?? 0;
+  return all.length + countMatches(doc, query, { from, to: current.from }) + 1;
+}
+
+/**
+ * Updates the highlights and the total after `tr`: the changed textblocks are counted before
+ * and after the change and searched again; the other highlights are mapped.
+ */
+function update(prev: SearchState, tr: Transaction, max: number): SearchState {
   const { query } = prev;
-  let next: SearchState = { ...prev, matches: prev.matches.map(tr.mapping, tr.doc) };
   const range = changedRange(tr);
-  const last = next.matches.find().reduce((end, match) => Math.max(end, match.to), 0);
+  let matches = prev.matches.map(tr.mapping, tr.doc);
+  if (!range) return { ...prev, matches };
+  const inverse = tr.mapping.invert();
+  const before = widen(tr.before, inverse.map(range.from, -1), inverse.map(range.to, 1));
+  const total =
+    prev.total - countMatches(tr.before, query, before) + countMatches(tr.doc, query, range);
+  const all = sorted(matches);
   // Past the last highlight of a limited search the matches are not highlighted: keep it so.
-  if (range && !(prev.limited && range.from > last)) {
-    const matches = next.matches.remove(next.matches.find(range.from, range.to));
-    const found = scan(state.doc, query, range, max + 1);
-    const limited = prev.limited && range.to < tr.doc.content.size;
-    next = capMatches({ ...next, matches: matches.add(tr.doc, found), limited }, max);
+  const limited = prev.total > prev.matches.find().length;
+  if (!(limited && range.from > (all[all.length - 1]?.to ?? 0))) {
+    matches = matches.remove(matches.find(range.from, range.to));
+    const found: Decoration[] = [];
+    forEachMatch(tr.doc, query, range, (match) => found.push(highlight(match)) < max);
+    matches = matches.add(tr.doc, found);
+    const extra = sorted(matches).slice(max);
+    if (extra.length > 0) matches = matches.remove(extra);
   }
-  return { ...next, current: selectedMatch(state, query) };
+  return { ...prev, matches, total };
 }
 
-/** A fresh search for `query`: one scan of the document, up to `max` highlights. */
-function start(state: EditorState, query: SearchQuery, max: number): SearchState {
+/** A fresh search for `query`: one scan of the document, the first `max` matches highlighted. */
+function start(doc: Node, query: SearchQuery, max: number): SearchState {
   if (!query.valid) return EMPTY;
-  const found = scan(state.doc, query, { from: 0, to: state.doc.content.size }, max + 1);
-  return {
-    query,
-    matches: DecorationSet.create(state.doc, found.slice(0, max)),
-    limited: found.length > max,
-    current: selectedMatch(state, query),
-    reveal: false,
-  };
+  const found: Decoration[] = [];
+  let total = 0;
+  forEachMatch(doc, query, { from: 0, to: doc.content.size }, (match) => {
+    if (total++ < max) found.push(highlight(match));
+    return true;
+  });
+  return { ...EMPTY, query, matches: DecorationSet.create(doc, found), total };
 }
 
 /** The visible part of the page around `view`: the viewport less the scroll margins. */
@@ -214,13 +258,45 @@ function revealCurrent(view: EditorView): void {
   element.scrollIntoView({ block: 'center', inline: 'nearest' });
 }
 
-/** The next plugin state: `reveal` holds only for the transaction that asked for it. */
+/** The plugin state after `tr`, before `current`, `index` and `reveal`. */
 function nextState(tr: Transaction, prev: SearchState, state: EditorState, max: number) {
   const query = tr.getMeta(searchKey) as SearchQuery | undefined;
-  if (query) return start(state, query, max);
-  if (!prev.query.valid) return prev;
-  if (tr.docChanged) return update(prev, tr, state, max);
-  return tr.selectionSet ? { ...prev, current: selectedMatch(state, prev.query) } : prev;
+  if (query) return start(state.doc, query, max);
+  if (!prev.query.valid || !tr.docChanged) return prev;
+  return update(prev, tr, max);
+}
+
+/**
+ * The index of `current` from the previous selected match, in the same document: one more or one
+ * less when moving to the next or previous match, without counting from the start.
+ */
+function stepIndex(doc: Node, query: SearchQuery, last: Range, lastIndex: number, current: Range) {
+  if (current.from >= last.to) {
+    return lastIndex + countMatches(doc, query, { from: last.to, to: current.from }) + 1;
+  }
+  if (current.to <= last.from) {
+    return lastIndex - countMatches(doc, query, { from: current.to, to: last.from }) - 1;
+  }
+  return lastIndex;
+}
+
+/** Sets `current` and its `index` when `tr` may have changed them. */
+function withCurrent(
+  next: SearchState,
+  prev: SearchState,
+  tr: Transaction,
+  state: EditorState,
+): SearchState {
+  const { query } = next;
+  if (!query.valid || (!tr.docChanged && !tr.selectionSet && !tr.getMeta(searchKey))) return next;
+  const current = selectedMatch(state, query);
+  if (!current) return { ...next, current, index: 0 };
+  const last = prev.current;
+  const index =
+    last && prev.index > 0 && !tr.docChanged && prev.query === query
+      ? stepIndex(state.doc, query, last, prev.index, current)
+      : indexOf(state.doc, query, next.matches, current);
+  return { ...next, current, index };
 }
 
 function searchPlugin(max: number): Plugin<SearchState> {
@@ -229,7 +305,7 @@ function searchPlugin(max: number): Plugin<SearchState> {
     state: {
       init: () => EMPTY,
       apply(tr, prev, _oldState, state) {
-        const next = nextState(tr, prev, state, max);
+        const next = withCurrent(nextState(tr, prev, state, max), prev, tr, state);
         const reveal = tr.getMeta(REVEAL_META) === true;
         return next.reveal === reveal ? next : { ...next, reveal };
       },
@@ -325,12 +401,11 @@ const replaceAll =
     const query = activeQuery(state);
     if (!query) return false;
     const matches: Range[] = [];
-    for (let pos = 0; ; ) {
-      const match = query.findNext(state, pos);
-      if (!match) break;
+    const range = { from: 0, to: state.doc.content.size };
+    forEachMatch(state.doc, query, range, (match) => {
       matches.push(match);
-      pos = Math.max(match.to, pos + 1);
-    }
+      return true;
+    });
     if (matches.length === 0) return false;
     if (dispatch) {
       const tr = state.tr;
@@ -341,25 +416,21 @@ const replaceAll =
   };
 
 /**
- * The matches of the active search of `editor`: how many are highlighted and which one is
- * selected. All zero without a search or without the {@link Search} extension.
+ * The matches of the active search of `editor`: how many there are, whether only some are
+ * highlighted, and which one is selected. All zero without a search or without the
+ * {@link Search} extension.
  */
 export function getSearchResults(editor: Editor): SearchResults {
-  const { matches, limited, current } = searchKey.getState(editor.state) ?? EMPTY;
-  const all = matches.find();
-  const index = current
-    ? all.some((match) => match.from === current.from && match.to === current.to)
-      ? all.filter((match) => match.from < current.from).length + 1
-      : 0
-    : 0;
-  return { count: all.length, limited, current: index };
+  const { matches, total, index } = searchKey.getState(editor.state) ?? EMPTY;
+  return { count: total, limited: total > matches.find().length, current: index };
 }
 
 /**
  * Find and replace, docs/SPEC.md F-902 (ADR 0004). Matching follows `SearchQuery` of
  * `prosemirror-search` (literal text, case, whole word); the matches get
  * `class="stilo-search-match"`, the selected one also `stilo-search-match--current`.
- * Setting a search scans the document once; later edits rescan only the changed textblocks.
+ * Setting a search scans and counts the whole document once; later edits rescan only the
+ * changed textblocks.
  */
 export const Search = defineExtension<SearchOptions>({
   name: 'search',

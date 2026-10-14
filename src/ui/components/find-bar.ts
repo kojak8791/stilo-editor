@@ -135,13 +135,13 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
       return;
     }
     const results = getSearchResults(editor);
-    const total = `${results.count}${results.limited ? '+' : ''}`;
+    const total = results.count.toLocaleString();
     count.textContent =
       results.count === 0
         ? messages['find.noResults']
         : results.current > 0
           ? messages['find.position']
-              .replace('{current}', String(results.current))
+              .replace('{current}', results.current.toLocaleString())
               .replace('{total}', total)
           : messages['find.results'].replace('{total}', total);
   }

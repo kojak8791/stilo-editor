@@ -3,6 +3,7 @@ import {
   createTestEditor,
   getHTMLWithSelection,
   mockScrollIntoView,
+  pressKey,
   typeText,
 } from '../../../tests/helpers';
 import type { Editor } from '../../core/editor';
@@ -68,10 +69,10 @@ describe('Search: matching', () => {
     expect(getSearchResults(editor)).toEqual({ count: 0, limited: false, current: 0 });
   });
 
-  it('stops at maxMatches and says there are more', () => {
+  it('highlights maxMatches matches and counts them all', () => {
     const editor = search('<p>a a a</p>', 'a', 2);
     expect(highlights(editor)).toEqual(['a', 'a']);
-    expect(getSearchResults(editor)).toEqual({ count: 2, limited: true, current: 0 });
+    expect(getSearchResults(editor)).toEqual({ count: 3, limited: true, current: 0 });
   });
 
   it('is empty without the extension', () => {
@@ -130,7 +131,8 @@ describe('Search: editing updates the highlights', () => {
   it('adds no highlight past the last one of a limited search', () => {
     const editor = search('<p>a a</p><p>a|</p>', 'a', 2);
     typeText(editor, ' a');
-    expect(getSearchResults(editor)).toEqual({ count: 2, limited: true, current: 0 });
+    expect(highlights(editor)).toEqual(['a', 'a']);
+    expect(getSearchResults(editor)).toEqual({ count: 4, limited: true, current: 0 });
     expect(editor.getHTML()).toBe('<p>a a</p><p>a a</p>');
   });
 
@@ -138,7 +140,55 @@ describe('Search: editing updates the highlights', () => {
     const editor = search('<p>|</p><p>a a</p>', 'a', 2);
     expect(getSearchResults(editor).limited).toBe(false);
     typeText(editor, 'a');
-    expect(getSearchResults(editor)).toEqual({ count: 2, limited: true, current: 0 });
+    expect(highlights(editor)).toEqual(['a', 'a']);
+    expect(getSearchResults(editor)).toEqual({ count: 3, limited: true, current: 0 });
+  });
+});
+
+describe('Search: the total follows the edits', () => {
+  function total(editor: Editor): number {
+    return getSearchResults(editor).count;
+  }
+
+  it.each([
+    ['typing a match', '<p>ca|</p><p>cat</p>', (e: Editor) => typeText(e, 't'), 2],
+    ['typing inside a match', '<p>c|at cat</p>', (e: Editor) => typeText(e, 'x'), 1],
+    ['splitting a match', '<p>c|at</p>', (e: Editor) => pressKey(e, 'Enter'), 0],
+    ['deleting a paragraph', '<p>cat</p><p>[cat cat]</p>', (e: Editor) => typeText(e, 'x'), 1],
+    ['pasting matches', '<p>a|</p>', (e: Editor) => typeText(e, ' cat cat cat'), 3],
+    ['a new content', '<p>cat</p>', (e: Editor) => e.setHTML('<p>cat</p><ul><li>cat</li></ul>'), 2],
+  ])('after %s', (_case, html, edit, expected) => {
+    const editor = search(html, 'cat', 1);
+    edit(editor);
+    expect(total(editor)).toBe(expected);
+  });
+
+  it('after joining two paragraphs into a match, and after undo', () => {
+    const editor = search('<p>ca</p><p>t cat</p>', 'cat', 1);
+    expect(total(editor)).toBe(1);
+    editor.view.dispatch(editor.state.tr.join(4));
+    expect(total(editor)).toBe(2);
+    editor.commands.undo();
+    expect(total(editor)).toBe(1);
+  });
+
+  it('after replaceAll, and after undo', () => {
+    const editor = search('<p>cat cat</p><p>cat</p>', 'cat', 1);
+    editor.commands.replaceAll('dog');
+    expect(total(editor)).toBe(0);
+    editor.commands.undo();
+    expect(total(editor)).toBe(3);
+  });
+
+  it('matches a fresh count after many edits', () => {
+    const editor = search('<p>|</p><p>cat</p>', 'cat', 2);
+    typeText(editor, 'cat ca');
+    typeText(editor, 't cat');
+    editor.commands.undo();
+    typeText(editor, 'cat');
+    const counted = total(editor);
+    editor.commands.setSearch({ text: 'cat' });
+    expect(counted).toBe(total(editor));
   });
 });
 
@@ -170,11 +220,26 @@ describe('Search: findNext / findPrevious', () => {
     expect(getHTMLWithSelection(editor)).toBe('<p>a [cat]</p>');
   });
 
+  it('steps the index past maxMatches, wrapping around', () => {
+    const editor = search('<p>|a a a a a</p>', 'a', 2);
+    const seen: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      editor.commands.findNext();
+      seen.push(getSearchResults(editor).current);
+    }
+    expect(seen).toEqual([1, 2, 3, 4, 5, 1]);
+    editor.commands.findPrevious();
+    expect(getSearchResults(editor).current).toBe(5);
+    editor.commands.findPrevious();
+    expect(getSearchResults(editor).current).toBe(4);
+  });
+
   it('reaches the matches past maxMatches', () => {
     const editor = search('<p>a a a|</p>', 'a', 2);
     editor.commands.select(5, 6);
     expect(getHTMLWithSelection(editor)).toBe('<p>a a [a]</p>');
-    expect(getSearchResults(editor).current).toBe(0);
+    expect(current(editor)).toEqual(['a']);
+    expect(getSearchResults(editor).current).toBe(3);
     expect(editor.commands.findPrevious()).toBe(true);
     expect(getSearchResults(editor).current).toBe(2);
   });
