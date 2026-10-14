@@ -33,7 +33,7 @@ export interface ToolbarContext {
   toggleTableMenu(): void;
 }
 
-/** A dropdown of mutually exclusive options (T-014). */
+/** A dropdown of mutually exclusive options, or of actions (T-048) (T-014). */
 export interface ToolbarDropdown {
   id: string;
   kind: 'dropdown';
@@ -59,7 +59,8 @@ export interface ToolbarDropdownOption {
   /** Shows the option label in this font family (a CSS `font-family` list). */
   fontFamily?: string;
   run(editor: Editor): void;
-  isActive(editor: Editor): boolean;
+  /** Without it the option is an action (`role="menuitem"`), never checked. T-048. */
+  isActive?(editor: Editor): boolean;
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
 }

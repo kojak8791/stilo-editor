@@ -418,7 +418,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak`, `Image`, `Table`, `BulletList`, `OrderedList`, `ListItem`, `TaskList`, `TaskItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
-`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `TextCase`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -462,6 +462,15 @@ and `toggleHeading` use `setTextblockType`, which keeps both styles when the blo
 and so does the heading input rule (`# `…`###### `, our `textblockTypeInputRule` in
 `core/helpers/input-rules.ts`); a list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
 without attributes). Output order: `text-align` then `line-height` (§7.3).
+
+Text case (F-213): the `TextCase` extension, a command and no schema. `setTextCase(letterCase)`
+changes the characters, so the HTML has no `text-transform`. The text of each selected textblock
+gives the context of `title` (a word starts after a character that is not a letter, digit or
+apostrophe: `l'amico` → `L'amico`) and `sentence` (a sentence starts at the block start and after
+`.` `!` `?` `…`), so a selection that starts inside a word or a sentence keeps it lowercase. The
+top-level blocks the selection touches are rebuilt and replaced in **one step**, the marks kept
+on each piece of text; the selection is mapped through a step map of the texts whose length
+changed (`ß` → `SS`). Nothing is dispatched when no character changes.
 
 Code block (F-306): the `CodeBlock` extension. `setCodeBlock({ language? })` turns the selected
 textblocks into code blocks with `setTextblockType`, then joins the sibling code blocks of the

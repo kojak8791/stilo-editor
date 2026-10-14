@@ -64,6 +64,7 @@ column is what you type to get the format as you write.
 | Text color | | | The button applies the last color; its arrow opens a palette, "No color" and a custom color |
 | Highlight | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | `==text==` | Same button as text color; the shortcut applies the default highlight |
 | Clear formatting | <kbd>Ctrl</kbd>+<kbd>\\</kbd> | | Links stay |
+| Text case | | | A menu: UPPERCASE, lowercase, Title Case, Sentence case, tOGGLE cASE; the letters change, the formatting stays |
 | **Links** | | | |
 | Link | <kbd>Ctrl</kbd>+<kbd>K</kbd> | | A popover sets the URL and "open in new tab"; on a link, a small bubble offers open, edit and remove |
 | **Blocks** | | | |

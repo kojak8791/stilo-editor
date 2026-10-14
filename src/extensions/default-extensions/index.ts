@@ -31,6 +31,7 @@ import { TaskItem } from '../task-item';
 import { TaskList } from '../task-list';
 import { Text } from '../text';
 import { TextAlign } from '../text-align';
+import { TextCase } from '../text-case';
 import { TextStyle } from '../text-style';
 import { Underline } from '../underline';
 
@@ -67,6 +68,7 @@ export interface DefaultExtensionsOptions {
   lineHeight?: false;
   highlight?: false;
   clearFormatting?: false;
+  textCase?: false;
   history?: false | Partial<HistoryOptions>;
   moveBlock?: false;
   placeholder?: false | Partial<PlaceholderOptions>;
@@ -121,6 +123,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(TextAlign, options.textAlign),
     ...include(LineHeight, options.lineHeight),
     ...include(ClearFormatting, options.clearFormatting),
+    ...include(TextCase, options.textCase),
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),
     ...include(Placeholder, options.placeholder),

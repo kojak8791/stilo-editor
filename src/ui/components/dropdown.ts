@@ -9,6 +9,8 @@ export interface DropdownOptionView {
   shortcut?: string;
   /** The label is drawn in this font family. */
   fontFamily?: string;
+  /** An action (`menuitem`), never checked; otherwise a `menuitemradio`. */
+  action?: boolean;
 }
 
 export interface DropdownOptions {
@@ -69,10 +71,10 @@ export function createDropdown(options: DropdownOptions): Dropdown {
   for (const opt of menuOptions) {
     const el = document.createElement('div');
     el.className = `stilo-dropdown__option stilo-dropdown__option--${opt.id}`;
-    el.setAttribute('role', 'menuitemradio');
+    el.setAttribute('role', opt.action ? 'menuitem' : 'menuitemradio');
     el.setAttribute('tabindex', '-1');
     el.setAttribute('data-option', opt.id);
-    el.setAttribute('aria-checked', 'false');
+    if (!opt.action) el.setAttribute('aria-checked', 'false');
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'stilo-dropdown__label';
@@ -269,7 +271,8 @@ export function createDropdown(options: DropdownOptions): Dropdown {
     const activeOption = menuOptions.find((opt) => opt.id === activeId);
     const displayedLabel = activeOption?.label ?? valueLabel ?? label;
     valueSpan.textContent = displayedLabel;
-    trigger.setAttribute('aria-label', `${label}: ${displayedLabel}`);
+    const actions = menuOptions.every((opt) => opt.action);
+    trigger.setAttribute('aria-label', actions ? label : `${label}: ${displayedLabel}`);
 
     const allDisabled = disabledIds.size === menuOptions.length;
     if (allDisabled) {
@@ -287,7 +290,9 @@ export function createDropdown(options: DropdownOptions): Dropdown {
       } else {
         el.removeAttribute('aria-disabled');
       }
-      el.setAttribute('aria-checked', id === activeId ? 'true' : 'false');
+      if (el.getAttribute('role') === 'menuitemradio') {
+        el.setAttribute('aria-checked', id === activeId ? 'true' : 'false');
+      }
     }
   }
 

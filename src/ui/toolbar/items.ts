@@ -1,4 +1,5 @@
 import {
+  ALargeSmall,
   Bold,
   Code,
   FaceSlightlySmilingPlus,
@@ -27,7 +28,7 @@ import {
   Underline,
   Undo2,
 } from 'lucide';
-import type { Editor, FontSizeUnit, HeadingLevel, TextAlignment } from '../../index';
+import type { Editor, FontSizeUnit, HeadingLevel, LetterCase, TextAlignment } from '../../index';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
 import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
@@ -57,6 +58,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'superscript',
     'link',
     'clearFormatting',
+    'textCase',
   ],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
@@ -72,6 +74,9 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ],
   ['find'],
 ];
+
+/** The options of the text case dropdown, in menu order. */
+const LETTER_CASES: readonly LetterCase[] = ['upper', 'lower', 'title', 'sentence', 'toggle'];
 
 /** The default toolbar items, by ID. */
 export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
@@ -212,6 +217,21 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     },
     isEnabled: (e) => 'clearFormatting' in e.commands && e.commands.clearFormatting.can(),
     isAvailable: (e) => 'clearFormatting' in e.commands,
+  },
+  textCase: {
+    id: 'textCase',
+    kind: 'dropdown',
+    labelKey: 'toolbar.textCase',
+    icon: ALargeSmall,
+    options: LETTER_CASES.map((letterCase) => ({
+      id: letterCase,
+      labelKey: `textCase.${letterCase}`,
+      run: (e: Editor) => {
+        e.commands.setTextCase(letterCase);
+      },
+      isEnabled: (e: Editor) => e.commands.setTextCase.can(letterCase),
+    })),
+    isAvailable: (e) => 'setTextCase' in e.commands,
   },
   bulletList: {
     id: 'bulletList',

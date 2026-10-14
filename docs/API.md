@@ -152,6 +152,7 @@ whether it is available.
 | `TextAlign` | `setTextAlign(alignment)`: `'left'`, `'center'`, `'right'` or `'justify'` on the selected paragraphs and headings; `false` for another value or where no block can be aligned |
 | `LineHeight` | `setLineHeight(lineHeight)`: a number (`1.5`) or a percentage (`'150%'`, stored as `1.5`) on the selected paragraphs and headings; `false` for zero, `normal`, a length or where no block has a line height. `unsetLineHeight()` |
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
+| `TextCase` | `setTextCase(letterCase)`: changes the characters of the selection, not a style; marks are kept. `'upper'` (UPPERCASE), `'lower'` (lowercase), `'title'` (Title Case: the first letter of each word), `'sentence'` (Sentence case: the first letter after `.` `!` `?` `…` and at the start of the block), `'toggle'` (tOGGLE cASE). `false` for an empty selection |
 | `History` | `undo()`, `redo()` |
 | `MoveBlock` | `moveBlockUp()`, `moveBlockDown()` |
 | `Search` | `setSearch({ text, caseSensitive?, wholeWord? })`: highlights the matches of `text` (taken literally); an empty `text` clears the search. `clearSearch()`. `findNext()`, `findPrevious()`: select the next or previous match, wrapping around, and scroll it to the middle of the view when it is not visible (also while the focus is in a find field, where ProseMirror does not scroll); `false` without a search or a match. `replaceNext(replacement)`: replaces the selected match and selects the next one (selects the next match when the selection is not one). `replaceAll(replacement)`: one undoable step; `false` without matches. The replacement text is inserted as is, with the formatting of the match |
@@ -210,6 +211,7 @@ defaultExtensions({
 | `textAlign` | `TextAlign` (alignment command and shortcuts; aligned content keeps its alignment without it) | — |
 | `lineHeight` | `LineHeight` (line spacing commands; content keeps its line spacing without it) | — |
 | `clearFormatting` | `ClearFormatting` | — |
+| `textCase` | `TextCase` | — |
 | `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
 | `moveBlock` | `MoveBlock` | — |
 | `placeholder` | `Placeholder` | `placeholder`: hint shown in the empty editor, default `''` (none) |
@@ -268,7 +270,7 @@ ones work.
 A button whose extension is not loaded is not shown. Default item IDs: `undo`, `redo`,
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
 `subscript`, `superscript`,
-`link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
+`link`, `clearFormatting`, `textCase`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
 `bulletList`, `orderedList`, `taskList`,
 `blockquote`, `codeBlock`, `horizontalRule`, `table`, `characters`, `find`.
 

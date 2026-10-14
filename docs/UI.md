@@ -148,7 +148,7 @@ export interface ToolbarContext {
   toggleTableMenu(): void;
 }
 
-/** A dropdown of mutually exclusive options (T-014). */
+/** A dropdown of mutually exclusive options (T-014), or of actions (T-048). */
 export interface ToolbarDropdown {
   id: string;
   kind: 'dropdown';
@@ -171,7 +171,8 @@ export interface ToolbarDropdownOption {
   /** Shows the option label in this font family (a CSS `font-family` list). T-038. */
   fontFamily?: string;
   run(editor: Editor): void;
-  isActive(editor: Editor): boolean;
+  /** Without it the option is an action (`role="menuitem"`), never checked. T-048. */
+  isActive?(editor: Editor): boolean;
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
 }
@@ -288,6 +289,7 @@ no functions.
 | `toolbar.superscript` | Superscript | Apice |
 | `toolbar.code` | Code | Codice |
 | `toolbar.clearFormatting` | Clear formatting | Cancella formattazione |
+| `toolbar.textCase` | Text case | Maiuscole e minuscole |
 | `toolbar.bulletList` | Bulleted list | Elenco puntato |
 | `toolbar.orderedList` | Numbered list | Elenco numerato |
 | `toolbar.taskList` | Checklist | Elenco di controllo |
@@ -310,6 +312,11 @@ no functions.
 | `align.justify` | Justify | Giustifica |
 | `toolbar.lineHeight` | Line spacing | Interlinea |
 | `lineHeight.default` | Default | Predefinita |
+| `textCase.upper` | UPPERCASE | MAIUSCOLO |
+| `textCase.lower` | lowercase | minuscolo |
+| `textCase.title` | Title Case | Iniziali Maiuscole |
+| `textCase.sentence` | Sentence case | Tipo frase |
+| `textCase.toggle` | tOGGLE cASE | iNVERTI mAIUSCOLE |
 | `toolbar.link` | Link | Collegamento |
 | `heading.paragraph` | Paragraph | Paragrafo |
 | `heading.h1` | Heading 1 | Titolo 1 |
@@ -393,7 +400,7 @@ no functions.
   ['heading'],
   ['fontFamily', 'fontSize'],
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
-    'clearFormatting'],
+    'clearFormatting', 'textCase'],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
   ['bulletList', 'orderedList', 'taskList', 'blockquote', 'codeBlock', 'horizontalRule', 'table',
@@ -432,6 +439,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 
 `fontFamily` (T-038) is `fontFamilyDropdown()`, see §6.4; `fontSize` (T-038) is
 `fontSizeInput()`, see §5.5.
+
+`textCase` (T-048) is the text case dropdown, see §6.6.
 
 `textAlign` (T-039) is `textAlignMenu()`, see §5.6; `lineHeight` (T-040) is
 `lineHeightDropdown()`, see §6.5.
@@ -1128,6 +1137,20 @@ lists the values as text.
 
 `isActive` reads the `lineHeight` of the heading or paragraph at the start of the selection.
 *Default* removes the block's own line height, so the block follows the host page's CSS again.
+
+### 6.6 Text case dropdown (T-048)
+
+Item ID `textCase`, `labelKey` `toolbar.textCase`, `icon` `ALargeSmall`, for the `TextCase`
+extension (SPEC F-213). `isAvailable`: `'setTextCase' in editor.commands`. A menu of actions:
+the options have no `isActive`, so they are `role="menuitem"` without `aria-checked`, and opening
+the menu focuses the first enabled one. Each label is written in its own case. The trigger's
+`aria-label` is the dropdown label alone, since no option is ever shown as the value.
+
+| Option ID | `labelKey` | `run` | `isEnabled` |
+|---|---|---|---|
+| `upper`, `lower`, `title`, `sentence`, `toggle` | `textCase.<id>` | `setTextCase(<id>)` | `setTextCase.can(<id>)`: a selection that is not empty |
+
+With an empty selection every option is disabled, so the trigger is too.
 
 ## 7. Styles (`src/styles/ui.css`)
 

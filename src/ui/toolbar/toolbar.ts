@@ -118,7 +118,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const optionViews: DropdownOptionView[] = dd.options.map((opt) => {
           const label = messages[opt.labelKey] ?? opt.labelKey;
           const shortcut = opt.shortcut ? formatShortcut(opt.shortcut, mac) : undefined;
-          return { id: opt.id, label, shortcut, fontFamily: opt.fontFamily };
+          return { id: opt.id, label, shortcut, fontFamily: opt.fontFamily, action: !opt.isActive };
         });
 
         const ddInstance = createDropdown({
@@ -288,7 +288,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const disabledIds = new Set<string>();
 
         for (const opt of dd.options) {
-          const isActive = opt.isActive(editor);
+          const isActive = opt.isActive?.(editor) ?? false;
           if (opt.isEnabled !== undefined && !opt.isEnabled(editor)) {
             disabledIds.add(opt.id);
           }

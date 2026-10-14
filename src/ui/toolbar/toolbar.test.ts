@@ -78,6 +78,7 @@ describe('toolbar', () => {
       'superscript',
       'link',
       'clearFormatting',
+      'textCase',
       'textColor',
       'textColor',
       'highlight',
@@ -1193,6 +1194,60 @@ describe('line spacing dropdown', () => {
     attachEditor(editor);
     const toolbar = createToolbar(editor, { container: createToolbarContainer() });
     expect(toolbar.element.querySelector('[data-item="lineHeight"]')).toBeNull();
+  });
+});
+
+describe('text case dropdown', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html });
+    attachEditor(editor);
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
+    const trigger = toolbar.element.querySelector<HTMLButtonElement>('[data-item="textCase"]')!;
+    const menu = toolbar.element.querySelector('.stilo-dropdown__option--upper')!.parentElement!;
+    const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
+    return { editor, toolbar, trigger, menu, option };
+  }
+
+  it('renders an icon trigger and a menu of actions, each label in its own case', () => {
+    const { trigger, menu } = setup('<p>[ab]</p>', { messages: itLocale });
+    expect(trigger.classList.contains('stilo-dropdown__trigger--icon')).toBe(true);
+    expect(trigger.getAttribute('aria-label')).toBe('Maiuscole e minuscole');
+    const options = [...menu.querySelectorAll('.stilo-dropdown__option')];
+    expect(options.map((el) => el.textContent)).toEqual([
+      'MAIUSCOLO',
+      'minuscolo',
+      'Iniziali Maiuscole',
+      'Tipo frase',
+      'iNVERTI mAIUSCOLE',
+    ]);
+    expect(options.every((el) => el.getAttribute('role') === 'menuitem')).toBe(true);
+    expect(options.some((el) => el.hasAttribute('aria-checked'))).toBe(false);
+  });
+
+  it('changes the case of the selection and focuses the first option on open', () => {
+    const { editor, trigger, menu, option } = setup('<p>[the quick fox]</p>');
+    trigger.click();
+    expect(document.activeElement).toBe(option('upper'));
+    option('title').click();
+    expect(menu.hidden).toBe(true);
+    expect(editor.getHTML()).toBe('<p>The Quick Fox</p>');
+  });
+
+  it('is disabled with an empty selection', () => {
+    const { trigger, option } = setup('<p>a|b</p>');
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(option('upper').getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('is not rendered without the TextCase extension', () => {
+    const editor = createTestEditor({
+      html: '<p>ab</p>',
+      extensions: [defaultExtensions({ textCase: false })],
+    });
+    attachEditor(editor);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    expect(toolbar.element.querySelector('[data-item="textCase"]')).toBeNull();
   });
 });
 
