@@ -726,35 +726,74 @@
   cursor: pointer;
 }
 
-/* Find bar (T-043): under the toolbar, in the same sticky container */
+/*
+ * Find bar (T-043): a floating panel at the top right, just under the toolbar, over the content
+ * (the content does not move). It lives in the toolbar container, so it stays at the top with a
+ * sticky toolbar; without `sticky` the container is made a positioned ancestor.
+ */
+.stilo-find-bar-host:not(.stilo-toolbar-host) {
+  position: relative;
+}
+
 .stilo-find-bar {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  z-index: var(--stilo-z-popover);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 4px 8px;
-  border-top: 1px solid var(--stilo-color-separator);
-  background: var(--stilo-color-toolbar-bg);
+  max-width: calc(100% - 16px);
+  padding: 6px 8px;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  box-shadow: var(--stilo-popover-shadow);
   color: var(--stilo-color-text);
   font-family: var(--stilo-font-family);
   font-size: var(--stilo-font-size);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    display 0.15s allow-discrete;
+}
+
+/* Slides in from above; browsers without @starting-style show it at once. */
+@starting-style {
+  .stilo-find-bar {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stilo-find-bar {
+    transition: none;
+  }
 }
 
 .stilo-find-bar__row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
 }
 
-.stilo-find-bar[hidden],
+.stilo-find-bar[hidden] {
+  display: none;
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 .stilo-find-bar__row[hidden] {
   display: none;
 }
 
 .stilo-find-bar__input {
   box-sizing: border-box;
-  width: 240px;
-  max-width: 100%;
+  width: 200px;
+  min-width: 0;
+  flex: 1 1 auto;
   padding: 4px 8px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
@@ -805,6 +844,7 @@
 
 .stilo-find-bar__button--text {
   padding: 0 10px;
+  white-space: nowrap;
   border: 1px solid var(--stilo-color-border);
   background: var(--stilo-color-bg);
 }

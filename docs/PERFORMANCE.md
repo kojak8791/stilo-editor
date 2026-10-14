@@ -69,11 +69,14 @@ under 16 ms fits in one frame of a 60 Hz screen.
 - **Top-level changes.** When a top-level block changes, ProseMirror compares the list of all
   top-level blocks, so moving a block in a huge flat document costs more than typing in it.
 - **Find and replace.** Typing with a search open costs little more than without it: only the
-  edited paragraph is searched again. Starting a search reads the whole document once (about
-  0.1 s at 50,000 paragraphs), and at most 1,000 matches are highlighted. *Replace all* collects
+  edited paragraph is searched again. Starting a search reads the whole document once and at
+  most 1,000 matches are highlighted: at 50,000 paragraphs, showing or clearing the highlights
+  takes 0.1–0.4 s, mostly ProseMirror redrawing them, and going to the next match about 70 ms.
+  At 10,000 paragraphs every step stays under 70 ms. *Replace all* collects
   every match: with hundreds of thousands of matches it is slow (not measured).
-- **Word count.** Counting reads the whole document, so the status bar counts half a second
-  after the last change, never on a keystroke.
+- **Word count.** The first count reads the whole document (55 ms at 10,000 paragraphs); later
+  counts read only the changed blocks. The status bar counts half a second after the last
+  change, never on a keystroke.
 - **One browser, one machine.** Budgets are set for Chromium on the reference PC; Firefox and
   WebKit are measured for information later.
 

@@ -871,9 +871,10 @@ for every `kind: 'iconMenu'` item; the menu is mounted in the toolbar (it scroll
 ### 5.7 Find bar (T-043)
 
 `createFindBar(editor, { container, messages })` (internal), created by the toolbar when the
-`Search` extension is loaded and appended to the toolbar `container` after the toolbar element:
-it sits under the toolbar and, with `sticky`, stays at the top with it. Not a popover: it stays
-open while the user edits the text.
+`Search` extension is loaded and appended to the toolbar `container` after the toolbar element,
+which gets the class `stilo-find-bar-host`. It floats at the top right just under the toolbar,
+over the content (the content does not move), and with `sticky` stays at the top with the
+toolbar. Not a popover: it stays open while the user edits the text.
 
 ```html
 <div class="stilo-find-bar" role="search" aria-label="Find and replace" hidden>
@@ -1153,11 +1154,17 @@ Layout:
   primary *Apply* button.
 - Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
   open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
-- Find bar: toolbar background, a 1px `--stilo-color-separator` line on top, `padding: 4px 8px`,
-  two wrapping rows with `gap: 4px`; 240px fields with border and radius; the count in
-  `--stilo-color-muted` at `0.9em`, at least `7em` wide so the buttons do not move; 28px icon
-  buttons with toolbar colors, a pressed toggle in `--stilo-color-active`; *Replace* and
-  *Replace all* with border. `[hidden]` is `display: none` on the bar and its rows.
+- Find bar: a floating panel, `position: absolute` 4px under the container (`top: calc(100% +
+  4px)`, `right: 8px`, at most the container width less 16px), `--stilo-z-popover`, with the
+  popover look (background, border, radius, `--stilo-popover-shadow`), `padding: 6px 8px`, two
+  rows with `gap: 4px` that never wrap (the fields shrink). The container is its positioned ancestor: sticky with
+  `sticky`, otherwise `.stilo-find-bar-host` makes it `position: relative`. It slides in from
+  6px above with a fade (0.15 s, `@starting-style` and `display` with `allow-discrete`, pure
+  CSS: older browsers show it at once), none with `prefers-reduced-motion: reduce`. Fields
+  200px wide (they shrink first), border and radius; the count in `--stilo-color-muted` at
+  `0.9em`, at least `7em` wide so the buttons do not move; 28px icon buttons with toolbar
+  colors, a pressed toggle in `--stilo-color-active`; *Replace* and *Replace all* with border.
+  `[hidden]` is `display: none` on the bar and its rows.
 - Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
   corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
 - Search matches (`content.css`): `.stilo-search-match` background

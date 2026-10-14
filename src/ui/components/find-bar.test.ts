@@ -215,8 +215,10 @@ describe('closing', () => {
 
   it('destroying the toolbar removes the bar', () => {
     const { toolbar, container } = setup('<p>cat</p>');
+    expect(container.classList.contains('stilo-find-bar-host')).toBe(true);
     toolbar.destroy();
     expect(container.querySelector('.stilo-find-bar')).toBeNull();
+    expect(container.classList.contains('stilo-find-bar-host')).toBe(false);
   });
 });
 

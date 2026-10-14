@@ -162,8 +162,8 @@ selection is not one). The matches have the class `stilo-search-match`, the sele
 
 `getWordCount(editor)` returns `{ words, characters }` for the whole document: words are runs of
 non-space characters with at least one letter or digit; characters include spaces, not line and
-paragraph breaks. It reads the whole document: call it on demand or after a pause, not on every
-change.
+paragraph breaks. The first call reads the whole document, later calls only the blocks that
+changed: still, call it on demand or after a pause, not on every change.
 
 ## 4. Extensions
 

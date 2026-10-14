@@ -46,7 +46,11 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
   is inserted literally, with the marks shared by the whole match. The `Search` extension
   (`src/extensions/search/`) has its own plugin and commands:
   - setting a query scans the document once and stops at `maxMatches` highlights (default
-    1,000); the count then reads `1000+`;
+    1,000); the count then reads `1000+`. The scan goes one top-level block at a time: a block
+    whose text does not contain the searched text is skipped, the others are searched with
+    `SearchQuery.findNext` as the document of their own `EditorState`, so the scan stays
+    linear (on the whole document `findNext` walks the blocks from the first one at every
+    call);
   - a transaction that changes the document rescans only the textblocks it touched, and maps the
     other highlights (`DecorationSet.map`); a selection change only checks whether the selection
     is a match;
@@ -71,4 +75,8 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
 - `npm run bench` measures the search in Chromium, rendering included (informative metrics,
   no budget): setting a frequent search (1,000+ matches) 35 ms at 10,000 paragraphs and 116 ms
   at 50,000; a rare phrase 21 ms and 92 ms; typing in the middle with the frequent search
-  active, p95 3.5 ms and 17.9 ms.
+  active, p95 3.5 ms and 17.9 ms. Measured right after loading (colder), 50,000 paragraphs
+  take 115–360 ms to set a search and about 230 ms to clear it, 70 ms per next match: most of
+  it is ProseMirror redrawing the highlights, which compares every top-level block when the
+  decorations change. It is not moved to a Web Worker: the redraw stays on the main thread,
+  and a worker would need its own copy of the document.

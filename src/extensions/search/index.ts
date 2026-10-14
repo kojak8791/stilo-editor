@@ -1,7 +1,8 @@
+import type { Node } from 'prosemirror-model';
 import { SearchQuery } from 'prosemirror-search';
 import {
   type Command,
-  type EditorState,
+  EditorState,
   Plugin,
   PluginKey,
   TextSelection,
@@ -83,15 +84,36 @@ const EMPTY: SearchState = {
   reveal: false,
 };
 
-/** Finds up to `max` matches between `from` and `to`. */
-function scan(state: EditorState, query: SearchQuery, range: Range, max: number): Decoration[] {
+/** Whether `block` may hold a match: its text contains the searched text. */
+function mayMatch(block: Node, query: SearchQuery): boolean {
+  const text = block.textContent;
+  return query.caseSensitive
+    ? text.includes(query.search)
+    : text.toLowerCase().includes(query.search.toLowerCase());
+}
+
+/**
+ * Finds up to `max` matches between `from` and `to` of `doc`, one top-level block at a time.
+ * `findNext` walks the top-level blocks from the first one at every call: on the whole document
+ * that is quadratic with many blocks, so each block that may match is searched as the document
+ * of its own state.
+ */
+function scan(doc: Node, query: SearchQuery, range: Range, max: number): Decoration[] {
   const found: Decoration[] = [];
-  for (let pos = range.from; found.length < max; ) {
-    const match = query.findNext(state, pos, range.to);
-    if (!match) break;
-    found.push(Decoration.inline(match.from, match.to, { class: MATCH_CLASS }));
-    pos = Math.max(match.to, pos + 1);
-  }
+  doc.forEach((block, offset) => {
+    const start = offset + 1;
+    const from = Math.max(0, range.from - start);
+    const to = Math.min(block.content.size, range.to - start);
+    if (found.length >= max || from > to || !mayMatch(block, query)) return;
+    const state = EditorState.create({ doc: block });
+    for (let pos = from; found.length < max; ) {
+      const match = query.findNext(state, pos, to);
+      if (!match) break;
+      const deco = { class: MATCH_CLASS };
+      found.push(Decoration.inline(start + match.from, start + match.to, deco));
+      pos = Math.max(match.to, pos + 1);
+    }
+  });
   return found;
 }
 
@@ -142,7 +164,7 @@ function update(prev: SearchState, tr: Transaction, state: EditorState, max: num
   // Past the last highlight of a limited search the matches are not highlighted: keep it so.
   if (range && !(prev.limited && range.from > last)) {
     const matches = next.matches.remove(next.matches.find(range.from, range.to));
-    const found = scan(state, query, range, max + 1);
+    const found = scan(state.doc, query, range, max + 1);
     const limited = prev.limited && range.to < tr.doc.content.size;
     next = capMatches({ ...next, matches: matches.add(tr.doc, found), limited }, max);
   }
@@ -152,7 +174,7 @@ function update(prev: SearchState, tr: Transaction, state: EditorState, max: num
 /** A fresh search for `query`: one scan of the document, up to `max` highlights. */
 function start(state: EditorState, query: SearchQuery, max: number): SearchState {
   if (!query.valid) return EMPTY;
-  const found = scan(state, query, { from: 0, to: state.doc.content.size }, max + 1);
+  const found = scan(state.doc, query, { from: 0, to: state.doc.content.size }, max + 1);
   return {
     query,
     matches: DecorationSet.create(state.doc, found.slice(0, max)),

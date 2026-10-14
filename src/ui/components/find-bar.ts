@@ -93,6 +93,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
   replaceRow.append(replaceField, replaceOne, replaceAll);
   element.append(findRow, replaceRow);
   container.append(element);
+  container.classList.add('stilo-find-bar-host');
 
   let timer = 0;
   let searched = '';
@@ -231,6 +232,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
       element.removeEventListener('click', onClick);
       editor.off('transaction', onTransaction);
       element.remove();
+      container.classList.remove('stilo-find-bar-host');
     },
   };
 }
