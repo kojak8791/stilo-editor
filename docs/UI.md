@@ -1016,7 +1016,7 @@ F-805.
   above / below, delete row; insert column left / right, delete column; merge cells, split cell;
   header row, header column (`menuitemcheckbox`, checked from `getTableHeaders`); delete table.
   Each item runs the command of the same name (`toggleHeaderRow`, `toggleHeaderColumn` for the
-  two toggles) and is `aria-disabled` when its `.can()` is false. Opening focuses the first
+  two toggles) and is `aria-disabled` when its `.can()` is false (in a table of one row, *Delete row* is disabled: *Delete table* removes it). Opening focuses the first
   enabled item; `ArrowDown` / `ArrowUp` (wrapping), `Home` / `End` move over the enabled ones;
   `click`, `Enter` or `Space` run it, close and focus the editor; `Tab` closes.
 - **Closing**: `Escape` closes and focuses the editor; pointer down outside closes without moving

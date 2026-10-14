@@ -109,6 +109,14 @@ describe('table menu: operations', () => {
     expect(item('toggleHeaderColumn').getAttribute('aria-checked')).toBe('false');
   });
 
+  it('offers only "Delete table" to delete a table of one row and one column', () => {
+    const { button, item } = setup('<table><tr><td>a|</td></tr></table>');
+    button.click();
+    expect(item('deleteRow').getAttribute('aria-disabled')).toBe('true');
+    expect(item('deleteColumn').getAttribute('aria-disabled')).toBe('true');
+    expect(item('deleteTable').hasAttribute('aria-disabled')).toBe(false);
+  });
+
   it('runs an operation on click and closes', () => {
     const { editor, button, menu, item } = setup(TABLE);
     button.click();

@@ -35,13 +35,13 @@ declare module '../../core/types' {
     addRowBefore: () => Command;
     /** Adds a row below the selected cells. */
     addRowAfter: () => Command;
-    /** Deletes the rows of the selected cells. */
+    /** Deletes the rows of the selected cells; `false` when they are all the rows. */
     deleteRow: () => Command;
     /** Adds a column left of the selected cells. */
     addColumnBefore: () => Command;
     /** Adds a column right of the selected cells. */
     addColumnAfter: () => Command;
-    /** Deletes the columns of the selected cells. */
+    /** Deletes the columns of the selected cells; `false` when they are all the columns. */
     deleteColumn: () => Command;
     /** Merges the selected cells into one (a rectangle of at least two cells). */
     mergeCells: () => Command;
@@ -204,6 +204,19 @@ function inTable(command: Command): Command {
   };
 }
 
+/**
+ * `deleteRow` or `deleteColumn`, refused when the selection covers every row / column: that is
+ * `deleteTable`. The library returns `true` from `.can()` there and does nothing when run.
+ */
+function deleteSome(axis: 'row' | 'column', command: Command): Command {
+  return (state, dispatch) => {
+    if (!isInTable(state)) return false;
+    const { top, bottom, left, right, map } = selectedRect(state);
+    const all = axis === 'row' ? bottom - top === map.height : right - left === map.width;
+    return !all && command(state, dispatch);
+  };
+}
+
 /** Whether `doc` contains a table, without entering textblocks. */
 function hasTable(state: EditorState): boolean {
   let found = false;
@@ -330,10 +343,10 @@ export const Table = defineExtension({
       deleteTable: () => deleteTable,
       addRowBefore: () => inTable(addRowBefore),
       addRowAfter: () => inTable(addRowAfter),
-      deleteRow: () => inTable(deleteRow),
+      deleteRow: () => inTable(deleteSome('row', deleteRow)),
       addColumnBefore: () => inTable(addColumnBefore),
       addColumnAfter: () => inTable(addColumnAfter),
-      deleteColumn: () => inTable(deleteColumn),
+      deleteColumn: () => inTable(deleteSome('column', deleteColumn)),
       mergeCells: () => inTable(mergeCells),
       splitCell: () => inTable(splitCell),
       toggleHeaderRow: () => inTable(toggleHeader('row')),

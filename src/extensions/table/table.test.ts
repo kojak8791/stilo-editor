@@ -208,6 +208,23 @@ describe('Table: row and column commands', () => {
     );
   });
 
+  it.each([
+    ['deleteRow', '<table><tr><td>a|</td><td>b</td></tr></table>'],
+    ['deleteColumn', '<table><tr><td>a|</td></tr><tr><td>b</td></tr></table>'],
+  ] as const)('%s refuses to delete every row or column', (command, html) => {
+    const editor = createTestEditor({ html });
+    expect(editor.commands[command].can()).toBe(false);
+    expect(editor.commands[command]()).toBe(false);
+    expect(editor.commands.deleteTable.can()).toBe(true);
+  });
+
+  it('deleteRow refuses when every row is selected', () => {
+    const editor = createTestEditor({ html });
+    selectCells(editor, 0, 3);
+    expect(editor.commands.deleteRow.can()).toBe(false);
+    expect(editor.commands.deleteColumn.can()).toBe(false);
+  });
+
   it('deletes the table', () => {
     const editor = createTestEditor({ html: `<p>x</p>${html}<p>y</p>` });
     expect(editor.commands.deleteTable()).toBe(true);
