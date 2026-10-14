@@ -85,6 +85,7 @@ column is what you type to get the format as you write.
 | **Tables** | | | |
 | Insert a table | | | Toolbar grid up to 10 × 8, with or without a header row |
 | Rows, columns, cells | | | With the cursor in a table, the same button opens: insert or delete rows and columns, merge and split cells, header row and column, delete table |
+| Table handles | | | Handles on the row and column under the mouse select them and open their menu (insert, delete); a corner handle opens merge, split and delete table |
 | Move between cells | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | <kbd>Tab</kbd> in the last cell adds a row |
 | Select cells | | | Drag across cells |
 | Resize a column | | | Drag the border of a column; the width is kept in the HTML |

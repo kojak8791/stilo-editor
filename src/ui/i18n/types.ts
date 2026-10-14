@@ -116,6 +116,8 @@ export type MessageKey =
   | 'toolbar.table'
   | 'table.insert'
   | 'table.size'
+  | 'table.row'
+  | 'table.column'
   | 'table.headerRow'
   | 'table.headerColumn'
   | 'table.addRowBefore'

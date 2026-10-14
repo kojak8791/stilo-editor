@@ -138,7 +138,7 @@ whether it is available.
 | `Blockquote` | `setBlockquote()`, `unsetBlockquote()`, `toggleBlockquote()` |
 | `CodeBlock` | `setCodeBlock({ language? })`: turns the selected blocks into one code block, a line each, or changes the language of the code block; `language` is letters, digits, `_` and `-` (`'js'`, `'c-sharp'`), `false` otherwise. `unsetCodeBlock()`: a paragraph per line. `toggleCodeBlock({ language? })` |
 | `HorizontalRule` | `setHorizontalRule()` |
-| `Table` | `insertTable({ rows?, cols?, withHeaderRow? })`: a table in place of the selection (3 × 3 with a header row by default), the cursor in the first cell; `false` inside a table, for counts that are not whole numbers ≥ 1, or where a table cannot go (a list item). `addRowBefore()`, `addRowAfter()`, `deleteRow()`, `addColumnBefore()`, `addColumnAfter()`, `deleteColumn()`: around the selected cells; delete is `false` when it would remove every row or column (use `deleteTable()`). `mergeCells()`: the selected rectangle of cells (drag across them). `splitCell()`: a merged cell. `toggleHeaderRow()`, `toggleHeaderColumn()`: the first row / column becomes header cells (`<th>`), or back. `deleteTable()`. `goToNextCell()` (adds a row in the last cell), `goToPreviousCell()` |
+| `Table` | `insertTable({ rows?, cols?, withHeaderRow? })`: a table in place of the selection (3 × 3 with a header row by default), the cursor in the first cell; `false` inside a table, for counts that are not whole numbers ≥ 1, or where a table cannot go (a list item). `addRowBefore()`, `addRowAfter()`, `deleteRow()`, `addColumnBefore()`, `addColumnAfter()`, `deleteColumn()`: around the selected cells; delete is `false` when it would remove every row or column (use `deleteTable()`). `mergeCells()`: the selected rectangle of cells (drag across them). `splitCell()`: a merged cell. `selectRow(pos?)`, `selectColumn(pos?)`, `selectTable(pos?)`: select the cells of the row, the column or the table of the cell around `pos` (default: the selection); `false` outside a table. `toggleHeaderRow()`, `toggleHeaderColumn()`: the first row / column becomes header cells (`<th>`), or back. `deleteTable()`. `goToNextCell()` (adds a row in the last cell), `goToPreviousCell()` |
 | `HardBreak` | `setHardBreak()` |
 | `BulletList` | `toggleBulletList()` |
 | `OrderedList` | `toggleOrderedList()` |
@@ -276,7 +276,10 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 
 The `table` button opens a grid to insert a table (with or without a header row); with the
 cursor in a table it opens the table operations instead: rows, columns, merge and split,
-header row and column, delete table.
+header row and column, delete table. With the `Table` extension the toolbar also shows handles
+next to the table: on the row and the column of the cell under the mouse (or with the cursor)
+and at the corner of the table. A handle selects its row or column and opens its menu (insert,
+delete); the corner opens merge, split and delete table.
 
 The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar, a panel
 floating under the toolbar (`Search` extension); the button also closes it, and the popovers of

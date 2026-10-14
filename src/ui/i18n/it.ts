@@ -118,6 +118,8 @@ export const it: Messages = {
   'toolbar.table': 'Tabella',
   'table.insert': 'Inserisci tabella',
   'table.size': '{columns} × {rows}',
+  'table.row': 'Riga',
+  'table.column': 'Colonna',
   'table.headerRow': 'Riga di intestazione',
   'table.headerColumn': 'Colonna di intestazione',
   'table.addRowBefore': 'Inserisci riga sopra',

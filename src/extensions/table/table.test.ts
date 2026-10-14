@@ -272,6 +272,68 @@ describe('Table: merge and split', () => {
   });
 });
 
+describe('Table: select row, column, table', () => {
+  const html = '<p>x</p><table><tr><td>a</td><td>b|</td></tr><tr><td>c</td><td>d</td></tr></table>';
+
+  /** The text of the selected cells. */
+  function selected(editor: Editor): string {
+    const { selection } = editor.state;
+    if (!(selection instanceof CellSelection)) return '';
+    const texts: string[] = [];
+    selection.forEachCell((cell) => texts.push(cell.textContent));
+    return texts.join(',');
+  }
+
+  /** The position inside the cell holding `text`. */
+  function cellPos(editor: Editor, text: string): number {
+    let found = -1;
+    editor.state.doc.descendants((node, pos) => {
+      if (found < 0 && node.type.spec.tableRole === 'cell' && node.textContent === text)
+        found = pos + 1;
+      return found < 0;
+    });
+    return found;
+  }
+
+  it.each([
+    ['selectRow', 'a,b'],
+    ['selectColumn', 'b,d'],
+    ['selectTable', 'a,b,c,d'],
+  ] as const)('%s selects around the selection', (command, cells) => {
+    const editor = createTestEditor({ html });
+    expect(editor.commands[command]()).toBe(true);
+    expect(selected(editor)).toBe(cells);
+  });
+
+  it.each([
+    ['selectRow', 'c,d'],
+    ['selectColumn', 'a,c'],
+    ['selectTable', 'a,b,c,d'],
+  ] as const)('%s selects around a position', (command, cells) => {
+    const editor = createTestEditor({ html });
+    expect(editor.commands[command](cellPos(editor, 'c'))).toBe(true);
+    expect(selected(editor)).toBe(cells);
+  });
+
+  it('selects every row a merged cell spans', () => {
+    const editor = createTestEditor({
+      html: T('<tr><td rowspan="2">a</td><td>b</td></tr><tr><td>c|</td></tr>'),
+    });
+    editor.commands.selectRow(cellPos(editor, 'a'));
+    expect(selected(editor)).toBe('a,b,c');
+  });
+
+  it.each(['selectRow', 'selectColumn', 'selectTable'] as const)(
+    '%s is false outside a table or at an invalid position',
+    (command) => {
+      const editor = createTestEditor({ html: `<p>x|</p>${T('<tr><td>a</td></tr>')}` });
+      expect(editor.commands[command]()).toBe(false);
+      expect(editor.commands[command](-1)).toBe(false);
+      expect(editor.commands[command](1000)).toBe(false);
+    },
+  );
+});
+
 describe('Table: header row and column', () => {
   it('toggles the header row and the header column', () => {
     const editor = createTestEditor({

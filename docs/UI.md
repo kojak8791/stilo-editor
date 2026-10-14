@@ -45,6 +45,8 @@ src/ui/
 │   ├── icon-menu.ts         createIconMenu: icon options in a row (T-039)
 │   ├── find-bar.ts          createFindBar: find and replace under the toolbar (T-043)
 │   ├── table-menu.ts        createTableMenu: insert grid and table operations (T-045)
+│   ├── table-actions.ts     createTableActions: a menu of table operations (T-049)
+│   ├── table-handles.ts     createTableHandles: row, column and corner handles (T-049)
 │   └── status-bar.ts        createStatusBar: word and character count (T-043)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
@@ -362,6 +364,8 @@ no functions.
 | `toolbar.table` | Table | Tabella |
 | `table.insert` | Insert table | Inserisci tabella |
 | `table.size` | {columns} × {rows} | {columns} × {rows} |
+| `table.row` | Row | Riga |
+| `table.column` | Column | Colonna |
 | `table.headerRow` | Header row | Riga di intestazione |
 | `table.headerColumn` | Header column | Colonna di intestazione |
 | `table.addRowBefore` | Insert row above | Inserisci riga sopra |
@@ -520,8 +524,9 @@ extension).
 - `Mod-k` in the editor (`metaKey` on Mac, `ctrlKey` elsewhere, no `Alt`/`Shift`, key `k`),
   when the `Link` extension is present: `preventDefault()`, then open the link popover (§5.1).
   The toolbar owns the link popover and the link bubble (§5.2) even when the `link` button is
-  not in its items. Both are mounted in the parent of `view.dom` (the element given to the
-  `Editor`), so that they scroll with the content.
+  not in its items, and the table handles (§5.10) when the `Table` extension is present, even
+  without the `table` button. They are mounted in the parent of `view.dom` (the element given
+  to the `Editor`), so that they scroll with the content.
 
 ### 4.4 State refresh
 
@@ -1032,8 +1037,56 @@ F-805.
   `click`, `Enter` or `Space` run it, close and focus the editor; `Tab` closes.
 - **Closing**: `Escape` closes and focuses the editor; pointer down outside closes without moving
   the focus. `toolbar.destroy()` removes it.
-- Hover handles on rows and columns and a corner menu over the table are planned (T-049); this
-  menu stays as the keyboard path to every operation.
+- The table handles (§5.10) offer the same operations with the mouse; this menu is the
+  keyboard path to all of them. Its operations panel is `createTableActions` (internal,
+  `table-actions.ts`), shared with the handle menus: items, `aria-disabled`, keys, running.
+
+### 5.10 Table handles (T-049)
+
+`createTableHandles(editor, { container, messages })` (internal), created by the toolbar when
+the `Table` extension is present (`'selectRow' in editor.commands`), `container` the parent of
+`view.dom`. Three buttons over the editor, not inside the table: the table wrapper scrolls
+sideways and clips what overflows it. SPEC F-805.
+
+```html
+<button type="button" class="stilo-table-handle stilo-table-handle--row" tabindex="-1"
+  title="Row" aria-label="Row" aria-haspopup="menu" aria-expanded="false">…GripVertical…</button>
+<button type="button" class="stilo-table-handle stilo-table-handle--column" tabindex="-1"
+  title="Column" aria-label="Column" aria-haspopup="menu" aria-expanded="false">
+  …GripHorizontal…</button>
+<button type="button" class="stilo-table-handle stilo-table-handle--table" tabindex="-1"
+  title="Table" aria-label="Table" aria-haspopup="menu" aria-expanded="false">…Grip…</button>
+<div class="stilo-table-menu__actions stilo-table-handle-menu stilo-popover" role="menu"
+  aria-label="Row" hidden>
+  <div class="stilo-dropdown__option stilo-table-menu__item--addRowBefore" role="menuitem"
+    tabindex="-1">Insert row above</div>
+  …
+</div>
+```
+
+- **Which cell**: the cell (`td`, `th`) under the mouse (`mousemove` on the container); when the
+  mouse leaves a cell for something else, the handles stay while it is within 32px of the table
+  (`NEAR`: the way to the handles), then go to the cell holding the head of the selection while
+  the editor has the focus (`view.domAtPos`), or hide. Also hidden in a read-only editor and
+  when the mouse leaves the container. Refreshed on `mousemove`, `mouseleave` and the
+  `transaction`, `focus` and `blur` events.
+- **Where** (Floating UI, `autoUpdate` on the cell): the row handle left of the table, centered
+  on the cell's rows; the column handle above the table, centered on the cell's columns; the
+  table handle at the corner, left of the column handles and above the row handles; 4px from
+  the table (`GAP`). The row and column handles hide (`visibility: hidden`, `hide` middleware)
+  when their cell is scrolled out of the table wrapper; the row and table handles stay at the
+  visible left edge of a table that scrolls sideways.
+- **Click**: `mousedown` is prevented (the editor keeps the focus and the selection). The row
+  handle runs `selectRow(pos)`, the column handle `selectColumn(pos)` (`pos` from
+  `view.posAtDOM(cell, 0)`); the table handle keeps a selection already inside its table (cells
+  to merge), otherwise runs `selectTable(pos)`. Then its menu opens under it, the first enabled
+  item focused; a second click closes it and focuses the editor. While a menu is open the
+  handles do not move.
+- **Menus** (`createTableActions`): row: insert row above, below; delete row. Column: insert
+  column left, right; delete column. Table: merge cells, split cell; delete table. Items,
+  `aria-disabled`, keys and closing as the operations of the table menu (§5.9).
+- Not in the tab order (`tabindex="-1"`): the keyboard path is the table menu of the toolbar.
+- `toolbar.destroy()` removes the handles and their menus.
 
 ## 6. Dropdown and heading dropdown (T-014)
 
@@ -1279,6 +1332,10 @@ Layout:
   centered in `--stilo-color-muted`, the checkbox row. Operations: the dropdown option look,
   at least 200px wide, 1px `--stilo-color-separator` lines between the groups; a header toggle
   shows `✓` on the right when checked (no active background).
+- Table handles: 18px buttons, 1px `--stilo-color-border` border, radius, on
+  `--stilo-color-bg`, icon 14px in `--stilo-color-muted`; on hover and while the menu is open,
+  border and icon in `--stilo-color-focus`. `z-index: --stilo-z-popover`. The menus use the
+  font of the UI and the look of the table menu operations.
 - Tables (`content.css`): the base CSS of `prosemirror-tables` (wrapper scrolling sideways,
   `table-layout: fixed`, resize handle in `--stilo-color-focus`, selected cells tinted with
   `--stilo-color-selected-cell`, default `rgb(9 105 218 / 0.12)`), cells with a 1px

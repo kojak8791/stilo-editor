@@ -5,6 +5,8 @@ import {
   addColumnBefore,
   addRowAfter,
   addRowBefore,
+  CellSelection,
+  cellAround,
   columnResizing,
   deleteColumn,
   deleteRow,
@@ -15,6 +17,7 @@ import {
   mergeCells,
   selectedRect,
   splitCell,
+  TableMap,
   tableEditing,
   toggleHeader,
 } from 'prosemirror-tables';
@@ -51,6 +54,15 @@ declare module '../../core/types' {
     toggleHeaderRow: () => Command;
     /** Turns the first column into header cells (`<th>`), or back. */
     toggleHeaderColumn: () => Command;
+    /**
+     * Selects the cells of the row of the cell around `pos` (default: the selection's head);
+     * `false` outside a table.
+     */
+    selectRow: (pos?: number) => Command;
+    /** Selects the cells of the column of the cell around `pos`, as `selectRow`. */
+    selectColumn: (pos?: number) => Command;
+    /** Selects every cell of the table around `pos`, as `selectRow`. */
+    selectTable: (pos?: number) => Command;
     /** Moves the cursor to the next cell; in the last cell, adds a row first. */
     goToNextCell: () => Command;
     /** Moves the cursor to the previous cell. */
@@ -217,6 +229,28 @@ function deleteSome(axis: 'row' | 'column', command: Command): Command {
   };
 }
 
+/** Selects the row, the column or the table of the cell around `pos` (cell selection). */
+function selectCells(target: 'row' | 'column' | 'table', pos?: number): Command {
+  return (state, dispatch) => {
+    const at = pos ?? state.selection.head;
+    if (at < 0 || at > state.doc.content.size) return false;
+    const $cell = cellAround(state.doc.resolve(at));
+    if (!$cell) return false;
+    if (dispatch) {
+      let selection: CellSelection;
+      if (target === 'row') selection = CellSelection.rowSelection($cell);
+      else if (target === 'column') selection = CellSelection.colSelection($cell);
+      else {
+        const { map } = TableMap.get($cell.node(-1));
+        const start = $cell.start(-1);
+        selection = CellSelection.create(state.doc, start + map[0]!, start + map.at(-1)!);
+      }
+      dispatch(state.tr.setSelection(selection));
+    }
+    return true;
+  };
+}
+
 /** Whether `doc` contains a table, without entering textblocks. */
 function hasTable(state: EditorState): boolean {
   let found = false;
@@ -351,6 +385,9 @@ export const Table = defineExtension({
       splitCell: () => inTable(splitCell),
       toggleHeaderRow: () => inTable(toggleHeader('row')),
       toggleHeaderColumn: () => inTable(toggleHeader('column')),
+      selectRow: (pos?: number) => selectCells('row', pos),
+      selectColumn: (pos?: number) => selectCells('column', pos),
+      selectTable: (pos?: number) => selectCells('table', pos),
       goToNextCell: () => nextCellOrRow,
       goToPreviousCell: () => goToNextCell(-1),
     };

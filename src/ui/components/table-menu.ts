@@ -1,7 +1,7 @@
 import type { Editor } from '../../index';
-import { getTableHeaders } from '../../index';
-import type { MessageKey, Messages } from '../i18n/types';
+import type { Messages } from '../i18n/types';
 import { createPopover } from './popover';
+import { createTableActions, type TableAction } from './table-actions';
 
 /** Options of {@link createTableMenu}. */
 export interface TableMenuOptions {
@@ -26,40 +26,13 @@ export interface TableMenu {
 const GRID_ROWS = 8;
 const GRID_COLUMNS = 10;
 
-type TableAction =
-  | 'addRowBefore'
-  | 'addRowAfter'
-  | 'deleteRow'
-  | 'addColumnBefore'
-  | 'addColumnAfter'
-  | 'deleteColumn'
-  | 'mergeCells'
-  | 'splitCell'
-  | 'toggleHeaderRow'
-  | 'toggleHeaderColumn'
-  | 'deleteTable';
-
-/** The operations, in groups; a header toggle is a `menuitemcheckbox`. */
-const ACTIONS: ReadonlyArray<ReadonlyArray<[TableAction, MessageKey]>> = [
-  [
-    ['addRowBefore', 'table.addRowBefore'],
-    ['addRowAfter', 'table.addRowAfter'],
-    ['deleteRow', 'table.deleteRow'],
-  ],
-  [
-    ['addColumnBefore', 'table.addColumnBefore'],
-    ['addColumnAfter', 'table.addColumnAfter'],
-    ['deleteColumn', 'table.deleteColumn'],
-  ],
-  [
-    ['mergeCells', 'table.mergeCells'],
-    ['splitCell', 'table.splitCell'],
-  ],
-  [
-    ['toggleHeaderRow', 'table.headerRow'],
-    ['toggleHeaderColumn', 'table.headerColumn'],
-  ],
-  [['deleteTable', 'table.deleteTable']],
+/** The operations of the toolbar menu, in groups. */
+const ACTIONS: ReadonlyArray<ReadonlyArray<TableAction>> = [
+  ['addRowBefore', 'addRowAfter', 'deleteRow'],
+  ['addColumnBefore', 'addColumnAfter', 'deleteColumn'],
+  ['mergeCells', 'splitCell'],
+  ['toggleHeaderRow', 'toggleHeaderColumn'],
+  ['deleteTable'],
 ];
 
 /** Creates the table menu (closed), anchored to the toolbar button. */
@@ -103,29 +76,13 @@ export function createTableMenu(editor: Editor, options: TableMenuOptions): Tabl
   picker.append(grid, size, headerLabel);
 
   // Operations
-  const menu = document.createElement('div');
-  menu.className = 'stilo-table-menu__actions';
-  menu.setAttribute('role', 'menu');
-  menu.setAttribute('aria-label', messages['toolbar.table']);
-  const items = new Map<HTMLElement, TableAction>();
-  ACTIONS.forEach((group, index) => {
-    if (index > 0) {
-      const separator = document.createElement('div');
-      separator.className = 'stilo-table-menu__separator';
-      separator.setAttribute('role', 'separator');
-      menu.append(separator);
-    }
-    for (const [action, labelKey] of group) {
-      const item = document.createElement('div');
-      item.className = `stilo-dropdown__option stilo-table-menu__item--${action}`;
-      item.tabIndex = -1;
-      const isToggle = action === 'toggleHeaderRow' || action === 'toggleHeaderColumn';
-      item.setAttribute('role', isToggle ? 'menuitemcheckbox' : 'menuitem');
-      item.textContent = messages[labelKey];
-      items.set(item, action);
-      menu.append(item);
-    }
+  const actions = createTableActions(editor, {
+    groups: ACTIONS,
+    label: messages['toolbar.table'],
+    messages,
+    close: () => popover.close(),
   });
+  const menu = actions.element;
 
   content.append(picker, menu);
 
@@ -169,29 +126,6 @@ export function createTableMenu(editor: Editor, options: TableMenuOptions): Tabl
     editor.commands.insertTable({ rows, cols, withHeaderRow: headerCheckbox.checked });
   }
 
-  const enabledItems = (): HTMLElement[] =>
-    [...items.keys()].filter((item) => item.getAttribute('aria-disabled') !== 'true');
-
-  function refreshItems(): void {
-    const headers = getTableHeaders(editor);
-    for (const [item, action] of items) {
-      const enabled = editor.commands[action].can();
-      if (enabled) item.removeAttribute('aria-disabled');
-      else item.setAttribute('aria-disabled', 'true');
-      if (action === 'toggleHeaderRow') item.setAttribute('aria-checked', String(!!headers?.row));
-      if (action === 'toggleHeaderColumn')
-        item.setAttribute('aria-checked', String(!!headers?.column));
-    }
-  }
-
-  function run(item: HTMLElement): void {
-    const action = items.get(item);
-    if (!action || item.getAttribute('aria-disabled') === 'true') return;
-    popover.close();
-    editor.focus();
-    editor.commands[action]();
-  }
-
   const cellOf = (target: EventTarget | null) =>
     (target as Element).closest<HTMLButtonElement>('.stilo-table-menu__cell');
 
@@ -219,48 +153,9 @@ export function createTableMenu(editor: Editor, options: TableMenuOptions): Tabl
     highlight(rows, columns, true);
   };
 
-  const onMenuClick = (event: MouseEvent): void => {
-    const item = (event.target as Element).closest<HTMLElement>('[role^="menuitem"]');
-    if (item) run(item);
-  };
-
-  const onMenuKeydown = (event: KeyboardEvent): void => {
-    const enabled = enabledItems();
-    const index = enabled.indexOf(event.target as HTMLElement);
-    let next: HTMLElement | undefined;
-    switch (event.key) {
-      case 'ArrowDown':
-        next = enabled[(index + 1) % enabled.length];
-        break;
-      case 'ArrowUp':
-        next = enabled[(index - 1 + enabled.length) % enabled.length];
-        break;
-      case 'Home':
-        next = enabled[0];
-        break;
-      case 'End':
-        next = enabled.at(-1);
-        break;
-      case 'Enter':
-      case ' ':
-        event.preventDefault();
-        run(event.target as HTMLElement);
-        return;
-      case 'Tab':
-        popover.close();
-        return;
-      default:
-        return;
-    }
-    event.preventDefault();
-    next?.focus();
-  };
-
   grid.addEventListener('mouseover', onGridOver);
   grid.addEventListener('click', onGridClick);
   grid.addEventListener('keydown', onGridKeydown);
-  menu.addEventListener('click', onMenuClick);
-  menu.addEventListener('keydown', onMenuKeydown);
 
   function open(): void {
     if (popover.isOpen) return;
@@ -273,10 +168,9 @@ export function createTableMenu(editor: Editor, options: TableMenuOptions): Tabl
     );
     popover.open();
     anchor.setAttribute('aria-expanded', 'true');
-    // The position arrives asynchronously: a scrolling focus would jump to the container top.
     if (inTable) {
-      refreshItems();
-      enabledItems()[0]?.focus({ preventScroll: true });
+      actions.refresh();
+      actions.focusFirst();
     } else {
       highlight(1, 1, true);
     }
@@ -292,8 +186,7 @@ export function createTableMenu(editor: Editor, options: TableMenuOptions): Tabl
     grid.removeEventListener('mouseover', onGridOver);
     grid.removeEventListener('click', onGridClick);
     grid.removeEventListener('keydown', onGridKeydown);
-    menu.removeEventListener('click', onMenuClick);
-    menu.removeEventListener('keydown', onMenuKeydown);
+    actions.destroy();
     popover.destroy();
     anchor.removeAttribute('aria-haspopup');
     anchor.removeAttribute('aria-expanded');

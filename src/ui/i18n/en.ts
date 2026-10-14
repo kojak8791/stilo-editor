@@ -118,6 +118,8 @@ export const en: Messages = {
   'toolbar.table': 'Table',
   'table.insert': 'Insert table',
   'table.size': '{columns} × {rows}',
+  'table.row': 'Row',
+  'table.column': 'Column',
   'table.headerRow': 'Header row',
   'table.headerColumn': 'Header column',
   'table.addRowBefore': 'Insert row above',

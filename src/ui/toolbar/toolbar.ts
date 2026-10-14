@@ -11,6 +11,7 @@ import { createIconMenu, type IconMenu } from '../components/icon-menu';
 import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
+import { createTableHandles } from '../components/table-handles';
 import { createTableMenu } from '../components/table-menu';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
@@ -213,6 +214,11 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         onEdit: () => linkPopover.open(),
       })
     : null;
+  // The table handles float over the editor too: tables clip what overflows them.
+  const tableHandles =
+    'selectRow' in editor.commands
+      ? createTableHandles(editor, { container: editorHost, messages })
+      : null;
   // The character picker hangs from its button and scrolls with the toolbar.
   const charactersButton = element.querySelector<HTMLElement>('[data-item="characters"]');
   const characterPicker = charactersButton
@@ -477,6 +483,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     for (const iconMenu of iconMenus) iconMenu.destroy();
     linkPopover?.destroy();
     linkBubble?.destroy();
+    tableHandles?.destroy();
     characterPicker?.destroy();
     tableMenu?.destroy();
     findBar?.destroy();

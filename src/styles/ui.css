@@ -639,6 +639,46 @@
   visibility: visible;
 }
 
+/* Table handles (T-049): row, column and corner, over the editor */
+.stilo-table-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--stilo-z-popover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: var(--stilo-color-muted);
+  cursor: pointer;
+}
+
+.stilo-table-handle[hidden] {
+  display: none;
+}
+
+.stilo-table-handle:hover,
+.stilo-table-handle[aria-expanded="true"] {
+  border-color: var(--stilo-color-focus);
+  color: var(--stilo-color-focus);
+}
+
+.stilo-table-handle .stilo-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.stilo-table-handle-menu {
+  font-family: var(--stilo-font-family);
+  font-size: var(--stilo-font-size);
+  color: var(--stilo-color-text);
+}
+
 .stilo-table-menu__separator {
   height: 1px;
   margin: 4px 0;
