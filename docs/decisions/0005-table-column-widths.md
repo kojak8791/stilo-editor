@@ -45,7 +45,8 @@ parse rules.
 - **Input**: widths come from `data-colwidth` only, accepted when it lists one positive whole
   number per spanned column (otherwise the cell has no width). The `<colgroup>` is ignored, since
   it is derived from the cells. Widths written only as `<col>` or as cell `width` (Word, Excel,
-  Google Sheets) are not read: paste of tables from spreadsheets is F-509 (M3).
+  Google Sheets) are not read yet: T-047 (paste cleanup) reads them as `colwidth`; paste of tables
+  from spreadsheets is F-509 (M3).
 
 ## Consequences
 
