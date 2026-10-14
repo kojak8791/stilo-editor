@@ -40,6 +40,8 @@ function group(title: string): HTMLElement {
 function button(parent: HTMLElement, label: string, task: () => Promise<void>): void {
   const element = Object.assign(document.createElement('button'), { type: 'button' });
   element.textContent = label;
+  // The editor keeps the focus, so that its selection shows, as with the toolbar.
+  element.addEventListener('mousedown', (event) => event.preventDefault());
   element.addEventListener('click', () => void run(label, task));
   parent.append(element);
 }
@@ -60,6 +62,8 @@ function painted(): Promise<void> {
 async function run(label: string, task: () => Promise<void>): Promise<void> {
   controls.disabled = true;
   status.textContent = `Running: ${label}…`;
+  // A focused editor also draws the selection in the page, as in real use.
+  editor.focus();
   await painted();
   try {
     await task();
