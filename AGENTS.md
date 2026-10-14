@@ -1,8 +1,8 @@
 # AGENTS.md — Rules for contributors and coding agents
 
 Stilo is an HTML5 WYSIWYG editor library built on ProseMirror. These rules apply to anyone who
-changes the code, human or AI agent. The decisions that matter outside a single change
-(dependencies, configuration, file layout, public APIs, HTML output) are written down in
+changes the code, human or AI agent. The development decisions that matter outside a single
+change (dependencies, configuration, file layout, public APIs, HTML output) are written down in
 `docs/`; a change that needs a new decision updates those documents first, or adds an ADR
 (`docs/decisions/`).
 
@@ -49,6 +49,12 @@ The toolchain enforces these. Respect them while you type, not after `npm run ch
   import from `src/ui/`, `lucide` or `@floating-ui/dom`; `src/ui/` imports the core only via
   `src/index.ts`.
 - **Never invent numbers** (measurements, costs): write "unknown".
+- **The repository is public: it holds only what is of public interest.** Code, development
+  decisions, and information useful to users and contributors (project information, pointers to
+  other tools) go in. Internal matters that do not concern the development of the editor (naming,
+  trademarks, competitors, marketing, project strategy) never go into repository files, commit
+  messages or branch names; they stay with the project owner. When in doubt, ask: does a user or
+  a contributor need this?
 
 ## 3. Coding rules
 
