@@ -1,3 +1,4 @@
+import { NodeSelection } from 'prosemirror-state';
 import { CellSelection } from 'prosemirror-tables';
 import { describe, expect, it } from 'vitest';
 import { createTestEditor, getHTMLWithSelection, pressKey } from '../../../tests/helpers';
@@ -103,6 +104,29 @@ describe('Table: irregular tables', () => {
     const editor = createTestEditor();
     editor.setHTML(html, options);
     expect(editor.getHTML()).toBe(fixed);
+  });
+
+  it('fixes a table that a transaction breaks, also when every block changes', () => {
+    const editor = createTestEditor({
+      html: `<p>x</p>${T('<tr><td>a</td><td>b</td></tr><tr><td>c</td><td>d</td></tr>')}<p>y</p>`,
+    });
+    let cell = -1;
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.spec.tableRole === 'cell' && node.textContent === 'd') cell = pos;
+    });
+    const tr = editor.state.tr.delete(cell, cell + editor.state.doc.nodeAt(cell)!.nodeSize);
+    tr.insertText('!', 1).insertText('!', tr.doc.content.size - 1);
+    editor.view.dispatch(tr);
+    expect(editor.getHTML()).toBe(
+      `<p>!x</p>${T('<tr><td>a</td><td>b</td></tr><tr><td>c</td><td></td></tr>')}<p>y!</p>`,
+    );
+  });
+
+  it('turns a selected cell node into a cell selection', () => {
+    const editor = createTestEditor({ html: `<p>x</p>${T('<tr><td>a</td></tr>')}` });
+    const { doc, tr } = editor.state;
+    editor.view.dispatch(tr.setSelection(NodeSelection.create(doc, 5)));
+    expect(editor.state.selection).toBeInstanceOf(CellSelection);
   });
 
   it('gives every cell of a column the width of the column', () => {

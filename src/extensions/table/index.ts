@@ -261,6 +261,36 @@ function hasTable(state: EditorState): boolean {
   return found;
 }
 
+/** Whether the part of `doc` that differs from `old` holds, or lies in, a table to fix. */
+function breaksTable(old: Node, doc: Node): boolean {
+  const start = old.content.findDiffStart(doc.content);
+  if (start === null) return false;
+  const end = Math.max(old.content.findDiffEnd(doc.content)!.b, start);
+  let found = false;
+  doc.nodesBetween(start, end, (node) => {
+    if (node.type.spec.tableRole === 'table' && TableMap.get(node).problems) found = true;
+    return !found && !node.isTextblock;
+  });
+  return found;
+}
+
+/**
+ * `tableEditing`, fixing tables only when a transaction breaks one. Its search for the changed
+ * tables (`changedDescendants`) does not move on in the old document after a block that
+ * differs, so a change to every block costs quadratic time, tables or not: 4.1 s in Chrome for
+ * the text case of 50,000 paragraphs (1 ms with this check). Otherwise it runs with `state` as the old state: no search, the cell
+ * selection is still normalized. `TableMap.get` is cached per node, as the library uses it.
+ */
+function fastTableEditing(): Plugin {
+  const plugin = tableEditing();
+  const append = plugin.spec.appendTransaction!;
+  return new Plugin({
+    ...plugin.spec,
+    appendTransaction: (transactions, old, state) =>
+      append.call(plugin, transactions, breaksTable(old.doc, state.doc) ? old : state, state),
+  });
+}
+
 /**
  * Fixes the irregular tables of a loaded document (missing cells, overlapping spans, column
  * widths that disagree), as `tableEditing` does for the tables a transaction changes: the
@@ -397,5 +427,5 @@ export const Table = defineExtension({
     'Shift-Tab': () => editor.commands.goToPreviousCell(),
   }),
   // Column resizing comes first: tableEditing would otherwise take its mouse events.
-  plugins: () => [columnResizing(), tableEditing(), fixLoadedTables()],
+  plugins: () => [columnResizing(), fastTableEditing(), fixLoadedTables()],
 });
