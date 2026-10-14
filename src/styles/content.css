@@ -139,11 +139,15 @@ li.ProseMirror-selectednode:after {
 }
 
 /* Image in the editor: two side handles, inside the image (a top-level block clips what
-   overflows it, see "Large documents" below), shown while the image is selected. */
+   overflows it, see "Large documents" below), shown while the image is selected. Only a selected
+   image is positioned: a positioned element paints over the caret placed right after it. */
 .stilo-image {
-  position: relative;
   display: inline-block;
   max-width: 100%;
+}
+
+.stilo-image.ProseMirror-selectednode {
+  position: relative;
 }
 
 .stilo-image img {

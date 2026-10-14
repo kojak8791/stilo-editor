@@ -469,7 +469,8 @@ another type is skipped and reported with the `imageRejected` event (`{ editor, 
 'tooLarge' | 'unsupportedType' }`). In the editor, a node view wraps the `<img>` in
 `span.stilo-image` with two side handles (`span.stilo-image__handle--left/right`), inside the
 image because a top-level block clips what overflows it (`content-visibility`, ADR 0003), shown
-by `content.css` while the image is selected and the editor editable. Dragging a handle changes
+by `content.css` while the image is selected and the editor editable. Only a selected image is
+`position: relative`: a positioned element paints over the caret placed right after it. Dragging a handle changes
 the width (at least 32px, at most the editor width) and keeps the aspect ratio; releasing it sets
 `width` and `height` with attribute steps: one undo step, the image stays selected.
 `content.css` gives every content image `max-width: 100%; height: auto`.
