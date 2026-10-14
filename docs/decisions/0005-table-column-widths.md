@@ -1,6 +1,6 @@
 # 0005 — Table column widths in the HTML output
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-14
 
 ## Context
