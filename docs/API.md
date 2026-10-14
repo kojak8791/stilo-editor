@@ -251,9 +251,9 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 
 The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar, a panel
 floating under the toolbar (`Search` extension); the button also closes it, and the popovers of
-the toolbar open over it while the search stays active. It has a find field, result count, previous and next match, match case,
-whole word, replace field, *Replace* and *Replace all*. It searches 350 ms after the last
-keystroke and only from 2 characters; <kbd>Enter</kbd> goes to the next match at once,
+the toolbar open over it while the search stays active. It has a find field, result count,
+previous and next match, match case, whole word, replace field, *Replace* and *Replace all*. It
+searches 350 ms after the last keystroke and only from 2 characters; <kbd>Enter</kbd> goes to the next match at once,
 <kbd>Shift</kbd>+<kbd>Enter</kbd> to the previous one, <kbd>Esc</kbd> closes the bar and clears
 the highlights; the searched text stays in the field for the next time. Outside the editor,
 <kbd>Ctrl</kbd>+<kbd>F</kbd> stays the browser's find.
