@@ -9,6 +9,7 @@ import {
   ListChevronsUpDown,
   ListOrdered,
   Minus,
+  Quote,
   Redo2,
   RemoveFormatting,
   Strikethrough,
@@ -18,7 +19,6 @@ import {
   TextAlignEnd,
   TextAlignJustify,
   TextAlignStart,
-  TextQuote,
   Type,
   Underline,
   Undo2,
@@ -228,7 +228,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
   blockquote: {
     id: 'blockquote',
     kind: 'button',
-    icon: TextQuote,
+    icon: Quote,
     labelKey: 'toolbar.blockquote',
     shortcut: 'Mod-Shift-b',
     run: (e) => {
