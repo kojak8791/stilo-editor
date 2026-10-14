@@ -268,7 +268,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     labelKey: 'toolbar.find',
     shortcut: 'Mod-f',
     run: (_e, toolbar) => {
-      toolbar.openFindBar();
+      toolbar.toggleFindBar();
     },
     isAvailable: (e) => 'setSearch' in e.commands,
   },

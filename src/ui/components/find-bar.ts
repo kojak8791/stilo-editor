@@ -10,6 +10,8 @@ export interface FindBarOptions {
   /** The find bar is appended inside it, after the toolbar. */
   container: HTMLElement;
   messages: Messages;
+  /** The toolbar button that toggles the bar: it gets `aria-expanded`. */
+  button?: HTMLElement | null;
 }
 
 /** The find and replace bar (T-043). */
@@ -20,6 +22,8 @@ export interface FindBar {
   open(): void;
   /** Hides the bar, clears the search and gives the focus back to the editor. */
   close(): void;
+  /** Closes the bar when it is open, otherwise opens it. */
+  toggle(): void;
   destroy(): void;
 }
 
@@ -30,7 +34,7 @@ const MIN_LENGTH = 2;
 
 /** Creates the find bar (hidden). */
 export function createFindBar(editor: Editor, options: FindBarOptions): FindBar {
-  const { container, messages } = options;
+  const { container, messages, button: toggleButton } = options;
   const mac = isMacPlatform();
 
   const element = document.createElement('div');
@@ -38,6 +42,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
   element.setAttribute('role', 'search');
   element.setAttribute('aria-label', messages['toolbar.find']);
   element.hidden = true;
+  toggleButton?.setAttribute('aria-expanded', 'false');
 
   function input(labelKey: MessageKey, modifier: string): HTMLInputElement {
     const field = document.createElement('input');
@@ -151,6 +156,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
   function open(): void {
     const text = selectedText();
     element.hidden = false;
+    toggleButton?.setAttribute('aria-expanded', 'true');
     replaceRow.hidden = !editor.isEditable;
     if (text) findField.value = text;
     findField.focus({ preventScroll: true });
@@ -163,6 +169,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
     clearTimeout(timer);
     timer = 0;
     element.hidden = true;
+    toggleButton?.setAttribute('aria-expanded', 'false');
     searched = '';
     editor.commands.clearSearch();
     editor.focus();
@@ -225,6 +232,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
     },
     open,
     close: hide,
+    toggle: () => (element.hidden ? open() : hide()),
     destroy(): void {
       clearTimeout(timer);
       findField.removeEventListener('input', onFindInput);
@@ -233,6 +241,7 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
       editor.off('transaction', onTransaction);
       element.remove();
       container.classList.remove('stilo-find-bar-host');
+      toggleButton?.removeAttribute('aria-expanded');
     },
   };
 }

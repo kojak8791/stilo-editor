@@ -71,6 +71,22 @@ describe('find button and Mod-f', () => {
     expect(find.value).toBe('');
   });
 
+  it('the button closes an open bar, like Escape, and shows the state with aria-expanded', () => {
+    const { button, bar, find, editor } = setup('<p>cat</p>');
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    button.click();
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    type(find, 'cat');
+    vi.advanceTimersByTime(350);
+    button.click();
+    expect(bar.hidden).toBe(true);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(getSearchResults(editor).count).toBe(0);
+    button.click();
+    expect(find.value).toBe('cat');
+    expect(getSearchResults(editor).count).toBe(1);
+  });
+
   it('Mod-f in the bar selects the find field instead of the browser find', () => {
     const { button, find, replace, modF } = setup('<p>ab</p>');
     button.click();

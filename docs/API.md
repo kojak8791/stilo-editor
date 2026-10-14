@@ -249,12 +249,14 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 `bulletList`, `orderedList`,
 `blockquote`, `horizontalRule`, `characters`, `find`.
 
-The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar under the
-toolbar (`Search` extension): find field, result count, previous and next match, match case,
+The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar, a panel
+floating under the toolbar (`Search` extension); the button also closes it, and the popovers of
+the toolbar open over it while the search stays active. It has a find field, result count, previous and next match, match case,
 whole word, replace field, *Replace* and *Replace all*. It searches 350 ms after the last
 keystroke and only from 2 characters; <kbd>Enter</kbd> goes to the next match at once,
 <kbd>Shift</kbd>+<kbd>Enter</kbd> to the previous one, <kbd>Esc</kbd> closes the bar and clears
-the highlights. Outside the editor, <kbd>Ctrl</kbd>+<kbd>F</kbd> stays the browser's find.
+the highlights; the searched text stays in the field for the next time. Outside the editor,
+<kbd>Ctrl</kbd>+<kbd>F</kbd> stays the browser's find.
 
 ```ts
 createToolbar(editor, {
@@ -323,7 +325,7 @@ createToolbar(editor, {
 | `icon` | A `lucide` icon |
 | `labelKey` | Key of the label in `messages`; a missing key is shown as is |
 | `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
-| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.openFindBar()` the find bar |
+| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar |
 | `isActive(editor)` | Optional: makes it a toggle button and tells when it is pressed |
 | `isEnabled(editor)` | Optional, default always enabled |
 | `isAvailable(editor)` | Optional: `false` hides the button |

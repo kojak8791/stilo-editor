@@ -432,7 +432,7 @@ cyan, blue, purple, pink) in a vivid, a light and a dark row (Tailwind shades 50
 `'insertText' in editor.commands` (the `Text` extension).
 
 `find` (T-043): `icon` `Search`, `labelKey` `toolbar.find`, shortcut `Mod-f`, `run` calls
-`context.openFindBar()` (§5.7), always enabled, `isAvailable` is `'setSearch' in editor.commands`
+`context.toggleFindBar()` (§5.7), always enabled, `isAvailable` is `'setSearch' in editor.commands`
 (the `Search` extension).
 
 ## 4. Toolbar behavior
@@ -904,8 +904,9 @@ toolbar. Not a popover: it stays open while the user edits the text.
 </div>
 ```
 
-- **Opening**: the `find` button and `Mod-f` in the editor (`view.dom`; outside the editor
-  `Mod-f` stays the browser's find). The selected text, when it lies in one textblock, fills the
+- **Opening**: the `find` button (it gets `aria-expanded`, and the active background while the
+  bar is open) and `Mod-f` in the editor (`view.dom`; outside the editor `Mod-f` stays the
+  browser's find). The selected text, when it lies in one textblock, fills the
   find field; the field gets the focus with its text selected and the search runs at once. The
   replace row is hidden in a read-only editor. `Mod-f` inside the bar selects the find field.
 - **Searching** (ADR 0004): typing in the find field searches 350 ms after the last keystroke;
@@ -918,8 +919,11 @@ toolbar. Not a popover: it stays open while the user edits the text.
   next match (`findNext`), `Shift+Enter` the previous one; the focus stays in the field.
   `Enter` in the replace field and *Replace* run `replaceNext(replacement)`; *Replace all* runs
   `replaceAll(replacement)`. Each runs a pending search first.
-- **Closing**: `Escape` anywhere in the bar or the close button: hides the bar, cancels a
-  pending search, runs `clearSearch()` and focuses the editor. `toolbar.destroy()` removes the
+- **Closing**: `Escape` anywhere in the bar, the close button or the `find` button: hides the
+  bar, cancels a pending search, runs `clearSearch()` and focuses the editor. The fields keep
+  their text: reopening searches it again, from the cursor (the last match found). Emptying the
+  find field forgets it. There is no hidden state between open and closed: the popovers of the
+  toolbar open over the bar, which stays open and active under them. `toolbar.destroy()` removes the
   bar.
 
 ### 5.8 Status bar (T-043)
@@ -1155,7 +1159,8 @@ Layout:
 - Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
   open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
 - Find bar: a floating panel, `position: absolute` 4px under the container (`top: calc(100% +
-  4px)`, `right: 8px`, at most the container width less 16px), `--stilo-z-popover`, with the
+  4px)`, `right: 8px`, at most the container width less 16px), `--stilo-z-popover` less 1
+  (the popovers of the toolbar open over it), with the
   popover look (background, border, radius, `--stilo-popover-shadow`), `padding: 6px 8px`, two
   rows with `gap: 4px` that never wrap (the fields shrink). The container is its positioned ancestor: sticky with
   `sticky`, otherwise `.stilo-find-bar-host` makes it `position: relative`. It slides in from

@@ -140,6 +140,11 @@
   background: var(--stilo-color-active);
 }
 
+/* The find button while its bar is open (T-043) */
+.stilo-toolbar__button[data-item="find"][aria-expanded="true"] {
+  background: var(--stilo-color-active);
+}
+
 .stilo-toolbar__button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: default;
@@ -739,7 +744,8 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 8px;
-  z-index: var(--stilo-z-popover);
+  /* Under the popovers of the toolbar (character picker, colors, menus), which open over it. */
+  z-index: calc(var(--stilo-z-popover) - 1);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

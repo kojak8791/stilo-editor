@@ -220,13 +220,16 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const context: ToolbarContext = {
     openLinkPopover: () => linkPopover?.open(),
     toggleCharacterPicker: () => characterPicker?.toggle(),
-    openFindBar: () => findBar?.open(),
+    toggleFindBar: () => findBar?.toggle(),
   };
 
   container.appendChild(element);
-  // The find bar sits under the toolbar, in the same (sticky) container.
+  // The find bar floats under the toolbar, in the same (sticky) container.
+  const findButton = element.querySelector<HTMLElement>('[data-item="find"]');
   const findBar =
-    'setSearch' in editor.commands ? createFindBar(editor, { container, messages }) : null;
+    'setSearch' in editor.commands
+      ? createFindBar(editor, { container, messages, button: findButton })
+      : null;
   // Sticky on the container: a sticky element only moves inside its parent. ProseMirror scrolls
   // the selection into view without knowing that the toolbar covers the top: the scroll margin
   // keeps it below the toolbar (5 is ProseMirror's default margin).
