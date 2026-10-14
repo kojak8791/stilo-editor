@@ -81,6 +81,10 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 
 ## Notes for later milestones
 
+- Find and format: apply a mark (bold, italic, highlight, color, ...) to every match of the
+  search, like "Replace with format" of word processors; possibly also remove it. One step, a
+  top-level block at a time, as `replaceAll` (ADR 0004). To decide: which formats, where the
+  command goes in the find bar.
 - README on the npm page: links to anchors of the README itself (`#large-documents`) do not
   work there (they do on GitHub); links to `docs/` do. Fix with the next `0.1.x` that is
   published for other reasons.
