@@ -1,6 +1,6 @@
 # 0004 — Find and replace with `prosemirror-search`
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-14
 
 ## Context
