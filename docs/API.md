@@ -150,7 +150,7 @@ whether it is available.
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
 | `History` | `undo()`, `redo()` |
 | `MoveBlock` | `moveBlockUp()`, `moveBlockDown()` |
-| `Search` | `setSearch({ text, caseSensitive?, wholeWord? })`: highlights the matches of `text` (taken literally); an empty `text` clears the search. `clearSearch()`. `findNext()`, `findPrevious()`: select the next or previous match, wrapping around; `false` without a search or a match. `replaceNext(replacement)`: replaces the selected match and selects the next one (selects the next match when the selection is not one). `replaceAll(replacement)`: one undoable step; `false` without matches. The replacement text is inserted as is, with the formatting of the match |
+| `Search` | `setSearch({ text, caseSensitive?, wholeWord? })`: highlights the matches of `text` (taken literally); an empty `text` clears the search. `clearSearch()`. `findNext()`, `findPrevious()`: select the next or previous match, wrapping around, and scroll it to the middle of the view when it is not visible (also while the focus is in a find field, where ProseMirror does not scroll); `false` without a search or a match. `replaceNext(replacement)`: replaces the selected match and selects the next one (selects the next match when the selection is not one). `replaceAll(replacement)`: one undoable step; `false` without matches. The replacement text is inserted as is, with the formatting of the match |
 
 `select(from, to?)` and `selectNode(pos)` take ProseMirror document positions.
 

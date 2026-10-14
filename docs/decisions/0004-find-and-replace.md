@@ -51,7 +51,9 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
     other highlights (`DecorationSet.map`); a selection change only checks whether the selection
     is a match;
   - the commands (`findNext`, `findPrevious`, `replaceNext`, `replaceAll`) scan from the
-    selection, once per call.
+    selection, once per call; the first three scroll the selected match to the middle of the
+    view when it is not visible: ProseMirror's `scrollIntoView` does nothing while the DOM
+    selection is outside the editor (the focus in the find field).
 - Queries are literal (`literal: true`, no regular expressions: SPEC F-902 asks for none).
 - The default UI (UI.md) waits 350 ms after the last keystroke in the find field before searching
   (`Enter` searches at once), and searches only from 2 characters.

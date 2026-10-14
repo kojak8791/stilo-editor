@@ -1,6 +1,6 @@
 import type { Mark } from 'prosemirror-model';
 import { EditorState, TextSelection } from 'prosemirror-state';
-import { vi } from 'vitest';
+import { type Mock, vi } from 'vitest';
 import { Editor } from '../../src/core/editor';
 import type { Extension } from '../../src/core/extension';
 import { serializeHTML } from '../../src/core/html/serialize';
@@ -171,4 +171,18 @@ export function mockRenderedFontSizes(rootSize = '16px'): void {
         : (sized?.style.fontSize ?? (element.closest('h1') ? '32px' : '16px'));
     return { fontSize } as CSSStyleDeclaration;
   });
+}
+
+/**
+ * jsdom has no `Element.scrollIntoView`: defines it as a mock and returns it. `Element`
+ * positions stay jsdom's zeros unless `getBoundingClientRect` is mocked too.
+ */
+export function mockScrollIntoView(): Mock<(options?: ScrollIntoViewOptions) => void> {
+  const scrollIntoView = vi.fn<(options?: ScrollIntoViewOptions) => void>();
+  Object.defineProperty(Element.prototype, 'scrollIntoView', {
+    value: scrollIntoView,
+    configurable: true,
+    writable: true,
+  });
+  return scrollIntoView;
 }

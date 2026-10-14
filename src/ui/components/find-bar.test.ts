@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createTestEditor, getHTMLWithSelection } from '../../../tests/helpers';
+import { createTestEditor, getHTMLWithSelection, mockScrollIntoView } from '../../../tests/helpers';
 import { defaultExtensions, getSearchResults } from '../../index';
 import { createToolbar, it as italian } from '../index';
 
@@ -35,6 +35,7 @@ function type(input: HTMLInputElement, value: string): void {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  mockScrollIntoView();
 });
 
 afterEach(() => {

@@ -7,7 +7,7 @@ import {
   TextSelection,
   type Transaction,
 } from 'prosemirror-state';
-import { Decoration, DecorationSet } from 'prosemirror-view';
+import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view';
 import type { Editor } from '../../core/editor';
 import { defineExtension } from '../../core/extension';
 
@@ -65,17 +65,22 @@ interface SearchState {
   limited: boolean;
   /** The selection, when it is exactly a match. */
   current: Range | null;
+  /** The transaction asked to scroll the selected match into view. */
+  reveal: boolean;
 }
 
 const MATCH_CLASS = 'stilo-search-match';
 const CURRENT_CLASS = 'stilo-search-match--current';
 const searchKey = new PluginKey<SearchState>('stiloSearch');
+/** Transaction meta: scroll the selected match into view. */
+const REVEAL_META = 'stiloSearchReveal';
 const NO_QUERY = new SearchQuery({ search: '' });
 const EMPTY: SearchState = {
   query: NO_QUERY,
   matches: DecorationSet.empty,
   limited: false,
   current: null,
+  reveal: false,
 };
 
 /** Finds up to `max` matches between `from` and `to`. */
@@ -153,7 +158,47 @@ function start(state: EditorState, query: SearchQuery, max: number): SearchState
     matches: DecorationSet.create(state.doc, found.slice(0, max)),
     limited: found.length > max,
     current: selectedMatch(state, query),
+    reveal: false,
   };
+}
+
+/** The visible part of the page around `view`: the viewport less the scroll margins. */
+function visibleBounds(view: EditorView): { top: number; bottom: number } {
+  const margin = view.someProp('scrollMargin') ?? 5;
+  const top = typeof margin === 'number' ? margin : margin.top;
+  const bottom = typeof margin === 'number' ? margin : margin.bottom;
+  const bounds = { top, bottom: window.innerHeight - bottom };
+  for (let node = view.dom.parentElement; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY !== 'auto' && overflowY !== 'scroll') continue;
+    const box = node.getBoundingClientRect();
+    bounds.top = Math.max(bounds.top, box.top);
+    bounds.bottom = Math.min(bounds.bottom, box.bottom);
+  }
+  return bounds;
+}
+
+/**
+ * Scrolls the selected match to the middle of the view when it is not visible. ProseMirror's
+ * `scrollIntoView` scrolls only while the DOM selection is in the editor, not while a find field
+ * has the focus.
+ */
+function revealCurrent(view: EditorView): void {
+  const element = view.dom.querySelector(`.${CURRENT_CLASS}`);
+  if (!element) return;
+  const rect = element.getBoundingClientRect();
+  const bounds = visibleBounds(view);
+  if (rect.top >= bounds.top && rect.bottom <= bounds.bottom) return;
+  element.scrollIntoView({ block: 'center', inline: 'nearest' });
+}
+
+/** The next plugin state: `reveal` holds only for the transaction that asked for it. */
+function nextState(tr: Transaction, prev: SearchState, state: EditorState, max: number) {
+  const query = tr.getMeta(searchKey) as SearchQuery | undefined;
+  if (query) return start(state, query, max);
+  if (!prev.query.valid) return prev;
+  if (tr.docChanged) return update(prev, tr, state, max);
+  return tr.selectionSet ? { ...prev, current: selectedMatch(state, prev.query) } : prev;
 }
 
 function searchPlugin(max: number): Plugin<SearchState> {
@@ -162,13 +207,17 @@ function searchPlugin(max: number): Plugin<SearchState> {
     state: {
       init: () => EMPTY,
       apply(tr, prev, _oldState, state) {
-        const query = tr.getMeta(searchKey) as SearchQuery | undefined;
-        if (query) return start(state, query, max);
-        if (!prev.query.valid) return prev;
-        if (tr.docChanged) return update(prev, tr, state, max);
-        return tr.selectionSet ? { ...prev, current: selectedMatch(state, prev.query) } : prev;
+        const next = nextState(tr, prev, state, max);
+        const reveal = tr.getMeta(REVEAL_META) === true;
+        return next.reveal === reveal ? next : { ...next, reveal };
       },
     },
+    view: () => ({
+      update(view, prevState) {
+        const search = searchKey.getState(view.state);
+        if (search?.reveal && search !== searchKey.getState(prevState)) revealCurrent(view);
+      },
+    }),
     props: {
       decorations(state) {
         const { matches, current } = searchKey.getState(state) ?? EMPTY;
@@ -188,9 +237,8 @@ function activeQuery(state: EditorState): SearchQuery | null {
 
 /** Selects `match` and scrolls it into view. */
 function selectMatch(state: EditorState, match: Range, dispatch?: (tr: Transaction) => void) {
-  dispatch?.(
-    state.tr.setSelection(TextSelection.create(state.doc, match.from, match.to)).scrollIntoView(),
-  );
+  const selection = TextSelection.create(state.doc, match.from, match.to);
+  dispatch?.(state.tr.setSelection(selection).scrollIntoView().setMeta(REVEAL_META, true));
   return true;
 }
 
@@ -244,7 +292,7 @@ const replaceNext =
       const selection = target
         ? TextSelection.create(tr.doc, target.from, target.to)
         : TextSelection.create(tr.doc, end);
-      dispatch(tr.setSelection(selection).scrollIntoView());
+      dispatch(tr.setSelection(selection).scrollIntoView().setMeta(REVEAL_META, true));
     }
     return true;
   };

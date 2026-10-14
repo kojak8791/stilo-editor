@@ -1,8 +1,22 @@
-import { describe, expect, it } from 'vitest';
-import { createTestEditor, getHTMLWithSelection, typeText } from '../../../tests/helpers';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  createTestEditor,
+  getHTMLWithSelection,
+  mockScrollIntoView,
+  typeText,
+} from '../../../tests/helpers';
 import type { Editor } from '../../core/editor';
 import { defaultExtensions } from '../default-extensions';
 import { getSearchResults, type SearchTerm } from '.';
+
+beforeEach(() => {
+  mockScrollIntoView();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  document.body.innerHTML = '';
+});
 
 /** The text of each highlighted match, in document order. */
 function highlights(editor: Editor): string[] {
@@ -172,6 +186,45 @@ describe('Search: findNext / findPrevious', () => {
     const editor = search('<p>cat</p>', text);
     expect(editor.commands.findNext()).toBe(false);
     expect(editor.commands.findPrevious.can()).toBe(false);
+  });
+});
+
+describe('Search: scrolling to the selected match', () => {
+  /** Places every element `top` px from the top of the viewport, 20 px high. */
+  function placeAt(top: number): void {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      DOMRect.fromRect({ x: 0, y: top, width: 50, height: 20 }),
+    );
+  }
+
+  it('scrolls a match out of view to the middle, also without the focus', () => {
+    const scroll = mockScrollIntoView();
+    const editor = search('<p>|cat cat</p>', 'cat');
+    document.body.append(editor.view.dom.parentElement!);
+    placeAt(5000);
+    editor.commands.findNext();
+    expect(scroll).toHaveBeenCalledTimes(1);
+    expect(scroll).toHaveBeenCalledWith({ block: 'center', inline: 'nearest' });
+    expect(scroll.mock.contexts[0]).toHaveProperty(
+      'className',
+      'stilo-search-match stilo-search-match--current',
+    );
+    editor.commands.findPrevious();
+    editor.commands.replaceNext('dog');
+    expect(scroll).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not scroll a visible match, nor on other transactions', () => {
+    const scroll = mockScrollIntoView();
+    const editor = search('<p>|cat cat</p>', 'cat');
+    document.body.append(editor.view.dom.parentElement!);
+    placeAt(100);
+    editor.commands.findNext();
+    expect(scroll).not.toHaveBeenCalled();
+    placeAt(5000);
+    editor.commands.setSearch({ text: 'cat' });
+    typeText(editor, 'x');
+    expect(scroll).not.toHaveBeenCalled();
   });
 });
 
