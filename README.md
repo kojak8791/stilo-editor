@@ -95,7 +95,8 @@ column is what you type to get the format as you write.
 | **Editing** | | | |
 | Undo | <kbd>Ctrl</kbd>+<kbd>Z</kbd> | | <kbd>Backspace</kbd> right after a Markdown shortcut undoes it |
 | Redo | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | | |
-| Paste | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | HTML is cleaned up; plain text lines become paragraphs |
+| Paste | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | HTML is cleaned up; plain text lines become paragraphs. From Word and Google Docs the body font, size and color are dropped (text that differs keeps them) and Word lists become real lists; tables keep their column widths |
+| Paste as plain text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> | | Only the text, without formatting |
 | Find and replace | <kbd>Ctrl</kbd>+<kbd>F</kbd> | | A bar under the toolbar: match case, whole word, previous and next match, replace one or all; the matches are counted exactly and the first 1,000 are highlighted; <kbd>Enter</kbd> / <kbd>Shift</kbd>+<kbd>Enter</kbd> go to the next / previous match, <kbd>Esc</kbd> closes it |
 | Word and character count | | | Optional status bar under the editor; also `getWordCount()` in the API |
 

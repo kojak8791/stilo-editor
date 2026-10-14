@@ -244,6 +244,11 @@ ones work.
   first: scripts, event handlers and unsafe URLs are removed, unknown tags are unwrapped and
   their text kept. Links accept `http:`, `https:`, `mailto:`, `tel:`, relative URLs and
   `#fragments`.
+- **Paste** also cleans up what word processors add: from Microsoft Word and Google Docs, the
+  font, size, color and line height of the document's body text are dropped (text that differs
+  keeps them) and Word's list paragraphs become real lists; pasted tables keep the pixel column
+  widths they carry. <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> pastes plain text only.
+  Details: [ARCHITECTURE.md §8](ARCHITECTURE.md#8-input-pipeline).
 - The full contract, element by element: [ARCHITECTURE.md §7](ARCHITECTURE.md#7-html-contract).
 
 ## 6. Default UI (`stilo-editor/ui`)

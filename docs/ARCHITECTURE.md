@@ -144,7 +144,7 @@ stilo-editor/
 │   │       ├── css.ts            CSS allowlist, parse/normalize/build style strings
 │   │       ├── parse.ts          HTML string -> ProseMirror doc
 │   │       ├── serialize.ts      ProseMirror doc -> HTML string
-│   │       └── paste/            Word / Google Docs cleanup (M2)
+│   │       └── paste/            Paste cleanup: Word, Google Docs, table widths
 │   ├── extensions/
 │   │   ├── index.ts              Re-exports all extensions
 │   │   ├── default-extensions/ defaultExtensions() bundle
@@ -567,7 +567,7 @@ For every extension, tests verify: `getHTML()` after `setHTML(getHTML())` is ide
 setHTML(html)           paste (transformPastedHTML)          drop
      │                          │                             │
      │                   inert DOMParser ──► paste cleanup     │
-     │                   (Word / GDocs, M2) ──► string          │
+     │                   (Word, GDocs, tables) ► string         │
      ▼                          ▼                             ▼
                 sanitize()  — DOMPurify, Stilo-owned instance
                                 │
@@ -592,6 +592,35 @@ setHTML(html)           paste (transformPastedHTML)          drop
 `src/core/html/serialize.ts`: `DOMSerializer.fromSchema(schema).serializeFragment()` into a
 container of a detached document (`document.implementation.createHTMLDocument()`), then
 `innerHTML`.
+
+Paste cleanup (`src/core/html/paste/`, F-703, F-704) runs on pasted HTML before the sanitizer, on
+a document parsed with an inert `DOMParser` (no scripts run, no images load):
+
+- **Microsoft Word** (HTML with the `urn:schemas-microsoft-com:office:word` namespace or the
+  `Word.Document` meta): the `<o:p>` paragraph ends are removed; list paragraphs
+  (`mso-list: l0 level1 lfo1`) become `<ul>` / `<ol>` nested by level, one list per run of
+  consecutive list paragraphs. The marker (the `mso-list: Ignore` span) is removed and gives the
+  type: `1.`, `a)`, `iv.` are numbered (a number above 1 gives `start`), anything else is a
+  bullet. Built on the clipboard format of Word for Windows (test fixtures, not verified with
+  Word yet); Word on the web is not recognized.
+- **Google Docs** (a `docs-internal-guid-*` wrapper): a `<br>` between the blocks of the wrapper
+  (an empty paragraph) becomes an empty `<p>`.
+- **Base style**, for both: Word and Google Docs write the font, size, color and line height of
+  the document on every run of text. For each of `font-family`, `font-size`, `color` and
+  `line-height`, the normalized value that covers most of the pasted characters is removed
+  everywhere; the text that differs keeps its value, and when most of the text has no value
+  nothing is removed. `font-size` is also removed inside headings (the level gives the size).
+  Accepted cost: a fragment that is all red, pasted alone, loses its red.
+- **Every paste**: a heading that is the first child of a `<li>` becomes a `<p>` (a list item
+  starts with a paragraph; otherwise the list breaks around it). A table whose cells have no
+  `data-colwidth` gets it from the pixel widths it carries
+  ([ADR 0005](decisions/0005-table-column-widths.md)): its `<col>` elements (`width` attribute,
+  `style="width"`, `span`), else the `width` of the cells that span one column; the column of each
+  cell follows `colspan` and the `rowspan` of the rows above. Other units (`%`, `em`) are not
+  read: those columns stay fluid. `setHTML` reads widths from `data-colwidth` only.
+
+`Mod-Shift-v` pastes the plain text of the clipboard (F-705): ProseMirror's own behavior while
+Shift is held, also when the clipboard has HTML.
 
 Plain-text paste uses ProseMirror's default: every line becomes a paragraph, runs of empty lines
 collapse (so `getText()` pasted back gives the same blocks), whitespace is kept as typed.

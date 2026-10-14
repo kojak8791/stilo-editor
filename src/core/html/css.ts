@@ -70,6 +70,15 @@ export function parseStyle(style: string): Map<string, string> {
 }
 
 /**
+ * Formats declarations (as returned by {@link parseStyle}) as `prop: value` joined with `; `.
+ * Returns `null` when there are none.
+ */
+export function formatStyle(declarations: ReadonlyMap<string, string>): string | null {
+  const parts = [...declarations].map(([property, value]) => `${property}: ${value}`);
+  return parts.length === 0 ? null : parts.join('; ');
+}
+
+/**
  * Normalizes a color value (input is trimmed and lowercased first):
  *
  * - `#rgb` → `#rrggbb`; `#rrggbb` kept (lowercase).

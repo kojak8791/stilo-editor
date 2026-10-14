@@ -150,6 +150,21 @@ describe('paste plain text', () => {
     expect(pasteText(editor, text)).toBe(returns);
     expect(getHTMLWithSelection(editor)).toBe(expected);
   });
+
+  it.each([
+    [false, '<p>x<strong>a</strong></p><p>b|y</p>'],
+    [true, '<p>xa</p><p>b|y</p>'],
+  ])('Mod-Shift-v pastes the plain text of the clipboard (shift: %s)', (shiftKey, expected) => {
+    const editor = createTestEditor({ html: '<p>x|y</p>' });
+    const { dom } = editor.view;
+    dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'V', ctrlKey: true, shiftKey }));
+    const event = new Event('paste', { cancelable: true });
+    const data = { 'text/html': '<p><b>a</b></p><p>b</p>', 'text/plain': 'a\nb' };
+    const getData = (format: string) => data[format as keyof typeof data] ?? '';
+    Object.defineProperty(event, 'clipboardData', { value: { files: [], getData } });
+    dom.dispatchEvent(event);
+    expect(getHTMLWithSelection(editor)).toBe(expected);
+  });
 });
 
 describe('security: XSS vectors', () => {
