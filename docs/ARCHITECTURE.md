@@ -413,7 +413,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
-`Highlight`, `TextAlign`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -428,8 +428,8 @@ configured with `{ <name>: { ...options } }`.
 | Node | Output | Also parsed from | Attributes |
 |---|---|---|---|
 | `doc` | — | — | content `block+` |
-| `paragraph` | `<p>` | `p`, `div` (fallback) | `textAlign` (F-308): `<p style="text-align: center">`, `null` for left |
-| `heading` | `<h1>`…`<h6>` | same | `level` 1–6, `textAlign` as `paragraph` |
+| `paragraph` | `<p>` | `p`, `div` (fallback) | `textAlign` (F-308): `<p style="text-align: center">`, `null` for left; `lineHeight` (F-312): `<p style="line-height: 1.5">`, `null` when unset |
+| `heading` | `<h1>`…`<h6>` | same | `level` 1–6, `textAlign` and `lineHeight` as `paragraph` |
 | `blockquote` | `<blockquote>` | same | content `block+` |
 | `horizontalRule` | `<hr>` | same | — |
 | `hardBreak` | `<br>` | same | inline |
@@ -443,13 +443,17 @@ configured with `{ <name>: { ...options } }`.
 | `image` (M2) | `<img src alt title width height>` | `img[src]` not inside `figure` | inline atom; empty attributes omitted |
 | `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
 
-Text alignment (F-308): the `textAlign` attribute belongs to `paragraph` and `heading`
-(`core/helpers/text-align.ts`), so aligned content keeps its alignment even without the
-`TextAlign` extension, which only adds `setTextAlign(alignment)` and `Mod-Shift-l/e/r/j` (its
-priority 101 puts its keymap before the marks', so `Mod-Shift-e` never falls back to `Mod-e`).
-`setParagraph`, `setHeading` and `toggleHeading` use `setTextblockType`, which keeps the
-alignment when the block type changes; a list item's paragraph with an alignment keeps its `<p>`
-(`compactParagraphs` unwraps only paragraphs without attributes).
+Text alignment (F-308) and line spacing (F-312): the `textAlign` and `lineHeight` attributes
+belong to `paragraph` and `heading` (`core/helpers/block-style.ts`), so content keeps them even
+without the `TextAlign` and `LineHeight` extensions, which only add the commands:
+`setTextAlign(alignment)` with `Mod-Shift-l/e/r/j` (priority 101 puts its keymap before the
+marks', so `Mod-Shift-e` never falls back to `Mod-e`), `setLineHeight(lineHeight)` and
+`unsetLineHeight()` (no shortcut). Both set the attribute on every selected textblock that has it
+(`setTextblockAttr`). A block with neither style parses with the shared default attributes: one
+attribute object per paragraph cost 19 MB of heap at 50k paragraphs. `setParagraph`, `setHeading`
+and `toggleHeading` use `setTextblockType`, which keeps both styles when the block type changes; a
+list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
+without attributes). Output order: `text-align` then `line-height` (§7.3).
 
 ### 7.2 Marks
 
@@ -486,6 +490,7 @@ Allowed CSS properties (anything else is dropped on input):
 | `color` | `textStyle` | See color rule |
 | `background-color` | `highlight` | See color rule |
 | `text-align` | `paragraph`, `heading` | `left\|center\|right\|justify`; `start` → `left`; `left` is the default and is omitted on output |
+| `line-height` | `paragraph`, `heading` | A unitless number `^\d+(\.\d+)?$` or a percentage of one (`115%` → `1.15`), rounded to 2 decimals without trailing zeros; zero, `normal` and lengths (`24px`, `1.5em`) dropped |
 
 Color rule: `#rgb`/`#rrggbb` → lowercase `#rrggbb`; `rgb(r, g, b)` and `rgba(..., 1)` → `#rrggbb`;
 `rgba` with alpha < 1 → `rgba(r, g, b, a)`; a lowercase keyword `^[a-z]{3,20}$` is kept unless it
@@ -498,7 +503,7 @@ Example: `<span style="font-family: 'Times New Roman', serif; font-size: 12pt; c
 
 All parsing/normalization/building of style strings goes through `src/core/html/css.ts`
 (`parseStyle`, `normalizeColor`, `normalizeFontSize`, `normalizeFontFamily`, `normalizeTextAlign`,
-`buildStyle`). Extensions never handle raw style strings themselves.
+`normalizeLineHeight`, `buildStyle`). Extensions never handle raw style strings themselves.
 
 ### 7.4 Exceptions (non-style attributes in content)
 

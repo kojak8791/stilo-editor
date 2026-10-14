@@ -13,6 +13,7 @@ export { Highlight, type HighlightAttributes } from './highlight';
 export { History, type HistoryOptions } from './history';
 export { HorizontalRule } from './horizontal-rule';
 export { Italic } from './italic';
+export { LineHeight } from './line-height';
 export { Link, type LinkAttributes } from './link';
 export { ListItem } from './list-item';
 export { MoveBlock } from './move-block';

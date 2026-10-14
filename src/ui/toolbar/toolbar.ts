@@ -122,6 +122,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const ddInstance = createDropdown({
           label: messages[dd.labelKey] ?? dd.labelKey,
           options: optionViews,
+          icon: dd.icon,
           container: element,
           onSelect: (id: string) => {
             const option = dd.options.find((o) => o.id === id);

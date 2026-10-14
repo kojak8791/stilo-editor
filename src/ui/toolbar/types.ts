@@ -35,6 +35,8 @@ export interface ToolbarDropdown {
   kind: 'dropdown';
   /** Key of the accessible name of the trigger and of the menu. */
   labelKey: string;
+  /** Shown by the trigger instead of the active option (T-040); default: the option label. */
+  icon?: IconNode;
   options: ToolbarDropdownOption[];
   /**
    * The text of the trigger when no option is active, e.g. a font size that is not in the list;

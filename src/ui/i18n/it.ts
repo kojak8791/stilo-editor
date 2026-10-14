@@ -28,6 +28,8 @@ export const it: Messages = {
   'align.center': 'Centra',
   'align.right': 'Allinea a destra',
   'align.justify': 'Giustifica',
+  'toolbar.lineHeight': 'Interlinea',
+  'lineHeight.default': 'Predefinita',
   'font.default': 'Predefinito',
   'font.sansSerif': 'Senza grazie',
   'font.serif': 'Con grazie',

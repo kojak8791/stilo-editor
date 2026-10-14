@@ -1,6 +1,7 @@
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
-import type { TextAlignment } from '../../core/helpers/text-align';
+import type { TextAlignment } from '../../core/helpers/block-style';
+import { setTextblockAttr } from '../../core/helpers/nodes';
 import { normalizeStyleValue } from '../../core/html/css';
 
 declare module '../../core/types' {
@@ -24,30 +25,10 @@ export const TextAlign = defineExtension({
   // the key without Shift, and Mod-Shift-e would toggle code (Mod-e) with Caps Lock on.
   priority: 101,
   commands: () => ({
-    setTextAlign: (alignment) => (state, dispatch) => {
+    setTextAlign: (alignment) => {
       const value = normalizeStyleValue('text-align', alignment);
-      if (!value) return false;
-      const textAlign = value === 'left' ? null : value;
-      const positions = new Set<number>();
-      for (const { $from, $to } of state.selection.ranges) {
-        state.doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
-          if (!node.isTextblock) return true;
-          if (node.type.spec.attrs?.textAlign !== undefined) positions.add(pos);
-          return false;
-        });
-      }
-      if (positions.size === 0) return false;
-
-      if (dispatch) {
-        const tr = state.tr;
-        for (const pos of positions) {
-          if (tr.doc.nodeAt(pos)?.attrs.textAlign !== textAlign) {
-            tr.setNodeAttribute(pos, 'textAlign', textAlign);
-          }
-        }
-        dispatch(tr.scrollIntoView());
-      }
-      return true;
+      if (!value) return () => false;
+      return setTextblockAttr('textAlign', value === 'left' ? null : value);
     },
   }),
   keymap: ({ editor }) => ({
@@ -58,4 +39,4 @@ export const TextAlign = defineExtension({
   }),
 });
 
-export type { TextAlignment } from '../../core/helpers/text-align';
+export type { TextAlignment } from '../../core/helpers/block-style';

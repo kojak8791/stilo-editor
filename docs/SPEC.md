@@ -71,6 +71,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-309 | **Move block up/down** | M1 | `Alt-ArrowUp` / `Alt-ArrowDown` | — |
 | F-310 | Block indentation (non-list) | M3 | — | — |
 | F-311 | Collapsible block (`<details>` with a `<summary>` title): open and close it without moving the cursor | M3 | — | — |
+| F-312 | Line spacing (`line-height`) on paragraphs and headings: 1, 1.15, 1.5, 2 in the toolbar, any number through the API | M2 | — | — |
 
 ### F-309 — Move block: exact behavior
 

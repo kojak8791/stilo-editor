@@ -1,5 +1,6 @@
 import type { Attrs, Node, NodeType } from 'prosemirror-model';
 import { type Command, NodeSelection, TextSelection, type Transaction } from 'prosemirror-state';
+import { BLOCK_STYLE_ATTRS } from './block-style';
 
 /**
  * Inserts a block `node` in place of the selection and puts the cursor at the start of the
@@ -38,13 +39,16 @@ export function insertBlock(type: NodeType, attrs: Attrs | null = null): Command
 
 /**
  * Command: like `setBlockType` from prosemirror-commands (turns the selected textblocks into
- * `type` with `attrs`), but a block keeps its `textAlign` when `type` has that attribute, so a
- * centered heading stays centered as a paragraph. `false` when no selected textblock changes.
+ * `type` with `attrs`), but a block keeps the style attributes (`textAlign`, `lineHeight`) that
+ * `type` also has, so a centered heading stays centered as a paragraph. `false` when no selected
+ * textblock changes.
  */
 export function setTextblockType(type: NodeType, attrs: Attrs = {}): Command {
-  const keepsAlign = type.spec.attrs?.textAlign !== undefined;
-  const attrsFor = (node: Node): Attrs =>
-    type.create(keepsAlign ? { ...attrs, textAlign: node.attrs.textAlign ?? null } : attrs).attrs;
+  const kept = BLOCK_STYLE_ATTRS.filter((name) => type.spec.attrs?.[name] !== undefined);
+  const attrsFor = (node: Node): Attrs => {
+    const styles = Object.fromEntries(kept.map((name) => [name, node.attrs[name] ?? null]));
+    return type.create({ ...attrs, ...styles }).attrs;
+  };
 
   return (state, dispatch) => {
     let applicable = false;
@@ -64,6 +68,33 @@ export function setTextblockType(type: NodeType, attrs: Attrs = {}): Command {
       const tr = state.tr;
       for (const { $from, $to } of state.selection.ranges) {
         tr.setBlockType($from.pos, $to.pos, type, attrsFor);
+      }
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
+}
+
+/**
+ * Command: sets the attribute `name` to `value` on every selected textblock whose type has that
+ * attribute (`textAlign`, `lineHeight`). `false` when no selected textblock has it.
+ */
+export function setTextblockAttr(name: string, value: unknown): Command {
+  return (state, dispatch) => {
+    const positions = new Set<number>();
+    for (const { $from, $to } of state.selection.ranges) {
+      state.doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
+        if (!node.isTextblock) return true;
+        if (node.type.spec.attrs?.[name] !== undefined) positions.add(pos);
+        return false;
+      });
+    }
+    if (positions.size === 0) return false;
+
+    if (dispatch) {
+      const tr = state.tr;
+      for (const pos of positions) {
+        if (tr.doc.nodeAt(pos)?.attrs[name] !== value) tr.setNodeAttribute(pos, name, value);
       }
       dispatch(tr.scrollIntoView());
     }

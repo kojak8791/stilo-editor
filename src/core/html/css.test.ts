@@ -4,6 +4,7 @@ import {
   normalizeColor,
   normalizeFontFamily,
   normalizeFontSize,
+  normalizeLineHeight,
   normalizeStyleValue,
   normalizeTextAlign,
   parseStyle,
@@ -211,6 +212,27 @@ describe('normalizeTextAlign', () => {
   });
 });
 
+describe('normalizeLineHeight', () => {
+  it.each([
+    ['1', '1'],
+    ['1.15', '1.15'],
+    [' 1.50 ', '1.5'],
+    ['2.0', '2'],
+    ['1.333', '1.33'],
+    ['115%', '1.15'],
+    ['200%', '2'],
+  ])('accepts %s → %s', (input, expected) => {
+    expect(normalizeLineHeight(input)).toBe(expected);
+  });
+
+  it.each(['normal', '0', '0.001', '24px', '1.5em', '-1', '.5', 'inherit', ''])(
+    'rejects %s',
+    (input) => {
+      expect(normalizeLineHeight(input)).toBeNull();
+    },
+  );
+});
+
 describe('normalizeStyleValue', () => {
   it('dispatches to the normalizer of each property', () => {
     expect(normalizeStyleValue('color', 'RGB(255,0,0)')).toBe('#ff0000');
@@ -220,6 +242,7 @@ describe('normalizeStyleValue', () => {
       "'Times New Roman', serif",
     );
     expect(normalizeStyleValue('text-align', 'start')).toBe('left');
+    expect(normalizeStyleValue('line-height', '150%')).toBe('1.5');
   });
 
   it('returns null when the normalizer rejects the value', () => {
@@ -336,11 +359,11 @@ describe('sanitizeStyle', () => {
   it('keeps all output properties in canonical order', () => {
     expect(
       sanitizeStyle(
-        "text-align: start; background-color: rgba(0,0,0,0.5); color: blue; font-size: 2EM; font-family: 'Open Sans'",
+        "line-height: 1.5; text-align: start; background-color: rgba(0,0,0,0.5); color: blue; font-size: 2EM; font-family: 'Open Sans'",
       ),
     ).toBe(
       "font-family: 'Open Sans'; font-size: 2em; color: blue; " +
-        'background-color: rgba(0, 0, 0, 0.5); text-align: left',
+        'background-color: rgba(0, 0, 0, 0.5); text-align: left; line-height: 1.5',
     );
   });
 

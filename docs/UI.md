@@ -66,7 +66,8 @@ export type { ToolbarButton, ToolbarColor, ToolbarColorButton, ToolbarContext,
   ToolbarIconMenuOption, ToolbarItem }
   from './toolbar/types';
 export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, fontFamilyDropdown, type FontSizeInputOptions,
-  fontSizeInput, headingDropdown, highlightButton, textAlignMenu, textColorButton }
+  fontSizeInput, headingDropdown, highlightButton, lineHeightDropdown, textAlignMenu,
+  textColorButton }
   from './toolbar/items';
 export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 export { DEFAULT_PALETTE } from './toolbar/palette';
@@ -144,6 +145,8 @@ export interface ToolbarDropdown {
   kind: 'dropdown';
   /** Key of the accessible name of the trigger and of the menu. */
   labelKey: string;
+  /** Shown by the trigger instead of the active option; default: the option label. T-040. */
+  icon?: IconNode;
   options: ToolbarDropdownOption[];
   /** Trigger text when no option is active (a value not in the list); `null`: the label. T-038. */
   getValueLabel?(editor: Editor): string | null;
@@ -294,6 +297,8 @@ no functions.
 | `align.center` | Center | Centra |
 | `align.right` | Align right | Allinea a destra |
 | `align.justify` | Justify | Giustifica |
+| `toolbar.lineHeight` | Line spacing | Interlinea |
+| `lineHeight.default` | Default | Predefinita |
 | `toolbar.link` | Link | Collegamento |
 | `heading.paragraph` | Paragraph | Paragrafo |
 | `heading.h1` | Heading 1 | Titolo 1 |
@@ -350,7 +355,7 @@ no functions.
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
     'clearFormatting'],
   ['textColor', 'highlight'],
-  ['textAlign'],
+  ['textAlign', 'lineHeight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ]
 ```
@@ -384,7 +389,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 `fontFamily` (T-038) is `fontFamilyDropdown()`, see §6.4; `fontSize` (T-038) is
 `fontSizeInput()`, see §5.5.
 
-`textAlign` (T-039) is `textAlignMenu()`, see §5.6.
+`textAlign` (T-039) is `textAlignMenu()`, see §5.6; `lineHeight` (T-040) is
+`lineHeightDropdown()`, see §6.5.
 
 `textColor` and `highlight` (T-026) are color split buttons (§5.4), created by
 `textColorButton(palette = DEFAULT_PALETTE)` and `highlightButton(palette = DEFAULT_PALETTE)`;
@@ -863,6 +869,9 @@ for every `kind: 'iconMenu'` item; the menu is mounted in the toolbar (it scroll
 - The trigger shows the label of the active option (the first whose `isActive` is true); when
   none is active, the text of `getValueLabel` if it returns one, otherwise the dropdown label.
   `aria-label` is `<dropdown label>: <shown text>`.
+- With `icon` (T-040), the trigger has the extra class `stilo-dropdown__trigger--icon` and shows
+  the icon in place of the `.stilo-dropdown__value` span (the shown text stays in `aria-label`);
+  it is sized like the icon menu trigger (§5.6).
 - An option with `fontFamily` has its label drawn in that font (`style.fontFamily` set on the
   `.stilo-dropdown__label`).
 - `aria-checked` is `true` on the active option only. A disabled option has
@@ -922,6 +931,21 @@ Geneva, sans-serif`, `Tahoma, Geneva, sans-serif`, `'Trebuchet MS', Helvetica, s
 (labels: the font name). Every named font has fallbacks for the systems that lack it. The
 values are written in the normalized form the editor stores (ARCHITECTURE §7.3), otherwise
 `isActive` would not match them.
+
+### 6.5 Line spacing dropdown (T-040)
+
+`lineHeightDropdown(values: readonly number[] = [1, 1.15, 1.5, 2]): ToolbarDropdown`, item ID
+`lineHeight`, `labelKey` `toolbar.lineHeight`, `icon` `ListChevronsUpDown`, `isAvailable`:
+`'setLineHeight' in editor.commands`. As in word processors, the trigger is an icon and the menu
+lists the values as text.
+
+| Option ID | `labelKey` | `run` | `isActive` | `isEnabled` |
+|---|---|---|---|---|
+| `default` | `lineHeight.default` | `unsetLineHeight()` | no `lineHeight` on the block | `unsetLineHeight.can()` |
+| the value with `.` → `-` (`1-15`) | the value (`1.15`, a missing key shown as is) | `setLineHeight(value)` | `lineHeight` is the value | `setLineHeight.can(value)` |
+
+`isActive` reads the `lineHeight` of the heading or paragraph at the start of the selection.
+*Default* removes the block's own line height, so the block follows the host page's CSS again.
 
 ## 7. Styles (`src/styles/ui.css`)
 

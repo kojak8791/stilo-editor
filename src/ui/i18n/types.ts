@@ -26,6 +26,8 @@ export type MessageKey =
   | 'align.center'
   | 'align.right'
   | 'align.justify'
+  | 'toolbar.lineHeight'
+  | 'lineHeight.default'
   | 'font.default'
   | 'font.sansSerif'
   | 'font.serif'

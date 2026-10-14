@@ -145,6 +145,7 @@ whether it is available.
 | `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()`. `setFontFamily(fontFamily)`: a CSS `font-family` list, `false` when no name is valid. `unsetFontFamily()`. `setFontSize(fontSize)`: `px`, `pt`, `em`, `rem` or `%` (`'14px'`), `false` otherwise. `unsetFontSize()`. Each command keeps the other two styles. `stepFontSize(delta, unit?)`: each selected part goes from the size it has on the page to the next (`delta` 1) or previous (`-1`) whole number in `unit` (`'pt'` default, `'px'`, `'rem'` stepped in px), between 1 and 400 |
 | `Highlight` | `setHighlight({ color? })`, `unsetHighlight()`, `toggleHighlight({ color? })`; without `color`, a plain `<mark>` |
 | `TextAlign` | `setTextAlign(alignment)`: `'left'`, `'center'`, `'right'` or `'justify'` on the selected paragraphs and headings; `false` for another value or where no block can be aligned |
+| `LineHeight` | `setLineHeight(lineHeight)`: a number (`1.5`) or a percentage (`'150%'`, stored as `1.5`) on the selected paragraphs and headings; `false` for zero, `normal`, a length or where no block has a line height. `unsetLineHeight()` |
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
 | `History` | `undo()`, `redo()` |
 | `MoveBlock` | `moveBlockUp()`, `moveBlockDown()` |
@@ -175,6 +176,7 @@ defaultExtensions({
 | `link` | `Link` | — |
 | `textStyle`, `highlight` | `TextStyle` (text color, font family, font size), `Highlight` | — |
 | `textAlign` | `TextAlign` (alignment command and shortcuts; aligned content keeps its alignment without it) | — |
+| `lineHeight` | `LineHeight` (line spacing commands; content keeps its line spacing without it) | — |
 | `clearFormatting` | `ClearFormatting` | — |
 | `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
 | `moveBlock` | `MoveBlock` | — |
@@ -228,7 +230,8 @@ ones work.
 A button whose extension is not loaded is not shown. Default item IDs: `undo`, `redo`,
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
 `subscript`, `superscript`,
-`link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `bulletList`, `orderedList`,
+`link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
+`bulletList`, `orderedList`,
 `blockquote`, `horizontalRule`, `characters`.
 
 ```ts

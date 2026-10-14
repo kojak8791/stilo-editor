@@ -28,6 +28,8 @@ export const en: Messages = {
   'align.center': 'Center',
   'align.right': 'Align right',
   'align.justify': 'Justify',
+  'toolbar.lineHeight': 'Line spacing',
+  'lineHeight.default': 'Default',
   'font.default': 'Default',
   'font.sansSerif': 'Sans serif',
   'font.serif': 'Serif',

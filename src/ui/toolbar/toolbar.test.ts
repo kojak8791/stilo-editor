@@ -81,6 +81,7 @@ describe('toolbar', () => {
       'highlight',
       'highlight',
       'textAlign',
+      'lineHeight',
       'bulletList',
       'orderedList',
       'blockquote',
@@ -1124,6 +1125,66 @@ describe('text alignment menu', () => {
     attachEditor(editor);
     const toolbar = createToolbar(editor, { container: createToolbarContainer() });
     expect(toolbar.element.querySelector('[data-item="textAlign"]')).toBeNull();
+  });
+});
+
+describe('line spacing dropdown', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html });
+    attachEditor(editor);
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
+    const trigger = toolbar.element.querySelector<HTMLButtonElement>('[data-item="lineHeight"]')!;
+    const menu = toolbar.element.querySelector('.stilo-dropdown__option--1-15')!.parentElement!;
+    const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
+    return { editor, toolbar, trigger, menu, option };
+  }
+
+  it('renders an icon trigger and the options, "Default" checked without a line height', () => {
+    const { trigger, menu, option } = setup('<p>a|b</p>');
+    expect(trigger.classList.contains('stilo-dropdown__trigger--icon')).toBe(true);
+    expect(trigger.querySelector('.stilo-dropdown__value')).toBeNull();
+    expect(trigger.getAttribute('aria-label')).toBe('Line spacing: Default');
+    const labels = [...menu.querySelectorAll('[role="menuitemradio"]')].map((el) => el.textContent);
+    expect(labels).toEqual(['Default', '1', '1.15', '1.5', '2']);
+    expect(option('default').getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('shows the line height of the block at the selection', () => {
+    const { trigger, option } = setup('<h2 style="line-height: 1.15">a|b</h2>', {
+      messages: itLocale,
+    });
+    expect(trigger.getAttribute('aria-label')).toBe('Interlinea: 1.15');
+    expect(option('1-15').getAttribute('aria-checked')).toBe('true');
+    expect(option('default').getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('sets the line height, and "Default" removes it', () => {
+    const { editor, trigger, menu, option } = setup('<p>a|b</p>');
+    trigger.click();
+    option('1-5').click();
+    expect(menu.hidden).toBe(true);
+    expect(editor.getHTML()).toBe('<p style="line-height: 1.5">ab</p>');
+    trigger.click();
+    option('default').click();
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+
+  it('is disabled on a selected horizontal rule', () => {
+    const { editor, toolbar, trigger } = setup('<p>a</p><hr><p>b</p>');
+    editor.commands.selectNode(3);
+    toolbar.update();
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('is not rendered without the LineHeight extension', () => {
+    const editor = createTestEditor({
+      html: '<p>ab</p>',
+      extensions: [defaultExtensions({ lineHeight: false })],
+    });
+    attachEditor(editor);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    expect(toolbar.element.querySelector('[data-item="lineHeight"]')).toBeNull();
   });
 });
 

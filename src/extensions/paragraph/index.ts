@@ -1,7 +1,7 @@
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
+import { blockStyleAttrs, blockStyleDOM, parseBlockStyle } from '../../core/helpers/block-style';
 import { setTextblockType } from '../../core/helpers/nodes';
-import { parseTextAlign, textAlignAttr, textAlignDOM } from '../../core/helpers/text-align';
 
 declare module '../../core/types' {
   interface Commands {
@@ -11,10 +11,10 @@ declare module '../../core/types' {
 }
 
 /**
- * The `paragraph` node (`<p>`, with `style="text-align: x"` when aligned). Priority 1000 makes it the first block node, which ProseMirror
- * uses as the default block. `<div>` needs no parse rule: ProseMirror treats it as a block
- * wrapper and wraps its loose inline content in paragraphs (the `div` fallback of
- * docs/ARCHITECTURE.md §7.1).
+ * The `paragraph` node (`<p>`, with `style` for its alignment and line height). Priority 1000
+ * makes it the first block node, which ProseMirror uses as the default block. `<div>` needs no
+ * parse rule: ProseMirror treats it as a block wrapper and wraps its loose inline content in
+ * paragraphs (the `div` fallback of docs/ARCHITECTURE.md §7.1).
  */
 export const Paragraph = defineExtension({
   name: 'paragraph',
@@ -23,19 +23,9 @@ export const Paragraph = defineExtension({
     paragraph: {
       group: 'block',
       content: 'inline*',
-      attrs: textAlignAttr(),
-      parseDOM: [
-        {
-          tag: 'p',
-          // `null` keeps the shared default attributes: one object per paragraph is a lot of memory
-          // in a large document.
-          getAttrs: (node) => {
-            const textAlign = parseTextAlign(node);
-            return textAlign ? { textAlign } : null;
-          },
-        },
-      ],
-      toDOM: (node) => textAlignDOM('p', node),
+      attrs: blockStyleAttrs(),
+      parseDOM: [{ tag: 'p', getAttrs: parseBlockStyle }],
+      toDOM: (node) => blockStyleDOM('p', node),
     },
   }),
   commands: ({ schema }) => ({

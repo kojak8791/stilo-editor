@@ -13,6 +13,7 @@ import { Highlight } from '../highlight';
 import { History, type HistoryOptions } from '../history';
 import { HorizontalRule } from '../horizontal-rule';
 import { Italic } from '../italic';
+import { LineHeight } from '../line-height';
 import { Link } from '../link';
 import { ListItem } from '../list-item';
 import { MoveBlock } from '../move-block';
@@ -52,6 +53,7 @@ export interface DefaultExtensionsOptions {
   link?: false;
   textStyle?: false;
   textAlign?: false;
+  lineHeight?: false;
   highlight?: false;
   clearFormatting?: false;
   history?: false | Partial<HistoryOptions>;
@@ -100,6 +102,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(TextStyle, options.textStyle),
     ...include(Highlight, options.highlight),
     ...include(TextAlign, options.textAlign),
+    ...include(LineHeight, options.lineHeight),
     ...include(ClearFormatting, options.clearFormatting),
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),

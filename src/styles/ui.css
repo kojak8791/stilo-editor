@@ -331,9 +331,12 @@
   background: var(--stilo-color-active);
 }
 
-/* Icon menu (text alignment): the options in a row */
-.stilo-icon-menu__trigger {
+/* Icon menu (text alignment): the options in a row. An icon dropdown (line spacing) has the same
+   trigger. */
+.stilo-icon-menu__trigger,
+.stilo-dropdown__trigger--icon {
   width: auto;
+  min-width: var(--stilo-button-size);
   gap: 2px;
   padding: 0 4px;
 }
@@ -343,7 +346,8 @@
   gap: var(--stilo-toolbar-gap);
 }
 
-.stilo-icon-menu__trigger .stilo-icon:last-child {
+.stilo-icon-menu__trigger .stilo-icon:last-child,
+.stilo-dropdown__trigger--icon .stilo-icon:last-child {
   width: 12px;
   height: 12px;
 }

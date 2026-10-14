@@ -10,6 +10,7 @@ export const STYLE_PROPERTIES = [
   'color',
   'background-color',
   'text-align',
+  'line-height',
 ] as const;
 
 /** A property allowed in the HTML output. */
@@ -222,6 +223,18 @@ export function normalizeTextAlign(value: string): string | null {
 }
 
 /**
+ * Normalizes `line-height` (trimmed): a number `^\d+(\.\d+)?$` or a percentage of it (`115%` →
+ * `1.15`), rounded to 2 decimals without trailing zeros; zero, `normal` and lengths → `null`.
+ */
+export function normalizeLineHeight(value: string): string | null {
+  const match = value.trim().match(/^(\d+(?:\.\d+)?)(%?)$/);
+  if (!match) return null;
+  const factor = Number(match[1]!) / (match[2] ? 100 : 1);
+  const rounded = Math.round(factor * 100) / 100;
+  return rounded > 0 ? String(rounded) : null;
+}
+
+/**
  * Normalizes the value of an output property with the matching normalizer above.
  * Returns `null` if the value matches {@link UNSAFE_VALUE} or the normalizer returns `null`.
  */
@@ -239,6 +252,8 @@ export function normalizeStyleValue(property: StyleProperty, value: string): str
       return normalizeFontFamily(value);
     case 'text-align':
       return normalizeTextAlign(value);
+    case 'line-height':
+      return normalizeLineHeight(value);
   }
 
   return null;

@@ -26,6 +26,7 @@ export {
   fontSizeInput,
   headingDropdown,
   highlightButton,
+  lineHeightDropdown,
   textAlignMenu,
   textColorButton,
 } from './toolbar/items';

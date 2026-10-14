@@ -89,7 +89,11 @@ describe('TextAlign: commands', () => {
   it('reports the alignment through the block attributes', () => {
     const editor = createTestEditor({ html: '<h3 style="text-align: center">a|b</h3>' });
     expect(editor.isActive('heading', { textAlign: 'center' })).toBe(true);
-    expect(editor.getAttributes('heading')).toEqual({ level: 3, textAlign: 'center' });
+    expect(editor.getAttributes('heading')).toEqual({
+      level: 3,
+      textAlign: 'center',
+      lineHeight: null,
+    });
   });
 });
 

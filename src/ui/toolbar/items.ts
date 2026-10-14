@@ -6,6 +6,7 @@ import {
   Italic,
   Link,
   List,
+  ListChevronsUpDown,
   ListOrdered,
   Minus,
   Redo2,
@@ -54,7 +55,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'clearFormatting',
   ],
   ['textColor', 'highlight'],
-  ['textAlign'],
+  ['textAlign', 'lineHeight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ];
 
@@ -262,6 +263,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
   fontFamily: fontFamilyDropdown(),
   fontSize: fontSizeInput(),
   textAlign: textAlignMenu(),
+  lineHeight: lineHeightDropdown(),
   textColor: textColorButton(),
   highlight: highlightButton(),
 };
@@ -427,6 +429,45 @@ export function textAlignMenu(): ToolbarIconMenu {
       isEnabled: (e: Editor) => e.commands.setTextAlign.can(alignment),
     })),
     isAvailable: (e: Editor) => 'setTextAlign' in e.commands,
+  };
+}
+
+/** The line height of the textblock at the start of the selection, `null` when it has none. */
+function blockLineHeight(editor: Editor): unknown {
+  return editor.getAttributes('heading').lineHeight ?? editor.getAttributes('paragraph').lineHeight;
+}
+
+/**
+ * The line spacing dropdown (`LineHeight` extension): "Default" (no line height of its own) and
+ * the `values`, shown as numbers.
+ */
+export function lineHeightDropdown(values: readonly number[] = [1, 1.15, 1.5, 2]): ToolbarDropdown {
+  return {
+    id: 'lineHeight',
+    kind: 'dropdown',
+    labelKey: 'toolbar.lineHeight',
+    icon: ListChevronsUpDown,
+    options: [
+      {
+        id: 'default',
+        labelKey: 'lineHeight.default',
+        run: (e: Editor) => {
+          e.commands.unsetLineHeight();
+        },
+        isActive: (e: Editor) => blockLineHeight(e) == null,
+        isEnabled: (e: Editor) => e.commands.unsetLineHeight.can(),
+      },
+      ...values.map((value) => ({
+        id: String(value).replace('.', '-'),
+        labelKey: String(value),
+        run: (e: Editor) => {
+          e.commands.setLineHeight(value);
+        },
+        isActive: (e: Editor) => blockLineHeight(e) === String(value),
+        isEnabled: (e: Editor) => e.commands.setLineHeight.can(value),
+      })),
+    ],
+    isAvailable: (e: Editor) => 'setLineHeight' in e.commands,
   };
 }
 

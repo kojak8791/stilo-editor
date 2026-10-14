@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide';
+import { ChevronDown, type IconNode } from 'lucide';
 import { createIcon } from './icon';
 import { createPopover, type Popover } from './popover';
 
@@ -15,6 +15,8 @@ export interface DropdownOptions {
   /** Accessible name of the trigger and of the menu; shown when no option is active. */
   label: string;
   options: DropdownOptionView[];
+  /** Shown by the trigger instead of the value; the value stays in its accessible name. */
+  icon?: IconNode;
   /** The popover container (the toolbar element). */
   container: HTMLElement;
   onSelect(id: string): void;
@@ -35,21 +37,21 @@ export interface Dropdown {
 }
 
 export function createDropdown(options: DropdownOptions): Dropdown {
-  const { label, options: menuOptions, container, onSelect } = options;
+  const { label, options: menuOptions, icon, container, onSelect } = options;
 
   // Create the trigger button
   const trigger = document.createElement('button');
   trigger.type = 'button';
-  trigger.className = 'stilo-toolbar__button stilo-dropdown__trigger';
+  trigger.className = `stilo-toolbar__button stilo-dropdown__trigger${icon ? ' stilo-dropdown__trigger--icon' : ''}`;
   trigger.setAttribute('aria-haspopup', 'menu');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.setAttribute('title', label);
   trigger.setAttribute('tabindex', '-1');
 
-  // Value span
+  // Value span (left detached when the icon takes its place)
   const valueSpan = document.createElement('span');
   valueSpan.className = 'stilo-dropdown__value';
-  trigger.appendChild(valueSpan);
+  trigger.appendChild(icon ? createIcon(icon) : valueSpan);
 
   // Chevron icon
   const chevron = createIcon(ChevronDown);

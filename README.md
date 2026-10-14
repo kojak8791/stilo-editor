@@ -73,6 +73,7 @@ column is what you type to get the format as you write.
 | Horizontal line | | `---` | |
 | Line break | <kbd>Shift</kbd>+<kbd>Enter</kbd> | | New line in the same paragraph |
 | Align left / center / right / justify | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd> / <kbd>J</kbd> | | Paragraphs and headings; the toolbar button opens the four alignments; changing a heading level keeps the alignment |
+| Line spacing | | | Paragraphs and headings; the toolbar menu offers Default, 1, 1.15, 1.5 and 2 |
 | Move block up / down | <kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>Alt</kbd>+<kbd>↓</kbd> | | The block or list item at the cursor, or all the selected ones; sub-items move along |
 | **Lists** | | | |
 | Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | `- ` `* ` `+ ` | |

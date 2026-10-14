@@ -2,8 +2,8 @@ import { textblockTypeInputRule } from 'prosemirror-inputrules';
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
 import { isNodeActive } from '../../core/helpers/active';
+import { blockStyleAttrs, blockStyleDOM, parseBlockStyle } from '../../core/helpers/block-style';
 import { setTextblockType } from '../../core/helpers/nodes';
-import { parseTextAlign, textAlignAttr, textAlignDOM } from '../../core/helpers/text-align';
 
 declare module '../../core/types' {
   interface Commands {
@@ -24,8 +24,8 @@ export interface HeadingOptions {
 }
 
 /**
- * The `heading` node (`<h1>`…`<h6>`, with `style="text-align: x"` when aligned), docs/SPEC.md
- * F-302.
+ * The `heading` node (`<h1>`…`<h6>`, with `style` for its alignment and line height),
+ * docs/SPEC.md F-302.
  */
 export const Heading = defineExtension<HeadingOptions>({
   name: 'heading',
@@ -35,12 +35,12 @@ export const Heading = defineExtension<HeadingOptions>({
       group: 'block',
       content: 'inline*',
       defining: true,
-      attrs: { level: { default: levels[0] ?? 1 }, ...textAlignAttr() },
+      attrs: { level: { default: levels[0] ?? 1 }, ...blockStyleAttrs() },
       parseDOM: levels.map((level) => ({
         tag: `h${level}`,
-        getAttrs: (node: HTMLElement) => ({ level, textAlign: parseTextAlign(node) }),
+        getAttrs: (node: HTMLElement) => ({ level, ...parseBlockStyle(node) }),
       })),
-      toDOM: (node) => textAlignDOM(`h${node.attrs.level}`, node),
+      toDOM: (node) => blockStyleDOM(`h${node.attrs.level}`, node),
     },
   }),
   commands: ({ schema, options }) => {
