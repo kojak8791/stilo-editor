@@ -339,6 +339,28 @@ describe('Search: replaceAll', () => {
     expect(editor.getHTML()).toBe('<p>cat <em>Cat</em></p><p>bobcat</p>');
   });
 
+  it('is one step that keeps the selection in place', () => {
+    const editor = search('<p>cat <strong>cat</strong></p><p>x|y</p><p>a cat</p><p>z</p>', 'cat');
+    const steps: number[] = [];
+    editor.on('transaction', ({ transaction }) => steps.push(transaction.steps.length));
+    editor.commands.replaceAll('lion');
+    expect(steps).toEqual([1]);
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p>lion <strong>lion</strong></p><p>x|y</p><p>a lion</p><p>z</p>',
+    );
+  });
+
+  it('replaces inside nested blocks and keeps the blocks around', () => {
+    const editor = search(
+      '<p>a</p><ul><li>cat</li><li>b<ul><li>the cat</li></ul></li></ul><p>c|</p>',
+      'cat',
+    );
+    editor.commands.replaceAll('');
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p>a</p><ul><li></li><li><p>b</p><ul><li>the </li></ul></li></ul><p>c|</p>',
+    );
+  });
+
   it('replaces also the matches past maxMatches', () => {
     const editor = search('<p>a a a</p>', 'a', 2);
     editor.commands.replaceAll('b');

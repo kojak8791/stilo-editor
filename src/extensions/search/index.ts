@@ -8,6 +8,7 @@ import {
   TextSelection,
   type Transaction,
 } from 'prosemirror-state';
+import { StepMap, Transform } from 'prosemirror-transform';
 import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view';
 import type { Editor } from '../../core/editor';
 import { defineExtension } from '../../core/extension';
@@ -346,7 +347,7 @@ function nextMatch(state: EditorState, query: SearchQuery, to: number): Range | 
 }
 
 /** Replaces `match` in `tr` with `text`, which takes the marks shared by the whole match. */
-function replaceMatch(tr: Transaction, match: Range, text: string): void {
+function replaceMatch(tr: Transform, match: Range, text: string): void {
   const from = tr.mapping.map(match.from, 1);
   const to = tr.mapping.map(match.to, -1);
   if (!text) {
@@ -355,6 +356,39 @@ function replaceMatch(tr: Transaction, match: Range, text: string): void {
   }
   const marks = tr.doc.resolve(from).marksAcross(tr.doc.resolve(to));
   tr.replaceWith(from, to, tr.doc.type.schema.text(text, marks));
+}
+
+/**
+ * Replaces every match (in document order) with `text` in one step. A step per match copies the
+ * list of top-level blocks at every match: 48,000 matches in 50,000 paragraphs ran out of
+ * memory. Each block with matches is rebuilt on its own, then the blocks from the first to the
+ * last changed one replace the old ones at once (the unchanged ones are the same nodes). The
+ * selection follows through a map of the replacements.
+ */
+function replaceMatches(state: EditorState, matches: Range[], text: string): Transaction {
+  const blocks: Node[] = [];
+  const ranges: number[] = [];
+  let from = -1;
+  let to = 0;
+  let changed = 0;
+  let next = 0;
+  state.doc.forEach((block, offset) => {
+    const end = offset + block.nodeSize;
+    const local = new Transform(block);
+    for (; next < matches.length && matches[next]!.to <= end; next++) {
+      const match = matches[next]!;
+      replaceMatch(local, { from: match.from - offset - 1, to: match.to - offset - 1 }, text);
+      ranges.push(match.from, match.to - match.from, text.length);
+    }
+    if (local.docChanged) {
+      if (from < 0) from = offset;
+      to = end;
+      changed = blocks.length + 1;
+    }
+    if (from >= 0) blocks.push(local.doc);
+  });
+  const tr = state.tr.replaceWith(from, to, blocks.slice(0, changed));
+  return tr.setSelection(state.selection.map(tr.doc, new StepMap(ranges)));
 }
 
 const findNext: Command = (state, dispatch) => {
@@ -407,11 +441,7 @@ const replaceAll =
       return true;
     });
     if (matches.length === 0) return false;
-    if (dispatch) {
-      const tr = state.tr;
-      for (const match of matches) replaceMatch(tr, match, replacement);
-      dispatch(tr);
-    }
+    dispatch?.(replaceMatches(state, matches, replacement));
     return true;
   };
 

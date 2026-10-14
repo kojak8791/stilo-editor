@@ -73,8 +73,9 @@ under 16 ms fits in one frame of a 60 Hz screen.
   match is counted, the first 1,000 are highlighted. At 50,000 paragraphs, showing or clearing
   the highlights takes 0.1–0.5 s, mostly ProseMirror redrawing them, and going to the next
   match 50–110 ms. At 10,000 paragraphs every step stays under 150 ms, the next match about
-  10 ms. *Replace all* with hundreds of thousands of matches makes one very large change (not
-  measured).
+  10 ms. *Replace all* is one change: 0.3 s for 9,500 matches in 10,000 paragraphs, about 6 s
+  for 48,000 matches in 50,000 paragraphs, where ProseMirror walks the blocks before each
+  changed one to place it.
 - **Word count.** The first count reads the whole document (55 ms at 10,000 paragraphs); later
   counts read only the changed blocks. The status bar counts half a second after the last
   change, never on a keystroke.

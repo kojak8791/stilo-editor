@@ -75,8 +75,14 @@ Measured in Node (no DOM, `prosemirror-search` 1.1.1):
   highlighted; `findNext` still reaches them and the count shows their position: moving to the
   next or previous match counts only the matches in between, the first jump far past the
   highlights counts from the last one (220 ms at 50,000 paragraphs).
-- `replaceAll` collects every match with the same linear scan; with hundreds of thousands of
-  matches the transaction itself is large (not measured).
+- `replaceAll` is one step: each top-level block with matches is rebuilt on its own, then the
+  blocks from the first to the last changed one replace the old ones at once, and the selection
+  follows through a map of the replacements. A step per match ran out of memory (48,000
+  matches in 50,000 paragraphs: every step copies the list of top-level blocks). In Chromium:
+  959 matches in 1,000 paragraphs 41 ms, 9,544 in 10,000 paragraphs 0.3 s, 47,975 in 50,000
+  paragraphs 5.9 s (undo 4.4 s), memory unchanged. Almost all of it is prosemirror-view: it
+  updates each changed top-level block and computes its position by walking the blocks before
+  it (`posAtStart`), quadratic with tens of thousands of changed blocks.
 - `npm run bench` measures the search in Chromium, rendering included (informative metrics,
   no budget): setting a frequent search (1,000+ matches) 35 ms at 10,000 paragraphs and 116 ms
   at 50,000; a rare phrase 21 ms and 92 ms; typing in the middle with the frequent search
