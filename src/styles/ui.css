@@ -184,13 +184,24 @@
   width: auto;
   min-width: 120px;
   justify-content: space-between;
+  gap: 6px;
   padding: 0 8px;
+}
+
+.stilo-dropdown__trigger[data-item="fontFamily"] {
+  width: 120px;
+}
+
+/* A long value is truncated, the chevron keeps its size */
+.stilo-dropdown__trigger .stilo-icon {
+  flex-shrink: 0;
 }
 
 .stilo-dropdown__value {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .stilo-dropdown__menu {
@@ -291,6 +302,7 @@
   font-family: var(--stilo-font-family);
   font-size: var(--stilo-font-size);
   text-align: center;
+  font-weight: 600;
 }
 
 .stilo-font-size__input:focus-visible {

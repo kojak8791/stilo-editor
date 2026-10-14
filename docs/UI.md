@@ -1025,7 +1025,11 @@ Layout:
 - Button: transparent background, no border, `--stilo-radius`, size `--stilo-button-size`,
   icon centered; hover → `--stilo-color-hover`; `--active` → `--stilo-color-active`;
   `[aria-disabled="true"]` → opacity 0.4, `cursor: default`, no hover color.
-- Dropdown trigger: auto width, `min-width: 120px`, text left, chevron right.
+- Dropdown trigger: auto width, `min-width: 120px`, text left, chevron right, at least 6px
+  apart. The shown value is semibold (`font-weight: 600`), like the value of the font size field.
+  The font family trigger has a fixed `width: 120px`, so the toolbar does not move with the font
+  name: a longer name ends with `…` (the full name stays in `aria-label` and in the menu); the
+  chevron never shrinks.
 - Popover host: `position: relative`. Popover: `position: absolute`, `top: 0`, `left: 0`,
   `width: max-content`, background, border, radius, shadow, `z-index`, `padding: 4px`.
   `.stilo-popover[hidden]` is `display: none`, so that a component class setting `display`
