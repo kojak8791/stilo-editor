@@ -95,18 +95,22 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* The editor is as wide as the demo's, so that the benchmarks match the baseline. */
+/* The editor fills the rest of the page; the toolbar (sticky) and the status bar stay in view. */
 .bench__main {
-  box-sizing: border-box;
-  max-width: 752px;
-  min-height: 100vh;
-  margin: 0 24px 0 504px;
+  margin-left: 480px;
   background: #fff;
 }
 
 .bench__content .stilo-content {
-  min-height: 300px;
+  box-sizing: border-box;
+  min-height: 100vh;
   padding: 16px 20px;
   outline: none;
   line-height: 1.5;
+}
+
+#status {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
 }
