@@ -1,0 +1,110 @@
+/* Benchmark page only (desktop). Content defaults live in src/styles/content.css. */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1f2328;
+  background: #f6f8fa;
+}
+
+.bench {
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  height: 100vh;
+}
+
+.bench__panel {
+  overflow: auto;
+  padding: 12px 16px;
+  border-right: 1px solid #d1d9e0;
+  font-size: 13px;
+}
+
+.bench__title {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+}
+
+.bench__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.bench__controls {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.bench__group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+
+.bench__group > strong {
+  width: 100%;
+}
+
+.bench__group input[type="text"] {
+  width: 120px;
+}
+
+.bench__stats,
+.bench__state {
+  margin: 8px 0;
+}
+
+.bench__state {
+  font-weight: 600;
+}
+
+.bench__results-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bench__results {
+  width: 100%;
+  margin-top: 4px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.bench__results th,
+.bench__results td {
+  padding: 2px 4px;
+  border-bottom: 1px solid #d1d9e0;
+  text-align: right;
+}
+
+.bench__results th:first-child,
+.bench__results td:first-child {
+  text-align: left;
+}
+
+.bench__results td {
+  font-variant-numeric: tabular-nums;
+}
+
+.bench__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+}
+
+.bench__content {
+  flex: 1;
+  overflow: auto;
+}
+
+.bench__content .stilo-content {
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  outline: none;
+  line-height: 1.5;
+}

@@ -89,7 +89,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 
 | Script | Command | Purpose |
 |---|---|---|
-| `dev` | `vite` | Demo page with hot reload (`demo/`) |
+| `dev` | `vite` | Demo page with hot reload (`demo/`); benchmark page at `/bench/` |
 | `build` | `vite build && tsc -p tsconfig.build.json` | Library build + declarations |
 | `typecheck` | `tsc --noEmit` | Type checking |
 | `lint` | `biome check .` | Lint + format check |
@@ -171,6 +171,8 @@ stilo-editor/
 ├── scripts/
 │   └── size.mjs                  Bundle size report (`npm run size`)
 └── bench/
+    ├── index.html, main.ts       Benchmark page (`/bench/`): panel of bulk operations, editor
+    ├── api.ts                    `window.__stilo`: benchmark API, timing in phases
     ├── generators/               Benchmark document generators
     ├── *.bench.ts                Playwright benchmarks
     └── results/                  JSON output (git-ignored except baseline.json)
@@ -739,13 +741,19 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
 
 ## 11. Benchmarks
 
-`bench/` per SPEC NFR-1. Generators are deterministic (seeded). Benchmarks load the demo page in a
-special mode (`/demo/?bench`: no `getHTML()` per update), drive the editor through
-`window.__stilo` (`demo/bench.ts`) and record metrics via `performance.now()` with a forced
+`bench/` per SPEC NFR-1. Generators are deterministic (seeded). Benchmarks load the benchmark
+page (`/bench/`: the full editor and UI, no `getHTML()` per update), drive the editor through
+`window.__stilo` (`bench/api.ts`) and record metrics via `performance.now()` with a forced
 layout, plus real key presses through Event Timing. Every document is measured first; a final
 `budgets` test writes `bench/results/<date>.json` and checks `bench/budgets.ts`.
 `bench/results/baseline.json` is the committed reference run (ADR 0003). Config:
-`playwright.bench.config.ts` (Chromium, Vite dev server on port 5179). For readers:
+`playwright.bench.config.ts` (Chromium, Vite dev server on port 5179).
+
+The page's panel runs bulk operations by hand, far beyond human use (50,000 paragraphs, select
+all, a change to every block); the demo stays for ordinary use. `__stilo.measure(operation)`
+splits the time of an operation into phases: the command, `applyTransaction` (state),
+`updateState` (view), the editor's event listeners, the forced layout, the next animation frame
+(where the toolbar refreshes) and the paint of that frame. For readers:
 [`docs/PERFORMANCE.md`](PERFORMANCE.md).
 
 ## 12. Collaboration readiness (M3)

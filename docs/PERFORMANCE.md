@@ -95,9 +95,26 @@ npx playwright install chromium   # once
 npm run bench
 ```
 
-Results are written to `bench/results/<date>.json`. In the demo, `/demo/?bench` exposes the
-benchmark API: open the browser console and run `__stilo.load('paragraphs-10k')` to try a large
-document by hand.
+Results are written to `bench/results/<date>.json`.
+
+To try the limits by hand, run `npm run dev` and open `/bench/`: the full editor beside a panel
+that loads the benchmark documents and runs bulk operations on them (select all, text case,
+typing, block moves, undo, search, replace all). Each operation is listed with its time split
+into phases, in milliseconds:
+
+| Phase | What it covers |
+|---|---|
+| cmd | The command that builds the change, or the parsing of a loaded document |
+| state | `applyTransaction`: the new state, with the plugins' fixes |
+| view | `updateState`: the update of the page |
+| events | The editor's event listeners |
+| layout | The layout of the page after the change |
+| frame | Until the next frame, where the toolbar refreshes (up to 16 ms of it is waiting) |
+| paint | Painting that frame |
+
+**Copy** puts the list on the clipboard, one row per line with tab-separated columns. The same
+functions are on `window.__stilo` in the browser console, e.g.
+`await __stilo.measure(() => __stilo.editor.commands.selectAll())`.
 
 ## Download size
 

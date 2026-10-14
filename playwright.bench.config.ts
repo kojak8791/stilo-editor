@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/** Benchmarks of SPEC NFR-1 (`npm run bench`), against the demo page in bench mode. */
+/** Benchmarks of SPEC NFR-1 (`npm run bench`), against the benchmark page (`/bench/`). */
 export default defineConfig({
   testDir: 'bench',
   testMatch: '*.bench.ts',
@@ -11,7 +11,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'npx vite --port 5179 --strictPort',
-    url: 'http://localhost:5179/demo/',
+    url: 'http://localhost:5179/bench/',
     reuseExistingServer: true,
     // Vite opens a browser tab on start (server.open) unless BROWSER is 'none'.
     env: { BROWSER: 'none' },

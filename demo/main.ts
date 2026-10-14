@@ -39,14 +39,8 @@ const editor = new Editor({
 createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
 createStatusBar(editor, { container: document.querySelector<HTMLElement>('#status')! });
 
-// Bench mode (ARCHITECTURE §11): no getHTML() per update, the API on window.__stilo.
-if (params.has('bench')) {
-  const { createBenchApi } = await import('./bench');
-  window.__stilo = createBenchApi(editor);
-} else {
-  const showHTML = () => {
-    output.textContent = editor.getHTML();
-  };
-  editor.on('input', showHTML);
-  showHTML();
-}
+const showHTML = () => {
+  output.textContent = editor.getHTML();
+};
+editor.on('input', showHTML);
+showHTML();

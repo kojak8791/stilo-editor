@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stilo benchmarks</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  </head>
+  <body class="bench">
+    <aside class="bench__panel">
+      <h1 class="bench__title">Stilo benchmarks</h1>
+      <fieldset id="controls" class="bench__controls"></fieldset>
+      <p id="stats" class="bench__stats"></p>
+      <p id="state" class="bench__state">Ready.</p>
+      <div class="bench__results-bar">
+        <h2 class="bench__subtitle">Results (ms)</h2>
+        <button id="copy" type="button">Copy</button>
+        <button id="clear" type="button">Clear</button>
+      </div>
+      <table class="bench__results">
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th title="Building the transactions, or parsing the HTML">cmd</th>
+            <th title="EditorState.applyTransaction, with appendTransaction">state</th>
+            <th title="EditorView.updateState: the DOM update">view</th>
+            <th title="Synchronous event listeners">events</th>
+            <th title="Forced layout">layout</th>
+            <th title="Until the next frame: the toolbar refresh">frame</th>
+            <th title="Style, layout and paint of that frame">paint</th>
+            <th>total</th>
+          </tr>
+        </thead>
+        <tbody id="results"></tbody>
+      </table>
+    </aside>
+    <main class="bench__main">
+      <div id="toolbar"></div>
+      <div id="editor" class="bench__content"></div>
+      <div id="status"></div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
