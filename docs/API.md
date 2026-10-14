@@ -142,7 +142,7 @@ whether it is available.
 | `ListItem` | `splitListItem()`, `sinkListItem()` (indent), `liftListItem()` (outdent) |
 | `Bold`, `Italic`, `Underline`, `Strike`, `Code`, `Subscript`, `Superscript` | `set<Name>()`, `unset<Name>()`, `toggle<Name>()`: `toggleBold()`, `setItalic()`, `unsetCode()`, … |
 | `Link` | `setLink({ href, target? })`: links the selection or updates the link at the cursor; `false` for an empty or unsafe `href`. `unsetLink()` |
-| `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()` |
+| `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()`. `setFontFamily(fontFamily)`: a CSS `font-family` list, `false` when no name is valid. `unsetFontFamily()`. `setFontSize(fontSize)`: `px`, `pt`, `em`, `rem` or `%` (`'14px'`), `false` otherwise. `unsetFontSize()`. Each command keeps the other two styles |
 | `Highlight` | `setHighlight({ color? })`, `unsetHighlight()`, `toggleHighlight({ color? })`; without `color`, a plain `<mark>` |
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
 | `History` | `undo()`, `redo()` |
@@ -172,7 +172,7 @@ defaultExtensions({
 | `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
 | `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
 | `link` | `Link` | — |
-| `textStyle`, `highlight` | `TextStyle` (text color), `Highlight` | — |
+| `textStyle`, `highlight` | `TextStyle` (text color, font family, font size), `Highlight` | — |
 | `clearFormatting` | `ClearFormatting` | — |
 | `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
 | `moveBlock` | `MoveBlock` | — |
@@ -224,7 +224,8 @@ ones work.
 | `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
 
 A button whose extension is not loaded is not shown. Default item IDs: `undo`, `redo`,
-`heading`, `bold`, `italic`, `underline`, `strike`, `code`, `subscript`, `superscript`,
+`heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
+`subscript`, `superscript`,
 `link`, `clearFormatting`, `textColor`, `highlight`, `bulletList`, `orderedList`,
 `blockquote`, `horizontalRule`, `characters`.
 
@@ -240,7 +241,18 @@ createToolbar(editor, {
 ```
 
 `textColorButton(palette?)` and `highlightButton(palette?)` create the color buttons with
-another palette (default `DEFAULT_PALETTE`).
+another palette (default `DEFAULT_PALETTE`). `fontFamilyDropdown(fonts?)` and
+`fontSizeDropdown(sizes?)` create the font dropdowns with other lists (default `DEFAULT_FONTS`
+and `DEFAULT_FONT_SIZES`); write a font list as the editor stores it (names with spaces in
+single quotes, `, ` between names):
+
+```ts
+fontFamilyDropdown([
+  { fontFamily: 'Inter, sans-serif', labelKey: 'Inter' },
+  { fontFamily: "'Source Serif 4', serif", labelKey: 'Source Serif' },
+]);
+fontSizeDropdown(['12pt', '14pt', '18pt']);
+```
 
 ### 6.2 Custom buttons
 

@@ -59,6 +59,8 @@ column is what you type to get the format as you write.
 | Inline code | <kbd>Ctrl</kbd>+<kbd>E</kbd> | `` `text` `` | |
 | Subscript | <kbd>Ctrl</kbd>+<kbd>,</kbd> | | Subscript and superscript exclude each other |
 | Superscript | <kbd>Ctrl</kbd>+<kbd>.</kbd> | | |
+| Font family | | | Toolbar dropdown: generic families (sans serif, serif, monospace) and common fonts, each shown in its own font |
+| Font size | | | Toolbar dropdown; a font or size that is not in the list (e.g. pasted from Word) is still shown |
 | Text color | | | The button applies the last color; its arrow opens a palette, "No color" and a custom color |
 | Highlight | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | `==text==` | Same button as text color; the shortcut applies the default highlight |
 | Clear formatting | <kbd>Ctrl</kbd>+<kbd>\\</kbd> | | Links stay |

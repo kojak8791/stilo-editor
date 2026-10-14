@@ -86,6 +86,73 @@ export function unsetMark(type: MarkType): Command {
 }
 
 /**
+ * Command: merges `attrs` into the mark of `type` on the selection, keeping its other
+ * attributes; a mark whose attributes all become `null` is removed. Lets one mark carry several
+ * independent attributes (`textStyle`: font family, size, color).
+ *
+ * - Setting (some value in `attrs` is not `null`): like {@link setMark}, applies to the stored
+ *   marks or to every selected text that accepts the mark; `false` when none does.
+ * - Clearing (every value is `null`): applies where the mark has one of these attributes;
+ *   `false` when none has.
+ */
+export function updateMarkAttrs(type: MarkType, attrs: Attrs): Command {
+  const setting = Object.values(attrs).some((value) => value !== null);
+  // The new mark for text that carries `marks`, `null` to remove it, `undefined` to skip the text.
+  const next = (marks: readonly Mark[]): Mark | null | undefined => {
+    if (isExcluded(marks, type)) return undefined;
+    const current = type.isInSet(marks);
+    if (!setting && !Object.keys(attrs).some((key) => current?.attrs[key] != null)) {
+      return undefined;
+    }
+    const merged = { ...current?.attrs, ...attrs };
+    return Object.values(merged).some((value) => value != null) ? type.create(merged) : null;
+  };
+
+  return (state, dispatch) => {
+    const { empty, $from, ranges } = state.selection;
+    if (empty) {
+      const mark = $from.parent.type.allowsMarkType(type)
+        ? next(state.storedMarks ?? $from.marks())
+        : undefined;
+      if (mark === undefined) return false;
+      dispatch?.(mark ? state.tr.addStoredMark(mark) : state.tr.removeStoredMark(type));
+      return true;
+    }
+
+    const changes: Array<{ from: number; to: number; mark: Mark | null }> = [];
+    for (const range of ranges) {
+      const from = range.$from.pos;
+      const to = range.$to.pos;
+      state.doc.nodesBetween(from, to, (node, pos, parent) => {
+        if (!node.isText || !parent?.type.allowsMarkType(type)) return;
+        const mark = next(node.marks);
+        if (mark === undefined) return;
+        const start = Math.max(pos, from);
+        const end = Math.min(pos + node.nodeSize, to);
+        // Adjacent text getting the same mark becomes one step.
+        const last = changes[changes.length - 1];
+        if (last?.to === start && (last.mark === mark || (last.mark && mark?.eq(last.mark)))) {
+          last.to = end;
+        } else {
+          changes.push({ from: start, to: end, mark });
+        }
+      });
+    }
+    if (changes.length === 0) return false;
+
+    if (dispatch) {
+      const tr = state.tr;
+      for (const { from, to, mark } of changes) {
+        if (mark) tr.addMark(from, to, mark);
+        else tr.removeMark(from, to, type);
+      }
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
+}
+
+/**
  * Command: {@link unsetMark} when the mark is active (see `isMarkActive`), otherwise
  * {@link setMark}. Unlike `toggleMark` from prosemirror-commands, a partially marked selection
  * gets the mark added, consistently with `isActive`.

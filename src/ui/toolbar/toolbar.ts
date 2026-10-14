@@ -96,7 +96,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const optionViews: DropdownOptionView[] = dd.options.map((opt) => {
           const label = messages[opt.labelKey] ?? opt.labelKey;
           const shortcut = opt.shortcut ? formatShortcut(opt.shortcut, mac) : undefined;
-          return { id: opt.id, label, shortcut };
+          return { id: opt.id, label, shortcut, fontFamily: opt.fontFamily };
         });
 
         const ddInstance = createDropdown({
@@ -244,7 +244,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         }
 
         const ddInstance = dropdownMap.get(dd.id);
-        ddInstance?.update({ activeId, disabledIds });
+        const valueLabel = activeId === null ? (dd.getValueLabel?.(editor) ?? null) : null;
+        ddInstance?.update({ activeId, disabledIds, valueLabel });
       } else {
         // Update button
         const btn = el as HTMLButtonElement;

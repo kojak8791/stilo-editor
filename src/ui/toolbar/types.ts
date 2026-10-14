@@ -36,6 +36,11 @@ export interface ToolbarDropdown {
   /** Key of the accessible name of the trigger and of the menu. */
   labelKey: string;
   options: ToolbarDropdownOption[];
+  /**
+   * The text of the trigger when no option is active, e.g. a font size that is not in the list;
+   * `null` (or no function) shows the dropdown label.
+   */
+  getValueLabel?(editor: Editor): string | null;
   isAvailable?(editor: Editor): boolean;
 }
 
@@ -45,6 +50,8 @@ export interface ToolbarDropdownOption {
   id: string;
   labelKey: string;
   shortcut?: string;
+  /** Shows the option label in this font family (a CSS `font-family` list). */
+  fontFamily?: string;
   run(editor: Editor): void;
   isActive(editor: Editor): boolean;
   /** Default: always enabled. */
@@ -88,6 +95,14 @@ export interface ToolbarColorButton {
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
   isAvailable?(editor: Editor): boolean;
+}
+
+/** A font of the `fontFamilyDropdown` list. */
+export interface ToolbarFont {
+  /** A CSS `font-family` list, written as the editor stores it (`'Times New Roman', serif`). */
+  fontFamily: string;
+  /** Key of the font name in `messages`; a missing key is shown as is. */
+  labelKey: string;
 }
 
 /** A single item in the toolbar. */

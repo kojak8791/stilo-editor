@@ -1,6 +1,6 @@
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
-import { setMark, unsetMark } from '../../core/helpers/marks';
+import { updateMarkAttrs } from '../../core/helpers/marks';
 import { buildStyle, normalizeStyleValue, readStyle } from '../../core/html/css';
 
 declare module '../../core/types' {
@@ -9,44 +9,109 @@ declare module '../../core/types' {
     setColor: (color: string) => Command;
     /** Removes the text color from the selection. */
     unsetColor: () => Command;
+    /** Sets the font family list of the selection. Returns `false` when no name is valid. */
+    setFontFamily: (fontFamily: string) => Command;
+    /** Removes the font family from the selection. */
+    unsetFontFamily: () => Command;
+    /** Sets the font size of the selection (`px`, `pt`, `em`, `rem`, `%`); `false` if invalid. */
+    setFontSize: (fontSize: string) => Command;
+    /** Removes the font size from the selection. */
+    unsetFontSize: () => Command;
   }
 }
 
-/** The `textStyle` attributes of a parsed color, `false` (no mark) when it is missing or invalid. */
-function colorAttrs(color: string | null): { color: string } | false {
-  return color ? { color } : false;
+type TextStyleAttr = 'fontFamily' | 'fontSize' | 'color';
+
+/** The CSS property and the `<font>` attribute of each `textStyle` attribute. */
+const SOURCES = {
+  fontFamily: { property: 'font-family', font: 'face' },
+  fontSize: { property: 'font-size', font: 'size' },
+  color: { property: 'color', font: 'color' },
+} as const;
+
+/** `<font size="1…7">` as CSS sizes (the browsers' `x-small` … `xxx-large`). */
+const FONT_SIZES = ['10px', '13px', '16px', '18px', '24px', '32px', '48px'];
+
+/** The value of `attr` written on `element` itself: its style, then the `<font>` attribute. */
+function ownValue(element: HTMLElement, attr: TextStyleAttr): string | null {
+  const { property, font } = SOURCES[attr];
+  const value = readStyle(element, property);
+  if (value || element.tagName !== 'FONT') return value;
+  const raw = element.getAttribute(font)?.trim();
+  if (!raw) return null;
+  if (attr !== 'fontSize') return normalizeStyleValue(property, raw);
+  return /^[1-7]$/.test(raw) ? FONT_SIZES[Number(raw) - 1]! : null;
 }
 
 /**
- * The `textStyle` mark (`<span style="color: x">`), docs/SPEC.md F-208. Also parsed from
- * `<font color>`. Font family and size (F-210, F-211) will be further attributes of this mark.
+ * The `textStyle` attributes of a `<span>` or `<font>`, `false` (no mark) when none is valid.
+ * The mark excludes itself, so the innermost element wins: it also takes the values of the
+ * enclosing ones, as CSS inheritance does (`<span style="font-family: x"><span style="color:
+ * red">` keeps the font).
+ */
+function textStyleAttrs(element: HTMLElement): Record<TextStyleAttr, string | null> | false {
+  const attrs: Record<TextStyleAttr, string | null> = {
+    fontFamily: null,
+    fontSize: null,
+    color: null,
+  };
+  for (let el: HTMLElement | null = element; el; el = el.parentElement) {
+    if (el.tagName !== 'SPAN' && el.tagName !== 'FONT') continue;
+    for (const attr of Object.keys(SOURCES) as TextStyleAttr[]) {
+      attrs[attr] ??= ownValue(el, attr);
+    }
+  }
+  return Object.values(attrs).some((value) => value !== null) && attrs;
+}
+
+/**
+ * The `textStyle` mark (`<span style="font-family: x; font-size: y; color: z">`), docs/SPEC.md
+ * F-208, F-210, F-211. Also parsed from `<font face size color>`.
  */
 export const TextStyle = defineExtension({
   name: 'textStyle',
   priority: 101,
   marks: () => ({
     textStyle: {
-      attrs: { color: { default: null } },
+      attrs: {
+        fontFamily: { default: null },
+        fontSize: { default: null },
+        color: { default: null },
+      },
       parseDOM: [
-        { tag: 'span[style]', getAttrs: (node) => colorAttrs(readStyle(node, 'color')) },
-        {
-          tag: 'font[color]',
-          getAttrs: (node) =>
-            colorAttrs(normalizeStyleValue('color', node.getAttribute('color') ?? '')),
-        },
+        { tag: 'span[style]', getAttrs: textStyleAttrs },
+        { tag: 'font', getAttrs: textStyleAttrs },
       ],
       group: 'formatting',
-      toDOM: (mark) => ['span', { style: buildStyle({ color: mark.attrs.color }) }, 0],
+      toDOM: (mark) => [
+        'span',
+        {
+          style: buildStyle({
+            'font-family': mark.attrs.fontFamily,
+            'font-size': mark.attrs.fontSize,
+            color: mark.attrs.color,
+          }),
+        },
+        0,
+      ],
     },
   }),
   commands: ({ schema }) => {
     const type = schema.marks.textStyle!;
+    const set =
+      (attr: TextStyleAttr) =>
+      (value: string): Command => {
+        const normalized = normalizeStyleValue(SOURCES[attr].property, value);
+        return normalized ? updateMarkAttrs(type, { [attr]: normalized }) : () => false;
+      };
+    const unset = (attr: TextStyleAttr) => (): Command => updateMarkAttrs(type, { [attr]: null });
     return {
-      setColor: (color) => {
-        const value = normalizeStyleValue('color', color);
-        return value ? setMark(type, { color: value }) : () => false;
-      },
-      unsetColor: () => unsetMark(type),
+      setColor: set('color'),
+      unsetColor: unset('color'),
+      setFontFamily: set('fontFamily'),
+      unsetFontFamily: unset('fontFamily'),
+      setFontSize: set('fontSize'),
+      unsetFontSize: unset('fontSize'),
     };
   },
 });

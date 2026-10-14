@@ -63,6 +63,13 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-033 | Release documents: README (warning, Usage with `npm install` and the CSS import, "Support" section: where to open issues and ask questions, no promised response time), `SECURITY.md` (private vulnerability reports through GitHub, public advisory with the fix), `CONTRIBUTING.md` (repeating the rule that keeps the README Features table in sync), issue templates (steps to reproduce, version, browser), first `docs/API.md` (editor options, commands, events, UI options; linked right below the Usage example; `ARCHITECTURE.md` stays the contributors' reference) | — | done |
 | T-034 | First public release: `stilo-editor@0.1.0` on npm, tag `v0.1.0` and GitHub release | NFR-6 | done |
 
+## M2 — v1.0 (continued)
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-038 | Font family and font size: `textStyle` attributes `fontFamily` and `fontSize` (also from `<font face size>`, nested spans keep the outer values), commands that change one style and keep the others, toolbar dropdowns with replaceable lists, each font drawn in its font, values outside the list shown | F-210, F-211, F-804 | in progress |
+| T-039 | Text alignment (left, center, right, justify) on paragraphs and headings: `textAlign` attribute, commands, `Mod-Shift-l/e/r/j`, toolbar | F-308 | planned |
+
 ## Notes for later milestones
 
 - README on the npm page: links to anchors of the README itself (`#large-documents`) do not

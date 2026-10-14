@@ -6,6 +6,8 @@ import { defaultExtensions, StiloError } from '../../index';
 import {
   createToolbar,
   en,
+  fontFamilyDropdown,
+  fontSizeDropdown,
   headingDropdown,
   it as itLocale,
   type ToolbarButton,
@@ -51,7 +53,7 @@ describe('toolbar', () => {
     const groups = [...toolbar.element.children].filter(
       (el) => el.getAttribute('role') === 'group',
     );
-    expect(groups.length).toBe(5);
+    expect(groups.length).toBe(6);
     expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
     const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
@@ -61,6 +63,8 @@ describe('toolbar', () => {
       'undo',
       'redo',
       'heading',
+      'fontFamily',
+      'fontSize',
       'bold',
       'italic',
       'underline',
@@ -765,5 +769,147 @@ describe('heading dropdown', () => {
     expect(names).toContain('headingDropdown');
     expect(names).not.toContain('createDropdown');
     expect(names).not.toContain('isMacPlatform');
+  });
+});
+
+describe('font dropdowns', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html });
+    attachEditor(editor);
+    // jsdom has no layout: scrolling the selection into view needs Range.getClientRects.
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
+    const dropdown = (item: 'fontFamily' | 'fontSize') => {
+      const trigger = toolbar.element.querySelector<HTMLButtonElement>(`[data-item="${item}"]`)!;
+      const value = () => trigger.querySelector('.stilo-dropdown__value')!.textContent;
+      trigger.click();
+      const menu = toolbar.element.querySelector<HTMLElement>(
+        '.stilo-dropdown__menu:not([hidden])',
+      )!;
+      trigger.click();
+      const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
+      const ids = () =>
+        [...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].map(
+          (el) => el.dataset.option,
+        );
+      return { trigger, value, menu, option, ids };
+    };
+    return { editor, toolbar, dropdown };
+  }
+
+  it('lists Default, the generic families and the fonts, each drawn in its font', () => {
+    const { dropdown } = setup('<p>a|b</p>');
+    const { trigger, value, option, ids } = dropdown('fontFamily');
+    expect(ids()).toEqual([
+      'default',
+      'sans-serif',
+      'serif',
+      'monospace',
+      'arial',
+      'verdana',
+      'tahoma',
+      'trebuchet-ms',
+      'georgia',
+      'times-new-roman',
+      'courier-new',
+    ]);
+    expect(value()).toBe('Font');
+    expect(trigger.getAttribute('aria-label')).toBe('Font: Font');
+    const label = (id: string) => option(id).querySelector<HTMLElement>('.stilo-dropdown__label')!;
+    expect(label('default').textContent).toBe('Default');
+    expect(label('default').style.fontFamily).toBe('');
+    expect(label('sans-serif').textContent).toBe('Sans serif');
+    expect(label('times-new-roman').textContent).toBe('Times New Roman');
+    expect(label('times-new-roman').style.fontFamily).toBe('"Times New Roman", Times, serif');
+  });
+
+  it('lists Default and the sizes', () => {
+    const { dropdown } = setup('<p>a|b</p>', { messages: itLocale });
+    const { value, ids, option } = dropdown('fontSize');
+    expect(ids()).toEqual([
+      'default',
+      '12px',
+      '14px',
+      '16px',
+      '18px',
+      '20px',
+      '24px',
+      '28px',
+      '36px',
+      '48px',
+    ]);
+    expect(value()).toBe('Dimensione');
+    expect(option('default').textContent).toBe('Predefinito');
+    expect(option('18px').textContent).toBe('18px');
+  });
+
+  it('applies and removes a font family and a size', () => {
+    const { editor, toolbar, dropdown } = setup('<p>[ab]</p>');
+    const family = dropdown('fontFamily');
+    const size = dropdown('fontSize');
+    family.option('georgia').click();
+    size.option('20px').click();
+    expect(editor.getHTML()).toBe(
+      '<p><span style="font-family: Georgia, serif; font-size: 20px">ab</span></p>',
+    );
+    toolbar.update();
+    expect(family.value()).toBe('Georgia');
+    expect(family.option('georgia').getAttribute('aria-checked')).toBe('true');
+    expect(family.option('default').getAttribute('aria-checked')).toBe('false');
+    expect(size.value()).toBe('20px');
+    family.option('default').click();
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 20px">ab</span></p>');
+    size.option('default').click();
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+
+  it('shows a value that is not in the list', () => {
+    const { dropdown } = setup(
+      '<p><span style="font-family: Calibri, sans-serif; font-size: 11pt">a|b</span></p>',
+    );
+    const family = dropdown('fontFamily');
+    expect(family.value()).toBe('Calibri');
+    expect(family.trigger.getAttribute('aria-label')).toBe('Font: Calibri');
+    expect(family.menu.querySelector('[aria-checked="true"]')).toBeNull();
+    expect(dropdown('fontSize').value()).toBe('11pt');
+  });
+
+  it('shows the dropdown label for a selection with different values', () => {
+    const { dropdown } = setup(
+      '<p>[<span style="font-family: Arial; font-size: 12px">a</span>' +
+        '<span style="font-family: Georgia; font-size: 14px">b</span>]</p>',
+    );
+    expect(dropdown('fontFamily').value()).toBe('Font');
+    expect(dropdown('fontSize').value()).toBe('Size');
+  });
+
+  it('is disabled inside code', () => {
+    const { dropdown } = setup('<p><code>a|b</code></p>');
+    expect(dropdown('fontFamily').trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(dropdown('fontSize').trigger.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('takes custom lists', () => {
+    const { dropdown } = setup('<p>a|b</p>', {
+      items: [
+        [
+          fontFamilyDropdown([{ fontFamily: "'Comic Sans MS', cursive", labelKey: 'Comic' }]),
+          fontSizeDropdown(['1em', '1.5em']),
+        ],
+      ],
+    });
+    expect(dropdown('fontFamily').ids()).toEqual(['default', 'comic-sans-ms']);
+    expect(dropdown('fontSize').ids()).toEqual(['default', '1em', '1-5em']);
+  });
+
+  it('is not rendered without the TextStyle extension', () => {
+    const editor = createTestEditor({
+      html: '<p>ab</p>',
+      extensions: [defaultExtensions({ textStyle: false })],
+    });
+    attachEditor(editor);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    expect(toolbar.element.querySelector('[data-item="fontFamily"]')).toBeNull();
+    expect(toolbar.element.querySelector('[data-item="fontSize"]')).toBeNull();
   });
 });

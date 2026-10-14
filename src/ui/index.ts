@@ -15,10 +15,14 @@ export { en } from './i18n/en';
 export { it } from './i18n/it';
 /** i18n types. */
 export type { MessageKey, Messages } from './i18n/types';
+/** Default lists of the font dropdowns. */
+export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 /** Default toolbar items and layout. */
 export {
   DEFAULT_ITEMS,
   DEFAULT_TOOLBAR,
+  fontFamilyDropdown,
+  fontSizeDropdown,
   headingDropdown,
   highlightButton,
   textColorButton,
@@ -35,5 +39,6 @@ export type {
   ToolbarContext,
   ToolbarDropdown,
   ToolbarDropdownOption,
+  ToolbarFont,
   ToolbarItem,
 } from './toolbar/types';

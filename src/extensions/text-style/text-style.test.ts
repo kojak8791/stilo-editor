@@ -36,6 +36,41 @@ describe('TextStyle: parse and serialize', () => {
       '<p><a href="x"><span style="color: red">a</span></a></p>',
     ],
     ['<p><code><span style="color: red">a</span></code></p>', '<p><code>a</code></p>'],
+    [
+      '<p><span style="font-family: &quot;Times New Roman&quot; ,serif">a</span></p>',
+      '<p><span style="font-family: \'Times New Roman\', serif">a</span></p>',
+    ],
+    [
+      '<p><span style="font-size: 12PT">a</span></p>',
+      '<p><span style="font-size: 12pt">a</span></p>',
+    ],
+    ['<p><span style="font-size: large">a</span></p>', '<p>a</p>'],
+    [
+      '<p><span style="color: red; font-size: 14px; font-family: Arial">a</span></p>',
+      '<p><span style="font-family: Arial; font-size: 14px; color: red">a</span></p>',
+    ],
+    [
+      '<p><font face="Georgia, serif" size="5" color="red">a</font></p>',
+      '<p><span style="font-family: Georgia, serif; font-size: 24px; color: red">a</span></p>',
+    ],
+    ['<p><font size="1">a</font></p>', '<p><span style="font-size: 10px">a</span></p>'],
+    ['<p><font size="7">a</font></p>', '<p><span style="font-size: 48px">a</span></p>'],
+    ['<p><font size="+1">a</font></p>', '<p>a</p>'],
+    ['<p><font size="8">a</font></p>', '<p>a</p>'],
+    ['<p><font>a</font></p>', '<p>a</p>'],
+    [
+      '<p><span style="font-family: Arial">a<span style="color: red">b</span></span></p>',
+      '<p><span style="font-family: Arial">a</span>' +
+        '<span style="font-family: Arial; color: red">b</span></p>',
+    ],
+    [
+      '<p><font face="Arial"><strong><span style="font-size: 9pt">a</span></strong></font></p>',
+      '<p><span style="font-family: Arial; font-size: 9pt"><strong>a</strong></span></p>',
+    ],
+    [
+      '<p><span style="font-family: Arial"><span style="font-family: Georgia">a</span></span></p>',
+      '<p><span style="font-family: Georgia">a</span></p>',
+    ],
   ])('parses %j as %j', (html, expected) => {
     expect(createTestEditor({ html }).getHTML()).toBe(expected);
   });
@@ -44,7 +79,9 @@ describe('TextStyle: parse and serialize', () => {
     const editor = createTestEditor({
       html:
         '<p><span style="color: #F00">a</span> <font color="navy">b</font> ' +
-        '<span style="color: rgba(0, 0, 0, 0.5)"><em>c</em></span></p>',
+        '<span style="color: rgba(0, 0, 0, 0.5)"><em>c</em></span> ' +
+        '<font face="Times New Roman" size="2">d</font> ' +
+        '<span style="font-family: Arial">e<span style="font-size: 9pt">f</span></span></p>',
     });
     const html = editor.getHTML();
     editor.setHTML(html);
@@ -127,10 +164,107 @@ describe('TextStyle: commands', () => {
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
   });
 
+  it.each([
+    ['setFontFamily', 'Georgia, serif', 'font-family: Georgia, serif'],
+    ['setFontFamily', '"Times New Roman"', "font-family: 'Times New Roman'"],
+    ['setFontSize', '18PX', 'font-size: 18px'],
+    ['setFontSize', '1.5em', 'font-size: 1.5em'],
+  ] as const)('%s(%j) sets %j', (command, value, style) => {
+    const editor = createTestEditor({ html: '<p>a[b]c</p>' });
+    expect(editor.commands[command](value)).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(`<p>a<span style="${style}">[b]</span>c</p>`);
+  });
+
+  it.each([
+    ['setFontFamily', ''],
+    ['setFontFamily', '"; color: red'],
+    ['setFontSize', 'large'],
+    ['setFontSize', '12'],
+    ['setFontSize', 'calc(1px)'],
+  ] as const)('%s rejects %j', (command, value) => {
+    const editor = createTestEditor({ html: '<p>[ab]</p>' });
+    expect(editor.commands[command](value)).toBe(false);
+    expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
+  });
+
+  it('keeps the other attributes when one is set or removed', () => {
+    const editor = createTestEditor({ html: '<p><span style="color: red">[ab]</span></p>' });
+    expect(editor.commands.setFontFamily('Arial')).toBe(true);
+    expect(editor.commands.setFontSize('14px')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p><span style="font-family: Arial; font-size: 14px; color: red">[ab]</span></p>',
+    );
+    expect(editor.commands.unsetColor()).toBe(true);
+    expect(editor.commands.unsetFontFamily()).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p><span style="font-size: 14px">[ab]</span></p>');
+    expect(editor.commands.unsetFontSize()).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
+  });
+
+  it('sets one attribute over text with different styles, keeping each one', () => {
+    const editor = createTestEditor({
+      html: '<p>[a<span style="color: red">b</span><span style="font-size: 9pt">c</span>]</p>',
+    });
+    expect(editor.commands.setFontFamily('Arial')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p><span style="font-family: Arial">[a</span>' +
+        '<span style="font-family: Arial; color: red">b</span>' +
+        '<span style="font-family: Arial; font-size: 9pt">c]</span></p>',
+    );
+  });
+
+  it.each([
+    ['unsetFontFamily', '<p><span style="color: red">[ab]</span></p>'],
+    ['unsetFontSize', '<p>[ab]</p>'],
+  ] as const)('%s returns false where no text has it', (command, html) => {
+    const editor = createTestEditor({ html });
+    expect(editor.commands[command]()).toBe(false);
+    expect(getHTMLWithSelection(editor)).toBe(html);
+  });
+
+  it('removes the attribute only from the selected part', () => {
+    const editor = createTestEditor({
+      html: '<p><span style="font-family: Arial; color: red">a[b]c</span></p>',
+    });
+    expect(editor.commands.unsetFontFamily()).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p><span style="font-family: Arial; color: red">a</span>' +
+        '<span style="color: red">[b]</span>' +
+        '<span style="font-family: Arial; color: red">c</span></p>',
+    );
+  });
+
+  it('merges the attributes in the stored marks with an empty selection', () => {
+    const editor = createTestEditor({ html: '<p><span style="color: red">a|</span></p>' });
+    expect(editor.commands.setFontSize('20px')).toBe(true);
+    typeText(editor, 'b');
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p><span style="color: red">a</span>' +
+        '<span style="font-size: 20px; color: red">b|</span></p>',
+    );
+    expect(editor.commands.unsetFontSize()).toBe(true);
+    expect(editor.commands.unsetColor()).toBe(true);
+    typeText(editor, 'c');
+    expect(getHTMLWithSelection(editor)).toBe(
+      '<p><span style="color: red">a</span>' +
+        '<span style="font-size: 20px; color: red">b</span>c|</p>',
+    );
+  });
+
+  it('cannot set a font inside code', () => {
+    const editor = createTestEditor({ html: '<p><code>[ab]</code></p>' });
+    expect(editor.commands.setFontFamily.can('Arial')).toBe(false);
+    expect(editor.commands.setFontSize.can('12px')).toBe(false);
+  });
+
   it('reports the active state and the color', () => {
     const editor = createTestEditor({ html: '<p><span style="color: red">a|b</span></p>' });
     expect(editor.isActive('textStyle', { color: 'red' })).toBe(true);
     expect(editor.isActive('textStyle', { color: 'blue' })).toBe(false);
-    expect(editor.getAttributes('textStyle')).toEqual({ color: 'red' });
+    expect(editor.getAttributes('textStyle')).toEqual({
+      fontFamily: null,
+      fontSize: null,
+      color: 'red',
+    });
   });
 });

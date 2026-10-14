@@ -7,6 +7,8 @@ export interface DropdownOptionView {
   id: string;
   label: string;
   shortcut?: string;
+  /** The label is drawn in this font family. */
+  fontFamily?: string;
 }
 
 export interface DropdownOptions {
@@ -21,6 +23,8 @@ export interface DropdownOptions {
 export interface DropdownState {
   activeId: string | null;
   disabledIds: ReadonlySet<string>;
+  /** Shown by the trigger when no option is active; default: the dropdown label. */
+  valueLabel?: string | null;
 }
 
 export interface Dropdown {
@@ -71,6 +75,7 @@ export function createDropdown(options: DropdownOptions): Dropdown {
     const labelSpan = document.createElement('span');
     labelSpan.className = 'stilo-dropdown__label';
     labelSpan.textContent = opt.label;
+    if (opt.fontFamily) labelSpan.style.fontFamily = opt.fontFamily;
     el.appendChild(labelSpan);
 
     if (opt.shortcut) {
@@ -256,11 +261,11 @@ export function createDropdown(options: DropdownOptions): Dropdown {
   let isDestroyed = false;
 
   function update(state: DropdownState): void {
-    const { activeId, disabledIds } = state;
+    const { activeId, disabledIds, valueLabel } = state;
 
     // Update trigger
     const activeOption = menuOptions.find((opt) => opt.id === activeId);
-    const displayedLabel = activeOption?.label ?? label;
+    const displayedLabel = activeOption?.label ?? valueLabel ?? label;
     valueSpan.textContent = displayedLabel;
     trigger.setAttribute('aria-label', `${label}: ${displayedLabel}`);
 

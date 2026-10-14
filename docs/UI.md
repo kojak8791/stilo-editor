@@ -44,7 +44,9 @@ src/ui/
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014),
-    │                        textColorButton, highlightButton (T-026)
+    │                        textColorButton, highlightButton (T-026),
+    │                        fontFamilyDropdown, fontSizeDropdown (T-038)
+    ├── fonts.ts             DEFAULT_FONTS, DEFAULT_FONT_SIZES (T-038)
     ├── palette.ts           DEFAULT_PALETTE (T-026)
     └── toolbar.ts           createToolbar
 src/styles/ui.css            All UI styles
@@ -58,9 +60,10 @@ Tests are colocated (`src/ui/**/<name>.test.ts`).
 ```ts
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
 export type { ToolbarButton, ToolbarColor, ToolbarColorButton, ToolbarContext,
-  ToolbarDropdown, ToolbarDropdownOption, ToolbarItem } from './toolbar/types';
-export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown, highlightButton,
-  textColorButton } from './toolbar/items';
+  ToolbarDropdown, ToolbarDropdownOption, ToolbarFont, ToolbarItem } from './toolbar/types';
+export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, fontFamilyDropdown, fontSizeDropdown, headingDropdown,
+  highlightButton, textColorButton } from './toolbar/items';
+export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 export { DEFAULT_PALETTE } from './toolbar/palette';
 export type { MessageKey, Messages } from './i18n/types';
 export { en } from './i18n/en';
@@ -137,6 +140,8 @@ export interface ToolbarDropdown {
   /** Key of the accessible name of the trigger and of the menu. */
   labelKey: string;
   options: ToolbarDropdownOption[];
+  /** Trigger text when no option is active (a value not in the list); `null`: the label. T-038. */
+  getValueLabel?(editor: Editor): string | null;
   isAvailable?(editor: Editor): boolean;
 }
 
@@ -146,6 +151,8 @@ export interface ToolbarDropdownOption {
   id: string;
   labelKey: string;
   shortcut?: string;
+  /** Shows the option label in this font family (a CSS `font-family` list). T-038. */
+  fontFamily?: string;
   run(editor: Editor): void;
   isActive(editor: Editor): boolean;
   /** Default: always enabled. */
@@ -183,6 +190,14 @@ export interface ToolbarColorButton {
   isAvailable?(editor: Editor): boolean;
 }
 
+/** A font of the fontFamilyDropdown list (T-038, §6.4). */
+export interface ToolbarFont {
+  /** A CSS `font-family` list, written as the editor stores it (`'Times New Roman', serif`). */
+  fontFamily: string;
+  /** Key of the font name in `messages`; a missing key is shown as is. */
+  labelKey: string;
+}
+
 export type ToolbarItem = ToolbarButton | ToolbarDropdown | ToolbarColorButton;
 ```
 
@@ -217,6 +232,12 @@ no functions.
 | `toolbar.blockquote` | Quote | Citazione |
 | `toolbar.horizontalRule` | Horizontal line | Linea orizzontale |
 | `toolbar.heading` | Text style | Stile testo |
+| `toolbar.fontFamily` | Font | Carattere |
+| `toolbar.fontSize` | Size | Dimensione |
+| `font.default` | Default | Predefinito |
+| `font.sansSerif` | Sans serif | Senza grazie |
+| `font.serif` | Serif | Con grazie |
+| `font.monospace` | Monospace | Monospaziato |
 | `toolbar.link` | Link | Collegamento |
 | `heading.paragraph` | Paragraph | Paragrafo |
 | `heading.h1` | Heading 1 | Titolo 1 |
@@ -269,6 +290,7 @@ no functions.
 [
   ['undo', 'redo'],
   ['heading'],
+  ['fontFamily', 'fontSize'],
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
     'clearFormatting'],
   ['textColor', 'highlight'],
@@ -301,6 +323,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 `canEditLink(editor)` (§5.1), `isAvailable` is `'setLink' in editor.commands`.
 
 `heading` (T-014) is `headingDropdown()`, see §6.
+
+`fontFamily` and `fontSize` (T-038) are `fontFamilyDropdown()` and `fontSizeDropdown()`, see §6.4.
 
 `textColor` and `highlight` (T-026) are color split buttons (§5.4), created by
 `textColorButton(palette = DEFAULT_PALETTE)` and `highlightButton(palette = DEFAULT_PALETTE)`;
@@ -656,8 +680,11 @@ and highlight (SPEC F-208, F-209, F-804).
 </div>
 ```
 
-- The trigger shows the label of the active option (the first whose `isActive` is true), or the
-  dropdown label when none is active; `aria-label` is `<dropdown label>: <shown text>`.
+- The trigger shows the label of the active option (the first whose `isActive` is true); when
+  none is active, the text of `getValueLabel` if it returns one, otherwise the dropdown label.
+  `aria-label` is `<dropdown label>: <shown text>`.
+- An option with `fontFamily` has its label drawn in that font (`style.fontFamily` set on the
+  `.stilo-dropdown__label`).
 - `aria-checked` is `true` on the active option only. A disabled option has
   `aria-disabled="true"`. When every option is disabled the trigger has `aria-disabled="true"`
   and does not open.
@@ -690,6 +717,37 @@ with fewer levels.
 
 `isEnabled` of each option: `isActive(editor) || editor.commands.<run command>.can()`. `setBlockType`
 refuses a block that already has the type, and the active option must stay selectable.
+
+### 6.4 Font family and font size dropdowns (T-038)
+
+`fontFamilyDropdown(fonts: readonly ToolbarFont[] = DEFAULT_FONTS)` (item ID `fontFamily`,
+`labelKey` `toolbar.fontFamily`) and `fontSizeDropdown(sizes: readonly string[] =
+DEFAULT_FONT_SIZES)` (item ID `fontSize`, `labelKey` `toolbar.fontSize`), for the `TextStyle`
+extension (SPEC F-210, F-211, F-804). `isAvailable`: `'setFontFamily' in editor.commands` and
+`'setFontSize' in editor.commands`. Pass them with other lists as custom items.
+
+| Option | ID | `labelKey` | `run` | `isActive` | `isEnabled` |
+|---|---|---|---|---|---|
+| Default | `default` | `font.default` | `unsetFontFamily()` / `unsetFontSize()` | never | `setFontFamily.can('serif')` / `setFontSize.can('16px')` |
+| a font | its first name, lowercased, other runs than `a-z0-9` → `-`: `'Times New Roman', serif` → `times-new-roman` | the font's `labelKey`; `fontFamily` is set, so it is drawn in that font | `setFontFamily(fontFamily)` | `isActive('textStyle', { fontFamily })` | `setFontFamily.can(fontFamily)` |
+| a size | the same rule: `1.5em` → `1-5em` | the size, shown as is | `setFontSize(size)` | `isActive('textStyle', { fontSize })` | `setFontSize.can(size)` |
+
+- *Default* is never checked: with no font family (size) the trigger shows the dropdown label,
+  *Font* (*Size*).
+- `getValueLabel`: the value of the whole selection when it is not in the list, e.g. a pasted
+  `Calibri, sans-serif` shown as *Calibri* (first name, unquoted) or `11pt` shown as is. A
+  selection with different values shows the dropdown label. Every option is disabled inside
+  code, so the trigger is too.
+
+`DEFAULT_FONTS`: the generic families `sans-serif`, `serif`, `monospace` (labels translated:
+`font.sansSerif`, `font.serif`, `font.monospace`), then `Arial, Helvetica, sans-serif`, `Verdana,
+Geneva, sans-serif`, `Tahoma, Geneva, sans-serif`, `'Trebuchet MS', Helvetica, sans-serif`,
+`Georgia, serif`, `'Times New Roman', Times, serif`, `'Courier New', Courier, monospace`
+(labels: the font name). Every named font has fallbacks for the systems that lack it. The
+values are written in the normalized form the editor stores (ARCHITECTURE §7.3), otherwise
+`isActive` would not match them.
+
+`DEFAULT_FONT_SIZES`: `12px`, `14px`, `16px`, `18px`, `20px`, `24px`, `28px`, `36px`, `48px`.
 
 ## 7. Styles (`src/styles/ui.css`)
 

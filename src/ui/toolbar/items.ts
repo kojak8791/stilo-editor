@@ -21,13 +21,21 @@ import {
 import type { Editor, HeadingLevel } from '../../index';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
+import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
 import { DEFAULT_PALETTE } from './palette';
-import type { ToolbarColor, ToolbarColorButton, ToolbarDropdown, ToolbarItem } from './types';
+import type {
+  ToolbarColor,
+  ToolbarColorButton,
+  ToolbarDropdown,
+  ToolbarFont,
+  ToolbarItem,
+} from './types';
 
 /** Default toolbar item IDs for the `items` configuration. */
 export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ['undo', 'redo'],
   ['heading'],
+  ['fontFamily', 'fontSize'],
   [
     'bold',
     'italic',
@@ -244,6 +252,8 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isAvailable: (e) => 'insertText' in e.commands,
   },
   heading: headingDropdown(),
+  fontFamily: fontFamilyDropdown(),
+  fontSize: fontSizeDropdown(),
   textColor: textColorButton(),
   highlight: highlightButton(),
 };
@@ -296,6 +306,98 @@ export function highlightButton(
     getColor: (e) => markColor(e, 'highlight'),
     isEnabled: (e) => 'setHighlight' in e.commands && e.commands.setHighlight.can(),
     isAvailable: (e) => 'setHighlight' in e.commands,
+  };
+}
+
+/** The first name of a CSS `font-family` list, unquoted: `'Times New Roman', serif` → `Times New Roman`. */
+function firstFamily(fontFamily: string): string {
+  return fontFamily.split(',')[0]!.replace(/'/g, '').trim();
+}
+
+/** A class-safe option ID for a CSS value: `'Times New Roman', serif` → `times-new-roman`. */
+function optionId(value: string): string {
+  return firstFamily(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-');
+}
+
+/** A `textStyle` attribute when the whole selection has the same value, otherwise `null`. */
+function textStyleValue(editor: Editor, attr: 'fontFamily' | 'fontSize'): string | null {
+  const value = editor.getAttributes('textStyle')[attr];
+  return typeof value === 'string' && editor.isActive('textStyle', { [attr]: value })
+    ? value
+    : null;
+}
+
+/**
+ * The font family dropdown (`TextStyle` extension): "Default" removes the font family, then one
+ * option per font, drawn in that font. A font that is not in the list is shown by its first name.
+ */
+export function fontFamilyDropdown(fonts: readonly ToolbarFont[] = DEFAULT_FONTS): ToolbarDropdown {
+  return {
+    id: 'fontFamily',
+    kind: 'dropdown',
+    labelKey: 'toolbar.fontFamily',
+    options: [
+      {
+        id: 'default',
+        labelKey: 'font.default',
+        run: (e: Editor) => {
+          e.commands.unsetFontFamily();
+        },
+        isActive: () => false,
+        isEnabled: (e: Editor) => e.commands.setFontFamily.can('serif'),
+      },
+      ...fonts.map(({ fontFamily, labelKey }) => ({
+        id: optionId(fontFamily),
+        labelKey,
+        fontFamily,
+        run: (e: Editor) => {
+          e.commands.setFontFamily(fontFamily);
+        },
+        isActive: (e: Editor) => e.isActive('textStyle', { fontFamily }),
+        isEnabled: (e: Editor) => e.commands.setFontFamily.can(fontFamily),
+      })),
+    ],
+    getValueLabel: (e: Editor) => {
+      const value = textStyleValue(e, 'fontFamily');
+      return value === null ? null : firstFamily(value);
+    },
+    isAvailable: (e: Editor) => 'setFontFamily' in e.commands,
+  };
+}
+
+/**
+ * The font size dropdown (`TextStyle` extension): "Default" removes the font size, then one
+ * option per size (CSS sizes, shown as they are). A size that is not in the list is shown too.
+ */
+export function fontSizeDropdown(sizes: readonly string[] = DEFAULT_FONT_SIZES): ToolbarDropdown {
+  return {
+    id: 'fontSize',
+    kind: 'dropdown',
+    labelKey: 'toolbar.fontSize',
+    options: [
+      {
+        id: 'default',
+        labelKey: 'font.default',
+        run: (e: Editor) => {
+          e.commands.unsetFontSize();
+        },
+        isActive: () => false,
+        isEnabled: (e: Editor) => e.commands.setFontSize.can('16px'),
+      },
+      ...sizes.map((fontSize) => ({
+        id: optionId(fontSize),
+        labelKey: fontSize,
+        run: (e: Editor) => {
+          e.commands.setFontSize(fontSize);
+        },
+        isActive: (e: Editor) => e.isActive('textStyle', { fontSize }),
+        isEnabled: (e: Editor) => e.commands.setFontSize.can(fontSize),
+      })),
+    ],
+    getValueLabel: (e: Editor) => textStyleValue(e, 'fontSize'),
+    isAvailable: (e: Editor) => 'setFontSize' in e.commands,
   };
 }
 
