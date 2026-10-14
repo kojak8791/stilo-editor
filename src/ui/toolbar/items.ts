@@ -8,6 +8,7 @@ import {
   List,
   ListChevronsUpDown,
   ListOrdered,
+  ListTodo,
   Minus,
   Quote,
   Redo2,
@@ -59,7 +60,16 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'table', 'characters'],
+  [
+    'bulletList',
+    'orderedList',
+    'taskList',
+    'blockquote',
+    'codeBlock',
+    'horizontalRule',
+    'table',
+    'characters',
+  ],
   ['find'],
 ];
 
@@ -228,6 +238,19 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isActive: (e) => e.isActive('orderedList'),
     isEnabled: (e) => 'toggleOrderedList' in e.commands && e.commands.toggleOrderedList.can(),
     isAvailable: (e) => 'toggleOrderedList' in e.commands,
+  },
+  taskList: {
+    id: 'taskList',
+    kind: 'button',
+    icon: ListTodo,
+    labelKey: 'toolbar.taskList',
+    shortcut: 'Mod-Shift-9',
+    run: (e) => {
+      e.commands.toggleTaskList();
+    },
+    isActive: (e) => e.isActive('taskList'),
+    isEnabled: (e) => 'toggleTaskList' in e.commands && e.commands.toggleTaskList.can(),
+    isAvailable: (e) => 'toggleTaskList' in e.commands,
   },
   blockquote: {
     id: 'blockquote',

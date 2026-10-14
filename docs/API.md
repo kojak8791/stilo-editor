@@ -143,6 +143,8 @@ whether it is available.
 | `BulletList` | `toggleBulletList()` |
 | `OrderedList` | `toggleOrderedList()` |
 | `ListItem` | `splitListItem()`, `sinkListItem()` (indent), `liftListItem()` (outdent) |
+| `TaskList` | `toggleTaskList()`: wraps the selection in a task list, lifts the items out, or converts a bulleted or numbered list (and back: the items lose their checked state) |
+| `TaskItem` | `splitTaskItem()`, `sinkTaskItem()` (indent), `liftTaskItem()` (outdent). `toggleTaskChecked()`: checks the selected task items, or unchecks them when all are checked; `false` outside a task item and in a code block |
 | `Bold`, `Italic`, `Underline`, `Strike`, `Code`, `Subscript`, `Superscript` | `set<Name>()`, `unset<Name>()`, `toggle<Name>()`: `toggleBold()`, `setItalic()`, `unsetCode()`, … |
 | `Link` | `setLink({ href, target? })`: links the selection or updates the link at the cursor; `false` for an empty or unsafe `href`. `unsetLink()` |
 | `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()`. `setFontFamily(fontFamily)`: a CSS `font-family` list, `false` when no name is valid. `unsetFontFamily()`. `setFontSize(fontSize)`: `px`, `pt`, `em`, `rem` or `%` (`'14px'`), `false` otherwise. `unsetFontSize()`. Each command keeps the other two styles. `stepFontSize(delta, unit?)`: each selected part goes from the size it has on the page to the next (`delta` 1) or previous (`-1`) whole number in `unit` (`'pt'` default, `'px'`, `'rem'` stepped in px), between 1 and 400 |
@@ -168,6 +170,11 @@ of the table at the selection are header cells, `null` outside a table.
 Column widths set by dragging a column border are written twice: `data-colwidth` on the cells
 (read back by the editor) and a `<colgroup>` with `<col style="width: 120px">` (shown by any
 page). A table without widths has neither.
+
+A task list is written as `<ul data-type="taskList">` with `<li data-checked="true">` or
+`<li data-checked="false">` items: only the editor draws the checkboxes. To show them on
+another page, load `content.css` and put the content in an element with the class
+`stilo-content`, or style `li[data-checked]` yourself.
 
 `getWordCount(editor)` returns `{ words, characters }` for the whole document: words are runs of
 non-space characters with at least one letter or digit; characters include spaces, not line and
@@ -196,6 +203,7 @@ defaultExtensions({
 | `table` | `Table` (tables, cell selection, column resize) | — |
 | `image` | `Image` (inline images: paste of image files, resize handles) | `maxInlineBytes`: largest pasted image file inserted as a data URL, default `5 * 1024 * 1024` (5 MB) |
 | `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
+| `taskList`, `taskItem` | `TaskList`, `TaskItem` (checklists: a checkbox for each item) | — |
 | `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
 | `link` | `Link` | — |
 | `textStyle`, `highlight` | `TextStyle` (text color, font family, font size), `Highlight` | — |
@@ -256,7 +264,7 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
-`bulletList`, `orderedList`,
+`bulletList`, `orderedList`, `taskList`,
 `blockquote`, `codeBlock`, `horizontalRule`, `table`, `characters`, `find`.
 
 The `table` button opens a grid to insert a table (with or without a header row); with the

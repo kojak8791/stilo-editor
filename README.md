@@ -79,6 +79,7 @@ column is what you type to get the format as you write.
 | **Lists** | | | |
 | Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | `- ` `* ` `+ ` | |
 | Numbered list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | `1. ` | Starts from the number you type |
+| Checklist | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>9</kbd> | `[ ] ` `[x] ` | Click a checkbox, or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to check the selected items; checked items are struck through |
 | Indent / outdent item | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | |
 | **Tables** | | | |
 | Insert a table | | | Toolbar grid up to 10 × 8, with or without a header row |

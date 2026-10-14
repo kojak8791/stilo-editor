@@ -15,6 +15,7 @@ export const it: Messages = {
   'toolbar.clearFormatting': 'Cancella formattazione',
   'toolbar.bulletList': 'Elenco puntato',
   'toolbar.orderedList': 'Elenco numerato',
+  'toolbar.taskList': 'Elenco di controllo',
   'toolbar.blockquote': 'Citazione',
   'toolbar.codeBlock': 'Blocco di codice',
   'toolbar.horizontalRule': 'Linea orizzontale',

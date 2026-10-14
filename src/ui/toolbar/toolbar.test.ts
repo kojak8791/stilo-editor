@@ -86,6 +86,7 @@ describe('toolbar', () => {
       'lineHeight',
       'bulletList',
       'orderedList',
+      'taskList',
       'blockquote',
       'codeBlock',
       'horizontalRule',

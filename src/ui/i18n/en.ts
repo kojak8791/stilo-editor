@@ -15,6 +15,7 @@ export const en: Messages = {
   'toolbar.clearFormatting': 'Clear formatting',
   'toolbar.bulletList': 'Bulleted list',
   'toolbar.orderedList': 'Numbered list',
+  'toolbar.taskList': 'Checklist',
   'toolbar.blockquote': 'Quote',
   'toolbar.codeBlock': 'Code block',
   'toolbar.horizontalRule': 'Horizontal line',

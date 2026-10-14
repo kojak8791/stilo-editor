@@ -27,6 +27,8 @@ import { Strike } from '../strike';
 import { Subscript } from '../subscript';
 import { Superscript } from '../superscript';
 import { Table } from '../table';
+import { TaskItem } from '../task-item';
+import { TaskList } from '../task-list';
 import { Text } from '../text';
 import { TextAlign } from '../text-align';
 import { TextStyle } from '../text-style';
@@ -50,6 +52,8 @@ export interface DefaultExtensionsOptions {
   bulletList?: false;
   orderedList?: false;
   listItem?: false;
+  taskList?: false;
+  taskItem?: false;
   bold?: false;
   italic?: false;
   underline?: false;
@@ -102,6 +106,8 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(BulletList, options.bulletList),
     ...include(OrderedList, options.orderedList),
     ...include(ListItem, options.listItem),
+    ...include(TaskList, options.taskList),
+    ...include(TaskItem, options.taskItem),
     ...include(Bold, options.bold),
     ...include(Italic, options.italic),
     ...include(Underline, options.underline),

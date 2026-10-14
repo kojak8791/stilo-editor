@@ -99,6 +99,13 @@ describe('drop of whole blocks inside text', () => {
       '<ul><li>ab</li><li>[x]</li><li>cd</li></ul>',
     ],
     [
+      'in a task item',
+      '<ul data-type="taskList"><li data-checked="true">abcd</li></ul><p>[x]</p>',
+      5,
+      '<ul data-type="taskList"><li data-checked="true">ab</li><li data-checked="false">[x]</li>' +
+        '<li data-checked="true">cd</li></ul>',
+    ],
+    [
       'a heading in a list item',
       '<ul><li>abcd</li></ul><h2>[x]</h2>',
       5,

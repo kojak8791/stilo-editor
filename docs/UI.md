@@ -290,6 +290,7 @@ no functions.
 | `toolbar.clearFormatting` | Clear formatting | Cancella formattazione |
 | `toolbar.bulletList` | Bulleted list | Elenco puntato |
 | `toolbar.orderedList` | Numbered list | Elenco numerato |
+| `toolbar.taskList` | Checklist | Elenco di controllo |
 | `toolbar.blockquote` | Quote | Citazione |
 | `toolbar.codeBlock` | Code block | Blocco di codice |
 | `toolbar.horizontalRule` | Horizontal line | Linea orizzontale |
@@ -395,7 +396,7 @@ no functions.
     'clearFormatting'],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'table',
+  ['bulletList', 'orderedList', 'taskList', 'blockquote', 'codeBlock', 'horizontalRule', 'table',
     'characters'],
   ['find'],
 ]
@@ -418,6 +419,7 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 | `clearFormatting` | `RemoveFormatting` | `toolbar.clearFormatting` | `Mod-\` | `clearFormatting` | — |
 | `bulletList` | `List` | `toolbar.bulletList` | `Mod-Shift-8` | `toggleBulletList` | `isActive('bulletList')` |
 | `orderedList` | `ListOrdered` | `toolbar.orderedList` | `Mod-Shift-7` | `toggleOrderedList` | `isActive('orderedList')` |
+| `taskList` | `ListTodo` | `toolbar.taskList` | `Mod-Shift-9` | `toggleTaskList` | `isActive('taskList')` |
 | `blockquote` | `Quote` | `toolbar.blockquote` | `Mod-Shift-b` | `toggleBlockquote` | `isActive('blockquote')` |
 | `codeBlock` | `SquareCode` | `toolbar.codeBlock` | `Mod-Alt-c` | `toggleCodeBlock` | `isActive('codeBlock')` |
 | `horizontalRule` | `Minus` | `toolbar.horizontalRule` | — | `setHorizontalRule` | — |
@@ -1262,6 +1264,12 @@ Layout:
   for the first and last block of a cell (the block before the resize handle, which
   `columnResizing` appends to the cell on hover, counts as the last one: otherwise its margin
   comes back and the table grows under the mouse), `1em` above and below the table.
+- Task lists (`content.css`): no bullets; the checkbox sits `1.5em` left of the item, `1em`
+  square, centered on the first line (`0.5lh`), with `accent-color: --stilo-color-focus`; a
+  checked item has its first paragraph in `--stilo-color-muted` and struck through (not its
+  sub-items). Outside the editor, under the class `stilo-content`, the same box is drawn by
+  `li::before`: a 1px `--stilo-color-muted` border, radius `0.2em`; checked, a white `✓` on
+  `--stilo-color-focus`.
 - Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
   corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
 - Search matches (`content.css`): `.stilo-search-match` background

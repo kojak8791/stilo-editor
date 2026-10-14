@@ -33,16 +33,16 @@ function dropBlocks(view: EditorView, event: DragEvent): boolean {
   const tr = state.tr.deleteSelection();
   const pos = tr.mapping.map(target.pos);
   const $pos = tr.doc.resolve(pos);
-  const { listItem } = state.schema.nodes;
   let nodes: Node[] = [];
   state.doc.slice(from, to).content.forEach((node) => {
     nodes.push(node);
   });
   let levels = 1;
-  if ($pos.depth > 2 && $pos.node(-1).type === listItem) {
-    const wrap = nodes.every((node) => listItem.contentMatch.matchType(node.type));
+  if ($pos.depth > 2 && $pos.node(-2).type.isInGroup('list')) {
+    const item = $pos.node(-1).type;
+    const wrap = nodes.every((node) => item.contentMatch.matchType(node.type));
     levels = wrap ? 2 : 3;
-    if (wrap) nodes = nodes.map((node) => listItem.create(null, node));
+    if (wrap) nodes = nodes.map((node) => item.create(null, node));
   }
   // Leave the levels whose edge the drop is at, then split the rest: no empty halves.
   const atStart = $pos.parentOffset === 0;

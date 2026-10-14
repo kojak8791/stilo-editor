@@ -244,6 +244,23 @@ test('a whole paragraph dropped inside a list item becomes an item', async ({
   await expect(output(page)).toHaveText('<ul><li>ab</li><li>xyz</li><li>cd</li></ul>');
 });
 
+test('task list: the checkbox checks its item and typing goes on at the cursor', async ({
+  page,
+}) => {
+  await openEmpty(page);
+  await type(page, '[ ] one');
+  await page.keyboard.press('Enter');
+  await type(page, 'two');
+  await page.locator('.stilo-task-item__checkbox').nth(0).click();
+  await type(page, '!');
+  await expect(output(page)).toHaveText(
+    '<ul data-type="taskList"><li data-checked="true">one</li>' +
+      '<li data-checked="false">two!</li></ul>',
+  );
+  await page.keyboard.press('ControlOrMeta+Enter');
+  await expect(page.locator('.stilo-task-item__checkbox').nth(1)).toBeChecked();
+});
+
 test('tables: insert from the grid, Tab through the cells, a new row from the last one', async ({
   page,
 }) => {

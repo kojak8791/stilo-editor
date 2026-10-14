@@ -38,6 +38,8 @@ export {
   Table,
   type TableHeaders,
 } from './table';
+export { TaskItem } from './task-item';
+export { TaskList } from './task-list';
 export { Text } from './text';
 export { TextAlign, type TextAlignment } from './text-align';
 export { type FontSizeUnit, getFontSize, TextStyle, toFontSize } from './text-style';

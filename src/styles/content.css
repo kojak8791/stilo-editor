@@ -161,8 +161,61 @@ li.ProseMirror-selectednode:after {
 
 .stilo-content li > p,
 .stilo-content li > ul,
-.stilo-content li > ol {
+.stilo-content li > ol,
+.stilo-content .stilo-task-item__content > p,
+.stilo-content .stilo-task-item__content > ul,
+.stilo-content .stilo-task-item__content > ol {
   margin: 0;
+}
+
+/* Task lists: a checkbox in place of the bullet, done items struck through. In the editor the
+   checkbox is an <input> of the item; content shown elsewhere under the class stilo-content gets
+   a box drawn from data-checked instead. */
+.stilo-content ul[data-type="taskList"] {
+  list-style: none;
+}
+
+.stilo-content ul[data-type="taskList"] > li {
+  position: relative;
+}
+
+.stilo-task-item__checkbox,
+.stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li::before {
+  position: absolute;
+  top: calc(0.5lh - 0.5em);
+  left: -1.5em;
+  width: 1em;
+  height: 1em;
+  margin: 0;
+}
+
+.stilo-task-item__checkbox {
+  accent-color: var(--stilo-color-focus, #0969da);
+  cursor: pointer;
+}
+
+.stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li::before {
+  content: "";
+  box-sizing: border-box;
+  border: 1px solid var(--stilo-color-muted, #59636e);
+  border-radius: 0.2em;
+  color: #ffffff;
+  font-size: inherit;
+  line-height: 1em;
+  text-align: center;
+}
+
+.stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li[data-checked="true"]::before {
+  content: "\2713";
+  border-color: var(--stilo-color-focus, #0969da);
+  background: var(--stilo-color-focus, #0969da);
+}
+
+.stilo-content [data-checked="true"] > .stilo-task-item__content > p:first-child,
+.stilo-content:not(.ProseMirror) [data-checked="true"] > p:first-child,
+.stilo-content:not(.ProseMirror) [data-checked="true"]:not(:has(> p)) {
+  color: var(--stilo-color-muted, #59636e);
+  text-decoration: line-through;
 }
 
 .stilo-content blockquote {

@@ -13,6 +13,7 @@ export type MessageKey =
   | 'toolbar.clearFormatting'
   | 'toolbar.bulletList'
   | 'toolbar.orderedList'
+  | 'toolbar.taskList'
   | 'toolbar.blockquote'
   | 'toolbar.codeBlock'
   | 'toolbar.horizontalRule'
