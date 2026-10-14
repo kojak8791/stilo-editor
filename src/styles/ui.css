@@ -725,3 +725,100 @@
   font: inherit;
   cursor: pointer;
 }
+
+/* Find bar (T-043): under the toolbar, in the same sticky container */
+.stilo-find-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--stilo-color-separator);
+  background: var(--stilo-color-toolbar-bg);
+  color: var(--stilo-color-text);
+  font-family: var(--stilo-font-family);
+  font-size: var(--stilo-font-size);
+}
+
+.stilo-find-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.stilo-find-bar[hidden],
+.stilo-find-bar__row[hidden] {
+  display: none;
+}
+
+.stilo-find-bar__input {
+  box-sizing: border-box;
+  width: 240px;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: inherit;
+  font: inherit;
+}
+
+.stilo-find-bar__input:focus-visible {
+  outline: 2px solid var(--stilo-color-focus);
+  outline-offset: -1px;
+}
+
+.stilo-find-bar__count {
+  min-width: 7em;
+  color: var(--stilo-color-muted);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.stilo-find-bar__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--stilo-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.stilo-find-bar__button:hover {
+  background: var(--stilo-color-hover);
+}
+
+.stilo-find-bar__button:focus-visible {
+  outline: 2px solid var(--stilo-color-focus);
+  outline-offset: 1px;
+}
+
+.stilo-find-bar__toggle[aria-pressed="true"] {
+  background: var(--stilo-color-active);
+}
+
+.stilo-find-bar__button--text {
+  padding: 0 10px;
+  border: 1px solid var(--stilo-color-border);
+  background: var(--stilo-color-bg);
+}
+
+/* Status bar (T-043): word and character count under the editor */
+.stilo-status-bar {
+  display: flex;
+  gap: 16px;
+  padding: 4px 12px;
+  border-top: 1px solid var(--stilo-color-separator);
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  background: var(--stilo-color-toolbar-bg);
+  color: var(--stilo-color-muted);
+  font-family: var(--stilo-font-family);
+  font-size: 12px;
+}

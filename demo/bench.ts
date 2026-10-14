@@ -25,6 +25,8 @@ export interface BenchApi {
   typing(fraction: number, iterations: number): number[];
   /** `iterations` block moves in the middle of the document, alternating down and up. */
   moveBlock(iterations: number): number[];
+  /** `setSearch({ text })` until the highlights are rendered; an empty text clears the search. */
+  search(text: string): number;
   /** JS heap in use (Chromium only), `null` elsewhere. */
   heapSize(): number | null;
   /** Puts the cursor at `fraction` of the document and focuses the editor (for real keys). */
@@ -86,6 +88,7 @@ export function createBenchApi(editor: Editor): BenchApi {
         time(() => (i % 2 ? editor.commands.moveBlockUp() : editor.commands.moveBlockDown())),
       );
     },
+    search: (text) => time(() => editor.commands.setSearch({ text })),
     focusAt(fraction) {
       placeCursor(fraction);
       editor.focus();

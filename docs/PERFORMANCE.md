@@ -31,9 +31,11 @@ For each document the benchmark measures:
   document, each including the layout it causes;
 - **load** (`setHTML`) and **export** (`getHTML`);
 - **block move** (`Alt+↑` / `Alt+↓`) in the middle of the document;
-- **memory** used after loading.
+- **memory** used after loading;
+- **find and replace**: starting a search for a frequent word and for a rare phrase, and typing
+  while a search is open (for information, without a budget).
 
-Each metric has a budget: a run that exceeds one fails (`npm run bench`). The reference run is
+Each other metric has a budget: a run that exceeds one fails (`npm run bench`). The reference run is
 kept in [`bench/results/baseline.json`](../bench/results/baseline.json) and later runs are
 compared with it.
 
@@ -66,6 +68,12 @@ under 16 ms fits in one frame of a 60 Hz screen.
   at 50,000 paragraphs.
 - **Top-level changes.** When a top-level block changes, ProseMirror compares the list of all
   top-level blocks, so moving a block in a huge flat document costs more than typing in it.
+- **Find and replace.** Typing with a search open costs little more than without it: only the
+  edited paragraph is searched again. Starting a search reads the whole document once (about
+  0.1 s at 50,000 paragraphs), and at most 1,000 matches are highlighted. *Replace all* collects
+  every match: with hundreds of thousands of matches it is slow (not measured).
+- **Word count.** Counting reads the whole document, so the status bar counts half a second
+  after the last change, never on a keystroke.
 - **One browser, one machine.** Budgets are set for Chromium on the reference PC; Firefox and
   WebKit are measured for information later.
 

@@ -46,6 +46,7 @@ const areas: Area[] = [
       'prosemirror-history',
       'prosemirror-inputrules',
       'prosemirror-schema-list',
+      'prosemirror-search',
       'prosemirror-tables',
       'prosemirror-dropcursor',
       'prosemirror-gapcursor',

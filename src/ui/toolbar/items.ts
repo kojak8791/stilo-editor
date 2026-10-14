@@ -12,6 +12,7 @@ import {
   Quote,
   Redo2,
   RemoveFormatting,
+  Search,
   Strikethrough,
   Subscript,
   Superscript,
@@ -57,6 +58,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
+  ['find'],
 ];
 
 /** The default toolbar items, by ID. */
@@ -258,6 +260,17 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       toolbar.toggleCharacterPicker();
     },
     isAvailable: (e) => 'insertText' in e.commands,
+  },
+  find: {
+    id: 'find',
+    kind: 'button',
+    icon: Search,
+    labelKey: 'toolbar.find',
+    shortcut: 'Mod-f',
+    run: (_e, toolbar) => {
+      toolbar.openFindBar();
+    },
+    isAvailable: (e) => 'setSearch' in e.commands,
   },
   heading: headingDropdown(),
   fontFamily: fontFamilyDropdown(),

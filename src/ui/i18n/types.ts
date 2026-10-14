@@ -104,7 +104,22 @@ export type MessageKey =
   | 'color.darkCyan'
   | 'color.darkBlue'
   | 'color.darkPurple'
-  | 'color.darkPink';
+  | 'color.darkPink'
+  | 'toolbar.find'
+  | 'find.find'
+  | 'find.replace'
+  | 'find.previous'
+  | 'find.next'
+  | 'find.matchCase'
+  | 'find.wholeWord'
+  | 'find.replaceOne'
+  | 'find.replaceAll'
+  | 'find.close'
+  | 'find.position'
+  | 'find.results'
+  | 'find.noResults'
+  | 'status.words'
+  | 'status.characters';
 
 /** UI strings: every {@link MessageKey}, plus the label keys of custom toolbar items. */
 export type Messages = Readonly<Record<MessageKey, string>> & Readonly<Record<string, string>>;

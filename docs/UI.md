@@ -42,7 +42,9 @@ src/ui/
 │   ├── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
 │   ├── color-button.ts      createColorButton: split button and color popover (T-026)
 │   ├── font-size-input.ts   createFontSizeInput: − field + and the list of sizes (T-038)
-│   └── icon-menu.ts         createIconMenu: icon options in a row (T-039)
+│   ├── icon-menu.ts         createIconMenu: icon options in a row (T-039)
+│   ├── find-bar.ts          createFindBar: find and replace under the toolbar (T-043)
+│   └── status-bar.ts        createStatusBar: word and character count (T-043)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014),
@@ -75,6 +77,8 @@ export type { MessageKey, Messages } from './i18n/types';
 export { en } from './i18n/en';
 export { it } from './i18n/it';
 export { formatShortcut } from './components/shortcut';
+export { createStatusBar, type StatusBar, type StatusBarOptions }
+  from './components/status-bar';
 ```
 
 `headingDropdown` and the dropdown types arrive with T-014.
@@ -341,6 +345,21 @@ no functions.
 | `color.pick` | Pick a color | Scegli un colore |
 | `color.custom` | Custom color | Colore personalizzato |
 | `color.apply` | Apply | Applica |
+| `toolbar.find` | Find and replace | Trova e sostituisci |
+| `find.find` | Find | Trova |
+| `find.replace` | Replace with | Sostituisci con |
+| `find.previous` | Previous match | Risultato precedente |
+| `find.next` | Next match | Risultato successivo |
+| `find.matchCase` | Match case | Maiuscole/minuscole |
+| `find.wholeWord` | Whole word | Parola intera |
+| `find.replaceOne` | Replace | Sostituisci |
+| `find.replaceAll` | Replace all | Sostituisci tutto |
+| `find.close` | Close | Chiudi |
+| `find.position` | {current} of {total} | {current} di {total} |
+| `find.results` | Results: {total} | Risultati: {total} |
+| `find.noResults` | No results | Nessun risultato |
+| `status.words` | Words | Parole |
+| `status.characters` | Characters | Caratteri |
 | `color.<name>` | the 32 color names of `DEFAULT_PALETTE` (`color.black`, `color.red`, `color.lightRed`, `color.darkRed`, …) | Nero, Rosso, Rosso chiaro, Rosso scuro, … |
 
 ### 3.3 Default items
@@ -357,6 +376,7 @@ no functions.
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
+  ['find'],
 ]
 ```
 
@@ -410,6 +430,10 @@ cyan, blue, purple, pink) in a vivid, a light and a dark row (Tailwind shades 50
 `characters` (T-024): `icon` `FaceSlightlySmilingPlus`, `labelKey` `toolbar.characters`, no shortcut, `run` calls
 `context.toggleCharacterPicker()` (§5.3), always enabled, `isAvailable` is
 `'insertText' in editor.commands` (the `Text` extension).
+
+`find` (T-043): `icon` `Search`, `labelKey` `toolbar.find`, shortcut `Mod-f`, `run` calls
+`context.openFindBar()` (§5.7), always enabled, `isAvailable` is `'setSearch' in editor.commands`
+(the `Search` extension).
 
 ## 4. Toolbar behavior
 
@@ -844,6 +868,78 @@ for every `kind: 'iconMenu'` item; the menu is mounted in the toolbar (it scroll
 `isActive`: the `textAlign` of the heading or paragraph at the start of the selection (`null` is
 `left`). `isEnabled`: `setTextAlign.can(id)` (false on a selected horizontal rule).
 
+### 5.7 Find bar (T-043)
+
+`createFindBar(editor, { container, messages })` (internal), created by the toolbar when the
+`Search` extension is loaded and appended to the toolbar `container` after the toolbar element:
+it sits under the toolbar and, with `sticky`, stays at the top with it. Not a popover: it stays
+open while the user edits the text.
+
+```html
+<div class="stilo-find-bar" role="search" aria-label="Find and replace" hidden>
+  <div class="stilo-find-bar__row">
+    <input type="text" class="stilo-find-bar__input stilo-find-bar__input--find"
+      placeholder="Find" aria-label="Find" autocomplete="off" spellcheck="false">
+    <span class="stilo-find-bar__count" aria-live="polite">2 of 4</span>
+    <button type="button" class="stilo-find-bar__button" aria-label="Previous match"
+      title="Previous match (Shift+Enter)">…ChevronUp…</button>
+    <button type="button" class="stilo-find-bar__button" aria-label="Next match"
+      title="Next match (Enter)">…ChevronDown…</button>
+    <button type="button" class="stilo-find-bar__button stilo-find-bar__toggle"
+      aria-label="Match case" title="Match case" aria-pressed="false">…CaseSensitive…</button>
+    <button type="button" class="stilo-find-bar__button stilo-find-bar__toggle"
+      aria-label="Whole word" title="Whole word" aria-pressed="false">…WholeWord…</button>
+    <button type="button" class="stilo-find-bar__button" aria-label="Close"
+      title="Close (Esc)">…X…</button>
+  </div>
+  <div class="stilo-find-bar__row">
+    <input type="text" class="stilo-find-bar__input stilo-find-bar__input--replace"
+      placeholder="Replace with" aria-label="Replace with" autocomplete="off" spellcheck="false">
+    <button type="button" class="stilo-find-bar__button stilo-find-bar__button--text">
+      Replace</button>
+    <button type="button" class="stilo-find-bar__button stilo-find-bar__button--text">
+      Replace all</button>
+  </div>
+</div>
+```
+
+- **Opening**: the `find` button and `Mod-f` in the editor (`view.dom`; outside the editor
+  `Mod-f` stays the browser's find). The selected text, when it lies in one textblock, fills the
+  find field; the field gets the focus with its text selected and the search runs at once. The
+  replace row is hidden in a read-only editor. `Mod-f` inside the bar selects the find field.
+- **Searching** (ADR 0004): typing in the find field searches 350 ms after the last keystroke;
+  fewer than 2 characters clear the search. `setSearch({ text, caseSensitive, wholeWord })`
+  takes the two toggles (`aria-pressed`), which search again at once.
+- **Count**: empty without a search; `find.noResults`; `find.position` (`2 of 4`) when the
+  selection is a highlighted match; otherwise `find.results` (`Results: 4`). The total reads
+  `1000+` when `getSearchResults(editor).limited`. Refreshed on every `transaction`.
+- **Keys and buttons**: `Enter` in the find field runs a pending search at once and selects the
+  next match (`findNext`), `Shift+Enter` the previous one; the focus stays in the field.
+  `Enter` in the replace field and *Replace* run `replaceNext(replacement)`; *Replace all* runs
+  `replaceAll(replacement)`. Each runs a pending search first.
+- **Closing**: `Escape` anywhere in the bar or the close button: hides the bar, cancels a
+  pending search, runs `clearSearch()` and focuses the editor. `toolbar.destroy()` removes the
+  bar.
+
+### 5.8 Status bar (T-043)
+
+`createStatusBar(editor, { container, messages = en })` → `{ element, update(), destroy() }`,
+public: the host mounts it where it wants, typically under the editor.
+
+```html
+<div class="stilo-status-bar">
+  <span class="stilo-status-bar__words">Words: 29</span>
+  <span class="stilo-status-bar__characters">Characters: 148</span>
+</div>
+```
+
+- Counts with `getWordCount(editor)` when created, then 500 ms after the last `input` event
+  (never per keystroke: it reads the whole document, ADR 0003). `update()` counts at once.
+  Numbers use `toLocaleString()`.
+- Not a live region: screen readers would read it at every pause in typing.
+- `destroy()` (idempotent) removes the element and the listeners; it runs on the editor's
+  `destroy` too.
+
 ## 6. Dropdown and heading dropdown (T-014)
 
 ### 6.1 DOM
@@ -1057,6 +1153,16 @@ Layout:
   primary *Apply* button.
 - Link bubble: small and unobtrusive, icons only (no URL text; the URL is in the tooltip of the
   open button): `padding: 2px`, 24px buttons with 16px icons, toolbar button colors.
+- Find bar: toolbar background, a 1px `--stilo-color-separator` line on top, `padding: 4px 8px`,
+  two wrapping rows with `gap: 4px`; 240px fields with border and radius; the count in
+  `--stilo-color-muted` at `0.9em`, at least `7em` wide so the buttons do not move; 28px icon
+  buttons with toolbar colors, a pressed toggle in `--stilo-color-active`; *Replace* and
+  *Replace all* with border. `[hidden]` is `display: none` on the bar and its rows.
+- Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
+  corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
+- Search matches (`content.css`): `.stilo-search-match` background
+  `--stilo-color-search-match` (default `#fff1a8`), `.stilo-search-match--current`
+  `--stilo-color-search-current` (default `#ffb347`).
 
 ## 8. Later
 

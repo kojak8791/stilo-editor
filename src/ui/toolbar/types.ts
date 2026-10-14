@@ -27,6 +27,8 @@ export interface ToolbarContext {
   openLinkPopover(): void;
   /** Opens or closes the character picker (no-op without the `characters` item). */
   toggleCharacterPicker(): void;
+  /** Opens the find bar (no-op without the `Search` extension). */
+  openFindBar(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */

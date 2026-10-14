@@ -43,8 +43,10 @@ describe('toolbar', () => {
     const container = createToolbarContainer();
     const toolbar = createToolbar(editor, { container });
 
-    expect(container.children.length).toBe(1);
+    // The toolbar, then the find bar (T-043).
+    expect(container.children.length).toBe(2);
     expect(container.firstElementChild).toBe(toolbar.element);
+    expect(container.lastElementChild!.className).toBe('stilo-find-bar');
     expect(toolbar.element.getAttribute('role')).toBe('toolbar');
     expect(toolbar.element.getAttribute('aria-label')).toBe('Formatting');
     expect(toolbar.element.getAttribute('aria-orientation')).toBe('horizontal');
@@ -53,7 +55,7 @@ describe('toolbar', () => {
     const groups = [...toolbar.element.children].filter(
       (el) => el.getAttribute('role') === 'group',
     );
-    expect(groups.length).toBe(7);
+    expect(groups.length).toBe(8);
     expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
     const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
@@ -87,6 +89,7 @@ describe('toolbar', () => {
       'blockquote',
       'horizontalRule',
       'characters',
+      'find',
     ]);
 
     toolbar.destroy();
@@ -441,12 +444,13 @@ describe('toolbar', () => {
     expect(byId('redo').getAttribute('tabindex')).toBe('0');
     expect(byId('undo').getAttribute('tabindex')).toBe('-1');
     expect(from('redo', 'ArrowLeft')).toBe('undo');
-    expect(from('undo', 'ArrowLeft')).toBe('characters');
+    expect(from('undo', 'ArrowLeft')).toBe('find');
+    expect(from('find', 'ArrowLeft')).toBe('characters');
     expect(from('characters', 'ArrowLeft')).toBe('horizontalRule');
     expect(from('horizontalRule', 'ArrowLeft')).toBe('blockquote');
-    expect(from('characters', 'ArrowRight')).toBe('undo');
+    expect(from('find', 'ArrowRight')).toBe('undo');
     expect(from('redo', 'ArrowRight')).toBe('heading');
-    expect(from('bold', 'End')).toBe('characters');
+    expect(from('bold', 'End')).toBe('find');
     expect(from('bold', 'Home')).toBe('undo');
     expect(items.filter((el) => el.getAttribute('tabindex') === '0')).toEqual([byId('undo')]);
 

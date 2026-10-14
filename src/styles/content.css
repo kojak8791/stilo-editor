@@ -213,3 +213,12 @@ li.ProseMirror-selectednode:after {
 .stilo-content blockquote > :last-child {
   margin-bottom: 0;
 }
+
+/* Find and replace (T-043): the matches and the selected one */
+.stilo-search-match {
+  background: var(--stilo-color-search-match, #fff1a8);
+}
+
+.stilo-search-match--current {
+  background: var(--stilo-color-search-current, #ffb347);
+}

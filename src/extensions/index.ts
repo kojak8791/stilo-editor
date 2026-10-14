@@ -21,6 +21,13 @@ export { MoveBlock } from './move-block';
 export { OrderedList } from './ordered-list';
 export { Paragraph } from './paragraph';
 export { Placeholder, type PlaceholderOptions } from './placeholder';
+export {
+  getSearchResults,
+  Search,
+  type SearchOptions,
+  type SearchResults,
+  type SearchTerm,
+} from './search';
 export { Strike } from './strike';
 export { Subscript } from './subscript';
 export { Superscript } from './superscript';

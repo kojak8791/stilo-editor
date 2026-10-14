@@ -31,6 +31,7 @@ describe('defaultExtensions', () => {
       'history',
       'moveBlock',
       'placeholder',
+      'search',
       'dropCursor',
       'gapCursor',
     ]);
@@ -64,6 +65,7 @@ describe('defaultExtensions', () => {
       'history',
       'moveBlock',
       'placeholder',
+      'search',
       'dropCursor',
       'gapCursor',
     ]);

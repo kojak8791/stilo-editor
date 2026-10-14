@@ -150,8 +150,20 @@ whether it is available.
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
 | `History` | `undo()`, `redo()` |
 | `MoveBlock` | `moveBlockUp()`, `moveBlockDown()` |
+| `Search` | `setSearch({ text, caseSensitive?, wholeWord? })`: highlights the matches of `text` (taken literally); an empty `text` clears the search. `clearSearch()`. `findNext()`, `findPrevious()`: select the next or previous match, wrapping around; `false` without a search or a match. `replaceNext(replacement)`: replaces the selected match and selects the next one (selects the next match when the selection is not one). `replaceAll(replacement)`: one undoable step; `false` without matches. The replacement text is inserted as is, with the formatting of the match |
 
 `select(from, to?)` and `selectNode(pos)` take ProseMirror document positions.
+
+`getSearchResults(editor)` returns `{ count, limited, current }` for the active search: the
+number of highlighted matches, `limited` when there are more than the extension option
+`maxMatches` (show `1000+`), and the 1-based index of the selected match (`0` when the
+selection is not one). The matches have the class `stilo-search-match`, the selected one also
+`stilo-search-match--current` (colors in `content.css`).
+
+`getWordCount(editor)` returns `{ words, characters }` for the whole document: words are runs of
+non-space characters with at least one letter or digit; characters include spaces, not line and
+paragraph breaks. It reads the whole document: call it on demand or after a pause, not on every
+change.
 
 ## 4. Extensions
 
@@ -183,6 +195,7 @@ defaultExtensions({
 | `history` | `History` | `depth`: undo steps kept, default `100`. `newGroupDelay`: changes closer than this (ms) are undone together, default `500` |
 | `moveBlock` | `MoveBlock` | — |
 | `placeholder` | `Placeholder` | `placeholder`: hint shown in the empty editor, default `''` (none) |
+| `search` | `Search` (find and replace) | `maxMatches`: matches highlighted at most, default `1000`; `findNext` and `replaceAll` also reach the others |
 | `dropCursor` | `DropCursor` | `color`: CSS color, default `'currentColor'` (`false`: none, style it with `class`). `width` in pixels, default `1`. `class`: extra CSS class |
 | `gapCursor` | `GapCursor` | — |
 
@@ -234,7 +247,14 @@ A button whose extension is not loaded is not shown. Default item IDs: `undo`, `
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
 `bulletList`, `orderedList`,
-`blockquote`, `horizontalRule`, `characters`.
+`blockquote`, `horizontalRule`, `characters`, `find`.
+
+The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar under the
+toolbar (`Search` extension): find field, result count, previous and next match, match case,
+whole word, replace field, *Replace* and *Replace all*. It searches 350 ms after the last
+keystroke and only from 2 characters; <kbd>Enter</kbd> goes to the next match at once,
+<kbd>Shift</kbd>+<kbd>Enter</kbd> to the previous one, <kbd>Esc</kbd> closes the bar and clears
+the highlights. Outside the editor, <kbd>Ctrl</kbd>+<kbd>F</kbd> stays the browser's find.
 
 ```ts
 createToolbar(editor, {
@@ -303,18 +323,29 @@ createToolbar(editor, {
 | `icon` | A `lucide` icon |
 | `labelKey` | Key of the label in `messages`; a missing key is shown as is |
 | `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
-| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover |
+| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.openFindBar()` the find bar |
 | `isActive(editor)` | Optional: makes it a toggle button and tells when it is pressed |
 | `isEnabled(editor)` | Optional, default always enabled |
 | `isAvailable(editor)` | Optional: `false` hides the button |
 
-### 6.3 Languages
+### 6.3 Status bar
+
+`createStatusBar(editor, { container, messages? })` appends a status bar with the word and
+character count of the document (`getWordCount`) inside `container`, typically under the
+editor. It counts again 500 ms after the last change; it returns `{ element, update(), destroy() }`
+and is removed with the editor.
+
+```ts
+createStatusBar(editor, { container: document.querySelector('#status')! });
+```
+
+### 6.4 Languages
 
 `en` (default) and `it` are exported. To change a few strings, spread a locale:
 `{ ...en, 'toolbar.bold': 'Strong' }`. The keys are listed in
 [UI.md §3.2](UI.md#32-i18n).
 
-### 6.4 Styles
+### 6.5 Styles
 
 The look of the toolbar and of the popovers is set with `--stilo-*` CSS custom properties
 (colors, font, sizes). Set them on `:root` or on any element that contains both the toolbar and

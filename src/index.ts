@@ -9,6 +9,7 @@ export { toggleList } from './core/helpers/lists';
 export { setMark, toggleMark, unsetMark } from './core/helpers/marks';
 export { insertBlock, insertBlockNode } from './core/helpers/nodes';
 export { textDecorationRules } from './core/helpers/parse-rules';
+export { getWordCount, type WordCount } from './core/helpers/word-count';
 export type {
   CommandFactories,
   CommandFactory,

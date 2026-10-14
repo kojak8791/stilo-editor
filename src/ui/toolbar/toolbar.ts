@@ -4,6 +4,7 @@ import { createCharacterPicker } from '../components/character-picker';
 import { type ColorButton, createColorButton } from '../components/color-button';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
+import { createFindBar } from '../components/find-bar';
 import { createFontSizeInput, type FontSizeInput } from '../components/font-size-input';
 import { createIcon } from '../components/icon';
 import { createIconMenu, type IconMenu } from '../components/icon-menu';
@@ -219,9 +220,13 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const context: ToolbarContext = {
     openLinkPopover: () => linkPopover?.open(),
     toggleCharacterPicker: () => characterPicker?.toggle(),
+    openFindBar: () => findBar?.open(),
   };
 
   container.appendChild(element);
+  // The find bar sits under the toolbar, in the same (sticky) container.
+  const findBar =
+    'setSearch' in editor.commands ? createFindBar(editor, { container, messages }) : null;
   // Sticky on the container: a sticky element only moves inside its parent. ProseMirror scrolls
   // the selection into view without knowing that the toolbar covers the top: the scroll margin
   // keeps it below the toolbar (5 is ProseMirror's default margin).
@@ -407,13 +412,18 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   };
   element.addEventListener('keydown', onToolbarKeydown);
 
-  // Alt-F10 on editor view.dom: focus toolbar; Mod-k: open the link popover
+  // Alt-F10 on editor view.dom: focus toolbar; Mod-k: open the link popover; Mod-f: the find bar
   const onEditorKeydown = (e: KeyboardEvent): void => {
     if (isDestroyed) return;
     const mod = mac ? e.metaKey : e.ctrlKey;
     if (linkPopover && mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       linkPopover.open();
+      return;
+    }
+    if (findBar && mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'f') {
+      e.preventDefault();
+      findBar.open();
       return;
     }
     if (e.key === 'F10' && e.altKey) {
@@ -458,6 +468,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     linkPopover?.destroy();
     linkBubble?.destroy();
     characterPicker?.destroy();
+    findBar?.destroy();
 
     if (container.contains(element)) {
       container.removeChild(element);

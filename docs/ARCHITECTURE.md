@@ -14,6 +14,7 @@ through an ADR (`docs/decisions/`).
 | Sanitization | DOMPurify |
 | Icons (UI only) | `lucide` |
 | Popover positioning (UI only) | `@floating-ui/dom` ([ADR 0002](decisions/0002-floating-ui.md)) |
+| Text search | `prosemirror-search`, its `SearchQuery` only ([ADR 0004](decisions/0004-find-and-replace.md)) |
 | Build | Vite (library mode) + `tsc` for `.d.ts` |
 | Unit tests | Vitest + jsdom |
 | E2E & benchmarks | Playwright (`@playwright/test`), Chromium / Firefox / WebKit |
@@ -29,7 +30,7 @@ Runtime `dependencies`:
 prosemirror-model  prosemirror-state  prosemirror-view  prosemirror-transform
 prosemirror-commands  prosemirror-keymap  prosemirror-history  prosemirror-inputrules
 prosemirror-schema-list  prosemirror-tables  prosemirror-dropcursor  prosemirror-gapcursor
-dompurify  lucide  @floating-ui/dom
+prosemirror-search  dompurify  lucide  @floating-ui/dom
 ```
 
 `devDependencies`:
@@ -417,7 +418,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `Image`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
-`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -711,3 +712,4 @@ layout, plus real key presses through Event Timing. Every document is measured f
 | D-12 | Single-paragraph list items are written without `<p>`; option `compactParagraphs` ([ADR 0001](decisions/0001-tight-list-items.md)) | 2026-10-11 |
 | D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1; `absolute` strategy in a host that scrolls with the anchor ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
 | D-14 | Top-level blocks use `content-visibility: auto`; performance budgets calibrated on the first measurement ([ADR 0003](decisions/0003-performance-baseline.md)) | 2026-10-12 |
+| D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |

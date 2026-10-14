@@ -8,6 +8,9 @@ const TYPING_ITERATIONS = 200;
 const EXPORT_RUNS = 5;
 const MOVE_ITERATIONS = 50;
 const KEYS = 40;
+/** Searches (ADR 0004): a frequent word (1000+ matches) and a rare phrase spread everywhere. */
+const SEARCH_FREQUENT = 'dolor';
+const SEARCH_RARE = 'velit esse lorem';
 /** Real key presses: one every 33 ms, like a held key or a fast typist. */
 const KEY_DELAY = 33;
 /** Event Timing reports only durations from this value up; faster keys count as this value. */
@@ -21,6 +24,10 @@ type Result = Budget & {
   keyToPaintMedian: number;
   keyToPaintP95: number;
   heapMB: number | null;
+  /** Informative (ADR 0004): setting a search, and typing in the middle while it is active. */
+  searchFrequent: number;
+  searchRare: number;
+  searchTypingP95: number;
 };
 
 const results: Record<string, Result> = {};
@@ -42,16 +49,32 @@ for (const name of DOCUMENTS) {
     await page.goto('/demo/?bench');
     await page.waitForFunction(() => window.__stilo !== undefined);
     const raw = await page.evaluate(
-      ({ name, typing, exports, moves }) => {
+      ({ name, typing, exports, moves, frequent, rare }) => {
         const api = window.__stilo!;
         const load = api.load(name);
         const heap = api.heapSize();
         const getHTML = Array.from({ length: exports }, () => api.getHTML());
         const latency = [0, 0.5, 1].map((fraction) => api.typing(fraction, typing));
         const moveBlock = api.moveBlock(moves);
-        return { load, heap, getHTML, latency, moveBlock };
+        const searchRare = api.search(rare);
+        const searchFrequent = api.search(frequent);
+        const searchTyping = api.typing(0.5, typing);
+        api.search('');
+        return {
+          load,
+          heap,
+          getHTML,
+          latency,
+          moveBlock,
+          searchRare,
+          searchFrequent,
+          searchTyping,
+        };
       },
-      { name, typing: TYPING_ITERATIONS, exports: EXPORT_RUNS, moves: MOVE_ITERATIONS },
+      {
+        ...{ name, typing: TYPING_ITERATIONS, exports: EXPORT_RUNS, moves: MOVE_ITERATIONS },
+        ...{ frequent: SEARCH_FREQUENT, rare: SEARCH_RARE },
+      },
     );
 
     // Real keys in the middle of the document, after the synthetic measurements.
@@ -78,6 +101,9 @@ for (const name of DOCUMENTS) {
       keyToPaintMedian: percentile(keys, 50),
       keyToPaintP95: percentile(keys, 95),
       heapMB: raw.heap === null ? null : round(raw.heap / 1024 / 1024),
+      searchFrequent: round(raw.searchFrequent),
+      searchRare: round(raw.searchRare),
+      searchTypingP95: round(percentile(raw.searchTyping, 95)),
     };
     results[name] = result;
     console.log(name, JSON.stringify(result));

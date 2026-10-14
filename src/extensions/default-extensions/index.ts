@@ -21,6 +21,7 @@ import { MoveBlock } from '../move-block';
 import { OrderedList } from '../ordered-list';
 import { Paragraph } from '../paragraph';
 import { Placeholder, type PlaceholderOptions } from '../placeholder';
+import { Search, type SearchOptions } from '../search';
 import { Strike } from '../strike';
 import { Subscript } from '../subscript';
 import { Superscript } from '../superscript';
@@ -61,6 +62,7 @@ export interface DefaultExtensionsOptions {
   history?: false | Partial<HistoryOptions>;
   moveBlock?: false;
   placeholder?: false | Partial<PlaceholderOptions>;
+  search?: false | Partial<SearchOptions>;
   dropCursor?: false | Partial<DropCursorOptions>;
   gapCursor?: false;
 }
@@ -110,6 +112,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),
     ...include(Placeholder, options.placeholder),
+    ...include(Search, options.search),
     ...include(DropCursor, options.dropCursor),
     ...include(GapCursor, options.gapCursor),
   ];

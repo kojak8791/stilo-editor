@@ -9,6 +9,12 @@ export type {
 } from './components/dropdown';
 /** Shortcut formatting utilities. */
 export { formatShortcut } from './components/shortcut';
+/** Status bar with the word and character count. */
+export {
+  createStatusBar,
+  type StatusBar,
+  type StatusBarOptions,
+} from './components/status-bar';
 /** English UI strings. */
 export { en } from './i18n/en';
 /** Italian UI strings. */

@@ -3,7 +3,7 @@ import '../src/styles/content.css';
 import './demo.css';
 import '../src/styles/ui.css';
 import { defaultExtensions, Editor } from '../src';
-import { createToolbar } from '../src/ui';
+import { createStatusBar, createToolbar } from '../src/ui';
 
 const content = [
   '<h2>Welcome to Stilo</h2>',
@@ -32,6 +32,7 @@ const editor = new Editor({
 });
 
 createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
+createStatusBar(editor, { container: document.querySelector<HTMLElement>('#status')! });
 
 // Bench mode (ARCHITECTURE §11): no getHTML() per update, the API on window.__stilo.
 if (params.has('bench')) {
