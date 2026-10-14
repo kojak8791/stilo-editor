@@ -178,5 +178,3 @@ document.querySelector('#clear')!.addEventListener('click', () => {
   rows.length = 0;
   results.replaceChildren();
 });
-
-updateStats();

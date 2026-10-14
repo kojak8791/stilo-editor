@@ -6,13 +6,19 @@ body {
   background: #f6f8fa;
 }
 
-.bench {
-  display: grid;
-  grid-template-columns: 560px 1fr;
-  height: 100vh;
-}
-
+/*
+ * The panel stays in view; the document scrolls with the page, as in the demo. Contained, so
+ * that the panel does not slow down the document's layout and scrolling.
+ */
 .bench__panel {
+  contain: strict;
+  will-change: transform;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 480px;
+  height: 100vh;
   overflow: auto;
   padding: 12px 16px;
   border-right: 1px solid #d1d9e0;
@@ -89,21 +95,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* The editor is as wide as the demo's, so that the benchmarks match the baseline. */
 .bench__main {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  box-sizing: border-box;
+  max-width: 752px;
+  min-height: 100vh;
+  margin: 0 24px 0 504px;
   background: #fff;
 }
 
-.bench__content {
-  flex: 1;
-  overflow: auto;
-}
-
 .bench__content .stilo-content {
-  min-height: 100%;
-  box-sizing: border-box;
+  min-height: 300px;
   padding: 16px 20px;
   outline: none;
   line-height: 1.5;
