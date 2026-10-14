@@ -11,6 +11,7 @@ import { createIconMenu, type IconMenu } from '../components/icon-menu';
 import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
+import { createTableMenu } from '../components/table-menu';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
 import { DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
@@ -217,10 +218,16 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const characterPicker = charactersButton
     ? createCharacterPicker(editor, { anchor: charactersButton, container: element, messages })
     : null;
+  // The table menu hangs from its button too.
+  const tableButton = element.querySelector<HTMLElement>('[data-item="table"]');
+  const tableMenu = tableButton
+    ? createTableMenu(editor, { anchor: tableButton, container: element, messages })
+    : null;
   const context: ToolbarContext = {
     openLinkPopover: () => linkPopover?.open(),
     toggleCharacterPicker: () => characterPicker?.toggle(),
     toggleFindBar: () => findBar?.toggle(),
+    toggleTableMenu: () => tableMenu?.toggle(),
   };
 
   container.appendChild(element);
@@ -471,6 +478,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     linkPopover?.destroy();
     linkBubble?.destroy();
     characterPicker?.destroy();
+    tableMenu?.destroy();
     findBar?.destroy();
 
     if (container.contains(element)) {

@@ -3,17 +3,17 @@ import { sanitizeStyle } from './css';
 
 /** Options of {@link serializeHTML}. */
 export interface SerializeOptions {
-  /** Unwrap the single paragraph of list items. Default: `true`. */
+  /** Unwrap the single paragraph of list items and table cells. Default: `true`. */
   compactParagraphs?: boolean;
 }
 
 /** Containers whose single paragraph is unwrapped by `compactParagraphs`. */
-const COMPACT_CONTAINERS = ['li'];
+const COMPACT_CONTAINERS = ['li', 'td', 'th'];
 
 /**
  * Canonical post-processing of serialized HTML, in place (docs/ARCHITECTURE.md §8.1): styles
  * rewritten with `sanitizeStyle`, and with `compactParagraphs` (default) the single paragraph of
- * list items unwrapped (docs/decisions/0001).
+ * list items and table cells unwrapped (docs/decisions/0001).
  */
 export function canonicalizeDOM(
   root: Element | DocumentFragment,

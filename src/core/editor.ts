@@ -23,6 +23,13 @@ import type {
 const SKIP_INPUT_META = 'stiloSkipInput';
 
 /**
+ * Transaction meta key of the empty transaction applied to every new `EditorState`: plugins can
+ * normalize the loaded document in `appendTransaction` (e.g. the `Table` extension fixes
+ * irregular tables), before the view shows it and without an undo step.
+ */
+export const LOAD_META = 'stiloLoad';
+
+/**
  * The Stilo editor. See docs/ARCHITECTURE.md §5.
  *
  * ```ts
@@ -225,7 +232,8 @@ export class Editor {
   }
 
   private createState(doc: Node): EditorState {
-    return EditorState.create({ schema: this.schema, doc, plugins: this.plugins });
+    const state = EditorState.create({ schema: this.schema, doc, plugins: this.plugins });
+    return state.applyTransaction(state.tr.setMeta(LOAD_META, true)).state;
   }
 
   /** Builds `commands` from the extension commands; `can` runs without `dispatch`. */

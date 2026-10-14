@@ -20,7 +20,8 @@ into view, so a very fast jump through a long document can show blank space for 
 
 Performance is a requirement with numbers attached (SPEC NFR-1), checked by a benchmark that
 runs the editor in a real browser (Chromium, through Playwright) on generated documents:
-paragraphs with headings, mixed formatting and links, and a list nested eight levels deep. The
+paragraphs with headings, mixed formatting and links, a list nested eight levels deep, and a
+table of 200 rows × 10 columns. The
 same seed always produces the same documents, so runs can be compared.
 
 For each document the benchmark measures:
@@ -50,6 +51,7 @@ under 16 ms fits in one frame of a 60 Hz screen.
 | 10,000 paragraphs | 4 MB | 1.1 s | 24 ms | 6.6 ms | 125 ms | 14 ms | 82 MB |
 | 50,000 paragraphs | 20 MB | 5.6 s | 150 ms | 39 ms | 0.7 s | 80 ms | 307 MB |
 | Nested list, 2,000 items | 0.2 MB | 0.09 s | under 16 ms | 0.2 ms | 12 ms | 0.2 ms | 21 MB |
+| Table, 200 × 10 cells | 0.2 MB | 0.06 s | under 16 ms | 0.3 ms | 10 ms | — | 22 MB |
 
 ## Why it is fast
 
@@ -60,6 +62,10 @@ under 16 ms fits in one frame of a 60 Hz screen.
 - **The browser works only on what is visible**: top-level blocks use `content-visibility: auto`,
   so layout and painting skip the blocks outside the viewport. In 10,000 paragraphs this alone
   brought a key press from 144 ms to 24 ms.
+
+Table commands change the whole table in one step: adding or deleting a column, or turning
+the first column into headers, in a 200-row table takes 6–10 ms alone and 33–48 ms inside
+50,000 paragraphs (undo the same).
 
 ## Limits
 
@@ -95,15 +101,18 @@ document by hand.
 
 ## Download size
 
-What an app built with Vite downloads, measured on 2026-10-13 with `npm run size`:
+What an app built with Vite downloads, measured on 2026-10-14 with `npm run size`:
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 246.4 kB | 77.6 kB |
-| Core and `defaultExtensions` | 274.1 kB | 85.8 kB |
-| Core, `defaultExtensions` and the default UI | 327.2 kB | 102.4 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 266.4 kB | 84.2 kB |
+| Core and `defaultExtensions` | 333.7 kB | 104.9 kB |
+| Core, `defaultExtensions` and the default UI | 410.4 kB | 127.5 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
 styles add 2.9 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
 consumer would, and fails if the minimal app contains packages that only unused extensions need.
+`prosemirror-tables` is the exception: it registers its cell selection when it is loaded, so
+bundlers keep part of it (12.8 kB minified, 4.1 kB gzip) even in an app without the `Table`
+extension.

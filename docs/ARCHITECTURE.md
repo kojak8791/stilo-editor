@@ -416,7 +416,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 ### 6.3 Default extensions
 
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
-`Heading`, `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak`, `Image`, `BulletList`, `OrderedList`, `ListItem`,
+`Heading`, `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak`, `Image`, `Table`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
 `Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
@@ -444,7 +444,9 @@ configured with `{ <name>: { ...options } }`.
 | `codeBlock` | `<pre><code class="language-x">` | `pre` (whitespace kept, `<br>` → newline, inner elements reduced to their text) | `language` (class omitted when null), from the first `language-*` class of the `<code>` or else of the `<pre>`; content `text*`, no marks |
 | `taskList` (M2) | `<ul data-type="taskList">` | same | content `taskItem+` |
 | `taskItem` (M2) | `<li data-checked="true\|false">` | `li[data-checked]` | `checked` |
-| `table` etc. (M2) | `<table><tbody><tr><th\|td>` | same (+ `thead`, `tfoot` flattened) | `colspan`, `rowspan`, `colwidth`: details fixed by ADR in the tables task |
+| `table` | `<table>`, with `<colgroup>` when a column has a width (ADR 0005) | `table` | content `tableRow+` |
+| `tableRow` | `<tr>` | `tr` (`thead`, `tbody`, `tfoot` flattened: the rows keep their order) | content `(tableCell \| tableHeader)*` |
+| `tableCell` / `tableHeader` | `<td>` / `<th>` | same | `colspan`, `rowspan` (omitted when 1; clamped to 1000 and 65534 as browsers do), `colwidth` (`data-colwidth`, ADR 0005); content `block+`; a single paragraph without attributes is written without `<p>` (`compactParagraphs`, ADR 0001) |
 | `image` | `<img src alt title width height>` | `img[src]` (not inside `figure`, M2) | inline atom (F-601); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
 | `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
 
@@ -476,6 +478,8 @@ is not handled, so it never traps the focus. Priority 101 puts its `Enter` befor
 which would split the item. Input rule: ```` ``` ```` or ```` ```lang ```` and a space at the
 start of a textblock. `code: true` turns off input rules and marks inside it. A list item
 cannot start with a code block (content `paragraph block*`).
+
+Tables (F-501…F-507): the `Table` extension, on `prosemirror-tables` (its `TableMap`, commands, `tableEditing` and `columnResizing` plugins; our own node specs, with the names of §4.1). `insertTable({ rows = 3, cols = 3, withHeaderRow = true })` replaces the selection with a table, the cursor in the first cell, and adds a paragraph after it when nothing follows; `false` inside a table (no nested tables from the command; pasted ones are kept) or where the container refuses a table. `addRowBefore/After`, `deleteRow`, `addColumnBefore/After`, `deleteColumn`, `mergeCells`, `splitCell`, `toggleHeaderRow` and `toggleHeaderColumn` (the first row / column of the table, whatever the selection) run on a document holding only the table, which then replaces the table in **one step**: the library makes a step per cell, and each step copies the top-level blocks (164 ms for a header column of 200 rows in 50,000 paragraphs, 35 ms in one step). `deleteTable()`. `getTableHeaders(editor)` tells whether the first row and column are headers (`null` outside a table). Keys: `Tab` goes to the next cell (selecting its text) and in the last cell adds a row; `Shift-Tab` goes back; outside a table they are not handled. Dragging the border of a column sets the `colwidth` of its cells (`columnResizing`); the table node view (`TableView`) draws the `<colgroup>` in the editor. `tableEditing` adds the cell selection (drag across cells) and fixes the tables a transaction changes (missing cells, overlapping spans, widths that disagree); the extension fixes the tables of a loaded document too, in the empty transaction the `Editor` applies to every new state (`LOAD_META`, no undo step), so `getHTML()` never changes after the first edit.
 
 Images (F-601, F-603, F-607, F-608): the `Image` extension. `src` follows SPEC NFR-2 (the
 sanitizer drops other URLs, SVG data URLs included). Paste: when the clipboard has HTML,
@@ -527,6 +531,7 @@ Allowed CSS properties (anything else is dropped on input):
 | `color` | `textStyle` | See color rule |
 | `background-color` | `highlight` | See color rule |
 | `text-align` | `paragraph`, `heading` | `left\|center\|right\|justify`; `start` → `left`; `left` is the default and is omitted on output |
+| `width` | `<col>` of `table` (ADR 0005) | Whole pixels: `^\d+(\.\d+)?px$`, rounded; zero and other units dropped |
 | `line-height` | `paragraph`, `heading` | A unitless number `^\d+(\.\d+)?$` or a percentage of one (`115%` → `1.15`), rounded to 2 decimals without trailing zeros; zero, `normal` and lengths (`24px`, `1.5em`) dropped |
 
 Color rule: `#rgb`/`#rrggbb` → lowercase `#rrggbb`; `rgb(r, g, b)` and `rgba(..., 1)` → `#rrggbb`;
@@ -540,13 +545,13 @@ Example: `<span style="font-family: 'Times New Roman', serif; font-size: 12pt; c
 
 All parsing/normalization/building of style strings goes through `src/core/html/css.ts`
 (`parseStyle`, `normalizeColor`, `normalizeFontSize`, `normalizeFontFamily`, `normalizeTextAlign`,
-`normalizeLineHeight`, `buildStyle`). Extensions never handle raw style strings themselves.
+`normalizeLineHeight`, `normalizeWidth`, `buildStyle`). Extensions never handle raw style strings themselves.
 
 ### 7.4 Exceptions (non-style attributes in content)
 
 - `class="language-<x>"` on `<code>` inside `<pre>` (de-facto standard for highlighters).
 - `data-type="taskList"` and `data-checked` for task lists.
-- Table column widths: decided in the tables task ADR (M2).
+- `data-colwidth` on `<td>` / `<th>`: the column widths, which the editor reads back; the `<colgroup>` written next to them is what other pages display ([ADR 0005](decisions/0005-table-column-widths.md)).
 
 ### 7.5 Idempotence
 
@@ -732,3 +737,4 @@ layout, plus real key presses through Event Timing. Every document is measured f
 | D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1; `absolute` strategy in a host that scrolls with the anchor ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
 | D-14 | Top-level blocks use `content-visibility: auto`; performance budgets calibrated on the first measurement ([ADR 0003](decisions/0003-performance-baseline.md)) | 2026-10-12 |
 | D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |
+| D-16 | Table column widths written twice: `data-colwidth` on the cells, read back, and a `<colgroup>` for display ([ADR 0005](decisions/0005-table-column-widths.md)) | 2026-10-14 |

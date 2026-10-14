@@ -44,6 +44,7 @@ src/ui/
 │   ├── font-size-input.ts   createFontSizeInput: − field + and the list of sizes (T-038)
 │   ├── icon-menu.ts         createIconMenu: icon options in a row (T-039)
 │   ├── find-bar.ts          createFindBar: find and replace under the toolbar (T-043)
+│   ├── table-menu.ts        createTableMenu: insert grid and table operations (T-045)
 │   └── status-bar.ts        createStatusBar: word and character count (T-043)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
@@ -141,6 +142,10 @@ export interface ToolbarContext {
   openLinkPopover(): void;
   /** Opens or closes the character picker (no-op without the `characters` item). T-024. */
   toggleCharacterPicker(): void;
+  /** Opens or closes the find bar (no-op without the `Search` extension). T-043. */
+  toggleFindBar(): void;
+  /** Opens or closes the table menu (no-op without the `table` item). T-045. */
+  toggleTableMenu(): void;
 }
 
 /** A dropdown of mutually exclusive options (T-014). */
@@ -346,6 +351,20 @@ no functions.
 | `color.pick` | Pick a color | Scegli un colore |
 | `color.custom` | Custom color | Colore personalizzato |
 | `color.apply` | Apply | Applica |
+| `toolbar.table` | Table | Tabella |
+| `table.insert` | Insert table | Inserisci tabella |
+| `table.size` | {columns} × {rows} | {columns} × {rows} |
+| `table.headerRow` | Header row | Riga di intestazione |
+| `table.headerColumn` | Header column | Colonna di intestazione |
+| `table.addRowBefore` | Insert row above | Inserisci riga sopra |
+| `table.addRowAfter` | Insert row below | Inserisci riga sotto |
+| `table.deleteRow` | Delete row | Elimina riga |
+| `table.addColumnBefore` | Insert column left | Inserisci colonna a sinistra |
+| `table.addColumnAfter` | Insert column right | Inserisci colonna a destra |
+| `table.deleteColumn` | Delete column | Elimina colonna |
+| `table.mergeCells` | Merge cells | Unisci celle |
+| `table.splitCell` | Split cell | Dividi cella |
+| `table.deleteTable` | Delete table | Elimina tabella |
 | `toolbar.find` | Find and replace | Trova e sostituisci |
 | `find.find` | Find | Trova |
 | `find.replace` | Replace with | Sostituisci con |
@@ -376,7 +395,8 @@ no functions.
     'clearFormatting'],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'characters'],
+  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'table',
+    'characters'],
   ['find'],
 ]
 ```
@@ -432,6 +452,11 @@ cyan, blue, purple, pink) in a vivid, a light and a dark row (Tailwind shades 50
 `characters` (T-024): `icon` `FaceSlightlySmilingPlus`, `labelKey` `toolbar.characters`, no shortcut, `run` calls
 `context.toggleCharacterPicker()` (§5.3), always enabled, `isAvailable` is
 `'insertText' in editor.commands` (the `Text` extension).
+
+`table` (T-045): `icon` `Table`, `labelKey` `toolbar.table`, no shortcut, `run` calls
+`context.toggleTableMenu()` (§5.9), `isEnabled` is `isActive('table') ||
+commands.insertTable.can()`, `isAvailable` is `'insertTable' in editor.commands` (the `Table`
+extension).
 
 `find` (T-043): `icon` `Search`, `labelKey` `toolbar.find`, shortcut `Mod-f`, `run` calls
 `context.toggleFindBar()` (§5.7), always enabled, `isAvailable` is `'setSearch' in editor.commands`
@@ -948,6 +973,57 @@ public: the host mounts it where it wants, typically under the editor.
 - `destroy()` (idempotent) removes the element and the listeners; it runs on the editor's
   `destroy` too.
 
+### 5.9 Table menu (T-045)
+
+`createTableMenu(editor, { anchor, container, messages })` (internal), created by the toolbar
+when it has the `table` item: anchored to that button, `container` the toolbar (it scrolls with
+it). One popover with two panels; which one shows is decided when it opens. SPEC F-501…F-505,
+F-805.
+
+```html
+<div class="stilo-popover stilo-table-menu" role="dialog" aria-label="Insert table" hidden>
+  <div class="stilo-table-menu__picker">
+    <div class="stilo-table-menu__grid" role="group" aria-label="Insert table">
+      <button type="button" class="stilo-table-menu__cell stilo-table-menu__cell--active"
+        data-rows="1" data-columns="1" aria-label="1 × 1" tabindex="0"></button>
+      …
+    </div>
+    <div class="stilo-table-menu__size" aria-hidden="true">1 × 1</div>
+    <label class="stilo-table-menu__header"><input type="checkbox" checked> Header row</label>
+  </div>
+  <div class="stilo-table-menu__actions" role="menu" aria-label="Table" hidden>
+    <div class="stilo-dropdown__option stilo-table-menu__item--addRowBefore" role="menuitem"
+      tabindex="-1">Insert row above</div>
+    …
+    <div class="stilo-table-menu__separator" role="separator"></div>
+    <div class="stilo-dropdown__option stilo-table-menu__item--toggleHeaderRow"
+      role="menuitemcheckbox" aria-checked="true" tabindex="-1">Header row</div>
+    …
+  </div>
+</div>
+```
+
+- **Button**: `aria-haspopup="dialog"`, `aria-expanded`; it toggles the menu. Disabled where a
+  table cannot be inserted (e.g. in a list item) unless the cursor is in a table.
+- **Outside a table: insert grid** (dialog *Insert table*), 8 rows × 10 columns (`GRID_ROWS`,
+  `GRID_COLUMNS` in the code and in `ui.css`). Opening highlights and focuses 1 × 1. The mouse
+  over a cell, or the arrow keys (no wrapping), highlight the rectangle from the first cell to it,
+  and the size shows under the grid (`table.size`, columns × rows, as each cell's accessible
+  name). A click, `Enter` or `Space` runs `insertTable({ rows, cols, withHeaderRow })`, closes and
+  focuses the editor. *Header row* is checked at first and keeps its state while the toolbar
+  lives.
+- **In a table: operations** (dialog *Table*, a `role="menu"` inside), in groups: insert row
+  above / below, delete row; insert column left / right, delete column; merge cells, split cell;
+  header row, header column (`menuitemcheckbox`, checked from `getTableHeaders`); delete table.
+  Each item runs the command of the same name (`toggleHeaderRow`, `toggleHeaderColumn` for the
+  two toggles) and is `aria-disabled` when its `.can()` is false. Opening focuses the first
+  enabled item; `ArrowDown` / `ArrowUp` (wrapping), `Home` / `End` move over the enabled ones;
+  `click`, `Enter` or `Space` run it, close and focus the editor; `Tab` closes.
+- **Closing**: `Escape` closes and focuses the editor; pointer down outside closes without moving
+  the focus. `toolbar.destroy()` removes it.
+- Hover handles on rows and columns and a corner menu over the table are planned (T-049); this
+  menu stays as the keyboard path to every operation.
+
 ## 6. Dropdown and heading dropdown (T-014)
 
 ### 6.1 DOM
@@ -1173,6 +1249,17 @@ Layout:
   `0.9em`, at least `7em` wide so the buttons do not move; 28px icon buttons with toolbar
   colors, a pressed toggle in `--stilo-color-active`; *Replace* and *Replace all* with border.
   `[hidden]` is `display: none` on the bar and its rows.
+- Table menu: grid of 10 columns of 18px cells with 3px gaps (border `--stilo-color-border`,
+  radius 3px; highlighted: `--stilo-color-focus` border on `--stilo-color-active`), the size
+  centered in `--stilo-color-muted`, the checkbox row. Operations: the dropdown option look,
+  at least 200px wide, 1px `--stilo-color-separator` lines between the groups; a header toggle
+  shows `✓` on the right when checked (no active background).
+- Tables (`content.css`): the base CSS of `prosemirror-tables` (wrapper scrolling sideways,
+  `table-layout: fixed`, resize handle in `--stilo-color-focus`, selected cells tinted with
+  `--stilo-color-selected-cell`, default `rgb(9 105 218 / 0.12)`), cells with a 1px
+  `--stilo-color-border` border and `6px 8px` padding, header cells semibold on
+  `--stilo-color-table-header` (default `#f6f8fa`) and aligned to the start, no outer margins
+  for the first and last block of a cell, `1em` above and below the table.
 - Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
   corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
 - Search matches (`content.css`): `.stilo-search-match` background

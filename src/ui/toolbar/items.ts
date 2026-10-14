@@ -17,6 +17,7 @@ import {
   Strikethrough,
   Subscript,
   Superscript,
+  Table,
   TextAlignCenter,
   TextAlignEnd,
   TextAlignJustify,
@@ -58,7 +59,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ],
   ['textColor', 'highlight'],
   ['textAlign', 'lineHeight'],
-  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'characters'],
+  ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'horizontalRule', 'table', 'characters'],
   ['find'],
 ];
 
@@ -264,6 +265,17 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     },
     isEnabled: (e) => 'setHorizontalRule' in e.commands && e.commands.setHorizontalRule.can(),
     isAvailable: (e) => 'setHorizontalRule' in e.commands,
+  },
+  table: {
+    id: 'table',
+    kind: 'button',
+    icon: Table,
+    labelKey: 'toolbar.table',
+    run: (_e, toolbar) => {
+      toolbar.toggleTableMenu();
+    },
+    isEnabled: (e) => e.isActive('table') || e.commands.insertTable.can(),
+    isAvailable: (e) => 'insertTable' in e.commands,
   },
   characters: {
     id: 'characters',

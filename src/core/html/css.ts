@@ -11,6 +11,7 @@ export const STYLE_PROPERTIES = [
   'background-color',
   'text-align',
   'line-height',
+  'width',
 ] as const;
 
 /** A property allowed in the HTML output. */
@@ -235,6 +236,19 @@ export function normalizeLineHeight(value: string): string | null {
 }
 
 /**
+ * Normalizes a `width` (trimmed, lowercased): whole pixels, `^\d+(\.\d+)?px$` rounded
+ * (`120.4px` → `120px`); zero, other units and keywords → `null` (docs/decisions/0005).
+ */
+export function normalizeWidth(value: string): string | null {
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d+(?:\.\d+)?)px$/);
+  const pixels = match ? Math.round(Number(match[1]!)) : 0;
+  return pixels > 0 ? `${pixels}px` : null;
+}
+
+/**
  * Normalizes the value of an output property with the matching normalizer above.
  * Returns `null` if the value matches {@link UNSAFE_VALUE} or the normalizer returns `null`.
  */
@@ -254,6 +268,8 @@ export function normalizeStyleValue(property: StyleProperty, value: string): str
       return normalizeTextAlign(value);
     case 'line-height':
       return normalizeLineHeight(value);
+    case 'width':
+      return normalizeWidth(value);
   }
 
   return null;

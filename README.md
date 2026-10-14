@@ -80,6 +80,12 @@ column is what you type to get the format as you write.
 | Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | `- ` `* ` `+ ` | |
 | Numbered list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | `1. ` | Starts from the number you type |
 | Indent / outdent item | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | |
+| **Tables** | | | |
+| Insert a table | | | Toolbar grid up to 10 × 8, with or without a header row |
+| Rows, columns, cells | | | With the cursor in a table, the same button opens: insert or delete rows and columns, merge and split cells, header row and column, delete table |
+| Move between cells | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | | <kbd>Tab</kbd> in the last cell adds a row |
+| Select cells | | | Drag across cells |
+| Resize a column | | | Drag the border of a column; the width is kept in the HTML |
 | **Images** | | | |
 | Paste an image | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | A copied image or screenshot is embedded in the HTML (PNG, JPEG, GIF, WebP, up to 5 MB by default); an image copied from a web page keeps its address |
 | Resize an image | | | Select it and drag one of its side handles; the proportions stay |

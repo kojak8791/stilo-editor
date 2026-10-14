@@ -62,6 +62,15 @@ export function paragraphs(count: number, seed = 1): string {
   return parts.join('');
 }
 
+/** A table of `rows` × `cols` cells of 1–6 words, the first row of header cells. */
+export function table(rows: number, cols: number, seed = 1): string {
+  const random = createRandom(seed);
+  const row = (tag: string) =>
+    `<tr>${Array.from({ length: cols }, () => `<${tag}>${inlineText(random, 1, 6)}</${tag}>`).join('')}</tr>`;
+  const body = Array.from({ length: rows }, (_, i) => row(i === 0 ? 'th' : 'td')).join('');
+  return `<table>${body}</table>`;
+}
+
 /**
  * A list of `count` items nested up to depth 8, every nested list randomly bulleted or ordered.
  * The depth follows a random walk: deeper, same level, or one or two levels up.

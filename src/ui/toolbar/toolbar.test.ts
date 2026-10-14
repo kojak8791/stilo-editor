@@ -89,6 +89,7 @@ describe('toolbar', () => {
       'blockquote',
       'codeBlock',
       'horizontalRule',
+      'table',
       'characters',
       'find',
     ]);
@@ -447,7 +448,8 @@ describe('toolbar', () => {
     expect(from('redo', 'ArrowLeft')).toBe('undo');
     expect(from('undo', 'ArrowLeft')).toBe('find');
     expect(from('find', 'ArrowLeft')).toBe('characters');
-    expect(from('characters', 'ArrowLeft')).toBe('horizontalRule');
+    expect(from('characters', 'ArrowLeft')).toBe('table');
+    expect(from('table', 'ArrowLeft')).toBe('horizontalRule');
     expect(from('horizontalRule', 'ArrowLeft')).toBe('codeBlock');
     expect(from('find', 'ArrowRight')).toBe('undo');
     expect(from('redo', 'ArrowRight')).toBe('heading');

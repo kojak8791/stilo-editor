@@ -13,6 +13,8 @@ const content = [
   '<pre><code class="language-js">function greet(name) {\n  return "Hello, " + name;\n}</code></pre>',
   '<ul><li>First item</li><li>Second item<ul><li>Nested item</li></ul></li></ul>',
   '<ol start="3"><li>Third</li><li>Fourth</li></ol>',
+  '<table><tr><th>Shortcut</th><th>Action</th></tr><tr><td>Tab</td><td>Next cell</td></tr>',
+  '<tr><td>Shift+Tab</td><td>Previous cell</td></tr></table>',
   '<hr>',
   '<p>Line one<br>line two</p>',
 ].join('');

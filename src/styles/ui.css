@@ -559,6 +559,92 @@
   color: var(--stilo-color-muted);
 }
 
+/* Table menu (T-045): insert grid of 10 columns (GRID_COLUMNS in table-menu.ts), operations */
+.stilo-table-menu {
+  font-family: var(--stilo-font-family);
+  font-size: var(--stilo-font-size);
+  color: var(--stilo-color-text);
+}
+
+.stilo-table-menu__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px;
+}
+
+.stilo-table-menu__picker[hidden],
+.stilo-table-menu__actions[hidden] {
+  display: none;
+}
+
+.stilo-table-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(10, 18px);
+  gap: 3px;
+}
+
+.stilo-table-menu__cell {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: 3px;
+  background: var(--stilo-color-bg);
+  cursor: pointer;
+}
+
+.stilo-table-menu__cell--active {
+  border-color: var(--stilo-color-focus);
+  background: var(--stilo-color-active);
+}
+
+.stilo-table-menu__cell:focus-visible {
+  outline: 2px solid var(--stilo-color-focus);
+  outline-offset: 1px;
+}
+
+.stilo-table-menu__size {
+  text-align: center;
+  color: var(--stilo-color-muted);
+}
+
+.stilo-table-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.stilo-table-menu__actions {
+  min-width: 200px;
+}
+
+.stilo-table-menu__actions .stilo-dropdown__option[aria-checked] {
+  background: transparent;
+}
+
+.stilo-table-menu__actions .stilo-dropdown__option[aria-checked]:hover,
+.stilo-table-menu__actions .stilo-dropdown__option[aria-checked]:focus-visible {
+  background: var(--stilo-color-hover);
+}
+
+.stilo-table-menu__actions .stilo-dropdown__option[aria-checked]::after {
+  content: "✓";
+  margin-left: auto;
+  visibility: hidden;
+}
+
+.stilo-table-menu__actions .stilo-dropdown__option[aria-checked="true"]::after {
+  visibility: visible;
+}
+
+.stilo-table-menu__separator {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--stilo-color-separator);
+}
+
 /* Color split button (T-026): the main part shows the last used color under its icon */
 .stilo-split {
   display: flex;

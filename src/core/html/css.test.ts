@@ -7,6 +7,7 @@ import {
   normalizeLineHeight,
   normalizeStyleValue,
   normalizeTextAlign,
+  normalizeWidth,
   parseStyle,
   readStyle,
   sanitizeStyle,
@@ -209,6 +210,21 @@ describe('normalizeTextAlign', () => {
 
   it.each(['end', 'middle', 'inherit', ''])('rejects %s', (input) => {
     expect(normalizeTextAlign(input)).toBeNull();
+  });
+});
+
+describe('normalizeWidth', () => {
+  it.each([
+    ['120px', '120px'],
+    [' 80PX ', '80px'],
+    ['120.4px', '120px'],
+    ['99.5px', '100px'],
+  ])('accepts %s → %s', (input, expected) => {
+    expect(normalizeWidth(input)).toBe(expected);
+  });
+
+  it.each(['0px', '0.2px', '50%', '10em', 'auto', '120', '-5px', ''])('rejects %s', (input) => {
+    expect(normalizeWidth(input)).toBeNull();
   });
 });
 

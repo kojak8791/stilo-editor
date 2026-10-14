@@ -1,5 +1,5 @@
 import { Selection } from 'prosemirror-state';
-import { nestedList, paragraphs } from '../bench/generators';
+import { nestedList, paragraphs, table } from '../bench/generators';
 import type { Editor } from '../src';
 
 /** Benchmark documents of SPEC NFR-1.2, generated in the page (not timed). */
@@ -8,6 +8,7 @@ const DOCUMENTS: Readonly<Record<string, () => string>> = {
   'paragraphs-10k': () => paragraphs(10_000),
   'paragraphs-50k': () => paragraphs(50_000),
   'nested-list': () => nestedList(2_000),
+  'table-large': () => table(200, 10),
 };
 
 /**

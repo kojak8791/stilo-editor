@@ -26,6 +26,7 @@ import { Search, type SearchOptions } from '../search';
 import { Strike } from '../strike';
 import { Subscript } from '../subscript';
 import { Superscript } from '../superscript';
+import { Table } from '../table';
 import { Text } from '../text';
 import { TextAlign } from '../text-align';
 import { TextStyle } from '../text-style';
@@ -44,6 +45,7 @@ export interface DefaultExtensionsOptions {
   codeBlock?: false;
   horizontalRule?: false;
   image?: false | Partial<ImageOptions>;
+  table?: false;
   hardBreak?: false;
   bulletList?: false;
   orderedList?: false;
@@ -96,6 +98,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(HorizontalRule, options.horizontalRule),
     ...include(HardBreak, options.hardBreak),
     ...include(Image, options.image),
+    ...include(Table, options.table),
     ...include(BulletList, options.bulletList),
     ...include(OrderedList, options.orderedList),
     ...include(ListItem, options.listItem),

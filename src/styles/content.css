@@ -96,6 +96,60 @@ li.ProseMirror-selectednode:after {
   display: block;
 }
 
+/*
+ * prosemirror-tables/style/tables.css. Copyright (C) 2015-2016 by Marijn Haverbeke and others,
+ * MIT license. Adapted: one `cursor` value, the colors from the Stilo custom properties.
+ */
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ProseMirror td:not([data-colwidth]):not(.column-resize-dragging),
+.ProseMirror th:not([data-colwidth]):not(.column-resize-dragging) {
+  min-width: var(--default-cell-min-width);
+}
+
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: var(--stilo-color-focus, #0969da);
+  pointer-events: none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--stilo-color-selected-cell, rgb(9 105 218 / 0.12));
+  pointer-events: none;
+}
+
 /* Stilo content defaults */
 
 /* Lists: list items hold paragraphs, which must not add their own margins. */
@@ -148,6 +202,33 @@ li.ProseMirror-selectednode:after {
   border-radius: 0;
   background: none;
   font-size: inherit;
+}
+
+/* Tables: a cell holds blocks, whose outer margins would pad the cell twice. */
+.stilo-content .tableWrapper {
+  margin: 1em 0;
+}
+
+.stilo-content td,
+.stilo-content th {
+  padding: 6px 8px;
+  border: 1px solid var(--stilo-color-border, #d1d9e0);
+}
+
+.stilo-content th {
+  background: var(--stilo-color-table-header, #f6f8fa);
+  font-weight: 600;
+  text-align: start;
+}
+
+.stilo-content td > :first-child,
+.stilo-content th > :first-child {
+  margin-top: 0;
+}
+
+.stilo-content td > :last-child,
+.stilo-content th > :last-child {
+  margin-bottom: 0;
 }
 
 /* Images: never wider than the content; with width and height they keep their ratio. */

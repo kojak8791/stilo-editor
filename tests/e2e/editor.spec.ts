@@ -243,3 +243,59 @@ test('a whole paragraph dropped inside a list item becomes an item', async ({
   await dragIntoText(page, page.locator('.ProseMirror li p'), 2);
   await expect(output(page)).toHaveText('<ul><li>ab</li><li>xyz</li><li>cd</li></ul>');
 });
+
+test('tables: insert from the grid, Tab through the cells, a new row from the last one', async ({
+  page,
+}) => {
+  await openEmpty(page);
+  await page.click('[data-item="table"]');
+  await page.click('[data-rows="2"][data-columns="2"]');
+  await type(page, 'a');
+  await page.keyboard.press('Tab');
+  await type(page, 'b');
+  await page.keyboard.press('Tab');
+  await type(page, 'c');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await type(page, 'e');
+  await expect(output(page)).toHaveText(
+    '<table><tbody><tr><th>a</th><th>b</th></tr><tr><td>c</td><td></td></tr>' +
+      '<tr><td>e</td><td></td></tr></tbody></table><p></p>',
+  );
+});
+
+test('tables: drag a column border to set its width', async ({ page }) => {
+  await openEmpty(page);
+  await page.click('[data-item="table"]');
+  await page.click('[data-rows="1"][data-columns="2"]');
+  const cell = await page.locator('.stilo-content th').first().boundingBox();
+  const y = cell!.y + cell!.height / 2;
+  await page.mouse.move(cell!.x + cell!.width - 2, y);
+  await page.mouse.down();
+  await page.mouse.move(cell!.x + 150, y, { steps: 5 });
+  await page.mouse.up();
+  await expect(output(page)).toHaveText(
+    /^<table><colgroup><col style="width: \d+px"><col><\/colgroup><tbody><tr><th data-colwidth="\d+"><\/th><th><\/th><\/tr><\/tbody><\/table><p><\/p>$/,
+  );
+  const width = Number((await output(page).textContent())!.match(/data-colwidth="(\d+)"/)![1]);
+  expect(Math.abs(width - 150)).toBeLessThan(10);
+});
+
+test('tables: select cells with the mouse and merge them from the menu', async ({ page }) => {
+  await openEmpty(page);
+  await page.click('[data-item="table"]');
+  await page.click('[data-rows="1"][data-columns="2"]');
+  const cells = page.locator('.stilo-content th');
+  const first = await cells.nth(0).boundingBox();
+  const second = await cells.nth(1).boundingBox();
+  await page.mouse.move(first!.x + 20, first!.y + first!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(second!.x + 20, second!.y + second!.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.locator('.stilo-content .selectedCell')).toHaveCount(2);
+  await page.click('[data-item="table"]');
+  await page.click('.stilo-table-menu__item--mergeCells');
+  await expect(output(page)).toHaveText(
+    '<table><tbody><tr><th colspan="2"></th></tr></tbody></table><p></p>',
+  );
+});
