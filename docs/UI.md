@@ -41,7 +41,8 @@ src/ui/
 │   ├── character-picker.ts  createCharacterPicker (T-024)
 │   ├── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
 │   ├── color-button.ts      createColorButton: split button and color popover (T-026)
-│   └── font-size-input.ts   createFontSizeInput: − field + and the list of sizes (T-038)
+│   ├── font-size-input.ts   createFontSizeInput: − field + and the list of sizes (T-038)
+│   └── icon-menu.ts         createIconMenu: icon options in a row (T-039)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014),
@@ -61,10 +62,12 @@ Tests are colocated (`src/ui/**/<name>.test.ts`).
 ```ts
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
 export type { ToolbarButton, ToolbarColor, ToolbarColorButton, ToolbarContext,
-  ToolbarDropdown, ToolbarDropdownOption, ToolbarFont, ToolbarFontSizeInput, ToolbarItem }
+  ToolbarDropdown, ToolbarDropdownOption, ToolbarFont, ToolbarFontSizeInput, ToolbarIconMenu,
+  ToolbarIconMenuOption, ToolbarItem }
   from './toolbar/types';
 export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, fontFamilyDropdown, type FontSizeInputOptions,
-  fontSizeInput, headingDropdown, highlightButton, textColorButton } from './toolbar/items';
+  fontSizeInput, headingDropdown, highlightButton, textAlignMenu, textColorButton }
+  from './toolbar/items';
 export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 export { DEFAULT_PALETTE } from './toolbar/palette';
 export type { MessageKey, Messages } from './i18n/types';
@@ -214,11 +217,37 @@ export interface ToolbarFontSizeInput {
   isAvailable?(editor: Editor): boolean;
 }
 
+/** A button showing the icon of the active option, opening the options in a row (T-039, §5.6). */
+export interface ToolbarIconMenu {
+  /** Unique within the toolbar; written as `data-item`. */
+  id: string;
+  kind: 'iconMenu';
+  /** Key of the accessible name of the trigger and of the menu. */
+  labelKey: string;
+  options: ToolbarIconMenuOption[];
+  isAvailable?(editor: Editor): boolean;
+}
+
+/** An option of a {@link ToolbarIconMenu}. */
+export interface ToolbarIconMenuOption {
+  /** Unique within the menu; used in the class `stilo-icon-menu__option--<id>`. */
+  id: string;
+  icon: IconNode;
+  labelKey: string;
+  /** Keymap notation shown in the tooltip. */
+  shortcut?: string;
+  run(editor: Editor): void;
+  isActive(editor: Editor): boolean;
+  /** Default: always enabled. */
+  isEnabled?(editor: Editor): boolean;
+}
+
 export type ToolbarItem =
   | ToolbarButton
   | ToolbarDropdown
   | ToolbarColorButton
-  | ToolbarFontSizeInput;
+  | ToolbarFontSizeInput
+  | ToolbarIconMenu;
 ```
 
 ### 3.2 i18n
@@ -260,6 +289,11 @@ no functions.
 | `font.sansSerif` | Sans serif | Senza grazie |
 | `font.serif` | Serif | Con grazie |
 | `font.monospace` | Monospace | Monospaziato |
+| `toolbar.textAlign` | Alignment | Allineamento |
+| `align.left` | Align left | Allinea a sinistra |
+| `align.center` | Center | Centra |
+| `align.right` | Align right | Allinea a destra |
+| `align.justify` | Justify | Giustifica |
 | `toolbar.link` | Link | Collegamento |
 | `heading.paragraph` | Paragraph | Paragrafo |
 | `heading.h1` | Heading 1 | Titolo 1 |
@@ -316,6 +350,7 @@ no functions.
   ['bold', 'italic', 'underline', 'strike', 'code', 'subscript', 'superscript', 'link',
     'clearFormatting'],
   ['textColor', 'highlight'],
+  ['textAlign'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ]
 ```
@@ -348,6 +383,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 
 `fontFamily` (T-038) is `fontFamilyDropdown()`, see §6.4; `fontSize` (T-038) is
 `fontSizeInput()`, see §5.5.
+
+`textAlign` (T-039) is `textAlignMenu()`, see §5.6.
 
 `textColor` and `highlight` (T-026) are color split buttons (§5.4), created by
 `textColorButton(palette = DEFAULT_PALETTE)` and `highlightButton(palette = DEFAULT_PALETTE)`;
@@ -753,6 +790,53 @@ pt is the default because Word and Google Docs paste their sizes in pt (`11pt` s
 and steps in pt) and office users know the scale. px and pt are absolute: text with a size
 does not follow the base size of the page nor the browser's default font size setting. `rem`
 follows both.
+
+### 5.6 Icon menu and text alignment (T-039)
+
+`createIconMenu(editor, item, { container, messages, mac })` (internal), created by the toolbar
+for every `kind: 'iconMenu'` item; the menu is mounted in the toolbar (it scrolls with it).
+
+```html
+<button type="button" class="stilo-toolbar__button stilo-icon-menu__trigger" data-item="textAlign"
+  aria-haspopup="menu" aria-expanded="false" aria-label="Alignment: Align left" title="Alignment"
+  tabindex="-1">
+  <svg class="stilo-icon" aria-hidden="true">…icon of the active option…</svg>
+  <svg class="stilo-icon" aria-hidden="true">…ChevronDown…</svg>
+</button>
+<!-- appended to the toolbar element by createPopover -->
+<div class="stilo-popover stilo-icon-menu" role="menu" aria-label="Alignment"
+  aria-orientation="horizontal" hidden>
+  <button type="button" class="stilo-toolbar__button stilo-icon-menu__option
+    stilo-icon-menu__option--left" data-option="left" role="menuitemradio" aria-checked="true"
+    aria-label="Align left" title="Align left (Ctrl+Shift+L)" tabindex="-1">
+    <svg class="stilo-icon" aria-hidden="true">…TextAlignStart…</svg>
+  </button>
+  …
+</div>
+```
+
+- **Trigger**: shows the icon of the active option (the first whose `isActive` is true), or of
+  the first option when none is; `aria-label` is `<label>: <option label>`. `click` toggles the
+  menu, `ArrowDown` opens it. Disabled (`aria-disabled="true"`, does not open) when every
+  option is disabled.
+- **Menu** (APG Menu Button, horizontal): opening focuses the checked option, or the first.
+  `ArrowRight` / `ArrowLeft` move with wrapping, `Home` / `End` go to the ends; disabled options
+  keep the focus but do nothing. Selecting (`click`, `Enter`, `Space`) closes the menu, gives the
+  focus to the editor and runs the option. `Escape` closes and focuses the trigger; `Tab`
+  closes. The active option has `aria-checked="true"` and `stilo-toolbar__button--active`.
+
+`textAlignMenu()`, item ID `textAlign`, `labelKey` `toolbar.textAlign`, `isAvailable`:
+`'setTextAlign' in editor.commands`.
+
+| Option ID | Icon (`lucide`) | `labelKey` | Shortcut | `run` |
+|---|---|---|---|---|
+| `left` | `TextAlignStart` | `align.left` | `Mod-Shift-l` | `setTextAlign('left')` |
+| `center` | `TextAlignCenter` | `align.center` | `Mod-Shift-e` | `setTextAlign('center')` |
+| `right` | `TextAlignEnd` | `align.right` | `Mod-Shift-r` | `setTextAlign('right')` |
+| `justify` | `TextAlignJustify` | `align.justify` | `Mod-Shift-j` | `setTextAlign('justify')` |
+
+`isActive`: the `textAlign` of the heading or paragraph at the start of the selection (`null` is
+`left`). `isEnabled`: `setTextAlign.can(id)` (false on a selected horizontal rule).
 
 ## 6. Dropdown and heading dropdown (T-014)
 

@@ -1,8 +1,9 @@
-import { setBlockType } from 'prosemirror-commands';
 import { textblockTypeInputRule } from 'prosemirror-inputrules';
 import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
 import { isNodeActive } from '../../core/helpers/active';
+import { setTextblockType } from '../../core/helpers/nodes';
+import { parseTextAlign, textAlignAttr, textAlignDOM } from '../../core/helpers/text-align';
 
 declare module '../../core/types' {
   interface Commands {
@@ -23,7 +24,8 @@ export interface HeadingOptions {
 }
 
 /**
- * The `heading` node (`<h1>`…`<h6>`), docs/SPEC.md F-302.
+ * The `heading` node (`<h1>`…`<h6>`, with `style="text-align: x"` when aligned), docs/SPEC.md
+ * F-302.
  */
 export const Heading = defineExtension<HeadingOptions>({
   name: 'heading',
@@ -33,23 +35,26 @@ export const Heading = defineExtension<HeadingOptions>({
       group: 'block',
       content: 'inline*',
       defining: true,
-      attrs: { level: { default: levels[0] ?? 1 } },
-      parseDOM: levels.map((level) => ({ tag: `h${level}`, attrs: { level } })),
-      toDOM: (node) => [`h${node.attrs.level}`, 0],
+      attrs: { level: { default: levels[0] ?? 1 }, ...textAlignAttr() },
+      parseDOM: levels.map((level) => ({
+        tag: `h${level}`,
+        getAttrs: (node: HTMLElement) => ({ level, textAlign: parseTextAlign(node) }),
+      })),
+      toDOM: (node) => textAlignDOM(`h${node.attrs.level}`, node),
     },
   }),
   commands: ({ schema, options }) => {
     const heading = schema.nodes.heading!;
     const setHeading = (attrs: { level: HeadingLevel }): Command => {
       if (!options.levels.includes(attrs.level)) return () => false;
-      return setBlockType(heading, { level: attrs.level });
+      return setTextblockType(heading, { level: attrs.level });
     };
     return {
       setHeading,
       toggleHeading: (attrs) => {
         return (state, dispatch) => {
           if (isNodeActive(state, heading, { level: attrs.level })) {
-            return setBlockType(schema.nodes.paragraph!)(state, dispatch);
+            return setTextblockType(schema.nodes.paragraph!)(state, dispatch);
           }
           return setHeading(attrs)(state, dispatch);
         };

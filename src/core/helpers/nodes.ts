@@ -35,3 +35,38 @@ export function insertBlock(type: NodeType, attrs: Attrs | null = null): Command
     return true;
   };
 }
+
+/**
+ * Command: like `setBlockType` from prosemirror-commands (turns the selected textblocks into
+ * `type` with `attrs`), but a block keeps its `textAlign` when `type` has that attribute, so a
+ * centered heading stays centered as a paragraph. `false` when no selected textblock changes.
+ */
+export function setTextblockType(type: NodeType, attrs: Attrs = {}): Command {
+  const keepsAlign = type.spec.attrs?.textAlign !== undefined;
+  const attrsFor = (node: Node): Attrs =>
+    type.create(keepsAlign ? { ...attrs, textAlign: node.attrs.textAlign ?? null } : attrs).attrs;
+
+  return (state, dispatch) => {
+    let applicable = false;
+    for (const { $from, $to } of state.selection.ranges) {
+      state.doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
+        if (applicable) return false;
+        if (!node.isTextblock || node.hasMarkup(type, attrsFor(node))) return true;
+        const $pos = state.doc.resolve(pos);
+        applicable =
+          node.type === type || $pos.parent.canReplaceWith($pos.index(), $pos.index() + 1, type);
+        return !applicable;
+      });
+    }
+    if (!applicable) return false;
+
+    if (dispatch) {
+      const tr = state.tr;
+      for (const { $from, $to } of state.selection.ranges) {
+        tr.setBlockType($from.pos, $to.pos, type, attrsFor);
+      }
+      dispatch(tr.scrollIntoView());
+    }
+    return true;
+  };
+}

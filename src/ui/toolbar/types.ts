@@ -122,9 +122,38 @@ export interface ToolbarFontSizeInput {
   isAvailable?(editor: Editor): boolean;
 }
 
+/**
+ * A button that shows the icon of the active option (of the first one when none is active) and
+ * opens the options as icons in a row (T-039).
+ */
+export interface ToolbarIconMenu {
+  /** Unique within the toolbar; written as `data-item`. */
+  id: string;
+  kind: 'iconMenu';
+  /** Key of the accessible name of the trigger and of the menu. */
+  labelKey: string;
+  options: ToolbarIconMenuOption[];
+  isAvailable?(editor: Editor): boolean;
+}
+
+/** An option of a {@link ToolbarIconMenu}. */
+export interface ToolbarIconMenuOption {
+  /** Unique within the menu; used in the class `stilo-icon-menu__option--<id>`. */
+  id: string;
+  icon: IconNode;
+  labelKey: string;
+  /** Keymap notation shown in the tooltip. */
+  shortcut?: string;
+  run(editor: Editor): void;
+  isActive(editor: Editor): boolean;
+  /** Default: always enabled. */
+  isEnabled?(editor: Editor): boolean;
+}
+
 /** A single item in the toolbar. */
 export type ToolbarItem =
   | ToolbarButton
   | ToolbarDropdown
   | ToolbarColorButton
-  | ToolbarFontSizeInput;
+  | ToolbarFontSizeInput
+  | ToolbarIconMenu;

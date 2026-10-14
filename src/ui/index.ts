@@ -26,6 +26,7 @@ export {
   fontSizeInput,
   headingDropdown,
   highlightButton,
+  textAlignMenu,
   textColorButton,
 } from './toolbar/items';
 /** Default palette of the color buttons. */
@@ -42,5 +43,7 @@ export type {
   ToolbarDropdownOption,
   ToolbarFont,
   ToolbarFontSizeInput,
+  ToolbarIconMenu,
+  ToolbarIconMenuOption,
   ToolbarItem,
 } from './toolbar/types';

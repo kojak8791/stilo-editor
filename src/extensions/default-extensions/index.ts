@@ -23,6 +23,7 @@ import { Strike } from '../strike';
 import { Subscript } from '../subscript';
 import { Superscript } from '../superscript';
 import { Text } from '../text';
+import { TextAlign } from '../text-align';
 import { TextStyle } from '../text-style';
 import { Underline } from '../underline';
 
@@ -50,6 +51,7 @@ export interface DefaultExtensionsOptions {
   code?: false;
   link?: false;
   textStyle?: false;
+  textAlign?: false;
   highlight?: false;
   clearFormatting?: false;
   history?: false | Partial<HistoryOptions>;
@@ -97,6 +99,7 @@ export function defaultExtensions(options: DefaultExtensionsOptions = {}): Exten
     ...include(Link, options.link),
     ...include(TextStyle, options.textStyle),
     ...include(Highlight, options.highlight),
+    ...include(TextAlign, options.textAlign),
     ...include(ClearFormatting, options.clearFormatting),
     ...include(History, options.history),
     ...include(MoveBlock, options.moveBlock),

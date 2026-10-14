@@ -13,12 +13,16 @@ import {
   Strikethrough,
   Subscript,
   Superscript,
+  TextAlignCenter,
+  TextAlignEnd,
+  TextAlignJustify,
+  TextAlignStart,
   TextQuote,
   Type,
   Underline,
   Undo2,
 } from 'lucide';
-import type { Editor, FontSizeUnit, HeadingLevel } from '../../index';
+import type { Editor, FontSizeUnit, HeadingLevel, TextAlignment } from '../../index';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
 import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
@@ -29,6 +33,7 @@ import type {
   ToolbarDropdown,
   ToolbarFont,
   ToolbarFontSizeInput,
+  ToolbarIconMenu,
   ToolbarItem,
 } from './types';
 
@@ -49,6 +54,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'clearFormatting',
   ],
   ['textColor', 'highlight'],
+  ['textAlign'],
   ['bulletList', 'orderedList', 'blockquote', 'horizontalRule', 'characters'],
 ];
 
@@ -255,6 +261,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
   heading: headingDropdown(),
   fontFamily: fontFamilyDropdown(),
   fontSize: fontSizeInput(),
+  textAlign: textAlignMenu(),
   textColor: textColorButton(),
   highlight: highlightButton(),
 };
@@ -386,6 +393,40 @@ export function fontSizeInput(options: FontSizeInputOptions = {}): ToolbarFontSi
     unit,
     sizes,
     isAvailable: (e: Editor) => 'stepFontSize' in e.commands,
+  };
+}
+
+/** The alignment of the textblock at the start of the selection. */
+function blockAlignment(editor: Editor): TextAlignment {
+  const textAlign =
+    editor.getAttributes('heading').textAlign ?? editor.getAttributes('paragraph').textAlign;
+  return typeof textAlign === 'string' ? (textAlign as TextAlignment) : 'left';
+}
+
+/** The text alignment menu (`TextAlign` extension): left, center, right, justify. */
+export function textAlignMenu(): ToolbarIconMenu {
+  const alignments = [
+    ['left', TextAlignStart, 'Mod-Shift-l'],
+    ['center', TextAlignCenter, 'Mod-Shift-e'],
+    ['right', TextAlignEnd, 'Mod-Shift-r'],
+    ['justify', TextAlignJustify, 'Mod-Shift-j'],
+  ] as const;
+  return {
+    id: 'textAlign',
+    kind: 'iconMenu',
+    labelKey: 'toolbar.textAlign',
+    options: alignments.map(([alignment, icon, shortcut]) => ({
+      id: alignment,
+      icon,
+      labelKey: `align.${alignment}`,
+      shortcut,
+      run: (e: Editor) => {
+        e.commands.setTextAlign(alignment);
+      },
+      isActive: (e: Editor) => blockAlignment(e) === alignment,
+      isEnabled: (e: Editor) => e.commands.setTextAlign.can(alignment),
+    })),
+    isAvailable: (e: Editor) => 'setTextAlign' in e.commands,
   };
 }
 

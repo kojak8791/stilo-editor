@@ -331,6 +331,23 @@
   background: var(--stilo-color-active);
 }
 
+/* Icon menu (text alignment): the options in a row */
+.stilo-icon-menu__trigger {
+  width: auto;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.stilo-icon-menu {
+  display: flex;
+  gap: var(--stilo-toolbar-gap);
+}
+
+.stilo-icon-menu__trigger .stilo-icon:last-child {
+  width: 12px;
+  height: 12px;
+}
+
 /* Link popover */
 .stilo-link-popover__form {
   display: flex;

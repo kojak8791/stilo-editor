@@ -23,5 +23,6 @@ export { Strike } from './strike';
 export { Subscript } from './subscript';
 export { Superscript } from './superscript';
 export { Text } from './text';
+export { TextAlign, type TextAlignment } from './text-align';
 export { type FontSizeUnit, getFontSize, TextStyle, toFontSize } from './text-style';
 export { Underline } from './underline';

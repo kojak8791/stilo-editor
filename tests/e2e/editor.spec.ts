@@ -125,6 +125,21 @@ test('undo and redo', async ({ page }) => {
   await expect(output(page)).toHaveText('<p>first</p><p>second</p>');
 });
 
+test('alignment shortcuts', async ({ page }) => {
+  await openEmpty(page);
+  await type(page, 'Stilo');
+  const shortcuts = [
+    ['e', '<p style="text-align: center">Stilo</p>'],
+    ['r', '<p style="text-align: right">Stilo</p>'],
+    ['j', '<p style="text-align: justify">Stilo</p>'],
+    ['l', '<p>Stilo</p>'],
+  ] as const;
+  for (const [key, html] of shortcuts) {
+    await page.keyboard.press(`ControlOrMeta+Shift+${key}`);
+    await expect(output(page)).toHaveText(html);
+  }
+});
+
 /** Drags the selection with the mouse, from its middle, to the point (`x`, `y`). */
 async function dragTo(page: Page, x: number, y: number) {
   const from = await page.evaluate(() => {

@@ -6,6 +6,7 @@ import type { Dropdown as DropdownInstance, DropdownOptionView } from '../compon
 import { createDropdown } from '../components/dropdown';
 import { createFontSizeInput, type FontSizeInput } from '../components/font-size-input';
 import { createIcon } from '../components/icon';
+import { createIconMenu, type IconMenu } from '../components/icon-menu';
 import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
@@ -102,6 +103,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const dropdownMap = new Map<string, DropdownInstance>();
   const colorButtons: ColorButton[] = [];
   const fontSizeInputs: FontSizeInput[] = [];
+  const iconMenus: IconMenu[] = [];
 
   for (const group of resolvedGroups) {
     const groupEl = document.createElement('div');
@@ -139,6 +141,12 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         itemElements.push(ddInstance.trigger);
         itemMap.set(ddInstance.trigger, dd);
         dropdownMap.set(dd.id, ddInstance);
+      } else if (item.kind === 'iconMenu') {
+        const iconMenu = createIconMenu(editor, item, { container: element, messages, mac });
+        groupEl.appendChild(iconMenu.trigger);
+        itemElements.push(iconMenu.trigger);
+        itemMap.set(iconMenu.trigger, item);
+        iconMenus.push(iconMenu);
       } else if (item.kind === 'fontSize') {
         const fontSizeInput = createFontSizeInput(editor, item, { container: element, messages });
         groupEl.appendChild(fontSizeInput.element);
@@ -250,9 +258,12 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   function update(): void {
     for (const colorButton of colorButtons) colorButton.update();
     for (const fontSizeInput of fontSizeInputs) fontSizeInput.update();
+    for (const iconMenu of iconMenus) iconMenu.update();
     for (const el of itemElements) {
       const item = itemMap.get(el);
-      if (!item || item.kind === 'color' || item.kind === 'fontSize') continue;
+      if (!item || item.kind === 'color' || item.kind === 'fontSize' || item.kind === 'iconMenu') {
+        continue;
+      }
 
       if (item.kind === 'dropdown') {
         // Update dropdown
@@ -442,6 +453,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     }
     for (const colorButton of colorButtons) colorButton.destroy();
     for (const fontSizeInput of fontSizeInputs) fontSizeInput.destroy();
+    for (const iconMenu of iconMenus) iconMenu.destroy();
     linkPopover?.destroy();
     linkBubble?.destroy();
     characterPicker?.destroy();

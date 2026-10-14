@@ -53,7 +53,7 @@ describe('toolbar', () => {
     const groups = [...toolbar.element.children].filter(
       (el) => el.getAttribute('role') === 'group',
     );
-    expect(groups.length).toBe(6);
+    expect(groups.length).toBe(7);
     expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
     const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
@@ -80,6 +80,7 @@ describe('toolbar', () => {
       'textColor',
       'highlight',
       'highlight',
+      'textAlign',
       'bulletList',
       'orderedList',
       'blockquote',
@@ -1028,6 +1029,101 @@ describe('font size control', () => {
     input.value = '20';
     press(input, 'Enter');
     expect(editor.getHTML()).toBe('<p><span style="font-size: 1.25rem">ab</span></p>');
+  });
+});
+
+describe('text alignment menu', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html });
+    attachEditor(editor);
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
+    const trigger = toolbar.element.querySelector<HTMLButtonElement>('[data-item="textAlign"]')!;
+    const menu = toolbar.element.querySelector<HTMLElement>('.stilo-icon-menu')!;
+    const option = (id: string) => menu.querySelector<HTMLButtonElement>(`[data-option="${id}"]`)!;
+    return { editor, toolbar, trigger, menu, option };
+  }
+
+  it('renders the trigger and the four options in a row', () => {
+    const { trigger, menu, option } = setup('<p>a|b</p>');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger.getAttribute('aria-label')).toBe('Alignment: Align left');
+    expect(trigger.title).toBe('Alignment');
+    expect(menu.getAttribute('role')).toBe('menu');
+    expect(menu.getAttribute('aria-orientation')).toBe('horizontal');
+    expect(menu.hidden).toBe(true);
+    const ids = [...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].map(
+      (el) => el.dataset.option,
+    );
+    expect(ids).toEqual(['left', 'center', 'right', 'justify']);
+    expect(option('center').getAttribute('aria-label')).toBe('Center');
+    expect(option('center').title).toBe('Center (Ctrl+Shift+E)');
+    expect(option('left').getAttribute('aria-checked')).toBe('true');
+    expect(option('center').getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('shows the alignment of the block at the selection', () => {
+    const { trigger, option } = setup('<h2 style="text-align: right">a|b</h2>', {
+      messages: itLocale,
+    });
+    expect(trigger.getAttribute('aria-label')).toBe('Allineamento: Allinea a destra');
+    expect(option('right').getAttribute('aria-checked')).toBe('true');
+    expect(option('right').classList.contains('stilo-toolbar__button--active')).toBe(true);
+  });
+
+  it('opens on click with the focus on the checked option; an option aligns', () => {
+    const { editor, trigger, menu, option } = setup('<p style="text-align: justify">a|b</p>');
+    trigger.click();
+    expect(menu.hidden).toBe(false);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(option('justify'));
+    option('center').click();
+    expect(menu.hidden).toBe(true);
+    expect(editor.getHTML()).toBe('<p style="text-align: center">ab</p>');
+    expect(document.activeElement).toBe(editor.view.dom);
+  });
+
+  it('moves between the options with the arrows, Home and End, wrapping', () => {
+    const { trigger, option } = setup('<p>a|b</p>');
+    trigger.focus();
+    press(trigger, 'ArrowDown');
+    expect(document.activeElement).toBe(option('left'));
+    press(option('left'), 'ArrowLeft');
+    expect(document.activeElement).toBe(option('justify'));
+    press(option('justify'), 'ArrowRight');
+    expect(document.activeElement).toBe(option('left'));
+    press(option('left'), 'End');
+    expect(document.activeElement).toBe(option('justify'));
+    press(option('justify'), 'Home');
+    expect(document.activeElement).toBe(option('left'));
+  });
+
+  it('Escape closes and gives the focus to the trigger', () => {
+    const { trigger, menu, option } = setup('<p>a|b</p>');
+    trigger.click();
+    press(option('left'), 'Escape');
+    expect(menu.hidden).toBe(true);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('is disabled on a selected horizontal rule', () => {
+    const { editor, toolbar, trigger, menu } = setup('<p>a</p><hr><p>b</p>');
+    editor.commands.selectNode(3);
+    toolbar.update();
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    trigger.click();
+    expect(menu.hidden).toBe(true);
+  });
+
+  it('is not rendered without the TextAlign extension', () => {
+    const editor = createTestEditor({
+      html: '<p>ab</p>',
+      extensions: [defaultExtensions({ textAlign: false })],
+    });
+    attachEditor(editor);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    expect(toolbar.element.querySelector('[data-item="textAlign"]')).toBeNull();
   });
 });
 

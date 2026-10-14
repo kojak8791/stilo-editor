@@ -413,7 +413,7 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 `defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
 `Heading`, `Blockquote`, `HorizontalRule`, `HardBreak`, `BulletList`, `OrderedList`, `ListItem`,
 `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
-`Highlight`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
+`Highlight`, `TextAlign`, `ClearFormatting`, `History`, `MoveBlock`, `Placeholder`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
 ---
@@ -428,8 +428,8 @@ configured with `{ <name>: { ...options } }`.
 | Node | Output | Also parsed from | Attributes |
 |---|---|---|---|
 | `doc` | — | — | content `block+` |
-| `paragraph` | `<p>` | `p`, `div` (fallback) | `textAlign` (M2) |
-| `heading` | `<h1>`…`<h6>` | same | `level` 1–6, `textAlign` (M2) |
+| `paragraph` | `<p>` | `p`, `div` (fallback) | `textAlign` (F-308): `<p style="text-align: center">`, `null` for left |
+| `heading` | `<h1>`…`<h6>` | same | `level` 1–6, `textAlign` as `paragraph` |
 | `blockquote` | `<blockquote>` | same | content `block+` |
 | `horizontalRule` | `<hr>` | same | — |
 | `hardBreak` | `<br>` | same | inline |
@@ -442,6 +442,14 @@ configured with `{ <name>: { ...options } }`.
 | `table` etc. (M2) | `<table><tbody><tr><th\|td>` | same (+ `thead`, `tfoot` flattened) | `colspan`, `rowspan`, `colwidth`: details fixed by ADR in the tables task |
 | `image` (M2) | `<img src alt title width height>` | `img[src]` not inside `figure` | inline atom; empty attributes omitted |
 | `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
+
+Text alignment (F-308): the `textAlign` attribute belongs to `paragraph` and `heading`
+(`core/helpers/text-align.ts`), so aligned content keeps its alignment even without the
+`TextAlign` extension, which only adds `setTextAlign(alignment)` and `Mod-Shift-l/e/r/j` (its
+priority 101 puts its keymap before the marks', so `Mod-Shift-e` never falls back to `Mod-e`).
+`setParagraph`, `setHeading` and `toggleHeading` use `setTextblockType`, which keeps the
+alignment when the block type changes; a list item's paragraph with an alignment keeps its `<p>`
+(`compactParagraphs` unwraps only paragraphs without attributes).
 
 ### 7.2 Marks
 
