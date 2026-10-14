@@ -1264,12 +1264,17 @@ Layout:
   for the first and last block of a cell (the block before the resize handle, which
   `columnResizing` appends to the cell on hover, counts as the last one: otherwise its margin
   comes back and the table grows under the mouse), `1em` above and below the table.
-- Task lists (`content.css`): no bullets; the checkbox sits `1.5em` left of the item, `1em`
-  square, centered on the first line (`0.5lh`), with `accent-color: --stilo-color-focus`; a
-  checked item has its first paragraph in `--stilo-color-muted` and struck through (not its
-  sub-items). Outside the editor, under the class `stilo-content`, the same box is drawn by
-  `li::before`: a 1px `--stilo-color-muted` border, radius `0.2em`; checked, a white `✓` on
-  `--stilo-color-focus`.
+- Task lists (`content.css`): no bullets. In the editor each item is a flex row (`gap: 0.5em`):
+  the `1em` checkbox, with `accent-color: --stilo-color-focus` and the font of the text (form
+  controls have their own), then `div.stilo-task-item__content` (a node view needs an element that
+  holds only the content); the list has `padding-left: 0.25em`, so the text starts where the text
+  of the other lists does. The checkbox is centered on the first line (`margin-top: calc(0.5lh -
+  0.5em)`), not on the whole item, which may hold more paragraphs and sub-lists; a first line in
+  a larger font than the item is the known limit (the box stays at the top). A checked item has
+  its first paragraph in `--stilo-color-muted` and struck through (not its sub-items). Outside
+  the editor, under the class `stilo-content`, the same box is drawn by `li::before`, absolutely
+  positioned `1.5em` left of the item: a 1px `--stilo-color-muted` border, radius `0.2em`;
+  checked, a white `✓` on `--stilo-color-focus`.
 - Status bar: toolbar background, a 1px `--stilo-color-separator` line on top, inherited bottom
   corner radii, `padding: 4px 12px`, `gap: 16px`, `--stilo-color-muted` text at 12px.
 - Search matches (`content.css`): `.stilo-search-match` background

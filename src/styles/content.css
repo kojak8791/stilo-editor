@@ -169,40 +169,58 @@ li.ProseMirror-selectednode:after {
 }
 
 /* Task lists: a checkbox in place of the bullet, done items struck through. In the editor the
-   checkbox is an <input> of the item; content shown elsewhere under the class stilo-content gets
-   a box drawn from data-checked instead. */
+   item is a flex row: its <input> checkbox, then the content (ProseMirror needs a container that
+   holds only the content). Content shown elsewhere under the class stilo-content gets a box drawn
+   from data-checked instead. Either way the box is centered on the first line, not on the whole
+   item, which may hold more paragraphs and sub-lists. */
 .stilo-content ul[data-type="taskList"] {
   list-style: none;
 }
 
-.stilo-content ul[data-type="taskList"] > li {
-  position: relative;
+.stilo-content.ProseMirror ul[data-type="taskList"] {
+  padding-left: 0.25em;
 }
 
-.stilo-task-item__checkbox,
-.stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li::before {
-  position: absolute;
-  top: calc(0.5lh - 0.5em);
-  left: -1.5em;
+.stilo-content.ProseMirror ul[data-type="taskList"] > li {
+  display: flex;
+  gap: 0.5em;
+}
+
+.stilo-task-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Form controls have their own font: inherit it, so that em and lh are those of the text. */
+.stilo-task-item__checkbox {
+  flex: none;
   width: 1em;
   height: 1em;
-  margin: 0;
-}
-
-.stilo-task-item__checkbox {
+  margin: calc(0.5lh - 0.5em) 0 0;
+  font-size: inherit;
+  line-height: inherit;
   accent-color: var(--stilo-color-focus, #0969da);
   cursor: pointer;
 }
 
+.stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li {
+  position: relative;
+}
+
 .stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li::before {
   content: "";
+  display: flex;
+  position: absolute;
+  top: calc(0.5lh - 0.5em);
+  left: -1.5em;
   box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--stilo-color-muted, #59636e);
   border-radius: 0.2em;
   color: #ffffff;
-  font-size: inherit;
-  line-height: 1em;
-  text-align: center;
 }
 
 .stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li[data-checked="true"]::before {
