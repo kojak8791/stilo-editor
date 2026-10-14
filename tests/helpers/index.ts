@@ -1,5 +1,6 @@
 import type { Mark } from 'prosemirror-model';
 import { EditorState, TextSelection } from 'prosemirror-state';
+import { vi } from 'vitest';
 import { Editor } from '../../src/core/editor';
 import type { Extension } from '../../src/core/extension';
 import { serializeHTML } from '../../src/core/html/serialize';
@@ -154,4 +155,20 @@ export function pasteText(editor: Editor, text: string): boolean {
 export function copySelection(editor: Editor): { html: string; text: string } {
   const { dom, text } = editor.view.serializeForClipboard(editor.state.selection.content());
   return { html: dom.innerHTML, text };
+}
+
+/**
+ * jsdom has no layout: makes `getComputedStyle(element).fontSize` return the nearest inline
+ * `font-size`, 32px inside an `<h1>`, otherwise 16px, and `rootSize` for the document root.
+ * Restore it with `vi.restoreAllMocks()`.
+ */
+export function mockRenderedFontSizes(rootSize = '16px'): void {
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+    const sized = element.closest<HTMLElement>('[style*="font-size"]');
+    const fontSize =
+      element === document.documentElement
+        ? rootSize
+        : (sized?.style.fontSize ?? (element.closest('h1') ? '32px' : '16px'));
+    return { fontSize } as CSSStyleDeclaration;
+  });
 }

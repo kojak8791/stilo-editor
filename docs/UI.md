@@ -40,12 +40,13 @@ src/ui/
 │   ├── link-bubble.ts       createLinkBubble (T-016)
 │   ├── character-picker.ts  createCharacterPicker (T-024)
 │   ├── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk (T-024)
-│   └── color-button.ts      createColorButton: split button and color popover (T-026)
+│   ├── color-button.ts      createColorButton: split button and color popover (T-026)
+│   └── font-size-input.ts   createFontSizeInput: − field + and the list of sizes (T-038)
 └── toolbar/
     ├── types.ts             ToolbarItem and related types
     ├── items.ts             DEFAULT_ITEMS, DEFAULT_TOOLBAR, headingDropdown (T-014),
     │                        textColorButton, highlightButton (T-026),
-    │                        fontFamilyDropdown, fontSizeDropdown (T-038)
+    │                        fontFamilyDropdown, fontSizeInput (T-038)
     ├── fonts.ts             DEFAULT_FONTS, DEFAULT_FONT_SIZES (T-038)
     ├── palette.ts           DEFAULT_PALETTE (T-026)
     └── toolbar.ts           createToolbar
@@ -60,9 +61,10 @@ Tests are colocated (`src/ui/**/<name>.test.ts`).
 ```ts
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
 export type { ToolbarButton, ToolbarColor, ToolbarColorButton, ToolbarContext,
-  ToolbarDropdown, ToolbarDropdownOption, ToolbarFont, ToolbarItem } from './toolbar/types';
-export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, fontFamilyDropdown, fontSizeDropdown, headingDropdown,
-  highlightButton, textColorButton } from './toolbar/items';
+  ToolbarDropdown, ToolbarDropdownOption, ToolbarFont, ToolbarFontSizeInput, ToolbarItem }
+  from './toolbar/types';
+export { DEFAULT_ITEMS, DEFAULT_TOOLBAR, fontFamilyDropdown, type FontSizeInputOptions,
+  fontSizeInput, headingDropdown, highlightButton, textColorButton } from './toolbar/items';
 export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 export { DEFAULT_PALETTE } from './toolbar/palette';
 export type { MessageKey, Messages } from './i18n/types';
@@ -198,7 +200,25 @@ export interface ToolbarFont {
   labelKey: string;
 }
 
-export type ToolbarItem = ToolbarButton | ToolbarDropdown | ToolbarColorButton;
+/** The font size control (T-038, §5.5): −, a field with a list of sizes, +. */
+export interface ToolbarFontSizeInput {
+  /** Unique within the toolbar; written as `data-item` on the three parts. */
+  id: string;
+  kind: 'fontSize';
+  /** Key of the accessible name of the field and of the list. */
+  labelKey: string;
+  /** The unit the field shows and writes; `rem` shows px and writes rem. */
+  unit: FontSizeUnit;
+  /** The sizes of the list, in `unit` (px for `rem`). */
+  sizes: readonly number[];
+  isAvailable?(editor: Editor): boolean;
+}
+
+export type ToolbarItem =
+  | ToolbarButton
+  | ToolbarDropdown
+  | ToolbarColorButton
+  | ToolbarFontSizeInput;
 ```
 
 ### 3.2 i18n
@@ -233,7 +253,9 @@ no functions.
 | `toolbar.horizontalRule` | Horizontal line | Linea orizzontale |
 | `toolbar.heading` | Text style | Stile testo |
 | `toolbar.fontFamily` | Font | Carattere |
-| `toolbar.fontSize` | Size | Dimensione |
+| `toolbar.fontSize` | Font size | Dimensione carattere |
+| `fontSize.decrease` | Decrease font size | Riduci dimensione carattere |
+| `fontSize.increase` | Increase font size | Aumenta dimensione carattere |
 | `font.default` | Default | Predefinito |
 | `font.sansSerif` | Sans serif | Senza grazie |
 | `font.serif` | Serif | Con grazie |
@@ -324,7 +346,8 @@ Every default button: `run` calls `editor.commands.<command>()`, `isEnabled` cal
 
 `heading` (T-014) is `headingDropdown()`, see §6.
 
-`fontFamily` and `fontSize` (T-038) are `fontFamilyDropdown()` and `fontSizeDropdown()`, see §6.4.
+`fontFamily` (T-038) is `fontFamilyDropdown()`, see §6.4; `fontSize` (T-038) is
+`fontSizeInput()`, see §5.5.
 
 `textColor` and `highlight` (T-026) are color split buttons (§5.4), created by
 `textColorButton(palette = DEFAULT_PALETTE)` and `highlightButton(palette = DEFAULT_PALETTE)`;
@@ -658,6 +681,79 @@ and highlight (SPEC F-208, F-209, F-804).
   without moving the focus. The toolbar does not prevent `mousedown` inside the popover (its
   fields take the focus).
 
+### 5.5 Font size control (T-038)
+
+`createFontSizeInput(editor, item, { container, messages })` (internal), created by the toolbar
+for every `kind: 'fontSize'` item; the list is mounted in the toolbar (it scrolls with it). SPEC
+F-211, F-804.
+
+```html
+<span class="stilo-font-size">
+  <button type="button" class="stilo-toolbar__button stilo-font-size__decrease"
+    data-item="fontSize" aria-label="Decrease font size" title="Decrease font size" tabindex="-1">
+    <svg class="stilo-icon" aria-hidden="true">…Minus…</svg>
+  </button>
+  <input type="text" class="stilo-font-size__input" data-item="fontSize" role="combobox"
+    aria-label="Font size" title="Font size" aria-autocomplete="none" aria-expanded="false"
+    aria-controls="stilo-font-size-x" inputmode="decimal" autocomplete="off" spellcheck="false"
+    tabindex="-1">
+  <button type="button" class="stilo-toolbar__button stilo-font-size__increase"
+    data-item="fontSize" aria-label="Increase font size" title="Increase font size" tabindex="-1">
+    <svg class="stilo-icon" aria-hidden="true">…Plus…</svg>
+  </button>
+</span>
+<!-- appended to the toolbar element by createPopover -->
+<div class="stilo-popover stilo-font-size__list" id="stilo-font-size-x" role="listbox"
+  aria-label="Font size" hidden>
+  <div class="stilo-font-size__option" id="stilo-font-size-x-0" role="option"
+    aria-selected="false" data-size="8">8</div>
+  …
+</div>
+```
+
+- **Three items for the keyboard**: the three parts are toolbar items (roving tabindex, §4.3)
+  with the same `data-item`. In the field the arrows move the caret; `ArrowLeft` with the caret
+  at the start and `ArrowRight` at the end move to the next item. The toolbar does not prevent
+  `mousedown` on the field (it takes the focus).
+- **The field** shows the size at the start of the selection in the unit of the item
+  (`getFontSize(editor, unit)`): the size the browser renders, so it includes headings, `em`
+  and the base size of the page (16 px in a plain paragraph of a page with the browser default
+  is `12` in pt). It is empty when the selected text has different written sizes, and while it
+  has the focus it keeps what the user types. Focus selects its text.
+- **− and +**: `stepFontSize(∓1, unit)`, which changes each selected part from its own size to
+  the previous / next whole number (`13.5` → `13` / `14`), between 1 and 400; with an empty
+  selection it sets the size of the next typed text. The list closes, the focus stays in the
+  editor.
+- **List** (`click` on the field, `ArrowDown` / `ArrowUp`): the option equal to the shown size
+  has `aria-selected="true"`. `ArrowDown` / `ArrowUp` move the active option
+  (`aria-activedescendant`, class `stilo-font-size__option--active`), starting from the selected
+  one, without wrapping. Clicking an option, or `Enter` on the active one, applies its size.
+- **Typing**: `Enter` applies the typed size. A number (`,` or `.` for decimals) is in the unit of
+  the item (`toFontSize`); a number with `px`, `pt`, `em`, `rem` or `%` is used as is. A number
+  in the item unit, px or pt must be between 1 and 400. A refused size sets
+  `aria-invalid="true"` and keeps the focus; typing removes the attribute.
+- **Applying** (option or `Enter`): `setFontSize(size)`, the list closes, `editor.focus()`.
+  `Escape` closes the list and goes back to the editor without applying; leaving the field in
+  any other way shows the size again.
+- **Disabled** (`setFontSize.can('12pt')` is `false`, e.g. inside code): the three parts have
+  `aria-disabled="true"`, the field is `readOnly` and empty, the list does not open.
+
+`fontSizeInput(options?: FontSizeInputOptions)`, item ID `fontSize`, `labelKey`
+`toolbar.fontSize`, `isAvailable`: `'stepFontSize' in editor.commands`.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `unit` | `'pt'` | `'pt'`, `'px'`: the unit shown and written. `'rem'`: shows px, writes rem (px ÷ the computed size of the root element), so the text follows the base size of the page that shows it |
+| `sizes` | `DEFAULT_FONT_SIZES.pt` for pt, `.px` for px and rem | The sizes of the list, in the shown unit |
+
+`DEFAULT_FONT_SIZES`: `pt` 8, 9, 10, 11, 12, 14, 18, 24, 36, 48, 72 (the scale of word
+processors); `px` 10, 12, 14, 16, 18, 20, 24, 32, 48, 64, 96.
+
+pt is the default because Word and Google Docs paste their sizes in pt (`11pt` shows as `11`
+and steps in pt) and office users know the scale. px and pt are absolute: text with a size
+does not follow the base size of the page nor the browser's default font size setting. `rem`
+follows both.
+
 ## 6. Dropdown and heading dropdown (T-014)
 
 ### 6.1 DOM
@@ -718,26 +814,22 @@ with fewer levels.
 `isEnabled` of each option: `isActive(editor) || editor.commands.<run command>.can()`. `setBlockType`
 refuses a block that already has the type, and the active option must stay selectable.
 
-### 6.4 Font family and font size dropdowns (T-038)
+### 6.4 Font family dropdown (T-038)
 
-`fontFamilyDropdown(fonts: readonly ToolbarFont[] = DEFAULT_FONTS)` (item ID `fontFamily`,
-`labelKey` `toolbar.fontFamily`) and `fontSizeDropdown(sizes: readonly string[] =
-DEFAULT_FONT_SIZES)` (item ID `fontSize`, `labelKey` `toolbar.fontSize`), for the `TextStyle`
-extension (SPEC F-210, F-211, F-804). `isAvailable`: `'setFontFamily' in editor.commands` and
-`'setFontSize' in editor.commands`. Pass them with other lists as custom items.
+`fontFamilyDropdown(fonts: readonly ToolbarFont[] = DEFAULT_FONTS)`, item ID `fontFamily`,
+`labelKey` `toolbar.fontFamily`, for the `TextStyle` extension (SPEC F-210, F-804).
+`isAvailable`: `'setFontFamily' in editor.commands`. Pass it with another list as a custom item.
 
 | Option | ID | `labelKey` | `run` | `isActive` | `isEnabled` |
 |---|---|---|---|---|---|
-| Default | `default` | `font.default` | `unsetFontFamily()` / `unsetFontSize()` | never | `setFontFamily.can('serif')` / `setFontSize.can('16px')` |
+| Default | `default` | `font.default` | `unsetFontFamily()` | never | `setFontFamily.can('serif')` |
 | a font | its first name, lowercased, other runs than `a-z0-9` → `-`: `'Times New Roman', serif` → `times-new-roman` | the font's `labelKey`; `fontFamily` is set, so it is drawn in that font | `setFontFamily(fontFamily)` | `isActive('textStyle', { fontFamily })` | `setFontFamily.can(fontFamily)` |
-| a size | the same rule: `1.5em` → `1-5em` | the size, shown as is | `setFontSize(size)` | `isActive('textStyle', { fontSize })` | `setFontSize.can(size)` |
 
-- *Default* is never checked: with no font family (size) the trigger shows the dropdown label,
-  *Font* (*Size*).
-- `getValueLabel`: the value of the whole selection when it is not in the list, e.g. a pasted
-  `Calibri, sans-serif` shown as *Calibri* (first name, unquoted) or `11pt` shown as is. A
-  selection with different values shows the dropdown label. Every option is disabled inside
-  code, so the trigger is too.
+- *Default* is never checked: with no font family the trigger shows the dropdown label, *Font*.
+- `getValueLabel`: the font family of the whole selection when it is not in the list, by its
+  first name, unquoted (a pasted `Calibri, sans-serif` shows *Calibri*). A selection with
+  different fonts shows the dropdown label. Every option is disabled inside code, so the trigger
+  is too.
 
 `DEFAULT_FONTS`: the generic families `sans-serif`, `serif`, `monospace` (labels translated:
 `font.sansSerif`, `font.serif`, `font.monospace`), then `Arial, Helvetica, sans-serif`, `Verdana,
@@ -746,8 +838,6 @@ Geneva, sans-serif`, `Tahoma, Geneva, sans-serif`, `'Trebuchet MS', Helvetica, s
 (labels: the font name). Every named font has fallbacks for the systems that lack it. The
 values are written in the normalized form the editor stores (ARCHITECTURE §7.3), otherwise
 `isActive` would not match them.
-
-`DEFAULT_FONT_SIZES`: `12px`, `14px`, `16px`, `18px`, `20px`, `24px`, `28px`, `36px`, `48px`.
 
 ## 7. Styles (`src/styles/ui.css`)
 

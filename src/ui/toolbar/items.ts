@@ -18,7 +18,7 @@ import {
   Underline,
   Undo2,
 } from 'lucide';
-import type { Editor, HeadingLevel } from '../../index';
+import type { Editor, FontSizeUnit, HeadingLevel } from '../../index';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
 import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
@@ -28,6 +28,7 @@ import type {
   ToolbarColorButton,
   ToolbarDropdown,
   ToolbarFont,
+  ToolbarFontSizeInput,
   ToolbarItem,
 } from './types';
 
@@ -253,7 +254,7 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
   },
   heading: headingDropdown(),
   fontFamily: fontFamilyDropdown(),
-  fontSize: fontSizeDropdown(),
+  fontSize: fontSizeInput(),
   textColor: textColorButton(),
   highlight: highlightButton(),
 };
@@ -321,11 +322,11 @@ function optionId(value: string): string {
     .replace(/[^a-z0-9]+/g, '-');
 }
 
-/** A `textStyle` attribute when the whole selection has the same value, otherwise `null`. */
-function textStyleValue(editor: Editor, attr: 'fontFamily' | 'fontSize'): string | null {
-  const value = editor.getAttributes('textStyle')[attr];
-  return typeof value === 'string' && editor.isActive('textStyle', { [attr]: value })
-    ? value
+/** The font family when the whole selection has the same one, otherwise `null`. */
+function selectedFontFamily(editor: Editor): string | null {
+  const { fontFamily } = editor.getAttributes('textStyle');
+  return typeof fontFamily === 'string' && editor.isActive('textStyle', { fontFamily })
+    ? fontFamily
     : null;
 }
 
@@ -360,44 +361,31 @@ export function fontFamilyDropdown(fonts: readonly ToolbarFont[] = DEFAULT_FONTS
       })),
     ],
     getValueLabel: (e: Editor) => {
-      const value = textStyleValue(e, 'fontFamily');
+      const value = selectedFontFamily(e);
       return value === null ? null : firstFamily(value);
     },
     isAvailable: (e: Editor) => 'setFontFamily' in e.commands,
   };
 }
 
-/**
- * The font size dropdown (`TextStyle` extension): "Default" removes the font size, then one
- * option per size (CSS sizes, shown as they are). A size that is not in the list is shown too.
- */
-export function fontSizeDropdown(sizes: readonly string[] = DEFAULT_FONT_SIZES): ToolbarDropdown {
+/** Options of {@link fontSizeInput}. */
+export interface FontSizeInputOptions {
+  /** The unit the field shows and writes. Default: `pt`. */
+  unit?: FontSizeUnit;
+  /** The sizes of the list, in `unit` (px for `rem`). Default: `DEFAULT_FONT_SIZES` of the unit. */
+  sizes?: readonly number[];
+}
+
+/** The font size control (`TextStyle` extension): −, a field with a list of sizes, +. */
+export function fontSizeInput(options: FontSizeInputOptions = {}): ToolbarFontSizeInput {
+  const { unit = 'pt', sizes = DEFAULT_FONT_SIZES[unit === 'pt' ? 'pt' : 'px'] } = options;
   return {
     id: 'fontSize',
-    kind: 'dropdown',
+    kind: 'fontSize',
     labelKey: 'toolbar.fontSize',
-    options: [
-      {
-        id: 'default',
-        labelKey: 'font.default',
-        run: (e: Editor) => {
-          e.commands.unsetFontSize();
-        },
-        isActive: () => false,
-        isEnabled: (e: Editor) => e.commands.setFontSize.can('16px'),
-      },
-      ...sizes.map((fontSize) => ({
-        id: optionId(fontSize),
-        labelKey: fontSize,
-        run: (e: Editor) => {
-          e.commands.setFontSize(fontSize);
-        },
-        isActive: (e: Editor) => e.isActive('textStyle', { fontSize }),
-        isEnabled: (e: Editor) => e.commands.setFontSize.can(fontSize),
-      })),
-    ],
-    getValueLabel: (e: Editor) => textStyleValue(e, 'fontSize'),
-    isAvailable: (e: Editor) => 'setFontSize' in e.commands,
+    unit,
+    sizes,
+    isAvailable: (e: Editor) => 'stepFontSize' in e.commands,
   };
 }
 

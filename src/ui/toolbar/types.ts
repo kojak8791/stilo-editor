@@ -1,5 +1,5 @@
 import type { IconNode } from 'lucide';
-import type { Editor } from '../../index';
+import type { Editor, FontSizeUnit } from '../../index';
 
 /** A toolbar button. */
 export interface ToolbarButton {
@@ -105,5 +105,26 @@ export interface ToolbarFont {
   labelKey: string;
 }
 
+/**
+ * The font size control (T-038): a decrease button, a field that shows the size at the selection,
+ * takes a typed size and opens a list of sizes, and an increase button.
+ */
+export interface ToolbarFontSizeInput {
+  /** Unique within the toolbar; written as `data-item` on the three parts. */
+  id: string;
+  kind: 'fontSize';
+  /** Key of the accessible name of the field and of the list. */
+  labelKey: string;
+  /** The unit the field shows and writes; `rem` shows px and writes rem. */
+  unit: FontSizeUnit;
+  /** The sizes of the list, in `unit` (px for `rem`). */
+  sizes: readonly number[];
+  isAvailable?(editor: Editor): boolean;
+}
+
 /** A single item in the toolbar. */
-export type ToolbarItem = ToolbarButton | ToolbarDropdown | ToolbarColorButton;
+export type ToolbarItem =
+  | ToolbarButton
+  | ToolbarDropdown
+  | ToolbarColorButton
+  | ToolbarFontSizeInput;

@@ -67,7 +67,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 
 | Task | Content | Spec | Status |
 |---|---|---|---|
-| T-038 | Font family and font size: `textStyle` attributes `fontFamily` and `fontSize` (also from `<font face size>`, nested spans keep the outer values), commands that change one style and keep the others, toolbar dropdowns with replaceable lists, each font drawn in its font, values outside the list shown | F-210, F-211, F-804 | in progress |
+| T-038 | Font family and font size: `textStyle` attributes `fontFamily` and `fontSize` (also from `<font face size>`, nested spans keep the outer values), commands that change one style and keep the others, `stepFontSize` from the rendered size; toolbar: font dropdown (each font drawn in its font, fonts outside the list shown) and font size control (− field +, list, typed sizes; unit pt, px or rem) | F-210, F-211, F-804 | in progress |
 | T-039 | Text alignment (left, center, right, justify) on paragraphs and headings: `textAlign` attribute, commands, `Mod-Shift-l/e/r/j`, toolbar | F-308 | planned |
 
 ## Notes for later milestones

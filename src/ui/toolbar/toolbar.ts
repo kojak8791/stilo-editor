@@ -4,6 +4,7 @@ import { createCharacterPicker } from '../components/character-picker';
 import { type ColorButton, createColorButton } from '../components/color-button';
 import type { Dropdown as DropdownInstance, DropdownOptionView } from '../components/dropdown';
 import { createDropdown } from '../components/dropdown';
+import { createFontSizeInput, type FontSizeInput } from '../components/font-size-input';
 import { createIcon } from '../components/icon';
 import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
@@ -56,6 +57,22 @@ function resolveItem(item: string | ToolbarItem, editor: Editor): ToolbarItem | 
   return item;
 }
 
+/** Whether `event` moves the caret in `input`: arrows leave the field only at its ends. */
+function movesCaret(event: KeyboardEvent, input: HTMLInputElement): boolean {
+  const { selectionStart, selectionEnd, value } = input;
+  switch (event.key) {
+    case 'Home':
+    case 'End':
+      return true;
+    case 'ArrowLeft':
+      return selectionStart !== 0 || selectionEnd !== 0;
+    case 'ArrowRight':
+      return selectionStart !== value.length || selectionEnd !== value.length;
+    default:
+      return false;
+  }
+}
+
 /** Creates the toolbar element and buttons, and registers event handlers. */
 export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar {
   const { container, items = DEFAULT_TOOLBAR, messages = en, sticky = true } = options;
@@ -84,6 +101,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const itemMap = new Map<HTMLElement, ToolbarItem>();
   const dropdownMap = new Map<string, DropdownInstance>();
   const colorButtons: ColorButton[] = [];
+  const fontSizeInputs: FontSizeInput[] = [];
 
   for (const group of resolvedGroups) {
     const groupEl = document.createElement('div');
@@ -121,6 +139,14 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         itemElements.push(ddInstance.trigger);
         itemMap.set(ddInstance.trigger, dd);
         dropdownMap.set(dd.id, ddInstance);
+      } else if (item.kind === 'fontSize') {
+        const fontSizeInput = createFontSizeInput(editor, item, { container: element, messages });
+        groupEl.appendChild(fontSizeInput.element);
+        for (const part of fontSizeInput.parts) {
+          itemElements.push(part);
+          itemMap.set(part, item);
+        }
+        fontSizeInputs.push(fontSizeInput);
       } else if (item.kind === 'color') {
         // The split button handles its own clicks; its popover scrolls with the toolbar.
         const colorButton = createColorButton(editor, item, { container: element, messages });
@@ -223,9 +249,10 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   // Update function: refresh active/enabled states
   function update(): void {
     for (const colorButton of colorButtons) colorButton.update();
+    for (const fontSizeInput of fontSizeInputs) fontSizeInput.update();
     for (const el of itemElements) {
       const item = itemMap.get(el);
-      if (!item || item.kind === 'color') continue;
+      if (!item || item.kind === 'color' || item.kind === 'fontSize') continue;
 
       if (item.kind === 'dropdown') {
         // Update dropdown
@@ -296,7 +323,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   // mousedown on toolbar: preventDefault to keep editor focus, except in the character and color
   // pickers, whose fields and buttons take the focus.
   const onToolbarMousedown = (e: MouseEvent): void => {
-    if (isDestroyed || (e.target as Element).closest('.stilo-char-picker, .stilo-color-picker')) {
+    const fields = '.stilo-char-picker, .stilo-color-picker, .stilo-font-size__input';
+    if (isDestroyed || (e.target as Element).closest(fields)) {
       return;
     }
     e.preventDefault();
@@ -328,7 +356,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (!btn) return;
 
     const index = itemElements.indexOf(btn);
-    if (index === -1) return;
+    if (index === -1 || (btn instanceof HTMLInputElement && movesCaret(e, btn))) return;
 
     switch (e.key) {
       case 'ArrowRight': {
@@ -413,6 +441,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
       ddInstance.destroy();
     }
     for (const colorButton of colorButtons) colorButton.destroy();
+    for (const fontSizeInput of fontSizeInputs) fontSizeInput.destroy();
     linkPopover?.destroy();
     linkBubble?.destroy();
     characterPicker?.destroy();

@@ -19,6 +19,8 @@ export type MessageKey =
   | 'toolbar.heading'
   | 'toolbar.fontFamily'
   | 'toolbar.fontSize'
+  | 'fontSize.decrease'
+  | 'fontSize.increase'
   | 'font.default'
   | 'font.sansSerif'
   | 'font.serif'

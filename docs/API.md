@@ -142,7 +142,7 @@ whether it is available.
 | `ListItem` | `splitListItem()`, `sinkListItem()` (indent), `liftListItem()` (outdent) |
 | `Bold`, `Italic`, `Underline`, `Strike`, `Code`, `Subscript`, `Superscript` | `set<Name>()`, `unset<Name>()`, `toggle<Name>()`: `toggleBold()`, `setItalic()`, `unsetCode()`, … |
 | `Link` | `setLink({ href, target? })`: links the selection or updates the link at the cursor; `false` for an empty or unsafe `href`. `unsetLink()` |
-| `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()`. `setFontFamily(fontFamily)`: a CSS `font-family` list, `false` when no name is valid. `unsetFontFamily()`. `setFontSize(fontSize)`: `px`, `pt`, `em`, `rem` or `%` (`'14px'`), `false` otherwise. `unsetFontSize()`. Each command keeps the other two styles |
+| `TextStyle` | `setColor(color)`: `false` for an invalid CSS color. `unsetColor()`. `setFontFamily(fontFamily)`: a CSS `font-family` list, `false` when no name is valid. `unsetFontFamily()`. `setFontSize(fontSize)`: `px`, `pt`, `em`, `rem` or `%` (`'14px'`), `false` otherwise. `unsetFontSize()`. Each command keeps the other two styles. `stepFontSize(delta, unit?)`: each selected part goes from the size it has on the page to the next (`delta` 1) or previous (`-1`) whole number in `unit` (`'pt'` default, `'px'`, `'rem'` stepped in px), between 1 and 400 |
 | `Highlight` | `setHighlight({ color? })`, `unsetHighlight()`, `toggleHighlight({ color? })`; without `color`, a plain `<mark>` |
 | `ClearFormatting` | `clearFormatting()`: removes every mark except links |
 | `History` | `undo()`, `redo()` |
@@ -241,18 +241,27 @@ createToolbar(editor, {
 ```
 
 `textColorButton(palette?)` and `highlightButton(palette?)` create the color buttons with
-another palette (default `DEFAULT_PALETTE`). `fontFamilyDropdown(fonts?)` and
-`fontSizeDropdown(sizes?)` create the font dropdowns with other lists (default `DEFAULT_FONTS`
-and `DEFAULT_FONT_SIZES`); write a font list as the editor stores it (names with spaces in
-single quotes, `, ` between names):
+another palette (default `DEFAULT_PALETTE`). `fontFamilyDropdown(fonts?)` creates the font
+dropdown with another list (default `DEFAULT_FONTS`); write a font list as the editor stores it
+(names with spaces in single quotes, `, ` between names). `fontSizeInput({ unit?, sizes? })`
+creates the font size control (−, a field with a list of sizes, +) with another unit or list:
 
 ```ts
 fontFamilyDropdown([
   { fontFamily: 'Inter, sans-serif', labelKey: 'Inter' },
   { fontFamily: "'Source Serif 4', serif", labelKey: 'Source Serif' },
 ]);
-fontSizeDropdown(['12pt', '14pt', '18pt']);
+fontSizeInput({ unit: 'px', sizes: [12, 14, 16, 20, 24] });
 ```
+
+The unit of the font size control is `'pt'` by default, like word processors and the sizes
+pasted from Word or Google Docs. `'px'` shows and writes px. px and pt are absolute: text with a
+size does not follow the page's base size or the reader's default font size. `'rem'` shows px
+and writes rem (px divided by the page's root font size), so the text follows them.
+
+`getFontSize(editor, unit?, pos?)` (from `stilo-editor`) returns the size the browser renders at
+a position (default: the selection start) in a unit; `toFontSize(editor, value, unit?)` the CSS
+size for a number in a unit (`12` → `'12pt'`, `18` in rem → `'1.125rem'` with a 16px root).
 
 ### 6.2 Custom buttons
 

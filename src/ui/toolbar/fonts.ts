@@ -17,15 +17,8 @@ export const DEFAULT_FONTS: readonly ToolbarFont[] = [
   { fontFamily: "'Courier New', Courier, monospace", labelKey: 'Courier New' },
 ];
 
-/** The default sizes of the font size dropdown, written as the editor stores them. */
-export const DEFAULT_FONT_SIZES: readonly string[] = [
-  '12px',
-  '14px',
-  '16px',
-  '18px',
-  '20px',
-  '24px',
-  '28px',
-  '36px',
-  '48px',
-];
+/** The default sizes of the font size list, by unit (`rem` uses the px list). */
+export const DEFAULT_FONT_SIZES: Readonly<Record<'pt' | 'px', readonly number[]>> = {
+  pt: [8, 9, 10, 11, 12, 14, 18, 24, 36, 48, 72],
+  px: [10, 12, 14, 16, 18, 20, 24, 32, 48, 64, 96],
+};

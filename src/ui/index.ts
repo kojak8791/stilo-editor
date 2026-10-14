@@ -21,8 +21,9 @@ export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 export {
   DEFAULT_ITEMS,
   DEFAULT_TOOLBAR,
+  type FontSizeInputOptions,
   fontFamilyDropdown,
-  fontSizeDropdown,
+  fontSizeInput,
   headingDropdown,
   highlightButton,
   textColorButton,
@@ -40,5 +41,6 @@ export type {
   ToolbarDropdown,
   ToolbarDropdownOption,
   ToolbarFont,
+  ToolbarFontSizeInput,
   ToolbarItem,
 } from './toolbar/types';

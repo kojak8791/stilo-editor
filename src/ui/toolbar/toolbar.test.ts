@@ -1,13 +1,13 @@
 import { Star } from 'lucide';
 import { NodeSelection } from 'prosemirror-state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createTestEditor } from '../../../tests/helpers';
+import { createTestEditor, mockRenderedFontSizes } from '../../../tests/helpers';
 import { defaultExtensions, StiloError } from '../../index';
 import {
   createToolbar,
   en,
   fontFamilyDropdown,
-  fontSizeDropdown,
+  fontSizeInput,
   headingDropdown,
   it as itLocale,
   type ToolbarButton,
@@ -64,6 +64,8 @@ describe('toolbar', () => {
       'redo',
       'heading',
       'fontFamily',
+      'fontSize',
+      'fontSize',
       'fontSize',
       'bold',
       'italic',
@@ -772,34 +774,28 @@ describe('heading dropdown', () => {
   });
 });
 
-describe('font dropdowns', () => {
+describe('font family dropdown', () => {
   function setup(html: string, options: Partial<ToolbarOptions> = {}) {
     const editor = createTestEditor({ html });
     attachEditor(editor);
     // jsdom has no layout: scrolling the selection into view needs Range.getClientRects.
     vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
     const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
-    const dropdown = (item: 'fontFamily' | 'fontSize') => {
-      const trigger = toolbar.element.querySelector<HTMLButtonElement>(`[data-item="${item}"]`)!;
-      const value = () => trigger.querySelector('.stilo-dropdown__value')!.textContent;
-      trigger.click();
-      const menu = toolbar.element.querySelector<HTMLElement>(
-        '.stilo-dropdown__menu:not([hidden])',
-      )!;
-      trigger.click();
-      const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
-      const ids = () =>
-        [...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].map(
-          (el) => el.dataset.option,
-        );
-      return { trigger, value, menu, option, ids };
-    };
-    return { editor, toolbar, dropdown };
+    const trigger = toolbar.element.querySelector<HTMLButtonElement>('[data-item="fontFamily"]')!;
+    const value = () => trigger.querySelector('.stilo-dropdown__value')!.textContent;
+    trigger.click();
+    const menu = toolbar.element.querySelector<HTMLElement>('.stilo-dropdown__menu:not([hidden])')!;
+    trigger.click();
+    const option = (id: string) => menu.querySelector<HTMLElement>(`[data-option="${id}"]`)!;
+    const ids = () =>
+      [...menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')].map(
+        (el) => el.dataset.option,
+      );
+    return { editor, toolbar, trigger, value, menu, option, ids };
   }
 
   it('lists Default, the generic families and the fonts, each drawn in its font', () => {
-    const { dropdown } = setup('<p>a|b</p>');
-    const { trigger, value, option, ids } = dropdown('fontFamily');
+    const { trigger, value, option, ids } = setup('<p>a|b</p>');
     expect(ids()).toEqual([
       'default',
       'sans-serif',
@@ -823,86 +819,220 @@ describe('font dropdowns', () => {
     expect(label('times-new-roman').style.fontFamily).toBe('"Times New Roman", Times, serif');
   });
 
-  it('lists Default and the sizes', () => {
-    const { dropdown } = setup('<p>a|b</p>', { messages: itLocale });
-    const { value, ids, option } = dropdown('fontSize');
-    expect(ids()).toEqual([
-      'default',
-      '12px',
-      '14px',
-      '16px',
-      '18px',
-      '20px',
-      '24px',
-      '28px',
-      '36px',
-      '48px',
-    ]);
-    expect(value()).toBe('Dimensione');
-    expect(option('default').textContent).toBe('Predefinito');
-    expect(option('18px').textContent).toBe('18px');
-  });
-
-  it('applies and removes a font family and a size', () => {
-    const { editor, toolbar, dropdown } = setup('<p>[ab]</p>');
-    const family = dropdown('fontFamily');
-    const size = dropdown('fontSize');
-    family.option('georgia').click();
-    size.option('20px').click();
-    expect(editor.getHTML()).toBe(
-      '<p><span style="font-family: Georgia, serif; font-size: 20px">ab</span></p>',
-    );
+  it('applies and removes a font family', () => {
+    const { editor, toolbar, value, option } = setup('<p>[ab]</p>');
+    option('georgia').click();
+    expect(editor.getHTML()).toBe('<p><span style="font-family: Georgia, serif">ab</span></p>');
     toolbar.update();
-    expect(family.value()).toBe('Georgia');
-    expect(family.option('georgia').getAttribute('aria-checked')).toBe('true');
-    expect(family.option('default').getAttribute('aria-checked')).toBe('false');
-    expect(size.value()).toBe('20px');
-    family.option('default').click();
-    expect(editor.getHTML()).toBe('<p><span style="font-size: 20px">ab</span></p>');
-    size.option('default').click();
+    expect(value()).toBe('Georgia');
+    expect(option('georgia').getAttribute('aria-checked')).toBe('true');
+    expect(option('default').getAttribute('aria-checked')).toBe('false');
+    option('default').click();
     expect(editor.getHTML()).toBe('<p>ab</p>');
   });
 
-  it('shows a value that is not in the list', () => {
-    const { dropdown } = setup(
-      '<p><span style="font-family: Calibri, sans-serif; font-size: 11pt">a|b</span></p>',
+  it('shows a font that is not in the list by its first name', () => {
+    const { trigger, value, menu } = setup(
+      '<p><span style="font-family: Calibri, sans-serif">a|b</span></p>',
     );
-    const family = dropdown('fontFamily');
-    expect(family.value()).toBe('Calibri');
-    expect(family.trigger.getAttribute('aria-label')).toBe('Font: Calibri');
-    expect(family.menu.querySelector('[aria-checked="true"]')).toBeNull();
-    expect(dropdown('fontSize').value()).toBe('11pt');
+    expect(value()).toBe('Calibri');
+    expect(trigger.getAttribute('aria-label')).toBe('Font: Calibri');
+    expect(menu.querySelector('[aria-checked="true"]')).toBeNull();
   });
 
-  it('shows the dropdown label for a selection with different values', () => {
-    const { dropdown } = setup(
-      '<p>[<span style="font-family: Arial; font-size: 12px">a</span>' +
-        '<span style="font-family: Georgia; font-size: 14px">b</span>]</p>',
+  it('shows the dropdown label for a selection with different fonts', () => {
+    const { value } = setup(
+      '<p>[<span style="font-family: Arial">a</span><span style="font-family: Georgia">b</span>]</p>',
     );
-    expect(dropdown('fontFamily').value()).toBe('Font');
-    expect(dropdown('fontSize').value()).toBe('Size');
+    expect(value()).toBe('Font');
   });
 
   it('is disabled inside code', () => {
-    const { dropdown } = setup('<p><code>a|b</code></p>');
-    expect(dropdown('fontFamily').trigger.getAttribute('aria-disabled')).toBe('true');
-    expect(dropdown('fontSize').trigger.getAttribute('aria-disabled')).toBe('true');
+    const { trigger } = setup('<p><code>a|b</code></p>');
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('takes custom lists', () => {
-    const { dropdown } = setup('<p>a|b</p>', {
+  it('takes a custom list', () => {
+    const { ids } = setup('<p>a|b</p>', {
       items: [
-        [
-          fontFamilyDropdown([{ fontFamily: "'Comic Sans MS', cursive", labelKey: 'Comic' }]),
-          fontSizeDropdown(['1em', '1.5em']),
-        ],
+        [fontFamilyDropdown([{ fontFamily: "'Comic Sans MS', cursive", labelKey: 'Comic' }])],
       ],
     });
-    expect(dropdown('fontFamily').ids()).toEqual(['default', 'comic-sans-ms']);
-    expect(dropdown('fontSize').ids()).toEqual(['default', '1em', '1-5em']);
+    expect(ids()).toEqual(['default', 'comic-sans-ms']);
+  });
+});
+
+describe('font size control', () => {
+  function setup(html: string, options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html });
+    attachEditor(editor);
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    mockRenderedFontSizes();
+    const toolbar = createToolbar(editor, { container: createToolbarContainer(), ...options });
+    const parts = [...toolbar.element.querySelectorAll<HTMLElement>('[data-item="fontSize"]')];
+    const [decrease, input, increase] = parts as [
+      HTMLButtonElement,
+      HTMLInputElement,
+      HTMLButtonElement,
+    ];
+    const list = toolbar.element.querySelector<HTMLElement>('.stilo-font-size__list')!;
+    const option = (size: string) => list.querySelector<HTMLElement>(`[data-size="${size}"]`)!;
+    const sizes = () =>
+      [...list.querySelectorAll<HTMLElement>('[role="option"]')].map((el) => el.textContent);
+    return { editor, toolbar, decrease, input, increase, list, option, sizes };
+  }
+
+  it('renders −, the field and +, and the list of sizes in pt', () => {
+    const { decrease, input, increase, list, sizes } = setup('<p>a|b</p>');
+    expect(decrease.getAttribute('aria-label')).toBe('Decrease font size');
+    expect(increase.getAttribute('aria-label')).toBe('Increase font size');
+    expect(input.getAttribute('role')).toBe('combobox');
+    expect(input.getAttribute('aria-label')).toBe('Font size');
+    expect(input.getAttribute('aria-expanded')).toBe('false');
+    expect(input.getAttribute('aria-controls')).toBe(list.id);
+    expect(list.getAttribute('role')).toBe('listbox');
+    expect(list.hidden).toBe(true);
+    expect(sizes()).toEqual(['8', '9', '10', '11', '12', '14', '18', '24', '36', '48', '72']);
   });
 
-  it('is not rendered without the TextStyle extension', () => {
+  it.each([
+    ['<p>a|b</p>', '12'],
+    ['<h1>a|b</h1>', '24'],
+    ['<p><span style="font-size: 11pt">a|b</span></p>', '11'],
+    ['<p><span style="font-size: 18px">a|b</span></p>', '13.5'],
+    ['<p>[<span style="font-size: 11pt">a</span><span style="font-size: 14pt">b</span>]</p>', ''],
+  ])('shows the size of %j as %j', (html, expected) => {
+    expect(setup(html).input.value).toBe(expected);
+  });
+
+  it('shows the size stored for the next typed text', () => {
+    const { toolbar, input, increase } = setup('<p>a|</p>');
+    increase.click();
+    toolbar.update();
+    expect(input.value).toBe('13');
+  });
+
+  it('steps the size with − and +', () => {
+    const { editor, decrease, increase } = setup('<p>[ab]</p>');
+    increase.click();
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 13pt">ab</span></p>');
+    decrease.click();
+    decrease.click();
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 11pt">ab</span></p>');
+  });
+
+  it('opens the list on click, with the shown size selected; an option applies it', () => {
+    const { editor, input, list, option } = setup('<p>[ab]</p>');
+    input.focus();
+    input.click();
+    expect(list.hidden).toBe(false);
+    expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(option('12').getAttribute('aria-selected')).toBe('true');
+    option('18').click();
+    expect(list.hidden).toBe(true);
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 18pt">ab</span></p>');
+    expect(document.activeElement).toBe(editor.view.dom);
+  });
+
+  it('moves in the list with the arrows and applies with Enter', () => {
+    const { editor, input, list, option } = setup('<p>[ab]</p>');
+    input.focus();
+    press(input, 'ArrowDown');
+    expect(list.hidden).toBe(false);
+    expect(input.getAttribute('aria-activedescendant')).toBe(option('14').id);
+    expect(option('14').classList.contains('stilo-font-size__option--active')).toBe(true);
+    press(input, 'ArrowUp');
+    press(input, 'ArrowUp');
+    expect(input.getAttribute('aria-activedescendant')).toBe(option('11').id);
+    press(input, 'Enter');
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 11pt">ab</span></p>');
+  });
+
+  it.each([
+    ['15', '15pt'],
+    ['10,5', '10.5pt'],
+    ['20px', '20px'],
+    ['1.5EM', '1.5em'],
+    ['0.8rem', '0.8rem'],
+  ])('applies the typed %j as %j', (typed, expected) => {
+    const { editor, input } = setup('<p>[ab]</p>');
+    input.focus();
+    input.value = typed;
+    press(input, 'Enter');
+    expect(editor.getHTML()).toBe(`<p><span style="font-size: ${expected}">ab</span></p>`);
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+  });
+
+  it.each(['abc', '0', '401', '500px', '-3'])('refuses the typed %j', (typed) => {
+    const { editor, input } = setup('<p>[ab]</p>');
+    input.focus();
+    input.value = typed;
+    press(input, 'Enter');
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(input);
+    input.dispatchEvent(new Event('input'));
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+  });
+
+  it('Escape gives the focus back to the text and shows the size again', () => {
+    const { editor, input } = setup('<p>[ab]</p>');
+    input.focus();
+    input.value = '30';
+    press(input, 'Escape');
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+    expect(document.activeElement).toBe(editor.view.dom);
+    expect(input.value).toBe('12');
+  });
+
+  it('arrows leave the field only at the ends of its text', () => {
+    const { input, decrease, increase } = setup('<p>a|b</p>');
+    input.focus();
+    input.setSelectionRange(1, 1);
+    press(input, 'ArrowLeft');
+    expect(document.activeElement).toBe(input);
+    input.setSelectionRange(0, 0);
+    press(input, 'ArrowLeft');
+    expect(document.activeElement).toBe(decrease);
+    increase.focus();
+    press(increase, 'ArrowLeft');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('is disabled inside code', () => {
+    const { decrease, input, increase } = setup('<p><code>a|b</code></p>');
+    for (const part of [decrease, input, increase]) {
+      expect(part.getAttribute('aria-disabled')).toBe('true');
+    }
+    expect(input.readOnly).toBe(true);
+    expect(input.value).toBe('');
+  });
+
+  it('takes another unit and list', () => {
+    const { editor, input, increase, sizes } = setup('<p>[ab]</p>', {
+      items: [[fontSizeInput({ unit: 'px', sizes: [12, 16] })]],
+    });
+    expect(input.value).toBe('16');
+    expect(sizes()).toEqual(['12', '16']);
+    increase.click();
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 17px">ab</span></p>');
+  });
+
+  it('writes rem from the px it shows', () => {
+    const { editor, input, sizes } = setup('<p>[ab]</p>', {
+      items: [[fontSizeInput({ unit: 'rem' })]],
+    });
+    expect(input.value).toBe('16');
+    expect(sizes()[0]).toBe('10');
+    input.focus();
+    input.value = '20';
+    press(input, 'Enter');
+    expect(editor.getHTML()).toBe('<p><span style="font-size: 1.25rem">ab</span></p>');
+  });
+});
+
+describe('font controls without TextStyle', () => {
+  it('are not rendered', () => {
     const editor = createTestEditor({
       html: '<p>ab</p>',
       extensions: [defaultExtensions({ textStyle: false })],

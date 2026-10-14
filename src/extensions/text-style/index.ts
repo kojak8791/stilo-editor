@@ -2,6 +2,7 @@ import type { Command } from 'prosemirror-state';
 import { defineExtension } from '../../core/extension';
 import { updateMarkAttrs } from '../../core/helpers/marks';
 import { buildStyle, normalizeStyleValue, readStyle } from '../../core/html/css';
+import { type FontSizeUnit, getFontSize, stepFontSizeValue, toFontSize } from './font-size';
 
 declare module '../../core/types' {
   interface Commands {
@@ -17,6 +18,12 @@ declare module '../../core/types' {
     setFontSize: (fontSize: string) => Command;
     /** Removes the font size from the selection. */
     unsetFontSize: () => Command;
+    /**
+     * Changes the font size of each selected part (or of the next typed text) from the size it
+     * has on the page to the next whole number in `unit` (`delta` 1) or the previous one (`-1`),
+     * between 1 and 400. Default unit `pt`.
+     */
+    stepFontSize: (delta: number, unit?: FontSizeUnit) => Command;
   }
 }
 
@@ -96,7 +103,7 @@ export const TextStyle = defineExtension({
       ],
     },
   }),
-  commands: ({ schema }) => {
+  commands: ({ schema, editor }) => {
     const type = schema.marks.textStyle!;
     const set =
       (attr: TextStyleAttr) =>
@@ -112,6 +119,16 @@ export const TextStyle = defineExtension({
       unsetFontFamily: unset('fontFamily'),
       setFontSize: set('fontSize'),
       unsetFontSize: unset('fontSize'),
+      stepFontSize:
+        (delta, unit = 'pt') =>
+        (state, dispatch) =>
+          updateMarkAttrs(type, (pos) => {
+            // An empty selection starts from the size stored for the next typed text, if any.
+            const start = getFontSize(editor, unit, state.selection.empty ? undefined : pos);
+            return { fontSize: toFontSize(editor, stepFontSizeValue(start, delta), unit) };
+          })(state, dispatch),
     };
   },
 });
+
+export { type FontSizeUnit, getFontSize, toFontSize } from './font-size';

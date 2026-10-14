@@ -94,17 +94,25 @@ export function unsetMark(type: MarkType): Command {
  *   marks or to every selected text that accepts the mark; `false` when none does.
  * - Clearing (every value is `null`): applies where the mark has one of these attributes;
  *   `false` when none has.
+ *
+ * `attrs` can be a function of the position of each selected text (the cursor for an empty
+ * selection), for values that differ along the selection; `null` leaves that text alone.
  */
-export function updateMarkAttrs(type: MarkType, attrs: Attrs): Command {
-  const setting = Object.values(attrs).some((value) => value !== null);
-  // The new mark for text that carries `marks`, `null` to remove it, `undefined` to skip the text.
-  const next = (marks: readonly Mark[]): Mark | null | undefined => {
-    if (isExcluded(marks, type)) return undefined;
+export function updateMarkAttrs(
+  type: MarkType,
+  attrs: Attrs | ((pos: number) => Attrs | null),
+): Command {
+  // The new mark for text at `pos` that carries `marks`, `null` to remove it, `undefined` to
+  // leave the text alone.
+  const next = (marks: readonly Mark[], pos: number): Mark | null | undefined => {
+    const values = typeof attrs === 'function' ? attrs(pos) : attrs;
+    if (!values || isExcluded(marks, type)) return undefined;
     const current = type.isInSet(marks);
-    if (!setting && !Object.keys(attrs).some((key) => current?.attrs[key] != null)) {
+    const setting = Object.values(values).some((value) => value !== null);
+    if (!setting && !Object.keys(values).some((key) => current?.attrs[key] != null)) {
       return undefined;
     }
-    const merged = { ...current?.attrs, ...attrs };
+    const merged = { ...current?.attrs, ...values };
     return Object.values(merged).some((value) => value != null) ? type.create(merged) : null;
   };
 
@@ -112,7 +120,7 @@ export function updateMarkAttrs(type: MarkType, attrs: Attrs): Command {
     const { empty, $from, ranges } = state.selection;
     if (empty) {
       const mark = $from.parent.type.allowsMarkType(type)
-        ? next(state.storedMarks ?? $from.marks())
+        ? next(state.storedMarks ?? $from.marks(), $from.pos)
         : undefined;
       if (mark === undefined) return false;
       dispatch?.(mark ? state.tr.addStoredMark(mark) : state.tr.removeStoredMark(type));
@@ -125,9 +133,9 @@ export function updateMarkAttrs(type: MarkType, attrs: Attrs): Command {
       const to = range.$to.pos;
       state.doc.nodesBetween(from, to, (node, pos, parent) => {
         if (!node.isText || !parent?.type.allowsMarkType(type)) return;
-        const mark = next(node.marks);
-        if (mark === undefined) return;
         const start = Math.max(pos, from);
+        const mark = next(node.marks, start);
+        if (mark === undefined) return;
         const end = Math.min(pos + node.nodeSize, to);
         // Adjacent text getting the same mark becomes one step.
         const last = changes[changes.length - 1];
