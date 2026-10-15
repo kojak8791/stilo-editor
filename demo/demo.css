@@ -28,6 +28,12 @@ body {
   background: #fff;
 }
 
+/* The status bar inherits the corners of its container: pass the editor's ones down. */
+.demo__status {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
 .demo__editor .stilo-content {
   min-height: 300px;
   padding: 16px 20px;

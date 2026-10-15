@@ -15,7 +15,7 @@ Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net)
 Clean HTML in and out, headless core, no paid tiers.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot.png" alt="Stilo with the default toolbar: formatted text, lists, colors and the link popover open" width="800">
+  <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot.png" alt="Stilo with the default toolbar: formatted text, a checklist, a table and the link popover open" width="800">
 </p>
 
 > [!WARNING]
@@ -110,12 +110,20 @@ column is what you type to get the format as you write.
 
 <table>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot2.png" alt="The font dropdown on a Times New Roman text, with lines in Georgia, Trebuchet MS, Verdana, Courier New and the generic families" width="400"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot3.png" alt="The highlight palette open, with No color, Default, the color grid and a custom color field" width="400"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot-find.png" alt="The find bar under the toolbar: five matches of espresso highlighted, the current one in orange, and ristretto in the replace field" width="400"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot-table.png" alt="A coffee menu table with a row selected by its handle and the row menu open: insert row above, insert row below, delete row" width="400"></td>
+  </tr>
+  <tr>
+    <td>Find and replace: match case, whole word, an exact count of the matches.</td>
+    <td>Tables: handles on rows and columns open their menu.</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot-fonts.png" alt="The font dropdown open on a Times New Roman text, each font drawn in its own font" width="400"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot-color.png" alt="The text color palette open, with No color, the color grid and a custom color field" width="400"></td>
   </tr>
   <tr>
     <td>Fonts and sizes: the toolbar shows the font and the size at the cursor.</td>
-    <td>Highlight palette: the browser's default marker stays one click away, next to the colors.</td>
+    <td>Text color and highlight: a palette, the last color one click away, a custom color.</td>
   </tr>
 </table>
 
