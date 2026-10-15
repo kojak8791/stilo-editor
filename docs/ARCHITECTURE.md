@@ -1,7 +1,9 @@
 # Stilo — Architecture
 
-Status: **draft v0.1** (2026-10-10). This document is the technical contract; changes go
-through an ADR (`docs/decisions/`).
+How Stilo is built and why: the technical contract of the library. A change that affects it
+updates this document in the same change; a decision that matters beyond one change also gets an
+ADR (`docs/decisions/`). How to use the library is in [API.md](API.md), the default UI in
+[UI.md](UI.md), the working rules in [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -122,12 +124,12 @@ stilo-editor/
 ├── playwright.config.ts          E2E
 ├── playwright.bench.config.ts    Benchmarks
 ├── biome.json
-├── assets/                     Brand: logo and symbol (light/dark), favicon, README screenshot; source/ has the black shapes
+├── assets/                     Logo, symbol, favicon, README screenshots; source/ shapes
 ├── docs/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── API.md                    API reference for applications (users of the package)
 │   ├── decisions/                ADRs: NNNN-short-title.md
-│   └── guides/                   How-to guides
+│   └── guides/                   How-to guides: ProseMirror positions, testing
 ├── src/
 │   ├── index.ts                  Public API of the core (re-exports only)
 │   ├── core/
@@ -147,7 +149,7 @@ stilo-editor/
 │   │       └── paste/            Paste cleanup: Word, Google Docs, table widths
 │   ├── extensions/
 │   │   ├── index.ts              Re-exports all extensions
-│   │   ├── default-extensions/ defaultExtensions() bundle
+│   │   ├── default-extensions/   defaultExtensions() bundle
 │   │   ├── document/  text/  paragraph/  heading/  blockquote/  ...
 │   │   └── <name>/
 │   │       ├── index.ts          export const <Name> = defineExtension({...})
@@ -203,116 +205,41 @@ otherwise they describe what the thing does.
 
 ### 4.2 Code rules
 
-- Named exports only, **no default exports** (except config files).
-- No `any`. Use `unknown` + narrowing.
-- No TypeScript `enum`: use string literal unions.
-- No DOM access at module top level (the core must be importable in Node).
-- No global mutable state: everything lives in the `Editor` instance, plugin state, or closures.
-- Relative imports without file extension (`moduleResolution: "Bundler"`). No path aliases.
-- Public API (everything exported from `src/index.ts` and `src/ui/index.ts`) has JSDoc.
-- Code, comments, docs and commit messages in **English**.
-- Errors: `throw new StiloError('message')` (`src/core/errors.ts`), messages prefixed by context.
+The coding and formatting rules are in [AGENTS.md](../AGENTS.md) §0 and §3. Three of them come
+from the architecture:
 
-### 4.3 Formatting (Biome)
-
-2 spaces, single quotes, semicolons, trailing commas, line width 100. Run `npm run format`.
+- No DOM access at module top level: the core must be importable in Node.
+- No global mutable state: everything lives in the `Editor` instance, plugin state or closures,
+  so several editors share a page and collaboration stays possible (§12).
+- Errors are `StiloError` (`src/core/errors.ts`), messages prefixed by their context.
 
 ---
 
-## 5. Editor API
+## 5. Editor
 
-```ts
-import { Editor, defaultExtensions } from 'stilo-editor';
+The `Editor` class (`src/core/editor.ts`) holds one ProseMirror `EditorView` and the state built
+from the extensions (§6). Its members are listed in [API.md](API.md) §2; this section explains
+the design behind them.
 
-const editor = new Editor({
-  element: document.querySelector('#editor')!,
-  extensions: [defaultExtensions()],
-  content: '<p>Hello <strong>world</strong></p>',
-});
-```
-
-```ts
-interface EditorOptions {
-  element: HTMLElement;                    // container; the editor appends its own DOM inside
-  extensions: Array<Extension | Extension[]>; // flattened
-  content?: string;                        // initial HTML (default: empty document)
-  editable?: boolean;                      // default true
-  autofocus?: boolean | 'start' | 'end';   // default false
-  ariaLabel?: string;                      // aria-label of the editable area
-  compactParagraphs?: boolean;             // default true: <li>text</li> (ADR 0001)
-}
-
-class Editor {
-  constructor(options: EditorOptions);
-
-  readonly view: EditorView;               // escape hatch
-  readonly schema: Schema;
-  get state(): EditorState;
-  get isEmpty(): boolean;
-  get isEditable(): boolean;
-  get isDestroyed(): boolean;
-
-  getHTML(): string;
-  setHTML(html: string, options?: SetContentOptions): void;
-  getJSON(): JSONContent;                  // = doc.toJSON()
-  setJSON(json: JSONContent, options?: SetContentOptions): void;
-  getText(): string;
-
-  readonly commands: CommandRunners;       // editor.commands.toggleBold() -> boolean
-                                           // editor.commands.toggleBold.can(): dry run
-  isActive(name: string, attrs?: Record<string, unknown>): boolean;
-  getAttributes(name: string): Record<string, unknown>;
-
-  setEditable(editable: boolean): void;
-  focus(position?: 'start' | 'end'): void;
-  blur(): void;
-
-  on<E extends keyof EditorEvents>(event: E, handler: (payload: EditorEvents[E]) => void): void;
-  off<E extends keyof EditorEvents>(event: E, handler: (payload: EditorEvents[E]) => void): void;
-
-  destroy(): void;
-}
-
-interface EditorEvents {
-  transaction: { editor: Editor; transaction: Transaction };
-  input: { editor: Editor; transaction: Transaction | null };    // doc changed (null: state
-                                                                 // replaced, resetHistory)
-  selectionchange: { editor: Editor; transaction: Transaction }; // selection changed, doc not
-  focus: { editor: Editor; event: FocusEvent };
-  blur: { editor: Editor; event: FocusEvent };
-  destroy: { editor: Editor };
-  // Extensions add their own events (module augmentation), e.g. `imageRejected` (`Image`).
-}
-```
-
-Semantics:
-
-- `setHTML` / `setJSON` options:
-
-  ```ts
-  interface SetContentOptions {
-    resetHistory?: boolean; // default false
-    emitInput?: boolean;    // default true
-  }
-  ```
-
-  - `resetHistory: false` (default): the whole content is replaced by **one undoable transaction**,
-    never grouped with the changes before it (`closeHistory`); the selection goes to the start of
-    the document.
-  - `resetHistory: true`: a fresh `EditorState` is created with the same plugins (all plugin
-    states, history included, start from scratch). Typical use: a "New document" button calls
-    `setHTML('', { resetHistory: true })`, or loading a different document.
-  - `input` is emitted unless `emitInput: false`; with `resetHistory: true` its `transaction`
-    is `null`.
-  - `setHTML('')` produces the empty document (`<p></p>`).
-- Empty document `getHTML()` returns `<p></p>`; use `isEmpty` to test emptiness.
-- `getText()` separates top-level blocks with `\n\n`, hard breaks with `\n`.
-- `isActive(name)` works for both marks (active across the selection or in stored marks) and nodes
-  (an ancestor of the selection with that type and matching `attrs`).
-- `getAttributes(name)`: for a mark, the attributes of the mark at the cursor (stored marks
-  first) or of the first one in the selected range; for a node, the selected node or the deepest
-  ancestor of that type. `{}` when there is none or the name is unknown.
-- The editable element gets class `stilo-content`, `role="textbox"`, `aria-multiline="true"`.
+- **HTML is the format** (D-02): `getHTML()` / `setHTML()` follow §7 and §8. `getJSON()` is
+  ProseMirror's `doc.toJSON()`, for applications that want it.
+- **Commands** run against the current state: `editor.commands.x(...args)` is
+  `factory(...args)(state, dispatch, view)`, `.can(...args)` the same without `dispatch` (§6.1).
+  A UI decides what to enable with `.can()`, `isActive()` and `getAttributes()` only (§2.2).
+- **Replacing the content.** By default (`resetHistory: false`) `setHTML` / `setJSON` replace
+  the whole document in one transaction, closed off from the changes before it
+  (`closeHistory`), so the replacement is its own undo step; the selection goes to the start.
+  `resetHistory: true` creates a new `EditorState` with the same plugins: every plugin state
+  starts over, the history included, and `input` is emitted with `transaction: null`.
+- **Loaded content.** Every new state (creation, `resetHistory`) gets one empty transaction
+  marked `LOAD_META`, not undoable: plugins use it to normalize what was loaded (the `Table`
+  extension fixes irregular tables there, §7.1).
+- **Events** come from a typed emitter (`src/core/events.ts`): `input` and `selectionchange`
+  are derived from each transaction. Extensions add their own events by module augmentation
+  of `EditorEvents` and emit them through their context (§6).
+- `editor.view`, `editor.state` and `editor.schema` are public as an escape hatch to
+  ProseMirror; the default UI uses `editor.view` only to anchor popovers and listen to DOM
+  events (§9).
 
 ---
 
@@ -400,28 +327,25 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 2. Duplicate extension names, node/mark names or command names → `StiloError`.
 3. The schema requires `doc`, `paragraph` and `text`; otherwise → `StiloError`.
    `Paragraph` has priority 1000 so it is the first `block` node (ProseMirror's default block).
-   `Text`, always present, also provides `insertText(text)`: it replaces the selection with
-   `text`, with the marks active at the cursor (`false` for an empty string). `Document`,
-   always present, provides the selection commands: `select(from, to?)` (a text selection
-   between document positions, moved to the nearest text position; `false` outside the
-   document), `selectNode(pos)` (`false` without a selectable node at `pos`) and `selectAll()`.
+   Since `Text` and `Document` are always present, the commands every UI needs live there:
+   `insertText` in `Text`, the selection commands (`select`, `selectNode`, `selectAll`) in
+   `Document`.
 4. Schema mark order (affects nesting in HTML output, outermost first):
    `link`, `highlight`, `textStyle`, `bold`, `italic`, `underline`, `strike`, `subscript`,
    `superscript`, `code`. `textStyle` is inside `highlight` because browsers give `<mark>` its
    own text color (`MarkText`), which would hide a color set outside it. The first three have
-   priorities 103, 102, 101 (the other marks keep
-   the default 100 and follow the `defaultExtensions` order).
+   priorities 103, 102, 101; the other marks keep the default 100 and follow the
+   `defaultExtensions` order.
 5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
    an input rule, so it may take precedence over every extension), then keymaps (by priority),
    then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last.
 
 ### 6.3 Default extensions
 
-`defaultExtensions(options?)` returns the default extension set: `Document`, `Text`, `Paragraph`,
-`Heading`, `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak`, `Image`, `Table`, `BulletList`, `OrderedList`, `ListItem`, `TaskList`, `TaskItem`,
-`Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code`, `Link`, `TextStyle`,
-`Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `TextCase`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
-configured with `{ <name>: { ...options } }`.
+`defaultExtensions(options?)` (`src/extensions/default-extensions/`) returns every built-in
+extension, in the order that gives the mark nesting of rule 4; `{ <name>: false }` leaves one
+out, `{ <name>: { ...options } }` configures it. The list and the options are in
+[API.md](API.md) §4. A new extension is added there and to `src/extensions/index.ts`.
 
 ### 6.4 Node views
 
@@ -516,9 +440,9 @@ Notes on the nodes:
 Mark exclusion: every mark except `link` declares `group: 'formatting'`, and `code` declares
 `excludes: 'formatting'`. Naming the group instead of the marks keeps the schema valid when some
 marks are disabled. `setMark` (and so every `set*`/`toggle*` command) returns `false` where an
-existing mark excludes the new one, so `commands.toggleBold.can()` is `false` inside code. Marks that
-exclude each other replace each other instead: `subscript` and `superscript` are both in the
-group `script` and declare `excludes: 'script'`, so setting one removes the other.
+existing mark excludes the new one, so `commands.toggleBold.can()` is `false` inside code.
+Marks that exclude each other replace each other instead: `subscript` and `superscript` are both
+in the group `script` and declare `excludes: 'script'`, so setting one removes the other.
 
 ### 7.3 Inline styles: allowlist and normalization
 
@@ -704,36 +628,17 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
 
 ## 10. Testing
 
-- **Unit** (Vitest + jsdom), colocated `*.test.ts`. Use `tests/helpers`:
-  - `createTestEditor({ extensions?, html? })`: defaults to `defaultExtensions()`; returns an `Editor`.
-  - Selection markers in `html`: `|` = cursor, `[` … `]` = range. Test content must not contain
-    these characters as text.
-  - `getHTMLWithSelection(editor)`: canonical HTML with the selection markers re-inserted. `|`
-    carries the marks the next typed character would get (`<strong>b|</strong>`: typing
-    continues in bold); `[` and `]` hug the selected text.
-  - `typeText(editor, text)`: types character by character, running input rules.
-  - `pressKey(editor, 'Mod-b')`: sends a key combination to the keymaps (`Mod` = `Ctrl`). Write
-    the combination exactly as in the keymap (`'Mod-Shift-s'`, lowercase letter): the synthetic
-    event has no `keyCode`, the fallback browsers use for `Shift`/Caps Lock variants.
-- **Per-extension minimum tests**: parse (every "also parsed from" source in §7), serialize,
-  idempotence, each command (enabled/disabled cases), each keyboard shortcut, each input rule.
-- **E2E** (Playwright, `tests/e2e/`): real typing, clipboard, drag & drop, UI, anything needing
-  layout. Runs against the demo page in Chromium, Firefox and WebKit (`playwright.config.ts`,
-  Vite dev server on port 5180). Two rules keep the tests faithful to real input:
-  - Type through the spec's `type()` helper, which waits for a rendered frame before each key.
-    A real key press makes the browser render; Playwright's synthetic keys do not, and without
-    a frame Chromium keeps a newly created block skipped by `content-visibility` (ADR 0003) and
-    puts the caret before the first character typed into it. Real Chrome is not affected.
-    The same holds for every script that drives the demo (visual checks, probes): keys sent
-    faster than any person types can fail where real typing works, so a failure seen only with
-    synthetic keys is first rerun at a human pace before it is called an editor bug.
-  - Paste with a `paste` event that carries its own `DataTransfer`, never the system clipboard:
-    it is shared by the parallel workers (and by the developer).
-  - Drag with the real mouse from the middle of the selected text. Playwright's WebKit on
-    Windows resolves every point of a text to offset 0 during a drop, so drops *inside* text
-    are skipped there (Safari is checked by hand); drops between blocks run everywhere.
-- **Security**: the payloads in `tests/fixtures/xss/vectors.ts` run through the sanitizer (and,
-  from M1, `setHTML` and paste); output asserted clean.
+Three layers, dense where the risk is high:
+
+- **Unit** (Vitest + jsdom), colocated `*.test.ts`: HTML in and out, sanitizing, commands, keys
+  and input rules, with the helpers of `tests/helpers/`. Part of `npm run check`.
+- **E2E** (Playwright, `tests/e2e/`): what needs a real browser (typing, clipboard, drag and
+  drop, the UI, layout) on the demo page in Chromium, Firefox and WebKit.
+- **Security**: the XSS vectors of `tests/fixtures/xss/` through the sanitizer and a paste.
+
+What every extension tests is in [AGENTS.md](../AGENTS.md) §5; how to write the tests (helpers,
+selection markers, the rules that keep E2E tests faithful to real input) is in
+[guides/testing.md](guides/testing.md).
 
 ## 11. Benchmarks
 

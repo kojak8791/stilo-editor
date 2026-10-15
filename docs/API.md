@@ -60,7 +60,7 @@ The editable element has the class `stilo-content`, `role="textbox"` and
 | Member | Returns | Meaning |
 |---|---|---|
 | `getHTML()` | `string` | The content as clean HTML (§5). The empty document is `<p></p>` |
-| `setHTML(html, options?)` | `void` | Replaces the content; the HTML is sanitized first. `setHTML('')` empties the editor |
+| `setHTML(html, options?)` | `void` | Replaces the content; the HTML is sanitized first and the cursor goes to the start. `setHTML('')` empties the editor |
 | `getJSON()` | `JSONContent` | The ProseMirror JSON of the document |
 | `setJSON(json, options?)` | `void` | Replaces the content from ProseMirror JSON |
 | `getText()` | `string` | Plain text: top-level blocks separated by a blank line, line breaks as `\n` |
@@ -80,8 +80,8 @@ save, or debounced after `input`), not on every change.
 
 | Member | Meaning |
 |---|---|
-| `isActive(name, attrs?)` | Whether a mark (`'bold'`, `'link'`, …) is active on the selection, or the selection is inside a node (`'heading'`, `'bulletList'`, …). With `attrs`, those attributes must match too: `isActive('heading', { level: 2 })` |
-| `getAttributes(name)` | The attributes of the mark or node at the selection: `getAttributes('link').href`. `{}` when there is none |
+| `isActive(name, attrs?)` | Whether a mark (`'bold'`, `'link'`, …) is on all the selected text (with an empty selection: on the next typed character), or the selection is inside a node (`'heading'`, `'bulletList'`, …). With `attrs`, those attributes must match too: `isActive('heading', { level: 2 })` |
+| `getAttributes(name)` | The attributes of the mark at the cursor (of the next typed character) or of the first one in the selection, or of the selected node or the innermost ancestor with that name: `getAttributes('link').href`. `{}` when there is none or the name is unknown |
 | `focus(position?)` | Focuses the editor; `'start'` or `'end'` also move the cursor there |
 | `blur()` | Removes the focus |
 | `setEditable(editable)` | Makes the content editable or read-only |
@@ -131,8 +131,8 @@ whether it is available.
 
 | Extension | Commands |
 |---|---|
-| `Document` | `select(from, to?)`, `selectNode(pos)`, `selectAll()` |
-| `Text` | `insertText(text)`: replaces the selection with `text`, keeping the marks at the cursor |
+| `Document` | `select(from, to?)`: a text selection between two positions, moved to the nearest text position; `false` outside the document. `selectNode(pos)`: `false` without a selectable node at `pos`. `selectAll()` |
+| `Text` | `insertText(text)`: replaces the selection with `text`, keeping the marks at the cursor; `false` for an empty string |
 | `Paragraph` | `setParagraph()` |
 | `Heading` | `setHeading({ level })`, `toggleHeading({ level })`, `level` 1–6 |
 | `Blockquote` | `setBlockquote()`, `unsetBlockquote()`, `toggleBlockquote()` |
