@@ -63,9 +63,23 @@ under 16 ms fits in one frame of a 60 Hz screen.
   so layout and painting skip the blocks outside the viewport. In 10,000 paragraphs this alone
   brought a key press from 144 ms to 24 ms.
 
-Table commands change the whole table in one step: adding or deleting a column, or turning
-the first column into headers, in a 200-row table takes 6–10 ms alone and 33–48 ms inside
-50,000 paragraphs (undo the same).
+## Bulk changes
+
+Commands that change many blocks at once (text case of a whole document, checking a long
+checklist, table commands) replace them in one step instead of one step per block
+([ARCHITECTURE.md §6.5](ARCHITECTURE.md#65-changes-to-many-nodes)). What that changed:
+
+| Operation | Where measured | Before | After |
+|---|---|---|---|
+| Text case of 50,000 paragraphs (the new editor state) | Chrome | 4.1 s | 1 ms |
+| Checking 4,000 task items | jsdom (unit tests) | 884 ms | 9 ms |
+| Header column of a 200-row table inside 50,000 paragraphs | unknown | 164 ms | 35 ms |
+
+Adding or deleting a column, or turning the first column into headers, in a 200-row table now
+takes 6–10 ms alone and 33–48 ms inside 50,000 paragraphs (undo the same).
+
+Paragraphs and headings without alignment or line spacing share one attribute object: one
+object per paragraph cost 19 MB of memory at 50,000 paragraphs.
 
 ## Limits
 

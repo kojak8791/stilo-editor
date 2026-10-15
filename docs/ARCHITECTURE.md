@@ -65,6 +65,23 @@ Build output in `dist/` (never committed): `index.js`, `ui.js`, `*.d.ts`, `conte
 
 Framework wrappers (M3) will be separate packages; the repo may then become an npm workspace (ADR).
 
+### 2.1 npm scripts
+
+| Script | Command | Purpose |
+|---|---|---|
+| `dev` | `vite` | Demo page with hot reload (`demo/`); benchmark page at `/bench/` |
+| `build` | `vite build && tsc -p tsconfig.build.json` | Library build + declarations |
+| `typecheck` | `tsc --noEmit` | Type checking |
+| `lint` | `biome check .` | Lint + format check |
+| `format` | `biome check --write .` | Auto-fix lint/format |
+| `test` | `vitest run` | Unit tests |
+| `test:watch` | `vitest` | Unit tests, watch mode |
+| `test:e2e` | `playwright test` | E2E tests |
+| `bench` | `playwright test -c playwright.bench.config.ts` | Performance benchmarks |
+| `size` | `npm run build && node scripts/size.mjs` | Bundle size of typical apps, tree-shaking check |
+| `check` | `npm run typecheck && npm run lint && npm run test` | **Quality gate** |
+| `prepublishOnly` | `npm run check && npm run build` | Run by `npm publish`: never publish an old or failing build |
+
 ### 2.2 Headless-first dependency rules
 
 The default UI is a convenience, not a requirement: using only the core and building a custom UI
@@ -84,23 +101,6 @@ src/core/        ──► (ProseMirror, DOMPurify only)
   public, the core API is extended — the UI never takes a shortcut.
 - These rules are enforced by `tests/architecture.test.ts` (scans import statements), part of
   `npm run check`.
-
-### 2.1 npm scripts
-
-| Script | Command | Purpose |
-|---|---|---|
-| `dev` | `vite` | Demo page with hot reload (`demo/`); benchmark page at `/bench/` |
-| `build` | `vite build && tsc -p tsconfig.build.json` | Library build + declarations |
-| `typecheck` | `tsc --noEmit` | Type checking |
-| `lint` | `biome check .` | Lint + format check |
-| `format` | `biome check --write .` | Auto-fix lint/format |
-| `test` | `vitest run` | Unit tests |
-| `test:watch` | `vitest` | Unit tests, watch mode |
-| `test:e2e` | `playwright test` | E2E tests |
-| `bench` | `playwright test -c playwright.bench.config.ts` | Performance benchmarks |
-| `size` | `npm run build && node scripts/size.mjs` | Bundle size of typical apps, tree-shaking check |
-| `check` | `npm run typecheck && npm run lint && npm run test` | **Quality gate** |
-| `prepublishOnly` | `npm run check && npm run build` | Run by `npm publish`: never publish an old or failing build |
 
 ---
 
@@ -423,6 +423,31 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`.
 `Highlight`, `TextAlign`, `LineHeight`, `ClearFormatting`, `TextCase`, `History`, `MoveBlock`, `Placeholder`, `Search`, `DropCursor`, `GapCursor`. Each can be disabled with `{ <name>: false }` or
 configured with `{ <name>: { ...options } }`.
 
+### 6.4 Node views
+
+Some nodes are drawn in the editor by a node view that adds controls. The controls are never
+content: `getHTML()` comes from the schema's `toDOM` (§7), not from the editor's DOM.
+
+- `taskItem` (`TaskItemView`): `<li data-checked>` with an `input.stilo-task-item__checkbox` and
+  the content in `div.stilo-task-item__content`. Outside the editor, `content.css` draws a box
+  from `data-checked` for content under the class `stilo-content`.
+- `table` (`TableView` of `prosemirror-tables`, installed by `columnResizing`): draws the
+  `<colgroup>` from the cells' `colwidth`.
+- `image` (`ImageView`): wraps the `<img>` in `span.stilo-image` with two side handles that
+  resize it; `content.css` explains their placement.
+
+### 6.5 Changes to many nodes
+
+Every step of a transaction rebuilds the nodes on its path, the list of top-level blocks
+included, so a step per item costs time proportional to items × blocks. A command that changes
+many nodes builds the new content and replaces it in **one step**: `setTextCase` (the top-level
+blocks the selection touches), `toggleTaskChecked` (the siblings holding the items), the table
+commands (`prosemirror-tables` makes a step per cell, so they run on a document holding only the
+table, which then replaces it). Plugins follow the same rule: the `Table` extension wraps
+`tableEditing`, whose search for changed tables cost quadratic time on a change to every block,
+so that it looks only at the changed range (`findDiffStart` / `findDiffEnd`). Measurements:
+[PERFORMANCE.md](PERFORMANCE.md#bulk-changes).
+
 ---
 
 ## 7. HTML contract
@@ -449,73 +474,38 @@ configured with `{ <name>: { ...options } }`.
 | `table` | `<table>`, with `<colgroup>` when a column has a width (ADR 0005) | `table` | content `tableRow+` |
 | `tableRow` | `<tr>` | `tr` (`thead`, `tbody`, `tfoot` flattened: the rows keep their order) | content `(tableCell \| tableHeader)*` |
 | `tableCell` / `tableHeader` | `<td>` / `<th>` | same | `colspan`, `rowspan` (omitted when 1; clamped to 1000 and 65534 as browsers do), `colwidth` (`data-colwidth`, ADR 0005); content `block+`; a single paragraph without attributes is written without `<p>` (`compactParagraphs`, ADR 0001) |
-| `image` | `<img src alt title width height>` | `img[src]` (not inside `figure`, M2) | inline atom (F-601); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
+| `image` | `<img src alt title width height>` | `img[src]` (not inside `figure`, M2) | inline atom (F-601); `src` per SPEC NFR-2 (SVG data URLs dropped); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
 | `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
 
-Text alignment (F-308) and line spacing (F-312): the `textAlign` and `lineHeight` attributes
-belong to `paragraph` and `heading` (`core/helpers/block-style.ts`), so content keeps them even
-without the `TextAlign` and `LineHeight` extensions, which only add the commands:
-`setTextAlign(alignment)` with `Mod-Shift-l/e/r/j` (priority 101 puts its keymap before the
-marks', so `Mod-Shift-e` never falls back to `Mod-e`), `setLineHeight(lineHeight)` and
-`unsetLineHeight()` (no shortcut). Both set the attribute on every selected textblock that has it
-(`setTextblockAttr`). A block with neither style parses with the shared default attributes: one
-attribute object per paragraph cost 19 MB of heap at 50k paragraphs. `setParagraph`, `setHeading`
-and `toggleHeading` use `setTextblockType`, which keeps both styles when the block type changes,
-and so does the heading input rule (`# `…`###### `, our `textblockTypeInputRule` in
-`core/helpers/input-rules.ts`); a list item's paragraph with a style keeps its `<p>` (`compactParagraphs` unwraps only paragraphs
-without attributes). Output order: `text-align` then `line-height` (§7.3).
+Notes on the nodes:
 
-Text case (F-213): the `TextCase` extension, a command and no schema. `setTextCase(letterCase)`
-changes the characters, so the HTML has no `text-transform`. The text of each selected textblock
-gives the context of `title` (a word starts after a character that is not a letter, digit or
-apostrophe: `l'amico` → `L'amico`) and `sentence` (a sentence starts at the block start and after
-`.` `!` `?` `…`), so a selection that starts inside a word or a sentence keeps it lowercase. The
-top-level blocks the selection touches are rebuilt and replaced in **one step**, the marks kept
-on each piece of text; the selection is mapped through a step map of the texts whose length
-changed (`ß` → `SS`). Nothing is dispatched when no character changes.
-
-Code block (F-306): the `CodeBlock` extension. `setCodeBlock({ language? })` turns the selected
-textblocks into code blocks with `setTextblockType`, then joins the sibling code blocks of the
-selection into one, a newline between each pair; on a code block it changes the language.
-`language` must match `^[\w-]+$` (the class the sanitizer keeps), otherwise the command returns
-`false`. `unsetCodeBlock()` turns every selected code block into one paragraph per line: each
-newline becomes a split, so the cursor keeps its line and column. Other conversions (the
-paragraph or a heading from the dropdown, `Backspace` into the previous block) use ProseMirror's
-`linebreakReplacement`: `hardBreak` declares it, so a newline becomes a `<br>` and back. Keys:
-`Mod-Alt-c` toggles; `Enter` and `Shift-Enter` insert a newline (`newlineInCode`), but `Enter` on an
-empty last line removes it and adds a paragraph after the block; `Mod-Enter` (`exitCode`, from
-`baseKeymap`) also leaves it; `Backspace` in an empty code block turns it into a paragraph; `Tab`
-is not handled, so it never traps the focus. Priority 101 puts its `Enter` before the list item's,
-which would split the item. Input rule: ```` ``` ```` or ```` ```lang ```` and a space at the
-start of a textblock. `code: true` turns off input rules and marks inside it. A list item
-cannot start with a code block (content `paragraph block*`).
-
-Task lists (F-406): the `TaskList` and `TaskItem` extensions. `toggleTaskList()` (`Mod-Shift-9`) works like the other list toggles (`toggleList`, `core/helpers/lists.ts`): it wraps the selection, lifts the items, or converts the nearest list; a conversion between lists whose items differ (`listItem` and `taskItem`) rebuilds the list in one step, and task items lose their `checked` state. Input rule: `[ ] ` or `[x] ` (`[X] `) at the start of a textblock, joined to a task list right before it. `splitTaskItem()` (`Enter`): the text keeps the item's state, a new empty item is unchecked (also the one made before the text at the start of a checked item); `sinkTaskItem()` (`Tab`), `liftTaskItem()` (`Shift-Tab`) and `Backspace` behave as in list items. `toggleTaskChecked()` (`Mod-Enter`) checks the innermost task item around each selected textblock, or unchecks them when all are checked; `false` outside a task item and in a code block, where `Mod-Enter` leaves the code. It replaces the siblings holding the items in **one step**: a step per item copies the parent's children each time (884 ms for 4,000 items in jsdom, 9 ms in one step). In the editor, a node view (`TaskItemView`) renders `<li data-checked>` with an `input.stilo-task-item__checkbox` and the content in `div.stilo-task-item__content`; clicking the checkbox sets `checked`, leaves the focus in the editor, and does nothing when the editor is not editable. The checkbox is not in `getHTML()`: for content shown elsewhere under the class `stilo-content`, `content.css` draws a box from `data-checked`.
-
-Tables (F-501…F-507): the `Table` extension, on `prosemirror-tables` (its `TableMap`, commands, `tableEditing` and `columnResizing` plugins; our own node specs, with the names of §4.1). `insertTable({ rows = 3, cols = 3, withHeaderRow = true })` replaces the selection with a table, the cursor in the first cell, and adds a paragraph after it when nothing follows; `false` inside a table (no nested tables from the command; pasted ones are kept) or where the container refuses a table. `addRowBefore/After`, `deleteRow`, `addColumnBefore/After`, `deleteColumn`, `mergeCells`, `splitCell`, `toggleHeaderRow` and `toggleHeaderColumn` (the first row / column of the table, whatever the selection) run on a document holding only the table, which then replaces the table in **one step**: the library makes a step per cell, and each step copies the top-level blocks (164 ms for a header column of 200 rows in 50,000 paragraphs, 35 ms in one step). `deleteRow` and `deleteColumn` return `false` (also from `.can()`) when the selection covers every row / column: that is `deleteTable()`. `selectRow(pos?)`, `selectColumn(pos?)` and `selectTable(pos?)` set a cell selection (`CellSelection.rowSelection` / `colSelection`, or every cell) around the cell at `pos`, by default the head of the selection: the table handles of the UI select what their menu acts on. `getTableHeaders(editor)` tells whether the first row and column are headers (`null` outside a table). Keys: `Tab` goes to the next cell (selecting its text) and in the last cell adds a row; `Shift-Tab` goes back; outside a table they are not handled. Dragging the border of a column sets the `colwidth` of its cells (`columnResizing`); the table node view (`TableView`) draws the `<colgroup>` in the editor. `tableEditing` adds the cell selection (drag across cells) and fixes the tables a transaction changes (missing cells, overlapping spans, widths that disagree); the extension wraps it so that it looks for those tables only when the changed part of the document (`findDiffStart` / `findDiffEnd`) holds, or lies in, a table with problems (`TableMap.problems`): its own search (`changedDescendants`) does not move on in the old document after a block that differs, so a change to every block cost quadratic time, tables or not: the new state of a text case over 50,000 paragraphs took 4.1 s in Chrome, 1 ms with the check (T-050); the extension fixes the tables of a loaded document too, in the empty transaction the `Editor` applies to every new state (`LOAD_META`, no undo step), so `getHTML()` never changes after the first edit.
-
-Images (F-601, F-603, F-607, F-608): the `Image` extension. `src` follows SPEC NFR-2 (the
-sanitizer drops other URLs, SVG data URLs included). Paste: when the clipboard has HTML,
-ProseMirror pastes it, so an image copied from a web page keeps its URL; otherwise each PNG,
-JPEG, GIF or WebP file becomes an `image` with a base64 `data:` URL, in place of the selection at
-the time the files have been read. A file larger than `maxInlineBytes` (default 5 MB) or of
-another type is skipped and reported with the `imageRejected` event (`{ editor, file, reason:
-'tooLarge' | 'unsupportedType' }`). In the editor, a node view wraps the `<img>` in
-`span.stilo-image` with two side handles (`span.stilo-image__handle--left/right`), inside the
-image because a top-level block clips what overflows it (`content-visibility`, ADR 0003), shown
-by `content.css` while the image is selected and the editor editable. Only a selected image is
-`position: relative`: a positioned element paints over the caret placed right after it. Dragging a handle changes
-the width (at least 32px, at most the editor width) and keeps the aspect ratio; releasing it sets
-`width` and `height` with attribute steps: one undo step, the image stays selected.
-`content.css` gives every content image `max-width: 100%; height: auto`.
+- **Block styles belong to the schema.** `textAlign` and `lineHeight` are attributes of
+  `paragraph` and `heading` (`core/helpers/block-style.ts`), so content keeps them without the
+  `TextAlign` and `LineHeight` extensions, which only add the commands. Changing the block type
+  (`setTextblockType`, also the heading input rule) keeps both. A block without styles shares
+  one default attribute object (memory: [PERFORMANCE.md](PERFORMANCE.md#bulk-changes)). A list
+  item's paragraph with a style keeps its `<p>`: `compactParagraphs` unwraps only paragraphs
+  without attributes.
+- **Text case changes the characters** (`TextCase`, F-213): the HTML never has
+  `text-transform`.
+- **Code block lines.** A line break inside a `codeBlock` is a `\n` character. `hardBreak`
+  declares itself the schema's `linebreakReplacement`, so a code block turned into another
+  textblock gets a `<br>` for each newline, and back. `code: true` turns off marks and input
+  rules inside it. `language` matches `^[\w-]+$`, the class the sanitizer keeps.
+- **Tables** use `prosemirror-tables` (`TableMap`, commands, the `tableEditing` and
+  `columnResizing` plugins) with our own node specs and the names of §4.1. `tableEditing` fixes
+  irregular tables (missing cells, overlapping spans, widths that disagree) when a transaction
+  changes them; the `Table` extension also fixes those of a loaded document, in the empty
+  transaction (`LOAD_META`, no undo step) the `Editor` applies to every new state, so
+  `getHTML()` never changes after the first edit.
 
 ### 7.2 Marks
 
 | Mark | Output | Also parsed from |
 |---|---|---|
 | `link` | `<a href target rel>` | `a[href]` with a non-empty allowed `href` (`isAllowedHref`). Attributes `href` and `target` (`_blank` or none); `rel` is not stored: it is written as `noopener noreferrer nofollow` when `target="_blank"`, and dropped on input. Not inclusive (typing at its end does not extend it) |
-| `textStyle` | `<span style="font-family; font-size; color">` | `span[style]`, `font[face/size/color]` (`size` 1–7 → `10px`, `13px`, `16px`, `18px`, `24px`, `32px`, `48px`; other values dropped); dropped when no allowed property remains. Attributes `fontFamily`, `fontSize`, `color` (F-208, F-210, F-211). The mark excludes itself, so a nested `<span>`/`<font>` would drop the outer values: the innermost one also takes the values of the enclosing ones (CSS inheritance). Commands `setColor(color)`, `setFontFamily(fontFamily)`, `setFontSize(fontSize)` (`false` for an invalid value) and `unsetColor()`, `unsetFontFamily()`, `unsetFontSize()`: each changes only its own attribute (`updateMarkAttrs`), and the mark goes away when none is left. `stepFontSize(delta, unit = 'pt')` changes each selected part from the size the browser renders (`getComputedStyle`, read through the view) to the next / previous whole number in `unit` (`pt`, `px`, or `rem` stepped in px), between 1 and 400 |
-| `highlight` | `<mark>` or `<mark style="background-color: x">` | `mark`, and a `background-color` style on any element; `transparent` counts as no color (Google Docs writes it on every span). Attribute `color` (`null` for a plain `<mark>`). `toggleHighlight()` without attributes removes any highlight; with `{ color }` it is active only for that color |
+| `textStyle` | `<span style="font-family; font-size; color">` | `span[style]`, `font[face/size/color]` (`size` 1–7 → `10px`, `13px`, `16px`, `18px`, `24px`, `32px`, `48px`; other values dropped); dropped when no allowed property remains. Attributes `fontFamily`, `fontSize`, `color` (F-208, F-210, F-211). The mark excludes itself, so a nested `<span>`/`<font>` would drop the outer values: the innermost one also takes the values of the enclosing ones (CSS inheritance). A command that removes the last attribute removes the mark |
+| `highlight` | `<mark>` or `<mark style="background-color: x">` | `mark`, and a `background-color` style on any element; `transparent` counts as no color (Google Docs writes it on every span). Attribute `color` (`null` for a plain `<mark>`) |
 | `bold` | `<strong>` | `strong`, `b` (except Google Docs `<b style="font-weight:normal">`), `font-weight: bold \| ≥600` |
 | `italic` | `<em>` | `em`, `i`, `font-style: italic` |
 | `underline` | `<u>` | `u`, `text-decoration: underline` |
@@ -558,13 +548,16 @@ Example: `<span style="font-family: 'Times New Roman', serif; font-size: 12pt; c
 
 All parsing/normalization/building of style strings goes through `src/core/html/css.ts`
 (`parseStyle`, `normalizeColor`, `normalizeFontSize`, `normalizeFontFamily`, `normalizeTextAlign`,
-`normalizeLineHeight`, `normalizeWidth`, `buildStyle`). Extensions never handle raw style strings themselves.
+`normalizeLineHeight`, `normalizeWidth`, `buildStyle`). Extensions never handle raw style
+strings themselves.
 
 ### 7.4 Exceptions (non-style attributes in content)
 
 - `class="language-<x>"` on `<code>` inside `<pre>` (de-facto standard for highlighters).
 - `data-type="taskList"` and `data-checked` for task lists.
-- `data-colwidth` on `<td>` / `<th>`: the column widths, which the editor reads back; the `<colgroup>` written next to them is what other pages display ([ADR 0005](decisions/0005-table-column-widths.md)).
+- `data-colwidth` on `<td>` / `<th>`: the column widths, which the editor reads back; the
+  `<colgroup>` written next to them is what other pages display
+  ([ADR 0005](decisions/0005-table-column-widths.md)).
 
 ### 7.5 Idempotence
 
@@ -630,6 +623,11 @@ a document parsed with an inert `DOMParser` (no scripts run, no images load):
   cell follows `colspan` and the `rowspan` of the rows above. Other units (`%`, `em`) are not
   read: those columns stay fluid. `setHTML` reads widths from `data-colwidth` only.
 
+Image files (`Image` extension): a paste whose clipboard has no HTML turns each PNG, JPEG, GIF or
+WebP file into an `image` with a base64 `data:` URL; a file over `maxInlineBytes` or of another
+type is reported with the `imageRejected` event. A clipboard with HTML is pasted as HTML, so an
+image copied from a web page keeps its URL.
+
 `Mod-Shift-v` pastes the plain text of the clipboard (F-705): ProseMirror's own behavior while
 Shift is held, also when the clipboard has HTML.
 
@@ -653,9 +651,7 @@ DOMSerializer (schema toDOM)          clipboardSerializer (same, per call)
 ```
 
 Copied HTML follows §7 exactly, plus ProseMirror's `data-pm-slice` on the first element; the
-plain text is `textBetween(…, '
-
-')`, the same rule as `getText()`.
+plain text separates blocks with a blank line (`textBetween`), the same rule as `getText()`.
 
 ### 8.2 Drag and drop (move)
 
@@ -770,7 +766,7 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 
 | # | Decision | Date |
 |---|---|---|
-| D-01 | Build on ProseMirror rather than Tiptap: learning, full ownership, fully open source | 2026-10-10 |
+| D-01 | Build directly on ProseMirror: learning, full ownership, fully open source | 2026-10-10 |
 | D-02 | HTML is the public in/out format; ProseMirror JSON is optional | 2026-10-10 |
 | D-03 | Semantic HTML first; inline style only for free values with an allowlist; classes only for UI | 2026-10-10 |
 | D-04 | Headless core + optional, decoupled UI in one package with subpath exports; no monorepo (§2.2) | 2026-10-10 |
@@ -778,9 +774,9 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 | D-06 | Toolchain: npm, Vite, Vitest+jsdom, Playwright, Biome, TS strict | 2026-10-10 |
 | D-07 | History is a swappable extension (Yjs later) | 2026-10-10 |
 | D-08 | Images (M2): inline `image` + block `figure` with plain-text caption; local (base64) and remote picker with alt/title/caption; upload callback, alignment, rich captions in M3 | 2026-10-10 |
-| D-11 | `setHTML`/`setJSON` take an options object; replacement is undoable by default, `resetHistory: true` starts fresh | 2026-10-10 |
 | D-09 | Performance verified by benchmarks with budgets (NFR-1) | 2026-10-10 |
 | D-10 | Code and docs in English | 2026-10-10 |
+| D-11 | `setHTML`/`setJSON` take an options object; replacement is undoable by default, `resetHistory: true` starts fresh | 2026-10-10 |
 | D-12 | Single-paragraph list items are written without `<p>`; option `compactParagraphs` ([ADR 0001](decisions/0001-tight-list-items.md)) | 2026-10-11 |
 | D-13 | UI popovers positioned with Floating UI; native `title` tooltips in M1; `absolute` strategy in a host that scrolls with the anchor ([ADR 0002](decisions/0002-floating-ui.md)) | 2026-10-12 |
 | D-14 | Top-level blocks use `content-visibility: auto`; performance budgets calibrated on the first measurement ([ADR 0003](decisions/0003-performance-baseline.md)) | 2026-10-12 |
