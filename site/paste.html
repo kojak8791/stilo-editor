@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- site:head -->
+    <title>Paste cleanup — Stilo</title>
+    <meta name="description" content="Paste from Microsoft Word, Google Docs or a web page into Stilo and compare the clipboard HTML with the clean HTML it keeps.">
+  </head>
+  <body>
+    <!-- site:header -->
+
+    <main>
+      <section class="page-intro">
+        <p class="eyebrow">Paste</p>
+        <h1 class="page-intro__title">From Word to <em>clean&nbsp;HTML</em>.</h1>
+        <p class="page-intro__lead">
+          Copy something from Microsoft Word, Google Docs or any web page and paste it below. On
+          the right, what the clipboard carried and what the editor keeps. Each paste replaces
+          the content; <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> pastes plain text.
+        </p>
+      </section>
+
+      <div class="workbench">
+        <div class="editor-frame">
+          <div id="toolbar" class="editor-frame__toolbar"></div>
+          <div id="editor" class="editor-frame__scroll"></div>
+          <div id="status" class="editor-frame__status"></div>
+        </div>
+        <div class="code-stack">
+          <div class="code-panel code-surface">
+            <div class="code-surface__bar">
+              <span class="code-surface__title">clipboard text/html</span>
+              <span id="clipboard-size"></span>
+            </div>
+            <pre class="code-surface__body"><code id="clipboard">Nothing pasted yet.</code></pre>
+          </div>
+          <div class="code-panel code-surface">
+            <div class="code-surface__bar">
+              <span class="code-surface__title">editor.getHTML()</span>
+              <span id="output-size"></span>
+            </div>
+            <pre class="code-surface__body"><code id="output"></code></pre>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- site:footer -->
+
+    <script type="module" src="./paste.ts"></script>
+  </body>
+</html>

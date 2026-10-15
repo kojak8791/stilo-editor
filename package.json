@@ -54,7 +54,9 @@
   },
   "scripts": {
     "dev": "vite",
+    "site": "vite -c vite.site.config.ts",
     "build": "vite build && tsc -p tsconfig.build.json",
+    "build:site": "vite build -c vite.site.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --error-on-warnings --max-diagnostics=none .",
     "format": "biome check --write .",

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- site:head -->
+    <title>Stilo — open-source HTML5 rich text editor</title>
+    <meta name="description" content="Open-source HTML5 WYSIWYG rich text editor built on ProseMirror: clean HTML in and out, headless core, made for long documents.">
+  </head>
+  <body>
+    <!-- site:header -->
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Open source · MIT · built on ProseMirror · 0.x preview</p>
+        <h1 class="hero__title">Rich text that writes <em>clean&nbsp;HTML</em>.</h1>
+        <p class="hero__lead">
+          An HTML5 WYSIWYG editor with a headless core and an optional toolbar. Made for long
+          documents, with no paid tiers and no closed extensions.
+        </p>
+        <div class="hero__actions">
+          <div class="install code-surface">
+            <code><span class="install__prompt">$</span> npm install stilo-editor</code>
+            <button class="copy-button" type="button" data-copy="npm install stilo-editor" aria-label="Copy the install command">Copy</button>
+          </div>
+          <a class="button" href="#try">Try it</a>
+        </div>
+      </section>
+
+      <section id="try" class="workbench" aria-label="Live editor">
+        <div class="editor-frame">
+          <div id="toolbar" class="editor-frame__toolbar"></div>
+          <div id="editor" class="editor-frame__scroll"></div>
+          <div id="status" class="editor-frame__status"></div>
+        </div>
+        <div class="code-panel code-surface">
+          <div class="code-surface__bar">
+            <span class="code-surface__title">editor.getHTML()</span>
+            <span class="live-dot">live</span>
+          </div>
+          <pre class="code-surface__body"><code id="output"></code></pre>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title">Why Stilo</h2>
+        <div class="why">
+          <article class="why__item">
+            <h3>Built for very large documents</h3>
+            <p>Typing feels immediate in a document of 10,000 paragraphs, about 400,000 words. Measured in a real browser against budgets, not assumed.</p>
+          </article>
+          <article class="why__item">
+            <h3>HTML is the public format</h3>
+            <p>Content goes in as HTML and comes out as clean, semantic, self-contained HTML, with a strict allowlist for tags, attributes and inline styles.</p>
+          </article>
+          <article class="why__item">
+            <h3>Headless core, optional UI</h3>
+            <p>The core works without any UI. The default toolbar and menus are a separate, replaceable module.</p>
+          </article>
+          <article class="why__item">
+            <h3>Entirely open source</h3>
+            <p>MIT licensed, aiming at the feature level of the established editors, with no paid tiers and no closed “pro” extensions.</p>
+          </article>
+          <article class="why__item">
+            <h3>Extensible by design</h3>
+            <p>Every feature is an extension with the same shape, so adding your own follows the same path.</p>
+          </article>
+          <article class="why__item">
+            <h3>Framework-agnostic</h3>
+            <p>Vanilla TypeScript, ESM only, types included and tree-shakable.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title">What it does</h2>
+        <p class="section__lead">With the default extensions and toolbar. On macOS, use <kbd>⌘</kbd> for <kbd>Ctrl</kbd> and <kbd>Option</kbd> for <kbd>Alt</kbd>.</p>
+        <div class="features">
+          <article class="feature">
+            <h3>Text</h3>
+            <p>Bold, italic, underline, strikethrough, inline code, subscript and superscript, font family and size, text color and highlight, text case.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>B</kbd> <kbd>Ctrl</kbd>+<kbd>I</kbd> <kbd>Ctrl</kbd>+<kbd>U</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Blocks</h3>
+            <p>Headings, quotes, code blocks, horizontal lines, alignment and line spacing. Move any block up and down.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>6</kbd> <kbd>Alt</kbd>+<kbd>↑</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Lists</h3>
+            <p>Bulleted, numbered and checklists, nested with <kbd>Tab</kbd>. Type <code>- </code>, <code>1. </code> or <code>[ ] </code> to start one.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> <kbd>8</kbd> <kbd>9</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Tables</h3>
+            <p>Insert from a grid, add and delete rows and columns, merge and split cells, header rows, handles on rows and columns, resizable columns.</p>
+            <p class="feature__keys"><kbd>Tab</kbd> <kbd>Shift</kbd>+<kbd>Tab</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Links and images</h3>
+            <p>A link popover with “open in new tab”. Paste an image or a screenshot and resize it with its handles.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>K</kbd> <kbd>Ctrl</kbd>+<kbd>V</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Paste cleanup</h3>
+            <p>HTML pasted from the web, Microsoft Word and Google Docs is cleaned up: real lists, tables with their column widths. Or paste plain text.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Find and replace</h3>
+            <p>Match case, whole word, replace one or all, with an exact count of the matches. A status bar counts words and characters.</p>
+            <p class="feature__keys"><kbd>Ctrl</kbd>+<kbd>F</kbd></p>
+          </article>
+          <article class="feature">
+            <h3>Markdown as you type</h3>
+            <p><code>**bold**</code>, <code>==highlight==</code>, <code># </code> for headings, <code>&gt; </code> for quotes, <code>```</code> for code, <code>---</code> for a line.</p>
+            <p class="feature__keys"><kbd>Backspace</kbd> undoes it</p>
+          </article>
+          <article class="feature">
+            <h3>Keyboard and accessibility</h3>
+            <p>The toolbar follows the WAI-ARIA Toolbar pattern, every popover works with the keyboard alone, every tooltip shows its shortcut.</p>
+            <p class="feature__keys"><kbd>Alt</kbd>+<kbd>F10</kbd> <kbd>Esc</kbd></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section__title">Get started</h2>
+        <div class="usage code-surface">
+          <div class="code-surface__bar">
+            <span class="code-surface__title">main.ts</span>
+            <button class="copy-button" type="button" data-copy-from="usage-code" aria-label="Copy the example">Copy</button>
+          </div>
+          <pre class="code-surface__body"><code id="usage-code"></code></pre>
+        </div>
+        <p class="section__lead">
+          Options, commands, events and the toolbar:
+          <a href="https://github.com/kojak8791/stilo-editor/blob/main/docs/API.md">API reference</a>.
+        </p>
+      </section>
+    </main>
+
+    <!-- site:footer -->
+
+    <script type="module" src="./home.ts"></script>
+  </body>
+</html>

@@ -72,6 +72,8 @@ Framework wrappers (M3) will be separate packages; the repo may then become an n
 | Script | Command | Purpose |
 |---|---|---|
 | `dev` | `vite` | Demo page with hot reload (`demo/`); benchmark page at `/bench/` |
+| `site` | `vite -c vite.site.config.ts` | Public site with hot reload (`site/`) |
+| `build:site` | `vite build -c vite.site.config.ts` | Public site build in `dist-site/` (published by `.github/workflows/pages.yml`) |
 | `build` | `vite build && tsc -p tsconfig.build.json` | Library build + declarations |
 | `typecheck` | `tsc --noEmit` | Type checking |
 | `lint` | `biome check .` | Lint + format check |
@@ -166,6 +168,10 @@ stilo-editor/
 ├── demo/
 │   ├── index.html
 │   └── main.ts
+├── site/                         Public site on GitHub Pages (`npm run site`)
+│   ├── *.html, *.ts              Home, Performance, Paste, Headless; `common.ts` shared setup
+│   ├── partials/                 head, header, footer, inserted by `vite.site.config.ts`
+│   └── fonts/                    Self-hosted woff2 subsets with their OFL licenses
 ├── tests/
 │   ├── helpers/                  createTestEditor, selection markers, fixtures loader
 │   ├── fixtures/                 html/ (word, gdocs, ...), xss/

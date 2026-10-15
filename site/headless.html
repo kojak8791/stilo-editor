@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- site:head -->
+    <title>Headless — Stilo</title>
+    <meta name="description" content="Stilo without its default UI: a few extensions and a toolbar of plain buttons built on the public API.">
+  </head>
+  <body>
+    <!-- site:header -->
+
+    <main>
+      <section class="page-intro">
+        <p class="eyebrow">Headless</p>
+        <h1 class="page-intro__title">Bring your <em>own&nbsp;toolbar</em>.</h1>
+        <p class="page-intro__lead">
+          The core has no UI. This editor loads only <code>content.css</code> and the extensions
+          it needs; its toolbar is the code on the right, which runs on this page. It uses only
+          the public API: commands, <code>.can()</code>, <code>isActive</code> and two events.
+        </p>
+      </section>
+
+      <div class="workbench">
+        <div class="editor-frame">
+          <div id="toolbar" class="plain-toolbar" role="toolbar" aria-label="Formatting"></div>
+          <div id="editor" class="editor-frame__scroll"></div>
+        </div>
+        <div class="code-panel code-surface">
+          <div class="code-surface__bar">
+            <span class="code-surface__title">headless-editor.ts</span>
+            <button class="copy-button" type="button" data-copy-from="source" aria-label="Copy the code">Copy</button>
+          </div>
+          <pre class="code-surface__body"><code id="source"></code></pre>
+        </div>
+      </div>
+    </main>
+
+    <!-- site:footer -->
+
+    <script type="module" src="./headless.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- site:head -->
+    <title>Performance — Stilo</title>
+    <meta name="description" content="Load a document of up to 20,000 paragraphs into Stilo and edit it: times measured in your browser.">
+  </head>
+  <body>
+    <!-- site:header -->
+
+    <main>
+      <section class="page-intro">
+        <p class="eyebrow">Performance</p>
+        <h1 class="page-intro__title">Long documents, <em>no&nbsp;pagination</em>.</h1>
+        <p class="page-intro__lead">
+          Load a generated document of up to 20,000 paragraphs, then type, select, search and
+          replace in it. The times below are measured now, in your browser.
+        </p>
+      </section>
+
+      <div class="perf-bar">
+        <fieldset class="segmented">
+          <legend class="visually-hidden">Document size</legend>
+          <button type="button" data-count="1000">1,000</button>
+          <button type="button" data-count="5000">5,000</button>
+          <button type="button" data-count="20000">20,000</button>
+        </fieldset>
+        <span class="perf-bar__unit">paragraphs</span>
+        <button id="export" class="button button--secondary" type="button">Export HTML</button>
+        <dl class="perf-stats">
+          <div><dt>HTML</dt><dd id="stat-size">—</dd></div>
+          <div><dt>Load and paint</dt><dd id="stat-load">—</dd></div>
+          <div><dt>Export</dt><dd id="stat-export">—</dd></div>
+        </dl>
+      </div>
+
+      <ol class="tries">
+        <li><strong>Type anywhere.</strong> The characters appear as you press the keys.</li>
+        <li><kbd>Ctrl</kbd>+<kbd>A</kbd>, then the <em>Aa</em> menu: every paragraph changes case in one step. <kbd>Ctrl</kbd>+<kbd>Z</kbd> brings it back.</li>
+        <li><kbd>Ctrl</kbd>+<kbd>F</kbd>, search <code>lorem</code> and replace all.</li>
+        <li><kbd>Ctrl</kbd>+<kbd>End</kbd> jumps to the end, <kbd>Alt</kbd>+<kbd>↑</kbd> moves a block.</li>
+      </ol>
+
+      <div class="editor-frame editor-frame--tall">
+        <div id="toolbar" class="editor-frame__toolbar"></div>
+        <div id="editor" class="editor-frame__scroll"></div>
+        <div id="status" class="editor-frame__status"></div>
+      </div>
+
+      <p class="section__lead">
+        How the editor is measured, the budgets and the limits:
+        <a href="https://github.com/kojak8791/stilo-editor/blob/main/docs/PERFORMANCE.md">Performance</a>.
+      </p>
+    </main>
+
+    <!-- site:footer -->
+
+    <script type="module" src="./performance.ts"></script>
+  </body>
+</html>

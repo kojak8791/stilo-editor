@@ -128,3 +128,4 @@ The toolchain enforces these. Respect them while you type, not after `npm run ch
 | `npm run size` | Bundle size of typical apps; fails if tree-shaking breaks |
 | `npm run test:e2e` | Playwright E2E |
 | `npm run dev` | Demo page |
+| `npm run site` | Public site (GitHub Pages) |
