@@ -5,6 +5,12 @@
   </picture>
 </h1>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/stilo-editor"><img src="https://img.shields.io/npm/v/stilo-editor" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/stilo-editor" alt="MIT license"></a>
+  <img src="https://img.shields.io/npm/types/stilo-editor" alt="TypeScript types included">
+</p>
+
 Open-source HTML5 WYSIWYG editor built on [ProseMirror](https://prosemirror.net).
 Clean HTML in and out, headless core, no paid tiers.
 
