@@ -3,8 +3,8 @@
 ## What Stilo is
 
 Stilo is an open-source (MIT) WYSIWYG HTML5 editor library for the browser, built on
-[ProseMirror](https://prosemirror.net). It aims at the feature level of editors such as Tiptap or
-CKEditor 5, while being **entirely open source**: no paid tiers, no closed "pro" extensions.
+[ProseMirror](https://prosemirror.net). It aims at the feature level of the established rich text
+editors, while being **entirely open source**: no paid tiers, no closed "pro" extensions.
 
 ## Goals
 

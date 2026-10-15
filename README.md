@@ -21,8 +21,8 @@ Clean HTML in and out, headless core, no paid tiers.
 - **Built for very large documents.** Typing stays immediate in a document longer than most
   novels (see [Large documents](#large-documents)). Measured in a real browser, checked against
   budgets, not assumed.
-- **Entirely open source (MIT).** Aiming at the feature level of Tiptap or CKEditor 5, with no paid
-  tiers and no closed "pro" extensions.
+- **Entirely open source (MIT).** Aiming at the feature level of the established rich text
+  editors, with no paid tiers and no closed "pro" extensions.
 - **HTML is the public format.** Content goes in as HTML and comes out as clean, semantic,
   self-contained HTML, with a strict allowlist for tags, attributes and inline styles.
 - **Headless core, optional UI.** The core works without any UI; the default toolbar and menus are
