@@ -487,6 +487,34 @@ strings themselves.
 
 For every extension, tests verify: `getHTML()` after `setHTML(getHTML())` is identical.
 
+### 7.6 Content styles (`content.css`)
+
+`content.css` is needed with or without the default UI: it holds the base CSS of ProseMirror,
+`prosemirror-gapcursor` and `prosemirror-tables`, and the defaults of the content, scoped to the
+class `stilo-content`. The editable element has that class; content shown elsewhere (a page that
+displays the saved HTML) gets the same look inside an element with that class.
+
+- **Editor only** (`.ProseMirror`): the node view controls (§6.4: task checkbox, image handles,
+  shown while the image is selected and the editor editable), the column resize handle and
+  selected cells, the placeholder, the search matches.
+- **Outside the editor** (`.stilo-content:not(.ProseMirror)`): the task list box is drawn from
+  `data-checked` with `li::before`, since the checkbox is not in the HTML.
+- **Large documents**: top-level blocks have `content-visibility: auto` (ADR 0003); a block
+  that has never been rendered is 3em tall. Containment stops margins from collapsing through a
+  block, so the first and last child of a blockquote and of a table cell have no outer margin.
+- Images are never wider than the content (`max-width: 100%; height: auto`).
+
+Colors are `--stilo-*` custom properties with a fallback in every `var()`, so the file works
+without `ui.css`; those shared with the UI (`--stilo-color-text`, `-muted`, `-border`, `-hover`,
+`-focus`) take the value set for the UI ([UI.md](UI.md) §7). Only the content uses:
+
+| Property | Default | Use |
+|---|---|---|
+| `--stilo-color-selected-cell` | `rgb(9 105 218 / 0.12)` | Tint of selected table cells |
+| `--stilo-color-table-header` | `#f6f8fa` | Header cell background |
+| `--stilo-color-search-match` | `#fff1a8` | Search match |
+| `--stilo-color-search-current` | `#ffb347` | Selected search match |
+
 ---
 
 ## 8. Input pipeline
@@ -615,7 +643,7 @@ The detailed design (modules, types, DOM, behavior, styles) is in [`docs/UI.md`]
   3. replacing single UI parts (e.g. own link dialog) through options;
   4. no default UI at all: core only + `content.css`, custom UI on the public API.
 - `createToolbar(editor, { container, items, messages })`. `items` is an array of groups; each
-  entry is the ID of a default item or a custom item object (UI.md §3).
+  entry is the ID of a default item or a custom item object (UI.md §3.1).
 - Toolbar items have a fixed shape (`kind: 'button' | 'dropdown'`, label key, `run(editor)`
   (buttons also get a `context` with UI services such as `openLinkPopover()`),
   optional `isActive`, `isEnabled`, `isAvailable`). State refresh on `transaction` events,

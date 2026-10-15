@@ -376,8 +376,8 @@ createStatusBar(editor, { container: document.querySelector('#status')! });
 ### 6.4 Languages
 
 `en` (default) and `it` are exported. To change a few strings, spread a locale:
-`{ ...en, 'toolbar.bold': 'Strong' }`. The keys are listed in
-[UI.md §3.2](UI.md#32-i18n).
+`{ ...en, 'toolbar.bold': 'Strong' }`. The keys, with the English strings, are in
+`src/ui/i18n/en.ts`; the conventions in [UI.md §6](UI.md#6-strings-i18n).
 
 ### 6.5 Styles
 
