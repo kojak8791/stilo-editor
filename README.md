@@ -1,9 +1,9 @@
-<h1 align="center">
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/logo-dark.svg">
     <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/logo.svg" alt="Stilo" width="300">
   </picture>
-</h1>
+</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/stilo-editor"><img src="https://img.shields.io/npm/v/stilo-editor" alt="npm version"></a>
@@ -18,9 +18,9 @@ Clean HTML in and out, headless core, no paid tiers.
   <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot.png" alt="Stilo with the default toolbar: formatted text, a checklist, a table and the link popover open" width="800">
 </p>
 
-<h3 align="center">
+<h2 align="center">
   <a href="https://kojak8791.github.io/stilo-editor/">See it in action: try the live demo →</a>
-</h3>
+</h2>
 
 > [!WARNING]
 > **Preview release.** Versions `0.x` are early previews: the editor works, but APIs may change
