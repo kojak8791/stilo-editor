@@ -29,8 +29,8 @@ Clean HTML in and out, headless core, no paid tiers.
 ## Why Stilo
 
 - **Built for very large documents.** Typing stays immediate in a document longer than most
-  novels (see [Large documents](#large-documents)). Measured in a real browser, checked against
-  budgets, not assumed.
+  novels (see [Large documents](https://github.com/kojak8791/stilo-editor#large-documents)).
+  Measured in a real browser, checked against budgets, not assumed.
 - **Entirely open source (MIT).** Aiming at the feature level of the established rich text
   editors, with no paid tiers and no closed "pro" extensions.
 - **HTML is the public format.** Content goes in as HTML and comes out as clean, semantic,

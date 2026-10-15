@@ -1,6 +1,6 @@
 {
   "name": "stilo-editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open-source HTML5 WYSIWYG rich text editor built on ProseMirror: clean HTML, headless core, fast on very large documents.",
   "keywords": [
     "wysiwyg",

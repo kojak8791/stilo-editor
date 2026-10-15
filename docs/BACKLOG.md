@@ -84,7 +84,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-052 | ARCHITECTURE §7 back to the HTML contract: command, key and node-view details move out (they are in API.md, README and the code), the design notes stay short; new §6.4 node views and §6.5 changes to many nodes; the bulk-change measurements move to PERFORMANCE.md; fixes (§2 order, §8.1, decision log). Second pass: the header says how the documents divide the work; §5 explains the `Editor` design instead of repeating API.md §2 (the precise `isActive` / `getAttributes` / `select` semantics move there); §4.2 keeps only the rules that come from the architecture; §6.2 and §6.3 point to API.md; §10 summarizes the test layers, the how-to moves to `docs/guides/testing.md`. UI.md rewritten as the design of the default UI: no copied interfaces, markup, i18n table, pixel layout or task IDs (the code is the reference); `content.css` described in ARCHITECTURE §7.6; its "Later" list moved to the notes below | — | done |
 | T-053 | Public site on GitHub Pages (`site/`, `npm run site`): Home (hero, live editor with its HTML beside it, why, features, usage), Performance (generated documents of 1,000 to 20,000 paragraphs, load and export timed in the visitor's browser), Paste (clipboard HTML beside the HTML the editor keeps), Headless (an editor with a few extensions and a toolbar of plain buttons, its code shown beside it); self-hosted fonts; the pages play the host and theme the editor only through its custom properties; `.github/workflows/pages.yml` builds and publishes it at every push to main | — | done |
 | T-054 | `setHTML` / `setJSON` slow when the document selection is inside the editor (10k paragraphs: DOM update 0.26 s → 2.9 s in Chrome, growing faster than the document): clear the DOM selection before replacing the document; measure other large changes (replace all) for the same effect | NFR-1 | done |
-| T-055 | Release `stilo-editor@0.2.0`: version, the README anchor links on the npm page (notes below), `npm pack` check in a clean Vite app, tag `v0.2.0` and GitHub release notes | NFR-6 | todo |
+| T-055 | Release `stilo-editor@0.2.0`: version, the README anchor links on the npm page (they do not work there), `npm pack` check in a clean Vite app, tag `v0.2.0` and GitHub release notes | NFR-6 | done |
 
 ## Notes for later milestones
 
@@ -92,9 +92,6 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
   search, like "Replace with format" of word processors; possibly also remove it. One step, a
   top-level block at a time, as `replaceAll` (ADR 0004). To decide: which formats, where the
   command goes in the find bar.
-- README on the npm page: links to anchors of the README itself (`#large-documents`) do not
-  work there (they do on GitHub); links to `docs/` do. Fix with the next `0.1.x` that is
-  published for other reasons.
 - After 0.1.0: a chaining API that runs several commands in one transaction (one `input`
   event).
 - After 0.1.0: CI on GitHub Actions running `npm run check` on every push, and npm trusted
