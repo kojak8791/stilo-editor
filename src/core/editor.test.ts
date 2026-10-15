@@ -163,6 +163,28 @@ describe('Editor: setHTML', () => {
     expect(input).toHaveBeenCalledWith({ editor, transaction: null });
   });
 
+  it('clears a DOM selection inside the editor before replacing the content', () => {
+    const editor = createCoreEditor('<p>old</p>');
+    document.body.append(editor.view.dom);
+    const selection = document.getSelection()!;
+    selection.collapse(editor.view.dom.firstChild, 0);
+    editor.setHTML('<p>new</p>');
+    expect(selection.rangeCount).toBe(0);
+    editor.view.dom.remove();
+  });
+
+  it('keeps a DOM selection outside the editor', () => {
+    const editor = createCoreEditor('<p>old</p>');
+    const outside = document.createElement('p');
+    outside.textContent = 'outside';
+    document.body.append(outside);
+    const selection = document.getSelection()!;
+    selection.collapse(outside.firstChild, 2);
+    editor.setHTML('<p>new</p>');
+    expect(selection.anchorNode).toBe(outside.firstChild);
+    outside.remove();
+  });
+
   it('is undone as its own step, not grouped with the changes just before it', () => {
     const TestHistory = defineExtension({ name: 'history', plugins: () => [history()] });
     const editor = createCoreEditor('<p>a</p>', [TestHistory()]);

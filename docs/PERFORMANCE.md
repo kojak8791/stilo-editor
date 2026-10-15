@@ -78,6 +78,20 @@ checklist, table commands) replace them in one step instead of one step per bloc
 Adding or deleting a column, or turning the first column into headers, in a 200-row table now
 takes 6–10 ms alone and 33–48 ms inside 50,000 paragraphs (undo the same).
 
+Replacing the whole document (`setHTML`, `setJSON`) first removes the browser selection when
+it lies inside the editor: the browser updates a selection while the nodes holding it are
+removed, and loading a document with the cursor in the editor was much slower. Page update
+(view phase) of `setHTML(html, { resetHistory: true })` with the cursor in the editor,
+Chromium (Playwright):
+
+| Document | Before | After |
+|---|---|---|
+| 10,000 paragraphs | 1.6 s | 0.3 s |
+| 50,000 paragraphs | 42 s | 1.6 s |
+
+The default replacement (`resetHistory: false`), *replace all*, text case of the whole document,
+deleting it and undo did not show the effect.
+
 Paragraphs and headings without alignment or line spacing share one attribute object: one
 object per paragraph cost 19 MB of memory at 50,000 paragraphs.
 

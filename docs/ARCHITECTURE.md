@@ -236,7 +236,11 @@ the design behind them.
   the whole document in one transaction, closed off from the changes before it
   (`closeHistory`), so the replacement is its own undo step; the selection goes to the start.
   `resetHistory: true` creates a new `EditorState` with the same plugins: every plugin state
-  starts over, the history included, and `input` is emitted with `transaction: null`.
+  starts over, the history included, and `input` is emitted with `transaction: null`. Both
+  first remove the browser selection when it lies inside the editor: the browser keeps it up to
+  date while the old nodes are removed, which made a load up to 25× slower; a focused editor
+  gets its selection back from ProseMirror after the update
+  ([PERFORMANCE.md](PERFORMANCE.md#bulk-changes)).
 - **Loaded content.** Every new state (creation, `resetHistory`) gets one empty transaction
   marked `LOAD_META`, not undoable: plugins use it to normalize what was loaded (the `Table`
   extension fixes irregular tables there, §7.1).
