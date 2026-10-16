@@ -14,6 +14,9 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [0.2.0] - 2026-10-15
 
+Second preview release. No breaking changes: with `defaultExtensions()` the new features are on
+as soon as you update.
+
 ### Added
 
 - **Tables**: insert from a grid, merge and split cells, header row and column, resizable
