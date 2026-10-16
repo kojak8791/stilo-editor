@@ -55,7 +55,11 @@ createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar
 editor.getHTML(); // '<p>Hello <strong>world</strong></p>'
 ```
 
-That is the whole setup. Want your own UI? Skip the toolbar: the core is headless.
+✅ That is the whole setup.
+
+### Want your own UI?
+
+Skip the toolbar: the core is headless.
 
 ```ts
 import 'stilo-editor/content.css';
