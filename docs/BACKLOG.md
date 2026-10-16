@@ -95,7 +95,7 @@ published package, so the new README needs a release. No code changes.
 |---|---|---|---|
 | T-056 | Documentation: shorter README (claim, quick start first, compact feature list, why Stilo), the full feature list in `docs/FEATURES.md` with screenshots, `CHANGELOG.md` (back to 0.1.0), `AGENTS.md` and `CONTRIBUTING.md` point to `docs/FEATURES.md`, `package.json` description and homepage (the live demo) | — | done |
 | T-057 | CI on GitHub Actions: `npm run check` and `npm run size` at every push and pull request, status badge in the README | — | done |
-| T-058 | Release `stilo-editor@0.2.1`: version, `npm pack` check in a clean Vite app, tag `v0.2.1`, GitHub releases (also for `v0.1.0` and `v0.2.0`) from the changelog | NFR-6 | planned |
+| T-058 | Release `stilo-editor@0.2.1`: version, `npm pack` check in a clean Vite app, tag `v0.2.1`, GitHub releases (also for `v0.1.0` and `v0.2.0`) from the changelog | NFR-6 | done |
 
 ## Notes for later milestones
 

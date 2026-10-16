@@ -6,11 +6,16 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-16
+
+Documentation release: no code changes.
+
 ### Changed
 
 - Shorter README, quick start first. The full list of features, shortcuts and Markdown
   shortcuts moves to [docs/FEATURES.md](docs/FEATURES.md).
 - New: this changelog.
+- The npm page links to the live demo as the homepage.
 
 ## [0.2.0] - 2026-10-15
 
@@ -66,6 +71,7 @@ First preview release.
 - Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
   characters and emoji picker.
 
-[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/kojak8791/stilo-editor/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kojak8791/stilo-editor/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kojak8791/stilo-editor/releases/tag/v0.1.0
