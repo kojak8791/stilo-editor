@@ -104,9 +104,11 @@ The toolchain enforces these. Respect them while you type, not after `npm run ch
 1. `npm run check` passes (typecheck + lint + unit tests). Run `npm run format` first.
 2. The behavior is tried in the demo when it is visible there.
 3. The documents in `docs/` describe the new behavior or decision.
-4. The **Features** table of `README.md` matches the code when a change adds, removes or changes
-   a user-visible feature, shortcut, Markdown shortcut or popover.
-5. `docs/BACKLOG.md` shows the task status.
+4. `docs/FEATURES.md` matches the code when a change adds, removes or changes a user-visible
+   feature, shortcut, Markdown shortcut or popover; the short list in `README.md` too when a
+   feature comes or goes.
+5. `CHANGELOG.md` lists the change under *Unreleased* when users notice it.
+6. `docs/BACKLOG.md` shows the task status.
 
 ## 7. Git
 

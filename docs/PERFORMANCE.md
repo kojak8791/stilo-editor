@@ -146,13 +146,13 @@ functions are on `window.__stilo` in the browser console, e.g.
 
 ## Download size
 
-What an app built with Vite downloads, measured on 2026-10-14 with `npm run size`:
+What an app built with Vite downloads, measured on 2026-10-16 with `npm run size`:
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 266.4 kB | 84.2 kB |
-| Core and `defaultExtensions` | 333.7 kB | 104.9 kB |
-| Core, `defaultExtensions` and the default UI | 410.4 kB | 127.5 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.0 kB | 85.4 kB |
+| Core and `defaultExtensions` | 344.2 kB | 108.3 kB |
+| Core, `defaultExtensions` and the default UI | 428.0 kB | 132.9 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The

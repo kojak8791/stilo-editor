@@ -116,10 +116,12 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 stilo-editor/
 ├── AGENTS.md                     Rules for contributors and coding agents
 ├── README.md
+├── CHANGELOG.md                  Changes of every release, for users
 ├── CONTRIBUTING.md               How to report bugs and propose changes
 ├── SECURITY.md                   Private vulnerability reports
 ├── LICENSE                       MIT
 ├── .github/ISSUE_TEMPLATE/       Issue forms: bug report, feature request
+├── .github/workflows/            CI (check, size) and the GitHub Pages site
 ├── package.json / package-lock.json
 ├── tsconfig.json                 Dev/typecheck config (src, tests, demo, bench)
 ├── tsconfig.build.json           Declarations for src/ only
@@ -132,6 +134,7 @@ stilo-editor/
 ├── docs/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── API.md                    API reference for applications (users of the package)
+│   ├── FEATURES.md               Every feature, shortcut and Markdown shortcut, for users
 │   ├── decisions/                ADRs: NNNN-short-title.md
 │   └── guides/                   How-to guides: ProseMirror positions, testing
 ├── src/

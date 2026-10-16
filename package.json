@@ -1,7 +1,7 @@
 {
   "name": "stilo-editor",
   "version": "0.2.0",
-  "description": "Open-source HTML5 WYSIWYG rich text editor built on ProseMirror: clean HTML, headless core, fast on very large documents.",
+  "description": "A complete rich text editor. Everything included, ready in minutes. Open-source WYSIWYG HTML editor built on ProseMirror: clean HTML in and out, headless core.",
   "keywords": [
     "wysiwyg",
     "wysiwyg-editor",
@@ -21,7 +21,7 @@
   ],
   "author": "Alessio Coggiola <alessio.coggiola@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/kojak8791/stilo-editor#readme",
+  "homepage": "https://kojak8791.github.io/stilo-editor/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kojak8791/stilo-editor.git"

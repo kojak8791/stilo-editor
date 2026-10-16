@@ -1,0 +1,68 @@
+# Changelog
+
+All notable changes to `stilo-editor`. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
+[Semantic Versioning](https://semver.org): until `1.0.0`, a minor version may change the API.
+
+## [Unreleased]
+
+### Changed
+
+- Shorter README, quick start first. The full list of features, shortcuts and Markdown
+  shortcuts moves to [docs/FEATURES.md](docs/FEATURES.md).
+- New: this changelog.
+
+## [0.2.0] - 2026-10-15
+
+### Added
+
+- **Tables**: insert from a grid, merge and split cells, header row and column, resizable
+  columns, handles on rows and columns that select them and open their menu.
+- **Images**: paste an image or a screenshot (embedded in the HTML, up to 5 MB by default),
+  resize with side handles.
+- **Checklists**, with the `[ ] ` and `[x] ` Markdown shortcuts.
+- **Code blocks**, with an optional language (`class="language-js"`).
+- **Find and replace**, with match case, whole word and an exact count of the matches.
+- **Word and character count**: `getWordCount()` and an optional status bar
+  (`createStatusBar`).
+- **Font family and font size** in the toolbar.
+- **Text alignment** and **line spacing** of paragraphs and headings.
+- **Text case**: UPPERCASE, lowercase, Title Case, Sentence case, tOGGLE cASE.
+- **Paste from Word and Google Docs**: real lists, column widths of tables kept, the body
+  font, size and color dropped.
+
+### Changed
+
+- `defaultExtensions()` includes the new extensions. Each one can be turned off with
+  `false`, e.g. `defaultExtensions({ table: false })`.
+- New dependency: `prosemirror-search`.
+
+### Fixed
+
+- `setHTML` / `setJSON` were slow on large documents while the selection was inside the
+  editor.
+- Changes to every block of a large document (text case, replace all) took quadratic time.
+- The `#` heading shortcuts dropped the alignment and the line spacing.
+
+## [0.1.0] - 2026-10-13
+
+First preview release.
+
+### Added
+
+- `Editor` with HTML and JSON in and out, a strict allowlist for tags, attributes and
+  styles, undo and redo.
+- Text: bold, italic, underline, strikethrough, inline code, subscript, superscript, text
+  color, highlight, clear formatting.
+- Links, with a popover and a bubble to open, edit or remove them.
+- Blocks: paragraphs, headings 1–6, quotes, horizontal lines, line breaks, moving blocks up
+  and down.
+- Bulleted and numbered lists.
+- Markdown shortcuts as you type, keyboard shortcuts for every command.
+- Paste cleanup and paste as plain text.
+- Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
+  characters and emoji picker.
+
+[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/kojak8791/stilo-editor/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/kojak8791/stilo-editor/releases/tag/v0.1.0
