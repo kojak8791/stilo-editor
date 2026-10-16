@@ -57,6 +57,21 @@ editor.getHTML(); // '<p>Hello <strong>world</strong></p>'
 
 That is the whole setup. Want your own UI? Skip the toolbar: the core is headless.
 
+```ts
+import 'stilo-editor/content.css';
+import { Editor, defaultExtensions } from 'stilo-editor';
+
+const editor = new Editor({
+  element: document.querySelector<HTMLElement>('#editor')!,
+  extensions: [defaultExtensions()],
+});
+
+document.querySelector('#bold')!.addEventListener('click', () => editor.commands.toggleBold());
+document.querySelector('#undo')!.addEventListener('click', () => editor.commands.undo());
+```
+
+Commands, button states and events: [API reference](docs/API.md).
+
 ## What's included
 
 - **Text:** bold, italic, underline, strikethrough, code, sub/superscript, fonts, sizes,
