@@ -86,6 +86,17 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
 | T-054 | `setHTML` / `setJSON` slow when the document selection is inside the editor (10k paragraphs: DOM update 0.26 s → 2.9 s in Chrome, growing faster than the document): clear the DOM selection before replacing the document; measure other large changes (replace all) for the same effect | NFR-1 | done |
 | T-055 | Release `stilo-editor@0.2.0`: version, the README anchor links on the npm page (they do not work there), `npm pack` check in a clean Vite app, tag `v0.2.0` and GitHub release notes | NFR-6 | done |
 
+## Release 0.2.1 — documentation
+
+A first contact that says in a few seconds what Stilo is: the npm page shows the README of the
+published package, so the new README needs a release. No code changes.
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-056 | Documentation: shorter README (claim, quick start first, compact feature list, why Stilo), the full feature list in `docs/FEATURES.md` with screenshots, `CHANGELOG.md` (back to 0.1.0), `AGENTS.md` and `CONTRIBUTING.md` point to `docs/FEATURES.md`, `package.json` description and homepage (the live demo) | — | planned |
+| T-057 | CI on GitHub Actions: `npm run check` and `npm run size` at every push and pull request, status badge in the README | — | done |
+| T-058 | Release `stilo-editor@0.2.1`: version, `npm pack` check in a clean Vite app, tag `v0.2.1`, GitHub releases (also for `v0.1.0` and `v0.2.0`) from the changelog | NFR-6 | planned |
+
 ## Notes for later milestones
 
 - Find and format: apply a mark (bold, italic, highlight, color, ...) to every match of the
@@ -94,8 +105,7 @@ Before the remaining M2 features: Stilo goes on npm as `0.x` previews, without a
   command goes in the find bar.
 - After 0.1.0: a chaining API that runs several commands in one transaction (one `input`
   event).
-- After 0.1.0: CI on GitHub Actions running `npm run check` on every push, and npm trusted
-  publishing (OIDC) with provenance instead of publishing by hand.
+- npm trusted publishing (OIDC) with provenance instead of publishing by hand.
 - Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
   `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
   refresh and of the link bubble. Measure with `npm run bench` before and after.

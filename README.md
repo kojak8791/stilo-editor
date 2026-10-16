@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/stilo-editor"><img src="https://img.shields.io/npm/v/stilo-editor" alt="npm version"></a>
+  <a href="https://github.com/kojak8791/stilo-editor/actions/workflows/ci.yml"><img src="https://github.com/kojak8791/stilo-editor/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/npm/l/stilo-editor" alt="MIT license"></a>
   <img src="https://img.shields.io/npm/types/stilo-editor" alt="TypeScript types included">
 </p>

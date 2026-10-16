@@ -86,6 +86,8 @@ Framework wrappers (M3) will be separate packages; the repo may then become an n
 | `check` | `npm run typecheck && npm run lint && npm run test` | **Quality gate** |
 | `prepublishOnly` | `npm run check && npm run build` | Run by `npm publish`: never publish an old or failing build |
 
+`.github/workflows/ci.yml` runs `check` and `size` at every push and pull request.
+
 ### 2.2 Headless-first dependency rules
 
 The default UI is a convenience, not a requirement: using only the core and building a custom UI
