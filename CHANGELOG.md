@@ -59,7 +59,7 @@ First preview release.
   and down.
 - Bulleted and numbered lists.
 - Markdown shortcuts as you type, keyboard shortcuts for every command.
-- Paste cleanup and paste as plain text.
+- Paste cleanup: pasted HTML is cleaned up, plain text lines become paragraphs.
 - Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
   characters and emoji picker.
 
