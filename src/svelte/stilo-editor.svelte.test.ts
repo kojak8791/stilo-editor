@@ -96,7 +96,7 @@ describe('StiloEditor', () => {
     flushSync();
     expect(editor.isEditable).toBe(false);
     expect(editor.getHTML()).toBe('<p>One</p>');
-    editor.commands.insertText('x');
+    editor.setHTML('<p>Three</p>');
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledOnce();
     props.editable = true;

@@ -208,6 +208,15 @@ describe('replace', () => {
     button.click();
     expect(replace.parentElement!.hidden).toBe(true);
   });
+
+  it('follows the read-only mode while the bar is open', () => {
+    const { button, editor, replace } = setup('<p>cat</p>');
+    button.click();
+    editor.setEditable(false);
+    expect(replace.parentElement!.hidden).toBe(true);
+    editor.setEditable(true);
+    expect(replace.parentElement!.hidden).toBe(false);
+  });
 });
 
 describe('closing', () => {

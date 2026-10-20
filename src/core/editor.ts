@@ -1,6 +1,12 @@
 import { closeHistory } from 'prosemirror-history';
 import type { Node, Schema } from 'prosemirror-model';
-import { EditorState, type Plugin, Selection, type Transaction } from 'prosemirror-state';
+import {
+  type Command,
+  EditorState,
+  type Plugin,
+  Selection,
+  type Transaction,
+} from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { createDropMovePlugin } from './drop';
 import { EventEmitter, type EventHandler } from './events';
@@ -22,6 +28,9 @@ import type {
 
 /** Transaction meta key: when `true`, the transaction does not emit `input`. */
 const SKIP_INPUT_META = 'stiloSkipInput';
+
+/** Transaction meta key of the empty transaction that `setEditable` dispatches. */
+const EDITABLE_META = 'stiloEditable';
 
 /**
  * Transaction meta key of the empty transaction applied to every new `EditorState`: plugins can
@@ -193,9 +202,14 @@ export class Editor {
     return nodeType ? getNodeAttributes(this.state, nodeType) : {};
   }
 
-  /** Switches read-only mode on/off. */
+  /**
+   * Switches read-only mode on/off. A change dispatches an empty transaction, so the UIs that
+   * refresh on `transaction` follow it.
+   */
   setEditable(editable: boolean): void {
+    if (editable === this.isEditable) return;
     this.view.setProps({ editable: () => editable });
+    this.view.dispatch(this.state.tr.setMeta(EDITABLE_META, editable));
   }
 
   /** Focuses the editor; optionally moves the cursor to the start or end of the document. */
@@ -237,16 +251,37 @@ export class Editor {
     return state.applyTransaction(state.tr.setMeta(LOAD_META, true)).state;
   }
 
-  /** Builds `commands` from the extension commands; `can` runs without `dispatch`. */
+  /** Builds `commands` from the extension commands; `can` does not apply them. */
   private createRunners(): CommandRunners {
     const runners: Record<string, CommandRunner<never[]>> = {};
     for (const [name, factory] of this.manager.commands) {
-      const run = (...args: never[]) =>
-        factory(...args)(this.state, (tr) => this.view.dispatch(tr), this.view);
-      const can = (...args: never[]) => factory(...args)(this.state, undefined, this.view);
+      const run = (...args: never[]) => this.runCommand(factory(...args), true);
+      const can = (...args: never[]) => this.runCommand(factory(...args), false);
       runners[name] = Object.assign(run, { can });
     }
     return runners as CommandRunners;
+  }
+
+  /**
+   * Runs `command`, or only tells whether it would apply. In read-only mode a command that
+   * changes the document or the stored marks does not apply and returns `false`; the others
+   * (selection, search) do. To know, the command builds its transaction: `can` costs as much
+   * as a run there.
+   */
+  private runCommand(command: Command, apply: boolean): boolean {
+    if (this.isEditable) {
+      return command(this.state, apply ? (tr) => this.view.dispatch(tr) : undefined, this.view);
+    }
+    let blocked = false;
+    const result = command(
+      this.state,
+      (tr) => {
+        if (tr.docChanged || tr.storedMarksSet) blocked = true;
+        else if (apply) this.view.dispatch(tr);
+      },
+      this.view,
+    );
+    return result && !blocked;
   }
 
   private setContent(doc: Node, options: SetContentOptions = {}): void {

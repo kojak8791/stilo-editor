@@ -1263,3 +1263,54 @@ describe('font controls without TextStyle', () => {
     expect(toolbar.element.querySelector('[data-item="fontSize"]')).toBeNull();
   });
 });
+
+describe('read-only', () => {
+  /** The enabled controls of the toolbar, by `data-item` or class. */
+  function enabledControls(toolbar: { element: HTMLElement }): string[] {
+    const controls = toolbar.element.querySelectorAll<HTMLElement>(
+      '[data-item], .stilo-toolbar__button, .stilo-font-size__input',
+    );
+    return [...controls]
+      .filter((control) => control.getAttribute('aria-disabled') !== 'true')
+      .filter((control) => !control.closest('[role="menu"], [role="listbox"], .stilo-popover'))
+      .map((control) => control.dataset.item ?? control.className);
+  }
+
+  it('disables every default item except find, and enables them again', () => {
+    const editor = createTestEditor({ html: '<p>[ab]</p>' });
+    attachEditor(editor);
+    vi.useFakeTimers();
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    expect(enabledControls(toolbar)).toContain('bold');
+
+    editor.setEditable(false);
+    vi.advanceTimersToNextFrame();
+    expect(enabledControls(toolbar)).toEqual(['find']);
+    const input = toolbar.element.querySelector<HTMLInputElement>('.stilo-font-size__input')!;
+    expect(input.readOnly).toBe(true);
+
+    editor.setEditable(true);
+    vi.advanceTimersToNextFrame();
+    expect(enabledControls(toolbar)).toContain('bold');
+  });
+
+  it('does not run the checks of the commands', () => {
+    const editor = createTestEditor({ html: '<p>[ab]</p>' });
+    attachEditor(editor);
+    vi.useFakeTimers();
+    createToolbar(editor, { container: createToolbarContainer() });
+    const can = vi.spyOn(editor.commands.toggleBold, 'can');
+    editor.setEditable(false);
+    vi.advanceTimersToNextFrame();
+    expect(can).not.toHaveBeenCalled();
+  });
+
+  it('does not change the content on click', () => {
+    const editor = createTestEditor({ html: '<p>[ab]</p>' });
+    attachEditor(editor);
+    editor.setEditable(false);
+    const toolbar = createToolbar(editor, { container: createToolbarContainer() });
+    toolbar.element.querySelector<HTMLButtonElement>('[data-item="bold"]')!.click();
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+});

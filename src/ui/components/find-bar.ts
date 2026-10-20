@@ -217,7 +217,9 @@ export function createFindBar(editor: Editor, options: FindBarOptions): FindBar 
   };
 
   const onTransaction = (): void => {
-    if (!element.hidden) showCount();
+    if (element.hidden) return;
+    replaceRow.hidden = !editor.isEditable;
+    showCount();
   };
 
   findField.addEventListener('input', onFindInput);

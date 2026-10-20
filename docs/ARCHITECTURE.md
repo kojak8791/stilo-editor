@@ -264,6 +264,12 @@ the design behind them.
 - **Commands** run against the current state: `editor.commands.x(...args)` is
   `factory(...args)(state, dispatch, view)`, `.can(...args)` the same without `dispatch` (§6.1).
   A UI decides what to enable with `.can()`, `isActive()` and `getAttributes()` only (§2.2).
+- **Read-only** (`editable: false`, `setEditable`) holds for the commands too, not only for the
+  keyboard: the editor runs a command with a `dispatch` that applies a transaction only when it
+  changes neither the document nor the stored marks, and returns `false` otherwise, also for
+  `.can()`. Selection and search commands keep working; `setHTML` / `setJSON` do not go through
+  the commands and still replace the content. A change of the mode dispatches an empty
+  transaction, so the UIs that refresh on `transaction` follow it.
 - **Replacing the content.** By default (`resetHistory: false`) `setHTML` / `setJSON` replace
   the whole document in one transaction, closed off from the changes before it
   (`closeHistory`), so the replacement is its own undo step; the selection goes to the start.
@@ -361,7 +367,8 @@ export const Bold = defineExtension({
 ```
 
 `editor.commands.x(...args)` runs `factory(...args)(state, dispatch, view)` and returns the boolean
-result. `editor.commands.x.can(...args)` runs it without `dispatch`.
+result. `editor.commands.x.can(...args)` runs it without `dispatch`, except in read-only mode
+(§5), where both run with a `dispatch` that discards the changes of the content.
 
 ### 6.2 ExtensionManager rules
 

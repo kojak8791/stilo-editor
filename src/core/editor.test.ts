@@ -1,5 +1,5 @@
 import { history, undo } from 'prosemirror-history';
-import type { Command } from 'prosemirror-state';
+import { type Command, Selection } from 'prosemirror-state';
 import { describe, expect, it, vi } from 'vitest';
 import { createCoreEditor, select, selectNode } from '../../tests/helpers/core';
 import type { Editor } from './editor';
@@ -19,9 +19,19 @@ const insertTestText: (text: string) => Command = (text) => (state, dispatch) =>
   return true;
 };
 
+const selectTestStart: () => Command = () => (state, dispatch) => {
+  dispatch?.(state.tr.setSelection(Selection.atStart(state.doc)));
+  return true;
+};
+
+const storeTestStrong: () => Command = () => (state, dispatch) => {
+  dispatch?.(state.tr.addStoredMark(state.schema.marks.strong!.create()));
+  return true;
+};
+
 const TestCommands = defineExtension({
   name: 'testCommands',
-  commands: () => ({ insertTestText }) as never,
+  commands: () => ({ insertTestText, selectTestStart, storeTestStrong }) as never,
 });
 
 describe('Editor: creation', () => {
@@ -217,6 +227,46 @@ describe('Editor: commands', () => {
     expect(editor.getHTML()).toBe('<p>a</p>');
     expect(transaction).not.toHaveBeenCalled();
   });
+
+  it('does not apply a content change in read-only mode, also with .can()', () => {
+    const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
+    select(editor, 2);
+    editor.setEditable(false);
+    const transaction = vi.fn();
+    editor.on('transaction', transaction);
+    expect(runners(editor.commands).insertTestText?.can('b')).toBe(false);
+    expect(runners(editor.commands).insertTestText?.('b')).toBe(false);
+    expect(runners(editor.commands).storeTestStrong?.()).toBe(false);
+    expect(editor.state.storedMarks).toBeNull();
+    expect(editor.getHTML()).toBe('<p>a</p>');
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('runs a selection change in read-only mode', () => {
+    const editor = createCoreEditor('<p>ab</p>', [TestCommands()]);
+    select(editor, 3);
+    editor.setEditable(false);
+    expect(runners(editor.commands).selectTestStart?.can()).toBe(true);
+    expect(editor.state.selection.from).toBe(3);
+    expect(runners(editor.commands).selectTestStart?.()).toBe(true);
+    expect(editor.state.selection.from).toBe(1);
+  });
+
+  it('applies content changes again when editable', () => {
+    const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
+    select(editor, 2);
+    editor.setEditable(false);
+    editor.setEditable(true);
+    expect(runners(editor.commands).insertTestText?.('b')).toBe(true);
+    expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+
+  it('replaces the content with setHTML in read-only mode', () => {
+    const editor = createCoreEditor('<p>a</p>', [TestCommands()]);
+    editor.setEditable(false);
+    editor.setHTML('<p>b</p>');
+    expect(editor.getHTML()).toBe('<p>b</p>');
+  });
 });
 
 describe('Editor: isActive', () => {
@@ -255,6 +305,22 @@ describe('Editor: editable, focus and events', () => {
     expect(editor.view.dom.getAttribute('contenteditable')).toBe('false');
     editor.setEditable(true);
     expect(editor.isEditable).toBe(true);
+  });
+
+  it('emits transaction when the read-only mode changes, not when it stays', () => {
+    const editor = createCoreEditor('<p>a</p>');
+    const transaction = vi.fn();
+    const input = vi.fn();
+    editor.on('transaction', transaction);
+    editor.on('input', input);
+    editor.setEditable(true);
+    expect(transaction).not.toHaveBeenCalled();
+    editor.setEditable(false);
+    expect(transaction).toHaveBeenCalledTimes(1);
+    editor.setEditable(false);
+    editor.setEditable(true);
+    expect(transaction).toHaveBeenCalledTimes(2);
+    expect(input).not.toHaveBeenCalled();
   });
 
   it('moves the cursor with focus(position)', () => {

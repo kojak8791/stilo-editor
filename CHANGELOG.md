@@ -20,6 +20,10 @@ All notable changes to `stilo-editor`. The format follows
 
 ### Fixed
 
+- A read-only editor (`editable: false`) can no longer be changed through the toolbar or the
+  commands: a command that would change the content returns `false`, also from `.can()`, and
+  the toolbar disables its buttons, except find. `setEditable` now emits `transaction`, so
+  the toolbar and your own buttons follow the switch.
 - After *select all* in a large document the toolbar refreshes about 10 times faster, so the
   selection shows sooner (50,000 paragraphs: 11 s → 1 s).
 

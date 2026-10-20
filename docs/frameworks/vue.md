@@ -175,7 +175,10 @@ const readOnly = ref(false);
 </template>
 ```
 
-To only show a document, without the toolbar: `<StiloEditor :editable="false" :toolbar="false" />`.
+In read-only mode the toolbar disables its buttons, except find, and the commands do not
+change the content: `editor.commands.toggleBold()` returns `false`, and so does `.can()`.
+Loading a document with `setHTML` still works. To only show a document, without the toolbar:
+`<StiloEditor :editable="false" :toolbar="false" />`.
 
 ## 7. Server-side rendering
 

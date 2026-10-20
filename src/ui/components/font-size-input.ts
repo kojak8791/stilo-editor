@@ -118,7 +118,7 @@ export function createFontSizeInput(
   let active = -1;
 
   function isEnabled(): boolean {
-    return editor.commands.setFontSize.can('12pt');
+    return editor.isEditable && editor.commands.setFontSize.can('12pt');
   }
 
   function setActive(index: number): void {

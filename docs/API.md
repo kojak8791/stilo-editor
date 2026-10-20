@@ -92,7 +92,7 @@ save, or debounced after `input`), not on every change.
 | `getAttributes(name)` | The attributes of the mark at the cursor (of the next typed character) or of the first one in the selection, or of the selected node or the innermost ancestor with that name: `getAttributes('link').href`. `{}` when there is none or the name is unknown |
 | `focus(position?)` | Focuses the editor; `'start'` or `'end'` also move the cursor there |
 | `blur()` | Removes the focus |
-| `setEditable(editable)` | Makes the content editable or read-only |
+| `setEditable(editable)` | Makes the content editable or read-only. Read-only also holds for the commands (§3); a change emits `transaction` |
 | `isEditable` | Whether the content is editable |
 | `destroy()` | Removes the editor and every event handler; calling it twice does nothing |
 | `isDestroyed` | Whether `destroy()` was called |
@@ -113,7 +113,7 @@ editor.on('input', ({ editor }) => save(editor.getHTML()));
 |---|---|---|
 | `input` | `{ editor, transaction }` | The document changed. `transaction` is `null` after `setHTML` / `setJSON` with `resetHistory: true` |
 | `selectionchange` | `{ editor, transaction }` | The selection changed and the document did not |
-| `transaction` | `{ editor, transaction }` | Every change of the editor state, including the two above |
+| `transaction` | `{ editor, transaction }` | Every change of the editor state, including the two above, and a change of `setEditable` (an empty transaction) |
 | `focus` | `{ editor, event }` | The editor got the focus |
 | `blur` | `{ editor, event }` | The editor lost the focus |
 | `destroy` | `{ editor }` | `destroy()` was called |
@@ -136,6 +136,12 @@ editor.commands.undo.can();                 // false: nothing to undo
 
 A command whose extension is not loaded is `undefined`: `'setLink' in editor.commands` tells
 whether it is available.
+
+In a read-only editor (`editable: false`, `setEditable(false)`) a command that would change the
+content or the stored marks does nothing and returns `false`, and so does its `.can()`; the
+selection and search commands keep working. `setHTML` and `setJSON` still replace the content.
+There, `.can()` builds the change to know whether it is one: check `editor.isEditable` first
+when you refresh many buttons.
 
 | Extension | Commands |
 |---|---|
@@ -275,7 +281,8 @@ ones work.
 | `messages` | `en` | UI strings |
 | `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
 
-A button whose extension is not loaded is not shown. Default item IDs: `undo`, `redo`,
+A button whose extension is not loaded is not shown. In a read-only editor every item is
+disabled except `find`, and the find bar hides its replace row. Default item IDs: `undo`, `redo`,
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textCase`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
@@ -367,7 +374,7 @@ createToolbar(editor, {
 | `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
 | `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar, `context.toggleTableMenu()` the table menu |
 | `isActive(editor)` | Optional: makes it a toggle button and tells when it is pressed |
-| `isEnabled(editor)` | Optional, default always enabled |
+| `isEnabled(editor)` | Optional, default always enabled. A button that changes the content: `editor.isEditable && …`, so that it is disabled in a read-only editor |
 | `isAvailable(editor)` | Optional: `false` hides the button |
 
 ### 6.3 Status bar

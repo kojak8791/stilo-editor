@@ -22,9 +22,15 @@ export interface LinkPopover {
 /** Any allowed URL: asks `commands.setLink.can()` whether the selection can take a link. */
 const PROBE_HREF = 'https://example.com';
 
-/** Whether the selection is in a link or can be linked (a cursor outside a link cannot). */
+/**
+ * Whether the editor is editable and the selection is in a link or can be linked (a cursor
+ * outside a link cannot).
+ */
 export function canEditLink(editor: Editor): boolean {
-  return editor.isActive('link') || editor.commands.setLink.can({ href: PROBE_HREF });
+  return (
+    editor.isEditable &&
+    (editor.isActive('link') || editor.commands.setLink.can({ href: PROBE_HREF }))
+  );
 }
 
 /** Creates the link popover (closed), anchored to the selection of `editor`. */

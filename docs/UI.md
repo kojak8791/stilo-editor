@@ -78,7 +78,9 @@ component. The types, with JSDoc, are in `src/ui/toolbar/types.ts`.
 `DEFAULT_TOOLBAR` groups: history; text style; font and size; inline formatting, link, clear
 formatting and text case; colors; alignment and line spacing; blocks, table and characters;
 find. The default buttons follow one rule: `run` calls `editor.commands.<command>()`,
-`isEnabled` its `.can()`, `isAvailable` is `'<command>' in editor.commands`.
+`isEnabled` its `.can()`, `isAvailable` is `'<command>' in editor.commands`. In a read-only
+editor every default item except `find` is disabled: `isEnabled` checks `editor.isEditable`
+first, so the toolbar does not run the commands' checks, which cost as much as a run there.
 
 | ID | Icon (`lucide`) | Shortcut | Command | `isActive` |
 |---|---|---|---|---|
@@ -242,7 +244,8 @@ move), and follows the sticky toolbar. The toolbar's popovers open over it.
   search again at once. `Enter` / `Shift+Enter` go to the next / previous match.
 - The count (`aria-live="polite"`) is exact (`getSearchResults`), also beyond the highlighted
   matches.
-- The replace row is hidden in a read-only editor.
+- The replace row is hidden in a read-only editor, also when the mode changes while the bar is
+  open.
 - Closing (`Escape`, close button, `find` button) clears the search and focuses the editor; the
   fields keep their text for the next opening.
 
