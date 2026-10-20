@@ -97,6 +97,27 @@ published package, so the new README needs a release. No code changes.
 | T-057 | CI on GitHub Actions: `npm run check` and `npm run size` at every push and pull request, status badge in the README | — | done |
 | T-058 | Release `stilo-editor@0.2.1`: version, `npm pack` check in a clean Vite app, tag `v0.2.1`, GitHub releases (also for `v0.1.0` and `v0.2.0`) from the changelog | NFR-6 | done |
 
+## Release 0.3.0 — framework wrappers
+
+Most apps embed an editor in a framework component, so the React, Vue and Svelte wrappers come
+before the remaining M2 features and before collaboration.
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-059 | Toolbar refresh on large selections: after select all, the refresh of the toolbar (the `isActive` / `isEnabled` check of every button over the selection, in one frame) takes 2.0 s at 10k paragraphs and 11.1 s at 50k (headless Chromium, frame phase of `/bench/`), so the selection shows late; checks that do not grow with the selection, also the `isEnabled` checks that are O(n) at the top level (`insertBlock` runs `canReplaceWith` on the document content); frame and per-keystroke cost measured on `/bench/` before and after | NFR-1 | in progress |
+| T-060 | Framework wrappers, first part: the ADR on their shape (separate packages in an npm workspace or subpath exports of `stilo-editor`, the framework as a peer dependency, server-side rendering, how the editor, its events and the default UI reach the component), then the React wrapper, its tests and its documentation (API.md, README) | F-1002 | todo |
+| T-061 | Vue wrapper, on the shape of the T-060 ADR: tests, documentation | F-1003 | todo |
+| T-062 | Svelte wrapper, on the shape of the T-060 ADR: tests, documentation | F-1005 | todo |
+| T-063 | Release `stilo-editor@0.3.0` and the wrappers: versions, `npm pack` check in clean Vite apps (vanilla, React, Vue, Svelte), tags, GitHub release from the changelog | NFR-6 | todo |
+
+## M2 — v1.0 (after 0.3.0)
+
+| Task | Content | Spec | Status |
+|---|---|---|---|
+| T-064 | Images, second part: block `figure` with a plain-text caption, drop of image files as a data URL (the same size limit as paste), an insert dialog (local file or remote URL, preview, `alt`, `title`, caption) that inserts a `figure`, editing the properties of an image or a figure, resize of both nodes keeping the aspect ratio | F-602, F-604…F-607, F-806 | todo |
+| T-065 | Bubble menu on a text selection: its content and how it relates to the toolbar decided at the start | F-807 | todo |
+| T-066 | Fullscreen mode and dark theme: a dark set of the `--stilo-*` custom properties; the gap cursor line of `content.css` (`.ProseMirror-gapcursor:after`, a fixed `black` today) takes a color that follows the theme | F-809, F-810 | todo |
+
 ## Notes for later milestones
 
 - Find and format: apply a mark (bold, italic, highlight, color, ...) to every match of the
@@ -106,9 +127,8 @@ published package, so the new README needs a release. No code changes.
 - After 0.1.0: a chaining API that runs several commands in one transaction (one `input`
   event).
 - npm trusted publishing (OIDC) with provenance instead of publishing by hand.
-- Performance (ADR 0003): toolbar `isEnabled` checks that are O(n) at the top level (e.g.
-  `insertBlock` runs `canReplaceWith` on the document content); per-keystroke cost of the toolbar
-  refresh and of the link bubble. Measure with `npm run bench` before and after.
+- Performance (ADR 0003): per-keystroke cost of the link bubble. Measure with `npm run bench`
+  before and after.
 - Toolbar icons: our own SVG set, drawn for the toolbar (possibly starting from
   single icons of public sets, keeping their license notices), replacing `lucide`; bold and
   strike first. Changing or dropping the `lucide` dependency needs an ADR.
@@ -116,8 +136,6 @@ published package, so the new README needs a release. No code changes.
   pure-CSS candidate is a scroll-driven animation on a named scroll timeline of the content,
   shared with the toolbar through `timeline-scope`; it needs a common ancestor and a unique
   name per editor. To evaluate.
-- F-809 (themes): the gap cursor line in `content.css` (`.ProseMirror-gapcursor:after`) has a
-  fixed `black` color, invisible on a dark theme; use `currentColor` or a `--stilo-*` property.
 - Default UI: a Floating UI tooltip with an arrow and a light animation in place of the native
   `title` (ADR 0002).
 - Default UI: `setEditable` emits no event, so the toolbar does not reflect read-only mode until

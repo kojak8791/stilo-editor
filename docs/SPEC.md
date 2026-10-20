@@ -6,8 +6,9 @@ Status: **draft v0.1** (2026-10-10). Changes to decisions marked as such require
 Every feature has a stable ID (`F-xxx`) referenced by tasks. Priority / milestone:
 
 - **M1 — MVP**: usable rich-text editor, HTML in/out, default toolbar, demo page, benchmark harness.
-- **M2 — v1.0**: tables, images, fonts/colors, paste cleanup, i18n, productivity tools.
-- **M3 — Later**: advanced features, collaboration, framework wrappers.
+- **M2 — v1.0**: tables, images, fonts/colors, paste cleanup, i18n, productivity tools, framework
+  wrappers.
+- **M3 — Later**: advanced features, collaboration.
 
 Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd on macOS.
 
@@ -161,7 +162,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 |---|---|---|
 | F-901 | Word and character count (computed on demand / debounced) | M2 |
 | F-902 | Find & replace (match case, whole word) | M2 |
-| F-903 | HTML source view (edit and apply) | M2 |
+| F-903 | HTML source view (edit and apply): not in the library, an app builds it on `getHTML()` and `setHTML()` | — |
 | F-904 | Special characters picker | M2 |
 | F-905 | Emoji picker | M2 |
 | F-906 | Video / iframe embeds (allowlisted providers) | M3 |
@@ -173,9 +174,10 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | ID | Feature | M |
 |---|---|---|
 | F-1001 | Real-time collaboration with Yjs (`y-prosemirror`), remote cursors | M3 |
-| F-1002 | React wrapper | M3 |
-| F-1003 | Vue wrapper | M3 |
+| F-1002 | React wrapper | M2 |
+| F-1003 | Vue wrapper | M2 |
 | F-1004 | Optional CSS-class output mode for style-based marks | M3 |
+| F-1005 | Svelte wrapper | M2 |
 
 ---
 
@@ -285,5 +287,5 @@ best-effort in M2, tested in M3. E2E tests run on Chromium, Firefox and WebKit.
 |---|---|---|
 | **M0 — Foundations** | Docs, scaffolding, config, core contracts (`Editor`, extension API, HTML pipeline skeleton, test helpers), first reference extension (`Bold`) | Done |
 | **M1 — MVP** | F-001…F-012, F-101…F-103, F-201…F-206, F-212, F-301…F-305, F-309, F-401…F-405, F-701, F-702, F-706, F-801…F-803, NFR-1 harness, demo page | Done |
-| **M2 — v1.0** | Remaining M2 features; `0.x` previews on npm from `0.1.0`, `1.0.0` at the end of M2 | In progress |
-| **M3 — Later** | Collaboration, wrappers, advanced UI, embeds | Planned |
+| **M2 — v1.0** | Remaining M2 features, framework wrappers (React, Vue, Svelte); `0.x` previews on npm from `0.1.0`, `1.0.0` at the end of M2 | In progress |
+| **M3 — Later** | Collaboration, advanced UI, embeds | Planned |

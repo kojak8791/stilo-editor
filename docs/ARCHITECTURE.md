@@ -65,7 +65,8 @@ Build output in `dist/` (never committed): `index.js`, `ui.js`, `*.d.ts`, `conte
 `style.css`.
 `package.json` has `"type": "module"`, `"sideEffects": ["**/*.css"]`.
 
-Framework wrappers (M3) will be separate packages; the repo may then become an npm workspace (ADR).
+Framework wrappers (React, Vue, Svelte; M2): their packaging (separate packages in an npm
+workspace or subpath exports) is decided by an ADR.
 
 ### 2.1 npm scripts
 
