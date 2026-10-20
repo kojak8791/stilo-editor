@@ -68,6 +68,11 @@ const areas: Area[] = [
     packages: new Set(['vue']),
     relativePrefixes: ['vue/', 'index', 'ui/index'],
   },
+  {
+    prefix: 'svelte/',
+    packages: new Set(['svelte', 'svelte/action', 'svelte/elements']),
+    relativePrefixes: ['svelte/', 'index', 'ui/index'],
+  },
 ];
 
 /** Check a single specifier against the rules for a given file area. */
@@ -150,7 +155,7 @@ function checkFile(relativePath: string, content: string): string[] {
   return violations;
 }
 
-/** Walk a directory recursively, returning relative paths with forward slashes. */
+/** Walk a directory recursively, returning the relative paths of the sources (`.ts`, `.svelte`). */
 async function walk(dir: string, base: string): Promise<string[]> {
   const entries = await readdir(join(base, dir), { withFileTypes: true });
   const results: string[] = [];
@@ -158,7 +163,7 @@ async function walk(dir: string, base: string): Promise<string[]> {
     const full = join(dir, entry.name).replace(/\\/g, '/');
     if (entry.isDirectory()) {
       results.push(...(await walk(full, base)));
-    } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) {
+    } else if (/\.(ts|svelte)$/.test(entry.name) && !entry.name.endsWith('.test.ts')) {
       results.push(full);
     }
   }
@@ -259,6 +264,20 @@ describe('architecture import rules', () => {
     ],
     ['vue/stilo-editor.ts', "import { useEffect } from 'react';", ["vue/stilo-editor.ts: 'react'"]],
     ['ui/toolbar/toolbar.ts', "import { watch } from 'vue';", ["ui/toolbar/toolbar.ts: 'vue'"]],
+    ['svelte/editor-action.ts', "import type { ActionReturn } from 'svelte/action';", []],
+    ['svelte/editor-action.ts', "import { createToolbar } from '../ui/index';", []],
+    ['svelte/stilo-editor.svelte', "import { stiloEditorWithUI } from './action.js';", []],
+    [
+      'svelte/editor-action.ts',
+      "import { Editor } from '../core/editor';",
+      ["svelte/editor-action.ts: '../core/editor'"],
+    ],
+    ['svelte/editor-action.ts', "import { watch } from 'vue';", ["svelte/editor-action.ts: 'vue'"]],
+    [
+      'ui/toolbar/toolbar.ts',
+      "import { mount } from 'svelte';",
+      ["ui/toolbar/toolbar.ts: 'svelte'"],
+    ],
     ['index.ts', "export { Editor } from './core/editor';", []],
     ['index.ts', "export * from './extensions';", []],
     ['index.ts', "export { createToolbar } from './ui';", ["index.ts: './ui'"]],
@@ -274,7 +293,7 @@ describe('architecture import rules', () => {
     expect(result).toEqual(violations);
   });
 
-  it('real scan finds files in core, extensions, ui, react and vue', async () => {
+  it('real scan finds files in core, extensions, ui, react, vue and svelte', async () => {
     const srcDir = join(__dirname, '..', 'src');
     const files = await walk('', srcDir);
 
@@ -283,12 +302,14 @@ describe('architecture import rules', () => {
     const foundUi = files.some((f) => f.startsWith('ui/'));
     const foundReact = files.some((f) => f.startsWith('react/'));
     const foundVue = files.some((f) => f.startsWith('vue/'));
+    const foundSvelte = files.some((f) => f.endsWith('.svelte'));
 
     expect(foundCore).toBe(true);
     expect(foundExtensions).toBe(true);
     expect(foundUi).toBe(true);
     expect(foundReact).toBe(true);
     expect(foundVue).toBe(true);
+    expect(foundSvelte).toBe(true);
 
     // Run the checker on all files and expect no violations
     const allViolations: string[] = [];

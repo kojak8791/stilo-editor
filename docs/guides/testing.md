@@ -23,6 +23,11 @@ Tests are colocated (`src/extensions/<name>/<name>.test.ts`) and use `tests/help
   `unmount`.
 - `mount(render)` (`tests/helpers/vue.ts`, for the Vue wrapper): mounts an app that renders
   `render()` and waits a tick, so the editor exists; returns `container` and `unmount`.
+- `render(component, props)` (`tests/helpers/svelte.ts`, for the Svelte wrapper): mounts a
+  Svelte 5 component and flushes its effects, so the editor exists; returns `container` and
+  `unmount`. A test file named `*.svelte.test.ts` can use runes: change `$state` passed as props,
+  then call `flushSync()`. Pass the props object itself, not a spread copy, or they stop
+  following.
 
 jsdom has no layout and loads no CSS: positions, visibility and styles are checked in the demo
 or in E2E tests.

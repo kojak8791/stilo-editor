@@ -120,22 +120,65 @@ types and the server renderer.
   know that `defineComponent` is pure and would keep the component, and with it the default UI,
   in an application that uses only the composable.
 
+### Svelte
+
+A Svelte component exists only as a `.svelte` file compiled by the Svelte compiler: it cannot be
+written in plain TypeScript like the React and Vue ones. On 2026-10-20, Svelte 5 had 82% of the
+weekly downloads of `svelte`, Svelte 4 14%, Svelte 3 4%. The Svelte wrapper (T-062) has two
+entries, so that an application on Svelte 4 never meets a file it cannot compile:
+
+- **`stilo-editor/svelte/action`**, for Svelte 4 and 5: two actions in TypeScript, the shape
+  Svelte offers to bind a DOM library to an element. They import nothing from Svelte at run
+  time, only the `ActionReturn` type, which both versions have. `stiloEditor` is the primitive
+  (`<div use:stiloEditor={options}>`; the editor options without `element`, and `onready` with
+  the editor). `stiloEditorWithUI` is the ready level: it creates the toolbar, editor and status
+  bar containers inside its element, takes the props of the component below as options, and
+  defaults `extensions` to `[defaultExtensions()]`. Svelte calls an action's `update` when its
+  options change: `editable` and the callbacks follow, the rest is read once. Actions never run
+  on the server. Svelte 5 also has attachments (`{@attach}`, 5.29); `fromAction` turns an action
+  into one, so the wrapper does not ship both.
+- **`stilo-editor/svelte`**, for Svelte 5: the `StiloEditor` component, written with runes, and
+  the two actions. Svelte libraries ship their components as source, compiled by the
+  application's build, because compiled output depends on the exact Svelte version; the export
+  has the `svelte` condition, which Svelte's Vite plugin recognizes (also for server-side
+  rendering in SvelteKit). The component is a thin shell over `stiloEditorWithUI`, whose logic
+  stays in TypeScript: its script only splits the props between the action and its element.
+  Events are callback props in lowercase, as in Svelte 5 (`oninput`, `onselectionchange`,
+  `ontransaction`, `onfocus`, `onblur`, `onready`); `editor` is bindable (`bind:editor`); the
+  attributes that are not props, `class` among them, go to its element.
+
+The build emits `dist/svelte/action.js` and `dist/svelte/index.js`, whose import of
+`./stilo-editor.svelte` stays as written, and copies the component and its hand-written types
+(`stilo-editor.svelte.d.ts`) next to them. `svelte` is `^4 || ^5`. The devDependencies are
+`svelte` and `@sveltejs/vite-plugin-svelte`, which compiles the component in the tests, in the
+demo and in `npm run size`. `svelte-check`, the type checker of `.svelte` files, is not used: it
+needs TypeScript 5 or 6, and the project is on TypeScript 7. The component's script is plain
+JavaScript and its types are written in `stilo-editor.svelte.d.ts`; tsc checks the actions,
+where the logic is. Biome reads `.svelte` files with `html.experimentalFullSupportEnabled`,
+without which it would see the variables used only in the markup as unused.
+
 ## Consequences
 
 - `package.json` gets an `exports` entry, a build entry and an optional peer dependency for each
   wrapper; one release publishes the core and every wrapper. A breaking change in a wrapper is
   a breaking change of the package.
 - D-04 stands: one package, no workspace.
-- `npm run size` measures, for React and for Vue, an app with the primitive and one with the
+- `npm run size` measures, for React, Vue and Svelte, an app with the primitive and one with the
   component, the framework itself excluded, and fails if the primitive alone pulls in the
-  default UI (`lucide`, `@floating-ui/dom`).
+  default UI (`lucide`, `@floating-ui/dom`). The Svelte app with the component compiles
+  `dist/svelte/stilo-editor.svelte`, as an application does.
 - Applications on React 18 are not covered by the unit tests, which run on React 19: the
   release check of the package (T-063) also builds an app on React 18. Likewise Vue 3.3 and
-  3.4: the tests run on 3.5, and T-063 also builds an app on Vue 3.3.
+  3.4: the tests run on 3.5, and T-063 also builds an app on Vue 3.3. Likewise Svelte 4: the
+  tests run on Svelte 5, and T-063 also builds an app on Svelte 4 with the actions.
 - Rejected: separate packages in an npm workspace (a monorepo against D-04, one more release
   and version to keep in step per wrapper); a controlled `value` / `onChange(html)` (cost at
   every change, the cursor lost when the value differs); React 19 only (most React downloads
   are already on 19, but React 18 still has about a fifth of them, and the wrapper needs
   nothing that only 19 has).
-- Svelte (T-062) follows this shape; how it is written (a compiled Svelte component or a
-  Svelte action) is decided in its task.
+- Svelte 4 gets the actions, not the component: a component in the syntax Svelte 4 compiles
+  would give the Svelte 5 majority the legacy mode, and a second component would double the
+  work.
+- Rejected for Svelte: the actions alone (no component for most Svelte users); the component
+  compiled to JavaScript by our build (tied to one Svelte version); attachments instead of
+  actions (Svelte 5.29 and later only).

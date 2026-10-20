@@ -17,6 +17,8 @@ npm install stilo-editor
 | `stilo-editor/ui` | The default UI: toolbar, popovers, UI strings |
 | `stilo-editor/react` | The React component and hook (§7) |
 | `stilo-editor/vue` | The Vue component and composable (§8) |
+| `stilo-editor/svelte` | The Svelte 5 component and the Svelte actions (§9) |
+| `stilo-editor/svelte/action` | The Svelte actions alone, for Svelte 4 and 5 (§9) |
 | `stilo-editor/style.css` | `content.css` + `ui.css` |
 | `stilo-editor/content.css` | Styles of the editable content only, for a custom UI |
 | `stilo-editor/ui.css` | Styles of the default UI only |
@@ -601,3 +603,134 @@ The options are read once. `editable` follows its changes when it is a ref or a 
 `useStiloEditor({ extensions, editable: () => !props.readOnly })`. The editor does not trigger
 renders when its content changes: to show button states, keep them in a ref updated from an
 `editor.on('transaction', …)` handler.
+
+## 9. Svelte (`stilo-editor/svelte`)
+
+For Svelte 4 and 5: `svelte` is an optional peer dependency of `stilo-editor`, so the
+application's own Svelte is used. The wrapper has two entries:
+
+| Import | Svelte | Content |
+|---|---|---|
+| `stilo-editor/svelte` | 5 | The `StiloEditor` component and the two actions |
+| `stilo-editor/svelte/action` | 4 and 5 | The actions `stiloEditorWithUI` and `stiloEditor` |
+
+On Svelte 4, import from `stilo-editor/svelte/action` only: `stilo-editor/svelte` contains a
+component written with runes, which the Svelte 4 compiler cannot compile.
+
+### 9.1 `StiloEditor`
+
+The editor with the default toolbar, for Svelte 5:
+
+```svelte
+<script lang="ts">
+  import 'stilo-editor/style.css';
+  import { StiloEditor } from 'stilo-editor/svelte';
+
+  let { initialHTML, onsave }: { initialHTML: string; onsave: (html: string) => void } =
+    $props();
+</script>
+
+<StiloEditor content={initialHTML} oninput={({ editor }) => onsave(editor.getHTML())} />
+```
+
+The component is shipped as a `.svelte` file that your build compiles, like other Svelte
+libraries: SvelteKit and the Vite templates of Svelte do it with no setup.
+
+As in React (§7.1), the props are read once, when the editor is created; `editable` and the
+callbacks follow their changes. `content` is the initial content, not a binding: the HTML is
+read when you need it (on save, or debounced after `oninput`). Load another document with
+`editor.setHTML(html, { resetHistory: true })`; to create the editor again with other props,
+wrap the component in `{#key}`.
+
+| Prop | Default | Meaning |
+|---|---|---|
+| `extensions` | `[defaultExtensions()]` | Extensions to load |
+| `content`, `editable`, `autofocus`, `ariaLabel`, `compactParagraphs` | | The editor options (§2.1) |
+| `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options (`items`, `sticky`; §6.1) |
+| `statusBar` | `false` | Shows the status bar (§6.3) under the editor |
+| `messages` | `en` | Strings of the toolbar and the status bar (§6.4) |
+| `editor` | | The `Editor`, for `bind:editor`; `null` until it is created |
+| `onready` | | Called with the `Editor` once it is created |
+| `oninput`, `onselectionchange`, `ontransaction`, `onfocus`, `onblur` | | Called at the events `input`, `selectionchange`, `transaction`, `focus`, `blur` (§2.4), with the same payload |
+
+The component renders a `<div>` that holds the toolbar, a `<div>` holding the editor and, with
+`statusBar`, a `<div>` holding the status bar. `class`, `style` and the other attributes go on
+the outer `<div>`: style the editor box through its class and the content through
+`.stilo-content`, as in §7.1.
+
+The editor needs the browser: with server-side rendering (SvelteKit) the component renders its
+empty `<div>` on the server and creates the editor, with its toolbar, in the browser. Bind
+`editor` to use it from your markup, and use `onready` for the events the component does not
+forward:
+
+```svelte
+<script lang="ts">
+  import type { Editor } from 'stilo-editor';
+  import { StiloEditor } from 'stilo-editor/svelte';
+
+  let editor = $state<Editor | null>(null);
+</script>
+
+<button type="button" disabled={!editor} onclick={() => editor?.commands.undo()}>Undo</button>
+<StiloEditor
+  bind:editor
+  onready={(created) => created.on('imageRejected', ({ reason }) => showError(reason))}
+/>
+```
+
+The editor is destroyed when the component unmounts.
+
+### 9.2 `stiloEditorWithUI`
+
+The same editor as an action, for Svelte 4 (and 5): `use:stiloEditorWithUI={options}` creates the
+toolbar, the editor and the status bar inside its element, which must be empty. The options are
+the props of `StiloEditor` (§9.1) except `editor` and the attributes: get the editor from
+`onready`.
+
+```svelte
+<script>
+  import 'stilo-editor/style.css';
+  import { stiloEditorWithUI } from 'stilo-editor/svelte/action';
+
+  export let initialHTML;
+  export let readOnly = false;
+</script>
+
+<div
+  class="my-editor"
+  use:stiloEditorWithUI={{
+    content: initialHTML,
+    editable: !readOnly,
+    statusBar: true,
+    oninput: ({ editor }) => save(editor.getHTML()),
+  }}
+></div>
+```
+
+Svelte passes the new options to the action when the values they read change: `editable` and
+the callbacks follow, the rest is read once. The editor is destroyed with the element.
+
+### 9.3 `stiloEditor`
+
+The editor alone, for a UI of your own: `use:stiloEditor={options}` takes the editor options
+(§2.1) without `element`, and `onready`, and creates the editor inside its element.
+
+```svelte
+<script lang="ts">
+  import 'stilo-editor/content.css';
+  import { defaultExtensions, type Editor } from 'stilo-editor';
+  import { stiloEditor } from 'stilo-editor/svelte';
+
+  let editor = $state<Editor | null>(null);
+</script>
+
+<button type="button" onclick={() => editor?.commands.toggleBold()}>Bold</button>
+<div
+  use:stiloEditor={{ extensions: [defaultExtensions()], onready: (created) => (editor = created) }}
+></div>
+```
+
+The options are read once; `editable` follows its changes. On Svelte 5, `fromAction` from
+`svelte/attachments` turns either action into an attachment (`{@attach}`). The editor does not
+update your state when its content changes: to show button states, keep them in `$state`
+updated from an `editor.on('transaction', …)` handler.

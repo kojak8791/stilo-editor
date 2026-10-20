@@ -38,9 +38,12 @@
       "trailingCommas": "all"
     }
   },
+  "html": {
+    "experimentalFullSupportEnabled": true
+  },
   "overrides": [
     {
-      "includes": ["*.config.ts", "playwright.bench.config.ts"],
+      "includes": ["*.config.ts", "playwright.bench.config.ts", "**/*.svelte.d.ts"],
       "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
     }
   ],

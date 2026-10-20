@@ -3,6 +3,7 @@
 // does not import need: a sign that tree-shaking broke.
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { build } from 'vite';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url)).replaceAll('\\', '/');
@@ -70,6 +71,20 @@ import { StiloEditor } from 'stilo-editor/vue';
 createApp({ render: () => h(StiloEditor) }).mount(document.body);`,
     absent: [],
   },
+  {
+    name: 'Svelte: stiloEditor + defaultExtensions',
+    code: `import { defaultExtensions } from 'stilo-editor';
+import { stiloEditor } from 'stilo-editor/svelte/action';
+stiloEditor(document.body, { extensions: [defaultExtensions()] });`,
+    absent: ['lucide', '@floating-ui/dom'],
+  },
+  {
+    name: 'Svelte: StiloEditor',
+    code: `import { mount } from 'svelte';
+import { StiloEditor } from 'stilo-editor/svelte';
+mount(StiloEditor, { target: document.body });`,
+    absent: [],
+  },
 ];
 
 /**
@@ -86,6 +101,8 @@ async function bundle(code) {
         { find: /^stilo-editor\/ui$/, replacement: `${dist}ui.js` },
         { find: /^stilo-editor\/react$/, replacement: `${dist}react.js` },
         { find: /^stilo-editor\/vue$/, replacement: `${dist}vue.js` },
+        { find: /^stilo-editor\/svelte$/, replacement: `${dist}svelte/index.js` },
+        { find: /^stilo-editor\/svelte\/action$/, replacement: `${dist}svelte/action.js` },
         { find: /^stilo-editor$/, replacement: `${dist}index.js` },
       ],
     },
@@ -95,12 +112,17 @@ async function bundle(code) {
         resolveId: (id) => (id === entry ? id : null),
         load: (id) => (id === entry ? code : null),
       },
+      // Compiles the Svelte component of dist/, as the application's build does.
+      svelte({ configFile: false }),
     ],
-    // The framework is the application's: the React and Vue apps measure what Stilo adds.
+    // The framework is the application's: the framework apps measure what Stilo adds.
     build: {
       write: false,
       minify: true,
-      rollupOptions: { input: entry, external: [/^react(-dom)?($|\/)/, /^vue($|\/)/] },
+      rollupOptions: {
+        input: entry,
+        external: [/^react(-dom)?($|\/)/, /^vue($|\/)/, /^svelte($|\/)/],
+      },
     },
   });
   const chunks = (Array.isArray(output) ? output : [output])

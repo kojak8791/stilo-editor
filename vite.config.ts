@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig, type Plugin } from 'vite';
 
 /** CSS files of `src/styles/` emitted as is; `style.css` is their concatenation. */
@@ -20,6 +21,23 @@ function stiloStyles(): Plugin {
   };
 }
 
+/** Files of `src/svelte/` emitted as is: the application compiles the component (ADR 0006). */
+const SVELTE_SOURCES = ['stilo-editor.svelte', 'stilo-editor.svelte.d.ts'];
+
+/** Emits the Svelte component and its types next to `svelte/index.js`. */
+function stiloSvelteSources(): Plugin {
+  return {
+    name: 'stilo-svelte-sources',
+    apply: 'build',
+    generateBundle() {
+      for (const name of SVELTE_SOURCES) {
+        const source = readFileSync(`src/svelte/${name}`, 'utf8');
+        this.emitFile({ type: 'asset', fileName: `svelte/${name}`, source });
+      }
+    },
+  };
+}
+
 export default defineConfig({
   server: { open: '/demo/' },
   build: {
@@ -29,6 +47,8 @@ export default defineConfig({
         ui: 'src/ui/index.ts',
         react: 'src/react/index.ts',
         vue: 'src/vue/index.ts',
+        'svelte/index': 'src/svelte/index.ts',
+        'svelte/action': 'src/svelte/action.ts',
       },
       formats: ['es'],
     },
@@ -40,9 +60,11 @@ export default defineConfig({
         /^@floating-ui\//,
         /^react($|\/)/,
         /^vue($|\/)/,
+        /^svelte($|\/)/,
+        /\.svelte$/,
       ],
     },
     copyPublicDir: false,
   },
-  plugins: [stiloStyles()],
+  plugins: [stiloStyles(), stiloSvelteSources(), svelte({ configFile: false })],
 });
