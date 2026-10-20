@@ -6,6 +6,13 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-20
+
+### Changed
+
+- The package keywords name React, Vue, Svelte and Next.js, so that npm search finds the
+  wrappers. No change in the code.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added
@@ -102,7 +109,8 @@ First preview release.
 - Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
   characters and emoji picker.
 
-[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/kojak8791/stilo-editor/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/kojak8791/stilo-editor/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/kojak8791/stilo-editor/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kojak8791/stilo-editor/compare/v0.1.0...v0.2.0
