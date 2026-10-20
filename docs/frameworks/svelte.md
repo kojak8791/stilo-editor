@@ -32,8 +32,9 @@ Import the styles once, for example in the component that shows the editor:
 | `stilo-editor/style.css` | With the default toolbar (`StiloEditor`, `stiloEditorWithUI`) |
 | `stilo-editor/content.css` | With a UI of your own (`stiloEditor`, §11) |
 
-The component has no size and no border of its own: give them through its `class`, and style
-the content through `.stilo-content`. Svelte scopes the styles of a component to the elements of
+The component has no border of its own and its editable area only a small padding and
+height: give the border through its `class`, and size the content through `.stilo-content`, whose
+rules replace the defaults. Svelte scopes the styles of a component to the elements of
 its own markup, and the editor's elements are not in it: write these rules in a global
 stylesheet, or with `:global(...)` in a `<style>` block:
 

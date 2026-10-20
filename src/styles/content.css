@@ -152,6 +152,15 @@ li.ProseMirror-selectednode:after {
 
 /* Stilo content defaults */
 
+/*
+ * The editable area gets some room around the text and a visible height when empty.
+ * `:where()` has no specificity, so any rule of the page replaces these values.
+ */
+:where(.stilo-content.ProseMirror) {
+  min-height: 6em;
+  padding: 12px 16px;
+}
+
 /* Lists: list items hold paragraphs, which must not add their own margins. */
 .stilo-content ul,
 .stilo-content ol {

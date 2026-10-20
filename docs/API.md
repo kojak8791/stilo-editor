@@ -410,3 +410,13 @@ the editor:
 The full list is in [UI.md §7](UI.md#7-styles-srcstylesuicss). The content is styled by
 `content.css` under the class `stilo-content`: rules such as `.stilo-content h2`, loaded after
 it, change it.
+
+The editable area has a small default padding (`12px 16px`) and height (`min-height: 6em`) and
+no border. Any rule of yours replaces them, whatever its specificity or order:
+
+```css
+.my-editor .stilo-content {
+  min-height: 300px;
+  padding: 16px;
+}
+```

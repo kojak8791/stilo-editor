@@ -23,8 +23,9 @@ Import the styles once, for example in the component that shows the editor:
 | `stilo-editor/style.css` | With the default toolbar (`StiloEditor`) |
 | `stilo-editor/content.css` | With a UI of your own (`useStiloEditor`, §11) |
 
-The component has no size and no border of its own: give them through `className`, and style
-the content through `.stilo-content`:
+The component has no border of its own and its editable area only a small padding and
+height: give the border through `className`, and size the content through `.stilo-content`, whose
+rules replace the defaults:
 
 ```css
 .note-editor {

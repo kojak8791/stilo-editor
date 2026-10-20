@@ -19,6 +19,13 @@ All notable changes to `stilo-editor`. The format follows
 - A guide for each framework, React, Vue and Svelte (`docs/frameworks/`): every task with code in
   the idiom of the framework, from install to a UI of your own.
 
+### Changed
+
+- The editable area has a small default padding (`12px 16px`) and height (`min-height: 6em`),
+  so an editor without styles of your own no longer has its text against the toolbar. Any rule
+  of yours replaces them; if you put the padding on the container instead, set
+  `.stilo-content { padding: 0 }`.
+
 ### Fixed
 
 - A read-only editor (`editable: false`) can no longer be changed through the toolbar or the

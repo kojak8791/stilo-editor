@@ -545,6 +545,10 @@ For every extension, tests verify: `getHTML()` after `setHTML(getHTML())` is ide
 class `stilo-content`. The editable element has that class; content shown elsewhere (a page that
 displays the saved HTML) gets the same look inside an element with that class.
 
+- **The editable area** (`:where(.stilo-content.ProseMirror)`, no specificity, so any rule of
+  the page replaces it): `padding: 12px 16px` and `min-height: 6em`, so that an editor without
+  styles of its own is usable. No border, which belongs to the container of the page, and the
+  focus outline of the browser.
 - **Editor only** (`.ProseMirror`): the node view controls (§6.4: task checkbox, image handles,
   shown while the image is selected and the editor editable), the column resize handle and
   selected cells, the placeholder, the search matches.
