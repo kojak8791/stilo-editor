@@ -104,7 +104,7 @@ import { StiloEditor } from 'stilo-editor/vue';
 </template>
 ```
 
-Vue 3.3 and later, server-side rendering included; `useStiloEditor` for your own UI:
+Vue 3.4 and later, server-side rendering included; `useStiloEditor` for your own UI:
 [Vue guide](docs/frameworks/vue.md).
 
 ### Svelte

@@ -166,16 +166,16 @@ What an app built with Vite downloads, measured on 2026-10-20 with `npm run size
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.0 kB | 85.4 kB |
-| Core and `defaultExtensions` | 344.3 kB | 108.3 kB |
-| Core, `defaultExtensions` and the default UI | 428.0 kB | 133.0 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.3 kB | 85.5 kB |
+| Core and `defaultExtensions` | 344.5 kB | 108.4 kB |
+| Core, `defaultExtensions` and the default UI | 428.8 kB | 133.1 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
-| React app with `useStiloEditor` and `defaultExtensions`, React excluded | 344.7 kB | 108.5 kB |
-| React app with `StiloEditor`, React excluded | 430.4 kB | 133.8 kB |
-| Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 344.7 kB | 108.5 kB |
-| Vue app with `StiloEditor`, Vue excluded | 430.6 kB | 133.9 kB |
-| Svelte app with the `stiloEditor` action and `defaultExtensions`, Svelte excluded | 344.4 kB | 108.4 kB |
-| Svelte app with `StiloEditor`, Svelte excluded | 430.7 kB | 133.9 kB |
+| React app with `useStiloEditor` and `defaultExtensions`, React excluded | 345.0 kB | 108.6 kB |
+| React app with `StiloEditor`, React excluded | 431.1 kB | 134.0 kB |
+| Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 345.0 kB | 108.6 kB |
+| Vue app with `StiloEditor`, Vue excluded | 431.4 kB | 134.0 kB |
+| Svelte app with the `stiloEditor` action and `defaultExtensions`, Svelte excluded | 344.7 kB | 108.5 kB |
+| Svelte app with `StiloEditor`, Svelte excluded | 431.5 kB | 134.0 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
 styles add 2.9 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a

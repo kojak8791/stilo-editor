@@ -43,7 +43,7 @@ typescript  vite  vitest  jsdom  @playwright/test  @biomejs/biome  @types/node
 react  react-dom  @types/react  @types/react-dom  vue  svelte  @sveltejs/vite-plugin-svelte
 ```
 
-`peerDependencies`, all optional: `react` (`^18 || ^19`), `vue` (`^3.3`) and `svelte`
+`peerDependencies`, all optional: `react` (`^18 || ^19`), `vue` (`^3.4`) and `svelte`
 (`^4 || ^5`), for the wrappers
 ([ADR 0006](decisions/0006-framework-wrappers.md)).
 

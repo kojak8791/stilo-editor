@@ -6,13 +6,15 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
 ### Added
 
 - React wrapper, `stilo-editor/react`: the `StiloEditor` component with the default toolbar
   and the `useStiloEditor` hook for a UI of your own. React 18 and 19, server-side rendering,
   marked `'use client'` for React Server Components (Next.js App Router).
 - Vue wrapper, `stilo-editor/vue`: the `StiloEditor` component with the default toolbar and the
-  `useStiloEditor` composable for a UI of your own. Vue 3.3 and later, server-side rendering.
+  `useStiloEditor` composable for a UI of your own. Vue 3.4 and later, server-side rendering.
 - Svelte wrapper, `stilo-editor/svelte`: the `StiloEditor` component for Svelte 5, with
   `bind:editor`, and the actions `stiloEditorWithUI` (default toolbar) and `stiloEditor` (a UI of
   your own) for Svelte 4 and 5, also from `stilo-editor/svelte/action`. Server-side rendering.
@@ -100,7 +102,8 @@ First preview release.
 - Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
   characters and emoji picker.
 
-[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/kojak8791/stilo-editor/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/kojak8791/stilo-editor/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kojak8791/stilo-editor/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kojak8791/stilo-editor/releases/tag/v0.1.0

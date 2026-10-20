@@ -106,10 +106,13 @@ the build.
 ### Vue
 
 The Vue wrapper (T-061) is written in TypeScript with render functions (`defineComponent`, `h`):
-no single-file components, so no Vue plugin in the build. `vue` is `^3.3`, the version that
-brought `toValue` and `MaybeRefOrGetter`; on 2026-10-20, 3.5 had 83% of the weekly downloads of
-`vue`, 3.3 and 3.4 6.5%, older 3.x versions 2%, Vue 2 (end of life) 8%. The devDependency is `vue` alone: it ships its
-types and the server renderer.
+no single-file components, so no Vue plugin in the build. `vue` is `^3.4`. The code runs on 3.3,
+which brought `toValue` and `MaybeRefOrGetter`, but the declaration that TypeScript writes for
+`StiloEditor` names `DefineSetupFnComponent`, a type Vue exports from 3.4 on: on 3.3 the types
+of the package do not compile, or with `skipLibCheck` the component loses its prop types
+(found by the release check, T-063). On 2026-10-20, 3.5 had 83% of the weekly downloads of
+`vue`, 3.3 4.9%, 3.4 1.6%, older 3.x versions 2%, Vue 2 (end of life) 8%. The devDependency is
+`vue` alone: it ships its types and the server renderer.
 
 - `useStiloEditor(options)` returns `{ element, editor }`: `element` is the template ref of the
   element (`<div ref="element">`; a property named `ref` would clash with Vue's `ref`), `editor`
@@ -174,8 +177,8 @@ without which it would see the variables used only in the markup as unused.
   default UI (`lucide`, `@floating-ui/dom`). The Svelte app with the component compiles
   `dist/svelte/stilo-editor.svelte`, as an application does.
 - Applications on React 18 are not covered by the unit tests, which run on React 19: the
-  release check of the package (T-063) also builds an app on React 18. Likewise Vue 3.3 and
-  3.4: the tests run on 3.5, and T-063 also builds an app on Vue 3.3. Likewise Svelte 4: the
+  release check of the package (T-063) also builds an app on React 18. Likewise Vue 3.4: the
+  tests run on 3.5, and T-063 also builds an app on Vue 3.4. Likewise Svelte 4: the
   tests run on Svelte 5, and T-063 also builds an app on Svelte 4 with the actions.
 - Rejected: separate packages in an npm workspace (a monorepo against D-04, one more release
   and version to keep in step per wrapper); a controlled `value` / `onChange(html)` (cost at

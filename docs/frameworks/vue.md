@@ -1,6 +1,6 @@
 # Stilo with Vue
 
-`stilo-editor/vue` gives Vue 3.3 and later the editor with the default toolbar, the
+`stilo-editor/vue` gives Vue 3.4 and later the editor with the default toolbar, the
 `StiloEditor` component, and the editor alone for a UI of your own, the `useStiloEditor`
 composable. This guide shows every task in Vue; the reference tables (commands, extensions,
 toolbar item IDs, events, CSS custom properties) are in [API.md](../API.md) and linked where
