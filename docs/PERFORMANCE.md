@@ -172,11 +172,13 @@ What an app built with Vite downloads, measured on 2026-10-20 with `npm run size
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 | React app with `useStiloEditor` and `defaultExtensions`, React excluded | 344.7 kB | 108.5 kB |
 | React app with `StiloEditor`, React excluded | 430.4 kB | 133.8 kB |
+| Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 344.7 kB | 108.5 kB |
+| Vue app with `StiloEditor`, Vue excluded | 430.6 kB | 133.9 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
 styles add 2.9 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
 consumer would, and fails if the minimal app contains packages that only unused extensions need,
-or the React app with the hook alone contains the default UI.
+or the React or Vue app with `useStiloEditor` alone contains the default UI.
 `prosemirror-tables` is the exception: it registers its cell selection when it is loaded, so
 bundlers keep part of it (12.8 kB minified, 4.1 kB gzip) even in an app without the `Table`
 extension.

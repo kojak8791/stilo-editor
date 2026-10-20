@@ -49,6 +49,10 @@
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react.js"
     },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue.js"
+    },
     "./content.css": "./dist/content.css",
     "./ui.css": "./dist/ui.css",
     "./style.css": "./dist/style.css"
@@ -91,10 +95,14 @@
     "prosemirror-view": "^1.42.6"
   },
   "peerDependencies": {
-    "react": "^18 || ^19"
+    "react": "^18 || ^19",
+    "vue": "^3.3"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
@@ -109,6 +117,7 @@
     "react-dom": "^19.3.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "vue": "^3.5.44"
   }
 }

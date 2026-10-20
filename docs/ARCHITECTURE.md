@@ -39,10 +39,10 @@ prosemirror-search  dompurify  lucide  @floating-ui/dom
 
 ```
 typescript  vite  vitest  jsdom  @playwright/test  @biomejs/biome  @types/node
-react  react-dom  @types/react  @types/react-dom
+react  react-dom  @types/react  @types/react-dom  vue
 ```
 
-`peerDependencies`, all optional: `react` (`^18 || ^19`), for the React wrapper
+`peerDependencies`, all optional: `react` (`^18 || ^19`) and `vue` (`^3.3`), for the wrappers
 ([ADR 0006](decisions/0006-framework-wrappers.md)).
 
 Exact versions are pinned by `package-lock.json`. **Adding, removing or upgrading a dependency
@@ -62,15 +62,16 @@ Single npm package `stilo-editor` with subpath exports:
 | `stilo-editor` | Core: `Editor`, `defineExtension`, all extensions, `defaultExtensions`, types |
 | `stilo-editor/ui` | Default UI: toolbar, menus, dialogs, i18n |
 | `stilo-editor/react` | React wrapper: `StiloEditor`, `useStiloEditor` |
+| `stilo-editor/vue` | Vue wrapper: `StiloEditor`, `useStiloEditor` |
 | `stilo-editor/content.css` | Content styles only (includes ProseMirror and prosemirror-tables base CSS) — for headless use |
 | `stilo-editor/ui.css` | Default UI styles only |
 | `stilo-editor/style.css` | `content.css` + `ui.css` |
 
-Build output in `dist/` (never committed): `index.js`, `ui.js`, `react.js`, `*.d.ts`,
+Build output in `dist/` (never committed): `index.js`, `ui.js`, `react.js`, `vue.js`, `*.d.ts`,
 `content.css`, `ui.css`, `style.css`.
 `package.json` has `"type": "module"`, `"sideEffects": ["**/*.css"]`.
 
-Framework wrappers (React; Vue and Svelte next) are subpath exports of the same package, with
+Framework wrappers (React and Vue; Svelte next) are subpath exports of the same package, with
 the framework as an optional peer dependency kept out of the build
 ([ADR 0006](decisions/0006-framework-wrappers.md)). Each one offers a primitive that creates the
 editor in an element of the component and a ready component with the default UI; the content is
@@ -104,6 +105,7 @@ is a first-class scenario. Allowed import directions:
 
 ```
 src/react/       ──► src/index.ts, src/ui/index.ts, react
+src/vue/         ──► src/index.ts, src/ui/index.ts, vue
 src/ui/          ──► src/index.ts (public core API only)
 src/extensions/  ──► src/core/
 src/core/        ──► (ProseMirror, DOMPurify only)
@@ -112,7 +114,7 @@ src/core/        ──► (ProseMirror, DOMPurify only)
 - `src/core/` and `src/extensions/` **never** import from `src/ui/`, `lucide` or `@floating-ui/dom`.
 - `src/ui/` imports the core **only** through `src/index.ts`, never from `src/core/**` or
   `src/extensions/**` directly.
-- A framework wrapper (`src/react/`) imports its framework and the public APIs only
+- A framework wrapper (`src/react/`, `src/vue/`) imports its framework and the public APIs only
   (`src/index.ts`, `src/ui/index.ts`); nothing else imports a framework.
 - Everything a UI needs (command execution, `.can()`, `isActive()`, events, node attributes of the
   selection) must be available in the public core API. If our UI needs something that is not
@@ -179,19 +181,21 @@ stilo-editor/
 │   │   ├── toolbar/  menus/  dialogs/  components/
 │   │   └── i18n/                 en.ts, it.ts, types.ts
 │   ├── react/                    React wrapper: index.ts, stilo-editor.ts, use-stilo-editor.ts
+│   ├── vue/                      Vue wrapper: the same files
 │   └── styles/
 │       ├── index.css             Entry: imports the files below
 │       ├── content.css           Editable content defaults (scoped to .stilo-content)
 │       └── ui.css                UI styles
 ├── demo/
 │   ├── index.html, main.ts       Demo page (`/demo/`)
-│   └── react/                    The same with the React component (`/demo/react/`)
+│   ├── react/                    The same with the React component (`/demo/react/`)
+│   └── vue/                      The same with the Vue component (`/demo/vue/`)
 ├── site/                         Public site on GitHub Pages (`npm run site`)
 │   ├── *.html, *.ts              Home, Performance, Paste, Headless; `common.ts` shared setup
 │   ├── partials/                 head, header, footer, inserted by `vite.site.config.ts`
 │   └── fonts/                    Self-hosted woff2 subsets with their OFL licenses
 ├── tests/
-│   ├── helpers/                  createTestEditor, selection markers, fixtures loader, React render
+│   ├── helpers/                  createTestEditor, selection markers, fixtures loader, React render, Vue mount
 │   ├── fixtures/                 html/ (word, gdocs, ...), xss/
 │   └── e2e/                      *.spec.ts (Playwright)
 ├── scripts/
@@ -745,4 +749,4 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 | D-14 | Top-level blocks use `content-visibility: auto`; performance budgets calibrated on the first measurement ([ADR 0003](decisions/0003-performance-baseline.md)) | 2026-10-12 |
 | D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |
 | D-16 | Table column widths written twice: `data-colwidth` on the cells, read back, and a `<colgroup>` for display ([ADR 0005](decisions/0005-table-column-widths.md)) | 2026-10-14 |
-| D-17 | Framework wrappers are subpath exports (`stilo-editor/react`) with the framework as an optional peer dependency; a primitive and a ready component; content not controlled ([ADR 0006](decisions/0006-framework-wrappers.md)) | 2026-10-20 |
+| D-17 | Framework wrappers are subpath exports (`stilo-editor/react`, `stilo-editor/vue`) with the framework as an optional peer dependency; a primitive and a ready component; content not controlled ([ADR 0006](decisions/0006-framework-wrappers.md)) | 2026-10-20 |

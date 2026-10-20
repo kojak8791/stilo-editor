@@ -97,20 +97,45 @@ one stays.
 The React sources use `createElement`: no JSX setting in `tsconfig.json` and no JSX plugin in
 the build.
 
+### Vue
+
+The Vue wrapper (T-061) is written in TypeScript with render functions (`defineComponent`, `h`):
+no single-file components, so no Vue plugin in the build. `vue` is `^3.3`, the version that
+brought `toValue` and `MaybeRefOrGetter`; on 2026-10-20, 3.5 had 83% of the weekly downloads of
+`vue`, 3.3 and 3.4 6.5%, older 3.x versions 2%, Vue 2 (end of life) 8%. The devDependency is `vue` alone: it ships its
+types and the server renderer.
+
+- `useStiloEditor(options)` returns `{ element, editor }`: `element` is the template ref of the
+  element (`<div ref="element">`; a property named `ref` would clash with Vue's `ref`), `editor`
+  a `shallowRef` (a deep `ref` would make the editor reactive). The editor is created when the
+  element is mounted and destroyed when it goes, also with `v-if`. `setup` runs once, so
+  `editable` follows its changes when it is a ref or a getter.
+- `StiloEditor` emits events instead of taking handler props: `ready` with the editor, then
+  `input`, `selectionChange`, `transaction`, `focus`, `blur` (`@selection-change` in a
+  template). `class` and the other attributes fall through to its element, so it has no
+  `className` prop; every editor option is a declared prop, so none falls through. Boolean props
+  accept the bare attribute (`<StiloEditor status-bar />`).
+- No `v-model`: the content is not controlled, as above.
+- The component is marked `/* @__PURE__ */`: Vue is external to the build, so bundlers would not
+  know that `defineComponent` is pure and would keep the component, and with it the default UI,
+  in an application that uses only the composable.
+
 ## Consequences
 
 - `package.json` gets an `exports` entry, a build entry and an optional peer dependency for each
   wrapper; one release publishes the core and every wrapper. A breaking change in a wrapper is
   a breaking change of the package.
 - D-04 stands: one package, no workspace.
-- `npm run size` measures a React app with the hook and one with the component, React itself
-  excluded, and fails if the hook alone pulls in the default UI (`lucide`, `@floating-ui/dom`).
+- `npm run size` measures, for React and for Vue, an app with the primitive and one with the
+  component, the framework itself excluded, and fails if the primitive alone pulls in the
+  default UI (`lucide`, `@floating-ui/dom`).
 - Applications on React 18 are not covered by the unit tests, which run on React 19: the
-  release check of the package (T-063) also builds an app on React 18.
+  release check of the package (T-063) also builds an app on React 18. Likewise Vue 3.3 and
+  3.4: the tests run on 3.5, and T-063 also builds an app on Vue 3.3.
 - Rejected: separate packages in an npm workspace (a monorepo against D-04, one more release
   and version to keep in step per wrapper); a controlled `value` / `onChange(html)` (cost at
   every change, the cursor lost when the value differs); React 19 only (most React downloads
   are already on 19, but React 18 still has about a fifth of them, and the wrapper needs
   nothing that only 19 has).
-- Vue (T-061) and Svelte (T-062) follow this shape; how each one is written (Vue render
-  functions, a compiled Svelte component or a Svelte action) is decided in its task.
+- Svelte (T-062) follows this shape; how it is written (a compiled Svelte component or a
+  Svelte action) is decided in its task.

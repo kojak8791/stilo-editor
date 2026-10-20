@@ -50,6 +50,26 @@ import { StiloEditor } from 'stilo-editor/react';
 createRoot(document.body).render(createElement(StiloEditor));`,
     absent: [],
   },
+  {
+    name: 'Vue: useStiloEditor + defaultExtensions',
+    code: `import { createApp, h } from 'vue';
+import { defaultExtensions } from 'stilo-editor';
+import { useStiloEditor } from 'stilo-editor/vue';
+createApp({
+  setup() {
+    const { element } = useStiloEditor({ extensions: [defaultExtensions()] });
+    return () => h('div', { ref: element });
+  },
+}).mount(document.body);`,
+    absent: ['lucide', '@floating-ui/dom'],
+  },
+  {
+    name: 'Vue: StiloEditor',
+    code: `import { createApp, h } from 'vue';
+import { StiloEditor } from 'stilo-editor/vue';
+createApp({ render: () => h(StiloEditor) }).mount(document.body);`,
+    absent: [],
+  },
 ];
 
 /**
@@ -65,6 +85,7 @@ async function bundle(code) {
       alias: [
         { find: /^stilo-editor\/ui$/, replacement: `${dist}ui.js` },
         { find: /^stilo-editor\/react$/, replacement: `${dist}react.js` },
+        { find: /^stilo-editor\/vue$/, replacement: `${dist}vue.js` },
         { find: /^stilo-editor$/, replacement: `${dist}index.js` },
       ],
     },
@@ -75,11 +96,11 @@ async function bundle(code) {
         load: (id) => (id === entry ? code : null),
       },
     ],
-    // React is the application's: the React apps measure what Stilo adds to them.
+    // The framework is the application's: the React and Vue apps measure what Stilo adds.
     build: {
       write: false,
       minify: true,
-      rollupOptions: { input: entry, external: [/^react(-dom)?($|\/)/] },
+      rollupOptions: { input: entry, external: [/^react(-dom)?($|\/)/, /^vue($|\/)/] },
     },
   });
   const chunks = (Array.isArray(output) ? output : [output])

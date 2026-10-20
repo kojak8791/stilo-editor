@@ -24,11 +24,23 @@ export default defineConfig({
   server: { open: '/demo/' },
   build: {
     lib: {
-      entry: { index: 'src/index.ts', ui: 'src/ui/index.ts', react: 'src/react/index.ts' },
+      entry: {
+        index: 'src/index.ts',
+        ui: 'src/ui/index.ts',
+        react: 'src/react/index.ts',
+        vue: 'src/vue/index.ts',
+      },
       formats: ['es'],
     },
     rolldownOptions: {
-      external: [/^prosemirror-/, 'dompurify', 'lucide', /^@floating-ui\//, /^react($|\/)/],
+      external: [
+        /^prosemirror-/,
+        'dompurify',
+        'lucide',
+        /^@floating-ui\//,
+        /^react($|\/)/,
+        /^vue($|\/)/,
+      ],
     },
     copyPublicDir: false,
   },

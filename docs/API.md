@@ -16,6 +16,7 @@ npm install stilo-editor
 | `stilo-editor` | The core: `Editor`, `defaultExtensions`, every extension, helpers, types |
 | `stilo-editor/ui` | The default UI: toolbar, popovers, UI strings |
 | `stilo-editor/react` | The React component and hook (§7) |
+| `stilo-editor/vue` | The Vue component and composable (§8) |
 | `stilo-editor/style.css` | `content.css` + `ui.css` |
 | `stilo-editor/content.css` | Styles of the editable content only, for a custom UI |
 | `stilo-editor/ui.css` | Styles of the default UI only |
@@ -497,3 +498,106 @@ export function PlainEditor() {
 As with the component, the options are read once and only `editable` follows its changes. The
 hook does not re-render the component when the editor changes: to show button states, keep
 them in React state from an `editor.on('transaction', …)` handler registered in an effect.
+
+## 8. Vue (`stilo-editor/vue`)
+
+For Vue 3.3 and later: `vue` is an optional peer dependency of `stilo-editor`, so the
+application's own Vue is used.
+
+### 8.1 `StiloEditor`
+
+The editor with the default toolbar:
+
+```vue
+<script setup lang="ts">
+import 'stilo-editor/style.css';
+import { StiloEditor } from 'stilo-editor/vue';
+
+defineProps<{ initialHTML: string }>();
+const emit = defineEmits<{ save: [html: string] }>();
+</script>
+
+<template>
+  <StiloEditor :content="initialHTML" @input="({ editor }) => emit('save', editor.getHTML())" />
+</template>
+```
+
+As in React (§7.1), the props are read once, when the editor is created; only `editable` follows
+its changes. The component has no `v-model`: `content` is the initial content, and the HTML is
+read when you need it (on save, or debounced after `input`). Load another document with
+`editor.setHTML(html, { resetHistory: true })`; to create the editor again with other props,
+change its `key`.
+
+| Prop | Default | Meaning |
+|---|---|---|
+| `extensions` | `[defaultExtensions()]` | Extensions to load |
+| `content`, `editable`, `autofocus`, `aria-label`, `compact-paragraphs` | | The editor options (§2.1) |
+| `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options (`items`, `sticky`; §6.1) |
+| `status-bar` | `false` | Shows the status bar (§6.3) under the editor |
+| `messages` | `en` | Strings of the toolbar and the status bar (§6.4) |
+
+The boolean props accept the bare attribute: `<StiloEditor status-bar />`.
+
+| Event | Payload |
+|---|---|
+| `ready` | The `Editor`, once it is created |
+| `input`, `selection-change`, `transaction`, `focus`, `blur` | The events `input`, `selectionchange`, `transaction`, `focus`, `blur` (§2.4), with the same payload |
+
+The component renders a `<div>` that holds the toolbar, a `<div>` holding the editor and, with
+`status-bar`, a `<div>` holding the status bar. `class`, `style` and the other attributes go on
+the outer `<div>`: style the editor box through its class and the content through
+`.stilo-content`, as in §7.1.
+
+The editor needs the browser: with server-side rendering (Nuxt) the component renders its empty
+`<div>` elements on the server and creates the editor in the browser. Use `ready` to keep the
+editor and for the events the component does not emit. Keep it in a `shallowRef` or a plain
+variable: a `ref` would make the whole editor deeply reactive.
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import type { Editor } from 'stilo-editor';
+import { StiloEditor } from 'stilo-editor/vue';
+
+const editor = shallowRef<Editor | null>(null);
+
+function onReady(created: Editor) {
+  editor.value = created;
+  created.on('imageRejected', ({ reason }) => showError(reason));
+}
+</script>
+
+<template>
+  <StiloEditor @ready="onReady" />
+</template>
+```
+
+The editor is destroyed when the component unmounts.
+
+### 8.2 `useStiloEditor`
+
+The editor alone, for a UI of your own. `useStiloEditor(options)` takes the editor options
+(§2.1) without `element` and returns `{ element, editor }`: bind `element` as the template ref of
+the element that holds the editor; `editor` is a `shallowRef`, `null` until that element is
+mounted (and on the server). The editor is created when the element appears and destroyed when it
+goes, also with `v-if`.
+
+```vue
+<script setup lang="ts">
+import 'stilo-editor/content.css';
+import { defaultExtensions } from 'stilo-editor';
+import { useStiloEditor } from 'stilo-editor/vue';
+
+const { element, editor } = useStiloEditor({ extensions: [defaultExtensions()] });
+</script>
+
+<template>
+  <button type="button" @click="editor?.commands.toggleBold()">Bold</button>
+  <div ref="element" />
+</template>
+```
+
+The options are read once. `editable` follows its changes when it is a ref or a getter:
+`useStiloEditor({ extensions, editable: () => !props.readOnly })`. The editor does not trigger
+renders when its content changes: to show button states, keep them in a ref updated from an
+`editor.on('transaction', …)` handler.

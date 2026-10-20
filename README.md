@@ -88,6 +88,22 @@ import { StiloEditor } from 'stilo-editor/react';
 React 18 and 19, server-side rendering included; `useStiloEditor` for your own UI:
 [React API](docs/API.md#7-react-stilo-editorreact).
 
+### Vue
+
+```vue
+<script setup>
+import 'stilo-editor/style.css';
+import { StiloEditor } from 'stilo-editor/vue';
+</script>
+
+<template>
+  <StiloEditor content="<p>Hello</p>" @input="({ editor }) => save(editor.getHTML())" />
+</template>
+```
+
+Vue 3.3 and later, server-side rendering included; `useStiloEditor` for your own UI:
+[Vue API](docs/API.md#8-vue-stilo-editorvue).
+
 ## What's included
 
 - **Text:** bold, italic, underline, strikethrough, code, sub/superscript, fonts, sizes,
@@ -116,7 +132,7 @@ from the keyboard alone. Every feature, shortcut and option: [All features](docs
 
 `0.x` preview: it works, but APIs may change in minor versions until `1.0.0`.
 Read the [changelog](CHANGELOG.md) before updating.
-Next: Vue and Svelte wrappers, real-time collaboration ([roadmap](docs/SPEC.md)).
+Next: Svelte wrapper, real-time collaboration ([roadmap](docs/SPEC.md)).
 
 ## Contributing
 

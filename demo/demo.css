@@ -30,7 +30,7 @@ body {
 
 /*
  * The status bar inherits the corners of its container, the last child of the editor box (also
- * in the React demo): pass the editor's ones down.
+ * in the React and Vue demos): pass the editor's ones down.
  */
 .demo__editor > :last-child {
   border-bottom-left-radius: inherit;

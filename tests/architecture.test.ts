@@ -63,6 +63,11 @@ const areas: Area[] = [
     packages: new Set(['react']),
     relativePrefixes: ['react/', 'index', 'ui/index'],
   },
+  {
+    prefix: 'vue/',
+    packages: new Set(['vue']),
+    relativePrefixes: ['vue/', 'index', 'ui/index'],
+  },
 ];
 
 /** Check a single specifier against the rules for a given file area. */
@@ -245,6 +250,15 @@ describe('architecture import rules', () => {
       "import { useEffect } from 'react';",
       ["ui/toolbar/toolbar.ts: 'react'"],
     ],
+    ['vue/stilo-editor.ts', "import { watch } from 'vue';", []],
+    ['vue/stilo-editor.ts', "import { createToolbar } from '../ui/index';", []],
+    [
+      'vue/stilo-editor.ts',
+      "import { Editor } from '../core/editor';",
+      ["vue/stilo-editor.ts: '../core/editor'"],
+    ],
+    ['vue/stilo-editor.ts', "import { useEffect } from 'react';", ["vue/stilo-editor.ts: 'react'"]],
+    ['ui/toolbar/toolbar.ts', "import { watch } from 'vue';", ["ui/toolbar/toolbar.ts: 'vue'"]],
     ['index.ts', "export { Editor } from './core/editor';", []],
     ['index.ts', "export * from './extensions';", []],
     ['index.ts', "export { createToolbar } from './ui';", ["index.ts: './ui'"]],
@@ -260,7 +274,7 @@ describe('architecture import rules', () => {
     expect(result).toEqual(violations);
   });
 
-  it('real scan finds files in core, extensions, ui and react', async () => {
+  it('real scan finds files in core, extensions, ui, react and vue', async () => {
     const srcDir = join(__dirname, '..', 'src');
     const files = await walk('', srcDir);
 
@@ -268,11 +282,13 @@ describe('architecture import rules', () => {
     const foundExtensions = files.some((f) => f.startsWith('extensions/'));
     const foundUi = files.some((f) => f.startsWith('ui/'));
     const foundReact = files.some((f) => f.startsWith('react/'));
+    const foundVue = files.some((f) => f.startsWith('vue/'));
 
     expect(foundCore).toBe(true);
     expect(foundExtensions).toBe(true);
     expect(foundUi).toBe(true);
     expect(foundReact).toBe(true);
+    expect(foundVue).toBe(true);
 
     // Run the checker on all files and expect no violations
     const allViolations: string[] = [];
