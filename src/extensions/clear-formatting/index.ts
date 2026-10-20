@@ -21,9 +21,14 @@ function clearMarks(types: readonly MarkType[]): Command {
       return true;
     }
 
-    const hasMark = ranges.some((range) =>
-      types.some((type) => state.doc.rangeHasMark(range.$from.pos, range.$to.pos, type)),
-    );
+    // One walk for all the types, stopping at the first mark.
+    let hasMark = false;
+    for (const range of ranges) {
+      state.doc.nodesBetween(range.$from.pos, range.$to.pos, (node) => {
+        hasMark ||= node.marks.some((mark) => types.includes(mark.type));
+        return !hasMark;
+      });
+    }
     if (!hasMark) return false;
 
     if (dispatch) {

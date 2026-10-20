@@ -92,6 +92,19 @@ Chromium (Playwright):
 The default replacement (`resetHistory: false`), *replace all*, text case of the whole document,
 deleting it and undo did not show the effect.
 
+After every change the toolbar asks each button whether its command applies to the selection.
+These checks stop at the first text the command would change, instead of preparing the whole
+change: one check per font, color and size used to cost as much as applying it. Toolbar refresh
+after *select all* (frame phase of `/bench/`, Chromium, Playwright):
+
+| Document | Before | After |
+|---|---|---|
+| 10,000 paragraphs | 2.1 s | 0.18 s |
+| 50,000 paragraphs | 11–12 s | 0.95 s |
+
+At 50,000 paragraphs the toolbar's own checks take about 0.1 s of it; the rest is the browser.
+With the cursor in the text, all the checks take 9 ms at 50,000 paragraphs.
+
 Paragraphs and headings without alignment or line spacing share one attribute object: one
 object per paragraph cost 19 MB of memory at 50,000 paragraphs.
 
@@ -100,6 +113,9 @@ object per paragraph cost 19 MB of memory at 50,000 paragraphs.
 - **The size of the page.** Stilo does not virtualize the document: every block is in the DOM,
   and the browser's own work on a very large editable area grows with it. That is what remains
   at 50,000 paragraphs.
+- **Select all.** At 50,000 paragraphs, selecting everything takes 6–9 s before it shows:
+  about 3 s in the browser's own selection update (`Selection.extend`, called by ProseMirror)
+  and most of the rest in the browser's rendering. At 10,000 paragraphs it takes about 1.2 s.
 - **Top-level changes.** When a top-level block changes, ProseMirror compares the list of all
   top-level blocks, so moving a block in a huge flat document costs more than typing in it.
 - **Find and replace.** Typing with a search open costs little more than without it: only the

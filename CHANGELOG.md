@@ -6,6 +6,11 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- After *select all* in a large document the toolbar refreshes about 10 times faster, so the
+  selection shows sooner (50,000 paragraphs: 11 s → 1 s).
+
 ## [0.2.1] - 2026-10-16
 
 Documentation release: no code changes.

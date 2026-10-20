@@ -132,6 +132,8 @@ export function updateMarkAttrs(
       const from = range.$from.pos;
       const to = range.$to.pos;
       state.doc.nodesBetween(from, to, (node, pos, parent) => {
+        // Without dispatch, the first change answers: the toolbar asks on every selection.
+        if (!dispatch && changes.length > 0) return false;
         if (!node.isText || !parent?.type.allowsMarkType(type)) return;
         const start = Math.max(pos, from);
         const mark = next(node.marks, start);

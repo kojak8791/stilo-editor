@@ -385,7 +385,9 @@ blocks the selection touches), `toggleTaskChecked` (the siblings holding the ite
 commands (`prosemirror-tables` makes a step per cell, so they run on a document holding only the
 table, which then replaces it). Plugins follow the same rule: the `Table` extension wraps
 `tableEditing`, whose search for changed tables cost quadratic time on a change to every block,
-so that it looks only at the changed range (`findDiffStart` / `findDiffEnd`). Measurements:
+so that it looks only at the changed range (`findDiffStart` / `findDiffEnd`). Without
+`dispatch` (`can()`), a command answers at the first node it would change and prepares nothing:
+the default toolbar asks every command about the selection after every change. Measurements:
 [PERFORMANCE.md](PERFORMANCE.md#bulk-changes).
 
 ---

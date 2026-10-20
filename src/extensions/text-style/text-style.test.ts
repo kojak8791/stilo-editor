@@ -158,6 +158,12 @@ describe('TextStyle: commands', () => {
     expect(editor.commands.setColor.can('red')).toBe(false);
   });
 
+  it('can be set when only text after code accepts it, without changing the document', () => {
+    const editor = createTestEditor({ html: '<p><code>[ab</code></p><p>c]</p>' });
+    expect(editor.commands.setColor.can('red')).toBe(true);
+    expect(getHTMLWithSelection(editor)).toBe('<p><code>[ab</code></p><p>c]</p>');
+  });
+
   it('is removed by clearFormatting', () => {
     const editor = createTestEditor({ html: '<p><span style="color: red">[ab]</span></p>' });
     expect(editor.commands.clearFormatting()).toBe(true);

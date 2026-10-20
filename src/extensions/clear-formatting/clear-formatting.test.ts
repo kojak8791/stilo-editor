@@ -45,6 +45,11 @@ describe('clearFormatting: multi-step', () => {
     expect(editor2.commands.clearFormatting.can()).toBe(false);
   });
 
+  it('clearFormatting.can() finds a formatting mark after text without one', () => {
+    const editor = createTestEditor({ html: '<p><a href="x">[a</a></p><p>b<s>c]</s></p>' });
+    expect(editor.commands.clearFormatting.can()).toBe(true);
+  });
+
   it('applies stored marks after clearFormatting', () => {
     const editor = createTestEditor({ html: '<p><strong>a|b</strong></p>' });
     editor.commands.clearFormatting();
