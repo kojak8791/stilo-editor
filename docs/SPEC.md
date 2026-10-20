@@ -155,6 +155,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-810 | Fullscreen mode | M2 |
 | F-811 | Slash command menu (`/`) | M3 |
 | F-812 | Block drag handle (BlockNote-like): drag a block or list item anywhere; a list item dropped outside its list gets wrapped in a new list of the same type, at the drop level | M3 |
+| F-813 | Compact toolbar (optional) for narrow editors: phones, side panels about 400 px wide. The items are packed on two levels: a first row of groups (and the most used actions) opens a group's items in its place, with a way back. Built from the same item configuration as the full toolbar; it can follow the width of its container. To design together with the bubble menu (F-807), which may take the marks on desktop but conflicts with the native selection menu on phones | M3 |
 
 ## 10. Productivity tools (`F-9xx`)
 
