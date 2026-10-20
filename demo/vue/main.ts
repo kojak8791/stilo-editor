@@ -1,3 +1,4 @@
+import './flags';
 import '../../src/styles/content.css';
 import '../demo.css';
 import '../../src/styles/ui.css';
