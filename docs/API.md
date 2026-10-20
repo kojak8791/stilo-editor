@@ -281,6 +281,11 @@ ones work.
 | `messages` | `en` | UI strings |
 | `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
 
+The toolbar sticks with CSS only: an element with `overflow: hidden`, even only
+`overflow-x`, between the editor and the scrolling area of the page stops it, and the toolbar
+scrolls away with the content. Use `overflow-x: clip` there: it cuts the content the same way
+and keeps the toolbar in view.
+
 A button whose extension is not loaded is not shown. In a read-only editor every item is
 disabled except `find`, and the find bar hides its replace row. Default item IDs: `undo`, `redo`,
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,

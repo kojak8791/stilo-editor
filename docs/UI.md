@@ -356,8 +356,8 @@ Layout choices:
   toolbar's container, not on the toolbar, because a sticky element only moves inside its
   parent. Pure CSS, no scroll listener: the toolbar follows the page when the editor flows in
   it, and stays in place when only the editor content scrolls. An ancestor with `overflow`
-  between the container and the scrolling area stops it from sticking (a CSS limit). The demo
-  shows the fixed-height layout at `/demo/?fixed`.
+  between the container and the scrolling area stops it from sticking (a CSS limit), while
+  `overflow: clip` does not. The demo shows the fixed-height layout at `/demo/?fixed`.
 - While stuck (`@container scroll-state(stuck: top)`) the toolbar gets a shadow; browsers
   without scroll-state queries show none. The toolbar sets ProseMirror's `scrollMargin` from the
   height of its container, so the selection scrolled into view stays below it.

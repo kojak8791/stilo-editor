@@ -190,6 +190,12 @@ The item IDs, and the functions that create the color buttons, the font list and
 control with your own lists, are in [API.md §6.1](../API.md#61-toolbar). A button whose
 extension is not loaded is not shown.
 
+The toolbar sticks with CSS only: an element with `overflow: hidden`, even only
+`overflow-x`, between the editor and the scrolling area of the page stops it, and the toolbar
+scrolls away with the content. Use `overflow-x: clip` there: it cuts the content the same way
+and keeps the toolbar in view. The `globals.css` of a new Next.js app sets `overflow-x: hidden` on
+`html, body`: change it to `clip`.
+
 ## 9. Custom buttons
 
 A custom button is an object in `items`; its icon comes from the
