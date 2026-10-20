@@ -63,6 +63,9 @@ export default defineConfig({
         /^svelte($|\/)/,
         /\.svelte$/,
       ],
+      // React Server Components: the React wrapper is client code (ADR 0006). Rolldown warns that
+      // it may not preserve a directive written in the source.
+      output: { banner: (chunk) => (chunk.name === 'react' ? "'use client';" : '') },
     },
     copyPublicDir: false,
   },

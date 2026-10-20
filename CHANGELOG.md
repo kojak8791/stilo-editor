@@ -9,7 +9,8 @@ All notable changes to `stilo-editor`. The format follows
 ### Added
 
 - React wrapper, `stilo-editor/react`: the `StiloEditor` component with the default toolbar
-  and the `useStiloEditor` hook for a UI of your own. React 18 and 19, server-side rendering.
+  and the `useStiloEditor` hook for a UI of your own. React 18 and 19, server-side rendering,
+  marked `'use client'` for React Server Components (Next.js App Router).
 - Vue wrapper, `stilo-editor/vue`: the `StiloEditor` component with the default toolbar and the
   `useStiloEditor` composable for a UI of your own. Vue 3.3 and later, server-side rendering.
 - Svelte wrapper, `stilo-editor/svelte`: the `StiloEditor` component for Svelte 5, with

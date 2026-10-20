@@ -160,9 +160,13 @@ Loading a document with `setHTML` still works. To only show a document, without 
 
 The editor needs the browser. With server-side rendering (Next.js, Remix, React Router) the
 component renders its empty `<div>` elements on the server and creates the editor, with its
-toolbar, in the browser; `onReady` is called in the browser only. The component uses React
-hooks: in the Next.js App Router, use it from a Client Component (a file that starts with
-`'use client'`).
+toolbar, in the browser; `onReady` is called in the browser only.
+
+In the Next.js App Router, `stilo-editor/react` is marked `'use client'`: a Server Component can
+render `<StiloEditor content={html} />` with props that are plain data (`content`, `editable`,
+`toolbar={false}`, `statusBar`, `className`). Event handlers, `onReady`, `extensions` and
+custom toolbar items are functions, which cannot leave a Server Component: render the editor
+from a Client Component of yours (a file that starts with `'use client'`) and pass them there.
 
 ## 8. Toolbar items
 

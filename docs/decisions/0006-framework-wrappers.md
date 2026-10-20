@@ -92,6 +92,12 @@ Importing a wrapper in Node touches no DOM (ARCHITECTURE §4.2). React's Strict 
 unmounts and mounts again in development: the first editor is destroyed and only the second
 one stays.
 
+React Server Components (the Next.js App Router): `dist/react.js` starts with `'use client'`,
+added by the build (Rolldown warns that it may not preserve a directive in the source), so the
+component and the hook are client references that a Server Component can import. Props that are
+functions (event handlers, `onReady`, extensions, custom toolbar items) cannot cross from a
+Server Component: they are passed from a Client Component.
+
 ### React without JSX
 
 The React sources use `createElement`: no JSX setting in `tsconfig.json` and no JSX plugin in
