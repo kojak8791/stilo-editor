@@ -15,6 +15,7 @@ npm install stilo-editor
 |---|---|
 | `stilo-editor` | The core: `Editor`, `defaultExtensions`, every extension, helpers, types |
 | `stilo-editor/ui` | The default UI: toolbar, popovers, UI strings |
+| `stilo-editor/react` | The React component and hook (§7) |
 | `stilo-editor/style.css` | `content.css` + `ui.css` |
 | `stilo-editor/content.css` | Styles of the editable content only, for a custom UI |
 | `stilo-editor/ui.css` | Styles of the default UI only |
@@ -395,3 +396,104 @@ the editor:
 The full list is in [UI.md §7](UI.md#7-styles-srcstylesuicss). The content is styled by
 `content.css` under the class `stilo-content`: rules such as `.stilo-content h2`, loaded after
 it, change it.
+
+## 7. React (`stilo-editor/react`)
+
+For React 18 and 19: `react` is an optional peer dependency of `stilo-editor`, so the
+application's own React is used.
+
+### 7.1 `StiloEditor`
+
+The editor with the default toolbar:
+
+```tsx
+import 'stilo-editor/style.css';
+import { StiloEditor } from 'stilo-editor/react';
+
+export function NoteEditor({ initialHTML, onSave }) {
+  return (
+    <StiloEditor
+      content={initialHTML}
+      onInput={({ editor }) => onSave(editor.getHTML())}
+    />
+  );
+}
+```
+
+The props are read once, when the editor is created; only `editable` and the event handlers
+follow their changes. `content` is the initial content, like `defaultValue` of an input: the
+component does not take the HTML back at every change, because serializing a large document at
+every keystroke would slow typing down. Read it when you need it (on save, or debounced after
+`onInput`), and load another document through the editor:
+`editor.setHTML(html, { resetHistory: true })`. To create the editor again with other props,
+change its React `key`.
+
+| Prop | Default | Meaning |
+|---|---|---|
+| `extensions` | `[defaultExtensions()]` | Extensions to load |
+| `content`, `editable`, `autofocus`, `ariaLabel`, `compactParagraphs` | | The editor options (§2.1) |
+| `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options (`items`, `sticky`; §6.1) |
+| `statusBar` | `false` | Shows the status bar (§6.3) under the editor |
+| `messages` | `en` | Strings of the toolbar and the status bar (§6.4) |
+| `className` | none | Class of the component's element |
+| `onReady` | none | Called with the `Editor` once it is created |
+| `onInput`, `onSelectionChange`, `onTransaction`, `onFocus`, `onBlur` | none | The events `input`, `selectionchange`, `transaction`, `focus`, `blur` (§2.4), with the same payload |
+
+The component renders a `<div>` with `className` that holds the toolbar, a `<div>` holding the
+editor and, with `statusBar`, a `<div>` holding the status bar. Style the editor box through
+`className` and the content through `.stilo-content`:
+
+```css
+.note-editor {
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+}
+
+.note-editor .stilo-content {
+  min-height: 300px;
+  padding: 16px;
+}
+```
+
+The editor needs the browser: with server-side rendering (Next.js, Remix) the component renders
+its empty `<div>` elements on the server and creates the editor in the browser. Use `onReady`
+to keep the editor, for example in a ref, and for the events the props do not cover:
+
+```tsx
+<StiloEditor
+  onReady={(editor) => {
+    editorRef.current = editor;
+    editor.on('imageRejected', ({ reason }) => showError(reason));
+  }}
+/>
+```
+
+The editor is destroyed when the component unmounts.
+
+### 7.2 `useStiloEditor`
+
+The editor alone, for a UI of your own. `useStiloEditor(options)` takes the editor options
+(§2.1) without `element` and returns `{ ref, editor }`: pass `ref` to the element that holds the
+editor; `editor` is `null` until that element is mounted (and on the server).
+
+```tsx
+import 'stilo-editor/content.css';
+import { defaultExtensions } from 'stilo-editor';
+import { useStiloEditor } from 'stilo-editor/react';
+
+export function PlainEditor() {
+  const { ref, editor } = useStiloEditor({ extensions: [defaultExtensions()] });
+  return (
+    <>
+      <button type="button" onClick={() => editor?.commands.toggleBold()}>
+        Bold
+      </button>
+      <div ref={ref} />
+    </>
+  );
+}
+```
+
+As with the component, the options are read once and only `editable` follows its changes. The
+hook does not re-render the component when the editor changes: to show button states, keep
+them in React state from an `editor.on('transaction', …)` handler registered in an effect.

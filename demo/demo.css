@@ -28,8 +28,11 @@ body {
   background: #fff;
 }
 
-/* The status bar inherits the corners of its container: pass the editor's ones down. */
-.demo__status {
+/*
+ * The status bar inherits the corners of its container, the last child of the editor box (also
+ * in the React demo): pass the editor's ones down.
+ */
+.demo__editor > :last-child {
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
 }
@@ -62,4 +65,9 @@ body {
 .demo--fixed .demo__content {
   flex: 1;
   overflow: auto;
+}
+
+.demo__option {
+  display: block;
+  margin: 0 0 8px;
 }

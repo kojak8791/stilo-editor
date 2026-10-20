@@ -58,6 +58,11 @@ const areas: Area[] = [
     packages: new Set(['lucide', '@floating-ui/dom']),
     relativePrefixes: ['ui/', 'index'],
   },
+  {
+    prefix: 'react/',
+    packages: new Set(['react']),
+    relativePrefixes: ['react/', 'index', 'ui/index'],
+  },
 ];
 
 /** Check a single specifier against the rules for a given file area. */
@@ -217,6 +222,29 @@ describe('architecture import rules', () => {
       "const m = await import('../../core/editor');",
       ["ui/toolbar/toolbar.ts: '../../core/editor'"],
     ],
+    ['react/stilo-editor.ts', "import { useEffect } from 'react';", []],
+    ['react/stilo-editor.ts', "import { Editor } from '../index';", []],
+    ['react/stilo-editor.ts', "import { createToolbar } from '../ui/index';", []],
+    [
+      'react/stilo-editor.ts',
+      "import { createToolbar } from '../ui/toolbar/toolbar';",
+      ["react/stilo-editor.ts: '../ui/toolbar/toolbar'"],
+    ],
+    [
+      'react/stilo-editor.ts',
+      "import { Editor } from '../core/editor';",
+      ["react/stilo-editor.ts: '../core/editor'"],
+    ],
+    [
+      'react/stilo-editor.ts',
+      "import { EditorView } from 'prosemirror-view';",
+      ["react/stilo-editor.ts: 'prosemirror-view'"],
+    ],
+    [
+      'ui/toolbar/toolbar.ts',
+      "import { useEffect } from 'react';",
+      ["ui/toolbar/toolbar.ts: 'react'"],
+    ],
     ['index.ts', "export { Editor } from './core/editor';", []],
     ['index.ts', "export * from './extensions';", []],
     ['index.ts', "export { createToolbar } from './ui';", ["index.ts: './ui'"]],
@@ -232,17 +260,19 @@ describe('architecture import rules', () => {
     expect(result).toEqual(violations);
   });
 
-  it('real scan finds files in core, extensions, and ui', async () => {
+  it('real scan finds files in core, extensions, ui and react', async () => {
     const srcDir = join(__dirname, '..', 'src');
     const files = await walk('', srcDir);
 
     const foundCore = files.some((f) => f.startsWith('core/'));
     const foundExtensions = files.some((f) => f.startsWith('extensions/'));
     const foundUi = files.some((f) => f.startsWith('ui/'));
+    const foundReact = files.some((f) => f.startsWith('react/'));
 
     expect(foundCore).toBe(true);
     expect(foundExtensions).toBe(true);
     expect(foundUi).toBe(true);
+    expect(foundReact).toBe(true);
 
     // Run the checker on all files and expect no violations
     const allViolations: string[] = [];

@@ -18,6 +18,9 @@ Tests are colocated (`src/extensions/<name>/<name>.test.ts`) and use `tests/help
 - `pressKey(editor, 'Mod-b')`: sends a key combination to the keymaps (`Mod` = `Ctrl`). Write
   the combination exactly as in the keymap (`'Mod-Shift-s'`, lowercase letter): the synthetic
   event has no `keyCode`, the fallback browsers use for `Shift` / Caps Lock variants.
+- `render(node)` (`tests/helpers/react.ts`, for the React wrapper): renders a React element
+  with `createRoot` inside `act`, so its effects have run; returns `container`, `rerender` and
+  `unmount`.
 
 jsdom has no layout and loads no CSS: positions, visibility and styles are checked in the demo
 or in E2E tests.

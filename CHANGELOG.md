@@ -6,6 +6,11 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- React wrapper, `stilo-editor/react`: the `StiloEditor` component with the default toolbar
+  and the `useStiloEditor` hook for a UI of your own. React 18 and 19, server-side rendering.
+
 ### Fixed
 
 - After *select all* in a large document the toolbar refreshes about 10 times faster, so the

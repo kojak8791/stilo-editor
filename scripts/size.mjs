@@ -29,6 +29,27 @@ const editor = new Editor({ element: document.body, extensions: [defaultExtensio
 createToolbar(editor, { container: document.body });`,
     absent: [],
   },
+  {
+    name: 'React: useStiloEditor + defaultExtensions',
+    code: `import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { defaultExtensions } from 'stilo-editor';
+import { useStiloEditor } from 'stilo-editor/react';
+function App() {
+  const { ref } = useStiloEditor({ extensions: [defaultExtensions()] });
+  return createElement('div', { ref });
+}
+createRoot(document.body).render(createElement(App));`,
+    absent: ['lucide', '@floating-ui/dom'],
+  },
+  {
+    name: 'React: StiloEditor',
+    code: `import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { StiloEditor } from 'stilo-editor/react';
+createRoot(document.body).render(createElement(StiloEditor));`,
+    absent: [],
+  },
 ];
 
 /**
@@ -43,6 +64,7 @@ async function bundle(code) {
     resolve: {
       alias: [
         { find: /^stilo-editor\/ui$/, replacement: `${dist}ui.js` },
+        { find: /^stilo-editor\/react$/, replacement: `${dist}react.js` },
         { find: /^stilo-editor$/, replacement: `${dist}index.js` },
       ],
     },
@@ -53,14 +75,21 @@ async function bundle(code) {
         load: (id) => (id === entry ? code : null),
       },
     ],
-    build: { write: false, minify: true, rollupOptions: { input: entry } },
+    // React is the application's: the React apps measure what Stilo adds to them.
+    build: {
+      write: false,
+      minify: true,
+      rollupOptions: { input: entry, external: [/^react(-dom)?($|\/)/] },
+    },
   });
   const chunks = (Array.isArray(output) ? output : [output])
     .flatMap((result) => result.output)
     .filter((file) => file.type === 'chunk');
   const startup = new Set(chunks.filter((chunk) => chunk.isEntry));
   for (const chunk of startup) {
-    for (const name of chunk.imports) startup.add(chunks.find((c) => c.fileName === name));
+    for (const imported of chunks.filter((c) => chunk.imports.includes(c.fileName))) {
+      startup.add(imported);
+    }
   }
   const onDemand = chunks.filter((chunk) => !startup.has(chunk));
   const modules = [...startup].flatMap((chunk) =>
