@@ -20,6 +20,9 @@
 
 <p align="center">
   <a href="https://kojak8791.github.io/stilo-editor/"><strong>Live demo</strong></a> ·
+  <a href="docs/frameworks/react.md"><strong>React</strong></a> ·
+  <a href="docs/frameworks/vue.md"><strong>Vue</strong></a> ·
+  <a href="docs/frameworks/svelte.md"><strong>Svelte</strong></a> ·
   <a href="docs/API.md"><strong>API</strong></a> ·
   <a href="docs/FEATURES.md"><strong>All features</strong></a>
 </p>
@@ -86,7 +89,7 @@ import { StiloEditor } from 'stilo-editor/react';
 ```
 
 React 18 and 19, server-side rendering included; `useStiloEditor` for your own UI:
-[React API](docs/API.md#7-react-stilo-editorreact).
+[React guide](docs/frameworks/react.md).
 
 ### Vue
 
@@ -102,7 +105,7 @@ import { StiloEditor } from 'stilo-editor/vue';
 ```
 
 Vue 3.3 and later, server-side rendering included; `useStiloEditor` for your own UI:
-[Vue API](docs/API.md#8-vue-stilo-editorvue).
+[Vue guide](docs/frameworks/vue.md).
 
 ### Svelte
 
@@ -116,7 +119,7 @@ Vue 3.3 and later, server-side rendering included; `useStiloEditor` for your own
 ```
 
 A component for Svelte 5, actions for Svelte 4 and 5, server-side rendering included:
-[Svelte API](docs/API.md#9-svelte-stilo-editorsvelte).
+[Svelte guide](docs/frameworks/svelte.md).
 
 ## What's included
 

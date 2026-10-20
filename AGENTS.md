@@ -39,7 +39,9 @@ The toolchain enforces these. Respect them while you type, not after `npm run ch
   `vitest.config.ts`, `playwright*.config.ts`, `biome.json`, `.gitignore`) change only when the
   change is about them.
 - **Public APIs, types and HTML output** follow `docs/ARCHITECTURE.md` and `docs/UI.md`; changing
-  them means updating those documents, and the user reference `docs/API.md`, in the same change.
+  them means updating those documents, the user reference `docs/API.md` and every framework
+  guide in `docs/frameworks/` that covers them, in the same change. The guides repeat the same
+  explanations on purpose, one per framework: update each of them, not just one.
 - **Lint warnings fail the build** (`npm run check` uses `--error-on-warnings`).
 - **Never disable lint rules** (`biome-ignore`) or use `@ts-ignore` / `@ts-expect-error` / `any`.
 - **Never weaken a test to make it pass.** A test changes only when the behavior it describes

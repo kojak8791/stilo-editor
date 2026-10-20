@@ -15,6 +15,8 @@ All notable changes to `stilo-editor`. The format follows
 - Svelte wrapper, `stilo-editor/svelte`: the `StiloEditor` component for Svelte 5, with
   `bind:editor`, and the actions `stiloEditorWithUI` (default toolbar) and `stiloEditor` (a UI of
   your own) for Svelte 4 and 5, also from `stilo-editor/svelte/action`. Server-side rendering.
+- A guide for each framework, React, Vue and Svelte (`docs/frameworks/`): every task with code in
+  the idiom of the framework, from install to a UI of your own.
 
 ### Fixed
 

@@ -2,8 +2,9 @@
 
 How Stilo is built and why: the technical contract of the library. A change that affects it
 updates this document in the same change; a decision that matters beyond one change also gets an
-ADR (`docs/decisions/`). How to use the library is in [API.md](API.md), the default UI in
-[UI.md](UI.md), the working rules in [AGENTS.md](../AGENTS.md).
+ADR (`docs/decisions/`). How to use the library is in [API.md](API.md) and, with React, Vue and
+Svelte, in the guides of [`frameworks/`](frameworks/); the default UI in [UI.md](UI.md), the
+working rules in [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -154,6 +155,7 @@ stilo-editor/
 │   ├── VISION.md  SPEC.md  ARCHITECTURE.md  UI.md  PERFORMANCE.md  BACKLOG.md
 │   ├── API.md                    API reference for applications (users of the package)
 │   ├── FEATURES.md               Every feature, shortcut and Markdown shortcut, for users
+│   ├── frameworks/               User guides of the wrappers: react.md, vue.md, svelte.md
 │   ├── decisions/                ADRs: NNNN-short-title.md
 │   └── guides/                   How-to guides: ProseMirror positions, testing
 ├── src/
