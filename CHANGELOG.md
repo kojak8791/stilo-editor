@@ -8,6 +8,8 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [0.4.0] - 2026-10-21
 
+Dark theme, full screen, and an option to turn the Markdown shortcuts off. No breaking changes: the new toolbar item is on as soon as you update, the dark colors only when your page sets `color-scheme`.
+
 ### Added
 
 - Editor option `markdownShortcuts` (default `true`): `false` turns the Markdown shortcuts off,
