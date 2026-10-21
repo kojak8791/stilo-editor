@@ -87,6 +87,10 @@ the Markdown shortcuts off.
 | Feature | Keyboard | Markdown | Notes |
 |---|---|---|---|
 | Paste an image | <kbd>Ctrl</kbd>+<kbd>V</kbd> | | A copied image or screenshot is embedded in the HTML (PNG, JPEG, GIF, WebP, up to 5 MB by default); an image copied from a web page keeps its address |
+| Drop an image | | | An image file dragged from the computer is embedded where it is dropped (the same formats and size as paste) |
+| Insert an image | | | The image button: an address or a file from the computer (embedded in the HTML), with a preview, alternative text, title, width and a caption; the image goes in its own block with the caption under it |
+| Edit an image | | | Select it and click the image button, or point at it and click the pencil in its corner: address or file, alternative text, title, width |
+| Caption | <kbd>Enter</kbd> leaves it | | Written under the image like any text, with any formatting (bold, links, colors, …) and line breaks (<kbd>Shift</kbd>+<kbd>Enter</kbd>), no lists or headings: pasted blocks become lines. <kbd>Enter</kbd> goes to a new paragraph under the image, <kbd>Backspace</kbd> at its start selects the image. An empty caption shows only while its image is selected |
 | Resize an image | | | Select it and drag one of its side handles; the proportions stay |
 
 ## Insert

@@ -1,13 +1,13 @@
 import type { Node } from 'prosemirror-model';
-import type { EditorView, NodeView } from 'prosemirror-view';
+import type { EditorView, NodeView, ViewMutationRecord } from 'prosemirror-view';
 
 /** Smallest width, in pixels, that the handles give an image. */
 const MIN_WIDTH = 32;
 
-/** The attributes of an `image` node, in HTML output order. */
+/** The attributes of an `image` or `figure` node, in HTML output order. */
 const ATTRIBUTES = ['src', 'alt', 'title', 'width', 'height'] as const;
 
-/** The HTML attributes of an `image` node, in output order, without the empty ones. */
+/** The HTML attributes of the `<img>` of a node, in output order, without the empty ones. */
 export function imageAttributes(node: Node): Record<string, string> {
   const attributes: Record<string, string> = {};
   for (const name of ATTRIBUTES) {
@@ -18,12 +18,18 @@ export function imageAttributes(node: Node): Record<string, string> {
 }
 
 /**
- * The `image` node in the editor: the `<img>` inside a `span.stilo-image` with two side handles,
- * shown while the image is selected (docs/SPEC.md F-607). Dragging a handle changes the width
- * and keeps the aspect ratio; releasing it sets `width` and `height` in one transaction.
+ * The `image` and `figure` nodes in the editor (docs/SPEC.md F-607): the `<img>` inside a
+ * `span.stilo-image` with two side handles, shown while the node is selected. Dragging a handle
+ * changes the width and keeps the aspect ratio; releasing it sets `width` and `height` in one
+ * transaction.
+ *
+ * A `figure` is a `figure.stilo-figure` holding that span and, in a `div`, its caption (the
+ * content: ProseMirror would remove the span from a content element). It has the class
+ * `stilo-figure--empty` while the caption is empty.
  */
 export class ImageView implements NodeView {
   readonly dom: HTMLElement;
+  readonly contentDOM?: HTMLElement;
   private readonly img: HTMLImageElement;
   private node: Node;
 
@@ -33,10 +39,18 @@ export class ImageView implements NodeView {
     private readonly getPos: () => number | undefined,
   ) {
     this.node = node;
-    this.dom = document.createElement('span');
-    this.dom.className = 'stilo-image';
+    const box = document.createElement('span');
+    box.className = 'stilo-image';
     this.img = document.createElement('img');
-    this.dom.append(this.createHandle('left'), this.img, this.createHandle('right'));
+    box.append(this.createHandle('left'), this.img, this.createHandle('right'));
+    if (node.isInline) {
+      this.dom = box;
+    } else {
+      this.dom = document.createElement('figure');
+      this.dom.className = 'stilo-figure';
+      this.contentDOM = document.createElement('div');
+      this.dom.append(box, this.contentDOM);
+    }
     this.render();
   }
 
@@ -52,9 +66,13 @@ export class ImageView implements NodeView {
     return event.target instanceof HTMLElement && event.target.dataset.handle !== undefined;
   }
 
-  /** The view changes only the inline width of the `<img>` while a handle is dragged. */
-  ignoreMutation(): boolean {
-    return true;
+  /**
+   * The view changes only the inline width of the `<img>` while a handle is dragged; changes in
+   * the caption are ProseMirror's.
+   */
+  ignoreMutation(mutation: ViewMutationRecord): boolean {
+    if (!this.contentDOM) return true;
+    return mutation.type !== 'selection' && !this.contentDOM.contains(mutation.target);
   }
 
   private render(): void {
@@ -63,6 +81,9 @@ export class ImageView implements NodeView {
       const value = attributes[name];
       if (value === undefined) this.img.removeAttribute(name);
       else this.img.setAttribute(name, value);
+    }
+    if (this.contentDOM) {
+      this.dom.classList.toggle('stilo-figure--empty', this.node.firstChild?.content.size === 0);
     }
   }
 
@@ -106,7 +127,7 @@ export class ImageView implements NodeView {
     document.addEventListener('pointercancel', onUp);
   }
 
-  /** Sets `width` and `height`; attribute steps keep the image selected. */
+  /** Sets `width` and `height`; attribute steps keep the node selected. */
   private setSize(width: number, height: number | null): void {
     const pos = this.getPos();
     const { attrs } = this.node;

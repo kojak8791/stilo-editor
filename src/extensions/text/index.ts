@@ -15,7 +15,7 @@ declare module '../../core/types' {
 export const Text = defineExtension({
   name: 'text',
   nodes: () => ({
-    text: { group: 'inline' },
+    text: { group: 'inline caption' },
   }),
   commands: () => ({
     insertText: (text: string) => (state, dispatch) => {

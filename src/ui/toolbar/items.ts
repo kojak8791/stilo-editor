@@ -4,6 +4,7 @@ import {
   Code,
   FaceSlightlySmilingPlus,
   Highlighter,
+  Image as ImageIcon,
   Italic,
   Link,
   List,
@@ -30,6 +31,7 @@ import {
   Undo2,
 } from 'lucide';
 import type { Editor, FontSizeUnit, HeadingLevel, LetterCase, TextAlignment } from '../../index';
+import { canEditImage, isImageSelected } from '../components/image-dialog';
 import { canEditLink } from '../components/link-popover';
 import type { MessageKey } from '../i18n/types';
 import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
@@ -71,6 +73,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'codeBlock',
     'horizontalRule',
     'table',
+    'image',
     'characters',
   ],
   ['find'],
@@ -210,6 +213,18 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
     isActive: (e) => e.isActive('link'),
     isEnabled: (e) => 'setLink' in e.commands && canEditLink(e),
     isAvailable: (e) => 'setLink' in e.commands,
+  },
+  image: {
+    id: 'image',
+    kind: 'button',
+    icon: ImageIcon,
+    labelKey: 'toolbar.image',
+    run: (_e, toolbar) => {
+      toolbar.openImageDialog();
+    },
+    isActive: (e) => isImageSelected(e),
+    isEnabled: (e) => 'insertFigure' in e.commands && canEditImage(e),
+    isAvailable: (e) => 'insertFigure' in e.commands,
   },
   clearFormatting: {
     id: 'clearFormatting',

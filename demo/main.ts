@@ -5,6 +5,25 @@ import '../src/styles/ui.css';
 import { defaultExtensions, Editor } from '../src';
 import { createStatusBar, createToolbar } from '../src/ui';
 
+/** A picture drawn on a canvas, as a PNG data URL: the demo needs no network. */
+function demoPicture(): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = 480;
+  canvas.height = 240;
+  const context = canvas.getContext('2d')!;
+  const gradient = context.createLinearGradient(0, 0, 480, 240);
+  gradient.addColorStop(0, '#0969da');
+  gradient.addColorStop(1, '#8250df');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 480, 240);
+  context.fillStyle = '#ffffff';
+  context.font = 'bold 64px sans-serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText('Stilo', 240, 120);
+  return canvas.toDataURL('image/png');
+}
+
 const content = [
   '<h2>Welcome to Stilo</h2>',
   '<p>This is <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s> and ',
@@ -17,6 +36,9 @@ const content = [
   '<li data-checked="false">Open task</li></ul>',
   '<table><tr><th>Shortcut</th><th>Action</th></tr><tr><td>Tab</td><td>Next cell</td></tr>',
   '<tr><td>Shift+Tab</td><td>Previous cell</td></tr></table>',
+  `<figure><img src="${demoPicture()}" alt="The word Stilo on a blue gradient" width="360" height="180">`,
+  '<figcaption>A figure with a <strong>styled</strong> caption and ',
+  '<a href="https://en.wikipedia.org/wiki/Figure_(publishing)">a link</a></figcaption></figure>',
   '<hr>',
   '<p>Line one<br>line two</p>',
 ].join('');

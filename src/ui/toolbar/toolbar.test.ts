@@ -92,6 +92,7 @@ describe('toolbar', () => {
       'codeBlock',
       'horizontalRule',
       'table',
+      'image',
       'characters',
       'find',
       'fullscreen',
@@ -452,7 +453,8 @@ describe('toolbar', () => {
     expect(from('undo', 'ArrowLeft')).toBe('fullscreen');
     expect(from('fullscreen', 'ArrowLeft')).toBe('find');
     expect(from('find', 'ArrowLeft')).toBe('characters');
-    expect(from('characters', 'ArrowLeft')).toBe('table');
+    expect(from('characters', 'ArrowLeft')).toBe('image');
+    expect(from('image', 'ArrowLeft')).toBe('table');
     expect(from('table', 'ArrowLeft')).toBe('horizontalRule');
     expect(from('horizontalRule', 'ArrowLeft')).toBe('codeBlock');
     expect(from('fullscreen', 'ArrowRight')).toBe('undo');

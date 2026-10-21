@@ -8,6 +8,8 @@ import { createFindBar } from '../components/find-bar';
 import { createFontSizeInput, type FontSizeInput } from '../components/font-size-input';
 import { createIcon } from '../components/icon';
 import { createIconMenu, type IconMenu } from '../components/icon-menu';
+import { createImageButton } from '../components/image-button';
+import { createImageDialog } from '../components/image-dialog';
 import { createLinkBubble } from '../components/link-bubble';
 import { createLinkPopover } from '../components/link-popover';
 import { formatShortcut, isMacPlatform } from '../components/shortcut';
@@ -259,6 +261,18 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     'selectRow' in editor.commands
       ? createTableHandles(editor, { container: editorHost, messages })
       : null;
+  // The image dialog and the edit button of images float over the editor too.
+  const imageDialog =
+    'insertFigure' in editor.commands
+      ? createImageDialog(editor, { container: editorHost, messages })
+      : null;
+  const imageButton = imageDialog
+    ? createImageButton(editor, {
+        container: editorHost,
+        messages,
+        onEdit: () => imageDialog.open(),
+      })
+    : null;
   // The character picker hangs from its button and scrolls with the toolbar.
   const charactersButton = element.querySelector<HTMLElement>('[data-item="characters"]');
   const characterPicker = charactersButton
@@ -274,6 +288,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     toggleCharacterPicker: () => characterPicker?.toggle(),
     toggleFindBar: () => findBar?.toggle(),
     toggleTableMenu: () => tableMenu?.toggle(),
+    openImageDialog: () => imageDialog?.open(),
     toggleFullscreen: () => setFullscreen(fullscreen === null),
     isFullscreen: () => fullscreen !== null,
   };
@@ -564,6 +579,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     linkPopover?.destroy();
     linkBubble?.destroy();
     tableHandles?.destroy();
+    imageDialog?.destroy();
+    imageButton?.destroy();
     characterPicker?.destroy();
     tableMenu?.destroy();
     findBar?.destroy();

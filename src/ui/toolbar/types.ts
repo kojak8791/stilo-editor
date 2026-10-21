@@ -32,6 +32,11 @@ export interface ToolbarContext {
   /** Opens or closes the table menu (no-op without the `table` item). T-045. */
   toggleTableMenu(): void;
   /**
+   * Opens the image dialog: edits the selected image or figure, otherwise inserts a figure
+   * (no-op without the `Image` extension). T-064.
+   */
+  openImageDialog(): void;
+  /**
    * Turns full screen on or off: the nearest element that holds the toolbar's container and the
    * editor gets the class `stilo-fullscreen` and fills the window. T-066.
    */

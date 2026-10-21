@@ -16,7 +16,7 @@ export const HardBreak = defineExtension({
   nodes: () => ({
     hardBreak: {
       inline: true,
-      group: 'inline',
+      group: 'inline caption',
       selectable: false,
       linebreakReplacement: true,
       leafText: () => '\n',

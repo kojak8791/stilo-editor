@@ -1,38 +1,46 @@
-import type { Attrs, Node, NodeType } from 'prosemirror-model';
-import { type Command, NodeSelection, TextSelection, type Transaction } from 'prosemirror-state';
+import type { Attrs, Fragment, Node, NodeType } from 'prosemirror-model';
+import { type Command, TextSelection, type Transaction } from 'prosemirror-state';
 import { keptBlockStyles } from './block-style';
 
 /**
  * Inserts a block `node` in place of the selection and puts the cursor at the start of the
  * textblock after it, creating a paragraph when no textblock follows. Used by commands and
- * input rules that insert atom blocks (horizontal rule, figure).
+ * input rules that insert blocks (horizontal rule, figure).
  */
 export function insertBlockNode(tr: Transaction, node: Node): Transaction {
+  const step = tr.steps.length;
   tr.replaceSelectionWith(node);
-  // When a textblock follows the node, the cursor is already at its start. Otherwise the node
-  // itself is selected: move into the next textblock, creating a paragraph if needed.
-  if (tr.selection instanceof NodeSelection) {
-    const end = tr.selection.to;
+  // The end of the inserted content: the start of the second half of a split textblock, or the
+  // position right after the node.
+  let end = tr.selection.to;
+  tr.mapping.maps[step]?.forEach((_from, _to, _newFrom, newTo) => {
+    end = newTo;
+  });
+  if (!tr.doc.resolve(end).parent.isTextblock) {
     if (!tr.doc.resolve(end).nodeAfter?.isTextblock) {
       tr.insert(end, tr.doc.type.schema.nodes.paragraph!.create());
     }
-    tr.setSelection(TextSelection.create(tr.doc, end + 1));
+    end++;
   }
-  return tr.scrollIntoView();
+  return tr.setSelection(TextSelection.create(tr.doc, end)).scrollIntoView();
 }
 
 /**
- * Command: inserts a block of `type` with {@link insertBlockNode}. Returns `false` where the
- * container of the selection (the parent of the selected textblock, or the parent of a selected
- * block node) does not allow `type`.
+ * Command: inserts a block of `type` (with `attrs` and `content`) with {@link insertBlockNode}.
+ * Returns `false` where the container of the selection (the parent of the selected textblock,
+ * or the parent of a selected block node) does not allow `type`.
  */
-export function insertBlock(type: NodeType, attrs: Attrs | null = null): Command {
+export function insertBlock(
+  type: NodeType,
+  attrs: Attrs | null = null,
+  content?: Fragment | Node,
+): Command {
   return (state, dispatch) => {
     const { $from } = state.selection;
     const depth = $from.parent.isTextblock ? $from.depth - 1 : $from.depth;
     const container = $from.node(depth);
     if (!container.canReplaceWith($from.index(depth), $from.indexAfter(depth), type)) return false;
-    dispatch?.(insertBlockNode(state.tr, type.create(attrs)));
+    dispatch?.(insertBlockNode(state.tr, type.create(attrs, content)));
     return true;
   };
 }

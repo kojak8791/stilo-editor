@@ -6,6 +6,31 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Figures: an image in its own block with a caption under it (`<figure>`, `<figcaption>`). The
+  caption is written in the document and takes every formatting of the editor (bold, links,
+  colors, …) and line breaks, but no blocks or images: pasted blocks become lines.
+  <kbd>Enter</kbd> leaves the caption for a new paragraph, <kbd>Backspace</kbd> at its start
+  selects the figure. An empty caption shows only while its figure is selected, with the hint
+  of the new `Image` option `captionPlaceholder` (default `'Caption'`).
+- Toolbar item `image` (after `table` in the default toolbar): a dialog that inserts a figure
+  from an address or a local file (embedded as a data URL), with a preview, alternative text,
+  title, width and a plain-text caption. With an image or a figure selected it edits it instead,
+  without the caption, which is edited in the document. An edit button in the corner of the image
+  under the mouse opens the same dialog. `ToolbarContext` gains `openImageDialog()`.
+- Commands `insertFigure` and `updateImage`, with the types `ImageAttributes` and
+  `FigureAttributes`.
+- Drop of image files: embedded where they are dropped, with the size limit and the
+  `imageRejected` event of paste.
+
+### Changed
+
+- HTML with a `<figure>` holding an image loads as a figure; before, the image became an inline
+  image and the caption a paragraph.
+- `maxInlineBytes` also limits the `data:` URLs of dropped files, `insertFigure` and
+  `updateImage`.
+
 ## [0.4.0] - 2026-10-21
 
 Dark theme, full screen, and an option to turn the Markdown shortcuts off. No breaking changes: the new toolbar item is on as soon as you update, the dark colors only when your page sets `color-scheme`.

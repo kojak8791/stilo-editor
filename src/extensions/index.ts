@@ -13,7 +13,7 @@ export { Heading, type HeadingLevel, type HeadingOptions } from './heading';
 export { Highlight, type HighlightAttributes } from './highlight';
 export { History, type HistoryOptions } from './history';
 export { HorizontalRule } from './horizontal-rule';
-export { Image, type ImageOptions } from './image';
+export { type FigureAttributes, Image, type ImageAttributes, type ImageOptions } from './image';
 export { Italic } from './italic';
 export { LineHeight } from './line-height';
 export { Link, type LinkAttributes } from './link';

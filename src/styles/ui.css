@@ -441,7 +441,8 @@
   gap: 4px;
 }
 
-.stilo-link-popover__button {
+.stilo-link-popover__button,
+.stilo-image-dialog__button {
   padding: 4px 10px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
@@ -451,20 +452,126 @@
   font: inherit;
 }
 
-.stilo-link-popover__button:hover {
+.stilo-link-popover__button:hover,
+.stilo-image-dialog__button:hover {
   background: var(--stilo-color-hover);
 }
 
-.stilo-link-popover__button:focus-visible {
+.stilo-link-popover__button:focus-visible,
+.stilo-image-dialog__button:focus-visible {
   outline: 2px solid var(--stilo-color-focus);
   outline-offset: 1px;
 }
 
 .stilo-link-popover__button--primary,
-.stilo-link-popover__button--primary:hover {
+.stilo-link-popover__button--primary:hover,
+.stilo-image-dialog__button--primary,
+.stilo-image-dialog__button--primary:hover {
   border-color: var(--stilo-color-focus);
   background: var(--stilo-color-focus);
   color: #ffffff;
+}
+
+/* Image dialog: the source (address or file), a preview, the fields in a column */
+.stilo-image-dialog__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+  padding: 4px;
+  font-family: var(--stilo-font-family);
+  font-size: var(--stilo-font-size);
+  color: var(--stilo-color-text);
+}
+
+.stilo-image-dialog__source {
+  display: flex;
+  gap: 4px;
+}
+
+.stilo-image-dialog__input {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: var(--stilo-color-text);
+  font: inherit;
+}
+
+.stilo-image-dialog__url {
+  flex: 1;
+}
+
+.stilo-image-dialog__input:focus-visible {
+  outline: 2px solid var(--stilo-color-focus);
+  outline-offset: -1px;
+}
+
+.stilo-image-dialog__url[aria-invalid="true"] {
+  border-color: var(--stilo-color-error);
+}
+
+.stilo-image-dialog__preview {
+  align-self: center;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+}
+
+.stilo-image-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--stilo-color-muted);
+}
+
+.stilo-image-dialog__field[hidden] {
+  display: none;
+}
+
+.stilo-image-dialog__error {
+  margin: 0;
+  color: var(--stilo-color-error);
+}
+
+.stilo-image-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Edit button of images: in the top right corner of the image */
+.stilo-image-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--stilo-z-popover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--stilo-color-border);
+  border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: var(--stilo-color-text);
+  cursor: pointer;
+}
+
+.stilo-image-button[hidden] {
+  display: none;
+}
+
+.stilo-image-button:hover {
+  border-color: var(--stilo-color-focus);
+  color: var(--stilo-color-focus);
+}
+
+.stilo-image-button .stilo-icon {
+  width: 16px;
+  height: 16px;
 }
 
 /* Link bubble: small and unobtrusive */

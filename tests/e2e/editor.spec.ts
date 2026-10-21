@@ -330,3 +330,37 @@ test('tables: the resize handle on hover does not change the height of the table
   await expect(page.locator('.stilo-content .column-resize-handle').first()).toBeAttached();
   expect((await table.boundingBox())!.height).toBe(height);
 });
+
+test('figures: insert from the dialog, a click on the image selects it, the caption is text', async ({
+  page,
+}) => {
+  const png =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  await openEmpty(page);
+  await page.locator('[data-item="image"]').click();
+  const dialog = page.getByRole('dialog', { name: 'Insert image' });
+  await dialog.getByRole('textbox', { name: 'Image address' }).fill(png);
+  await dialog.getByLabel('Width (px)').fill('80');
+  await dialog.getByLabel('Caption').fill('Hello');
+  await dialog.getByRole('button', { name: 'Insert' }).click();
+  await expect(output(page)).toHaveText(
+    new RegExp(
+      `^<figure><img src="${png.replace(/[+]/g, '+')}" width="80"( height="80")?><figcaption>Hello</figcaption></figure><p></p>$`,
+    ),
+  );
+
+  await page.locator('figure img').click();
+  await expect(page.locator('.stilo-figure')).toHaveClass(/ProseMirror-selectednode/);
+  await expect(page.locator('.stilo-image__handle--right')).toBeVisible();
+
+  await page.locator('figcaption').click();
+  await page.keyboard.press('End');
+  await page.keyboard.press('ControlOrMeta+b');
+  await type(page, ' world');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(200);
+  await type(page, 'next');
+  await expect(output(page)).toHaveText(
+    /<figcaption>Hello<strong> world<\/strong><\/figcaption><\/figure><p>next<\/p><p><\/p>$/,
+  );
+});

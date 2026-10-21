@@ -118,7 +118,7 @@ editor.on('input', ({ editor }) => save(editor.getHTML()));
 | `focus` | `{ editor, event }` | The editor got the focus |
 | `blur` | `{ editor, event }` | The editor lost the focus |
 | `destroy` | `{ editor }` | `destroy()` was called |
-| `imageRejected` | `{ editor, file, reason }` | A pasted image file was not inserted (`Image` extension): `reason` is `'tooLarge'` (over `maxInlineBytes`) or `'unsupportedType'` (not PNG, JPEG, GIF or WebP) |
+| `imageRejected` | `{ editor, file, reason }` | A pasted or dropped image file was not inserted (`Image` extension): `reason` is `'tooLarge'` (over `maxInlineBytes`) or `'unsupportedType'` (not PNG, JPEG, GIF or WebP) |
 
 ## 3. Commands
 
@@ -154,6 +154,7 @@ when you refresh many buttons.
 | `CodeBlock` | `setCodeBlock({ language? })`: turns the selected blocks into one code block, a line each, or changes the language of the code block; `language` is letters, digits, `_` and `-` (`'js'`, `'c-sharp'`), `false` otherwise. `unsetCodeBlock()`: a paragraph per line. `toggleCodeBlock({ language? })` |
 | `HorizontalRule` | `setHorizontalRule()` |
 | `Table` | `insertTable({ rows?, cols?, withHeaderRow? })`: a table in place of the selection (3 × 3 with a header row by default), the cursor in the first cell; `false` inside a table, for counts that are not whole numbers ≥ 1, or where a table cannot go (a list item). `addRowBefore()`, `addRowAfter()`, `deleteRow()`, `addColumnBefore()`, `addColumnAfter()`, `deleteColumn()`: around the selected cells; delete is `false` when it would remove every row or column (use `deleteTable()`). `mergeCells()`: the selected rectangle of cells (drag across them). `splitCell()`: a merged cell. `selectRow(pos?)`, `selectColumn(pos?)`, `selectTable(pos?)`: select the cells of the row, the column or the table of the cell around `pos` (default: the selection); `false` outside a table. `toggleHeaderRow()`, `toggleHeaderColumn()`: the first row / column becomes header cells (`<th>`), or back. `deleteTable()`. `goToNextCell()` (adds a row in the last cell), `goToPreviousCell()` |
+| `Image` | `insertFigure({ src, alt?, title?, width?, height?, caption? })`: a figure in place of the selection, the cursor in the block after it; `caption` is plain text; `false` for a `src` that is not allowed (`http:`, `https:` and relative URLs, PNG, JPEG, GIF and WebP `data:` URLs are) or a `data:` URL over `maxInlineBytes`, and in a caption. `updateImage({ src?, alt?, title?, width?, height? })`: changes the attributes given of the selected image or figure, or of the figure whose caption holds the cursor; `null` (or `''` for the texts) clears one; `false` without an image or for a `src` that `insertFigure` refuses. `width` and `height` are whole pixels, other values clear them |
 | `HardBreak` | `setHardBreak()` |
 | `BulletList` | `toggleBulletList()` |
 | `OrderedList` | `toggleOrderedList()` |
@@ -217,7 +218,7 @@ defaultExtensions({
 | `heading` | `Heading` | `levels`: allowed levels, default `[1, 2, 3, 4, 5, 6]` |
 | `blockquote`, `codeBlock`, `horizontalRule`, `hardBreak` | `Blockquote`, `CodeBlock`, `HorizontalRule`, `HardBreak` | — |
 | `table` | `Table` (tables, cell selection, column resize) | — |
-| `image` | `Image` (inline images: paste of image files, resize handles) | `maxInlineBytes`: largest pasted image file inserted as a data URL, default `5 * 1024 * 1024` (5 MB) |
+| `image` | `Image` (inline images and figures with a caption: paste and drop of image files, resize handles) | `maxInlineBytes`: largest image inserted as a data URL by paste, drop, `insertFigure` and `updateImage`, default `5 * 1024 * 1024` (5 MB). `captionPlaceholder`: hint shown in an empty caption while its figure is selected or holds the cursor, default `'Caption'`; `''` for none |
 | `bulletList`, `orderedList`, `listItem` | `BulletList`, `OrderedList`, `ListItem` | — |
 | `taskList`, `taskItem` | `TaskList`, `TaskItem` (checklists: a checkbox for each item) | — |
 | `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code` | `Bold`, `Italic`, `Underline`, `Strike`, `Subscript`, `Superscript`, `Code` | — |
@@ -294,7 +295,7 @@ IDs: `undo`, `redo`,
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textCase`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
 `bulletList`, `orderedList`, `taskList`,
-`blockquote`, `codeBlock`, `horizontalRule`, `table`, `characters`, `find`, `fullscreen`.
+`blockquote`, `codeBlock`, `horizontalRule`, `table`, `image`, `characters`, `find`, `fullscreen`.
 
 The `table` button opens a grid to insert a table (with or without a header row); with the
 cursor in a table it opens the table operations instead: rows, columns, merge and split,
@@ -302,6 +303,13 @@ header row and column, delete table. With the `Table` extension the toolbar also
 next to the table: on the row and the column of the cell under the mouse (or with the cursor)
 and at the corner of the table. A handle selects its row or column and opens its menu (insert,
 delete); the corner opens merge, split and delete table.
+
+The `image` button opens the image dialog: an address or a local file (embedded as a data URL),
+a preview, alternative text, title, width, and a caption as plain text; *Insert* adds a figure.
+With an image or a figure selected, or the cursor in a caption, it edits that image instead, and
+the dialog has no caption field: the caption is written and styled in the document, like any
+text. With the `Image` extension the toolbar also shows an edit button in the corner of the
+image under the mouse, or of the selected one, which opens the same dialog.
 
 The `find` button and <kbd>Ctrl</kbd>+<kbd>F</kbd> in the editor open the find bar, a panel
 floating under the toolbar (`Search` extension); the button also closes it, and the popovers of
@@ -409,7 +417,7 @@ createToolbar(editor, {
 | `icon` | A `lucide` icon |
 | `labelKey` | Key of the label in `messages`; a missing key is shown as is |
 | `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
-| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar, `context.toggleTableMenu()` the table menu, `context.toggleFullscreen()` turns full screen on or off |
+| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar, `context.toggleTableMenu()` the table menu, `context.openImageDialog()` the image dialog, `context.toggleFullscreen()` turns full screen on or off |
 | `isActive(editor, context)` | Optional: makes it a toggle button and tells when it is pressed; `context.isFullscreen()` tells whether the editor is in full screen |
 | `isEnabled(editor)` | Optional, default always enabled. A button that changes the content: `editor.isEditable && …`, so that it is disabled in a read-only editor |
 | `isAvailable(editor)` | Optional: `false` hides the button |

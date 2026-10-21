@@ -118,16 +118,16 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | ID | Feature | M | Notes |
 |---|---|---|---|
 | F-601 | Inline `image` node (`src`, `alt`, `title`, `width`, `height`) | M2 | For images inside text |
-| F-602 | Block `figure` node: image + optional caption (`<figure>`/`<figcaption>`) | M2 | Caption is plain text |
+| F-602 | Block `figure` node: image + optional caption (`<figure>`/`<figcaption>`) | M2 | The caption takes the marks of the loaded extensions and hard breaks, no blocks or images; it is edited in the document |
 | F-603 | Paste image from clipboard → inline `image` as base64 data URL | M2 | |
 | F-604 | Drop image file → inline `image` as base64 data URL | M2 | |
-| F-605 | Image picker: local file (→ base64) or remote URL, with `alt`, `title`, caption → inserts a `figure` | M2 | Core command + UI dialog (F-806) |
-| F-606 | Edit image/figure properties (`alt`, `title`, caption, size) | M2 | |
+| F-605 | Image picker: local file (→ base64) or remote URL, with `alt`, `title`, caption → inserts a `figure` | M2 | Core command `insertFigure` + UI dialog (F-806); the caption is plain text there |
+| F-606 | Edit image/figure properties (`src`, `alt`, `title`, size) | M2 | Core command `updateImage`; the caption is edited only in the document |
 | F-607 | Resize with handles (keeps aspect ratio), for both nodes | M2 | |
 | F-608 | Max inline size option (default 5 MB), reject larger with an event | M2 | `image.maxInlineBytes` |
 | F-609 | Upload callback `image.upload(file) => Promise<url>` instead of base64 | M3 | Option name reserved now |
 | F-610 | Figure alignment (left/center/right) | M3 | Output format to be decided by ADR |
-| F-611 | Rich-text captions (marks inside `figcaption`) | M3 | |
+| F-611 | Rich-text captions (marks inside `figcaption`) | M2 | Part of F-602 (T-064) |
 | F-612 | Image editing inside the editor: crop and rotate (other edits to be decided) | M3 | |
 
 ## 8. Paste & clipboard (`F-7xx`)
@@ -150,7 +150,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-803 | Link dialog (popover), opened by the toolbar button or `Mod-k` | M1 |
 | F-804 | Font family / size dropdowns, color pickers | M2 |
 | F-805 | Table menu (insert grid picker + operations) | M2 |
-| F-806 | Image dialog: local file / remote URL, preview, `alt`, `title`, caption | M2 |
+| F-806 | Image dialog: local file / remote URL, preview, `alt`, `title`, width; a plain-text caption when inserting. Opened by the toolbar button and by an edit button over the image under the mouse or the selected one | M2 |
 | F-807 | Bubble menu on text selection | M2 |
 | F-808 | i18n: English and Italian, pluggable dictionaries | M2 |
 | F-809 | Light/dark theme via CSS custom properties | M2 |

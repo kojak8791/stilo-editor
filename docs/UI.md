@@ -38,6 +38,8 @@ src/ui/
 │   ├── dropdown.ts          createDropdown
 │   ├── link-popover.ts      createLinkPopover, canEditLink
 │   ├── link-bubble.ts       createLinkBubble
+│   ├── image-dialog.ts      createImageDialog, canEditImage, selectedImageElement
+│   ├── image-button.ts      createImageButton: edit button over an image
 │   ├── character-picker.ts  createCharacterPicker
 │   ├── characters.ts        SYMBOLS, EMOJI: picker data, a separate chunk
 │   ├── color-button.ts      createColorButton: split button and color popover
@@ -76,7 +78,7 @@ component. The types, with JSDoc, are in `src/ui/toolbar/types.ts`.
 | `iconMenu` | `createIconMenu` (§5.6): options as icons in a row | `textAlign` |
 
 `DEFAULT_TOOLBAR` groups: history; text style; font and size; inline formatting, link, clear
-formatting and text case; colors; alignment and line spacing; blocks, table and characters;
+formatting and text case; colors; alignment and line spacing; blocks, table, image and characters;
 find; full screen. The default buttons follow one rule: `run` calls
 `editor.commands.<command>()`, `isEnabled` its `.can()`, `isAvailable` is
 `'<command>' in editor.commands`. In a read-only editor every default item except `find` and
@@ -109,6 +111,7 @@ The other buttons open a component through the `ToolbarContext` passed to `run` 
 | `link` | `Link`, `Mod-k` | link popover (§5.1) | `canEditLink`: not at a cursor outside a link |
 | `characters` | `FaceSlightlySmilingPlus` | character picker (§5.3) | always (needs `Text`) |
 | `table` | `Table` | table menu (§5.9) | in a table, or where `insertTable.can()` |
+| `image` | `Image` | image dialog (§5.12); a toggle, pressed on an image or a figure (`isActive('image')`, `isActive('figure')`) | on an image or a figure, or where `insertFigure.can()` |
 | `find` | `Search`, `Mod-f` | find bar (§5.7) | always (needs `Search`) |
 | `fullscreen` | `Maximize` | full screen (§8), a toggle button | always |
 
@@ -136,7 +139,8 @@ popover, character picker, font size field) take the focus themselves.
 - `Escape` in the toolbar focuses the editor. `Alt-F10` in the editor focuses the toolbar.
 - `Escape` in the editor leaves full screen (§8), unless an open popover takes it first.
 - `Mod-k` in the editor opens the link popover, `Mod-f` the find bar. The toolbar owns the link
-  popover, the link bubble and the table handles even without the matching buttons.
+  popover, the link bubble, the table handles, the image dialog and the image edit button even
+  without the matching buttons.
 - The toolbar handles keys only from its own items, never from inside an open menu.
 
 ### 3.5 State refresh
@@ -300,6 +304,37 @@ trigger is too.
 | `fontFamily` (`fontFamilyDropdown(fonts?)`) | Default, then `DEFAULT_FONTS`: the generic families, then common fonts with fallbacks | Each label is drawn in its font; a font not in the list (pasted) is shown by its first name. Values are written as the editor normalizes them (ARCHITECTURE §7.3), or `isActive` would not match |
 | `lineHeight` (`lineHeightDropdown(values?)`) | Default, 1, 1.15, 1.5, 2 | Icon trigger, values as text; *Default* removes the block's own line height |
 | `textCase` | UPPERCASE, lowercase, Title Case, Sentence case, tOGGLE cASE | Actions, each label in its own case; disabled with an empty selection |
+
+### 5.12 Image dialog
+
+`.stilo-image-dialog`, `role="dialog"`, mounted in the editor's element (SPEC F-605, F-606,
+F-806). Its mode is chosen when it opens:
+
+- **Edit** (`Edit image`, *Apply*): the selection is on an image or a figure, or in a caption.
+  Anchored to the image. Prefilled from `getAttributes('image' | 'figure')`; an embedded image
+  (`data:` URL) shows *Embedded image* in the address field and is kept until the field is
+  typed in or a file is chosen. No caption field: the caption is edited in the document, so the
+  dialog never overwrites its styles. Runs `updateImage`.
+- **Insert** (`Insert image`, *Insert*): anchored to the selection. Runs `insertFigure`; the
+  *Caption* field is plain text, inserted as typed (`**x**` and `<b>` stay characters).
+
+The fields: the address (focused and selected on open) and *Choose file* (a hidden
+`input type="file"` for PNG, JPEG, GIF and WebP, read as a `data:` URL), a preview of the image,
+*Alternative text*, *Title*, *Caption* (insert only), *Width (px)* with the natural width as a
+hint. The height follows the ratio of the preview, or of the image's own `width` and `height`;
+an empty width removes the size. Width and height are sent only when the width or the image
+changed, so the size set with the handles stays. An error shows under the fields
+(`role="alert"`) and keeps the dialog open: no source, an address the editor refuses, a file of
+another type, a file over `maxInlineBytes` (the command refuses its `data:` URL).
+
+### 5.13 Image edit button
+
+`.stilo-image-button` (icon `Pencil`, `aria-haspopup="dialog"`), mounted in the editor's element
+when the `Image` extension is loaded. It sits inside the top right corner of the image under the
+mouse, else of the selected image or figure (or the figure holding the cursor) while the editor
+has the focus; hidden in a read-only editor. A click selects the image or figure and opens the
+image dialog to edit it; its `mousedown` is prevented, so the editor keeps the focus. Not in the
+tab order: the keyboard path is the `image` button of the toolbar.
 
 ## 6. Strings (i18n)
 

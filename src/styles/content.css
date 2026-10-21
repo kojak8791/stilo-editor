@@ -342,15 +342,35 @@ li.ProseMirror-selectednode:after {
   height: auto;
 }
 
+/* Figures: an image and its caption. */
+.stilo-content figure {
+  margin: 1em 0;
+}
+
+.stilo-content figcaption {
+  margin-top: 0.4em;
+  color: var(--stilo-color-muted, #59636e);
+  font-size: 0.9em;
+}
+
+/* In the editor, an empty caption shows only while its figure is selected or holds the cursor,
+   with the placeholder. */
+.stilo-figure--empty:not(.stilo-figure--active) figcaption,
+.stilo-content:not([contenteditable="true"]) .stilo-figure--empty figcaption {
+  display: none;
+}
+
 /* Image in the editor: two side handles, inside the image (a top-level block clips what
-   overflows it, see "Large documents" below), shown while the image is selected. Only a selected
-   image is positioned: a positioned element paints over the caret placed right after it. */
+   overflows it, see "Large documents" below), shown while the image or its figure is selected.
+   Only a selected image is positioned: a positioned element paints over the caret placed right
+   after it. */
 .stilo-image {
   display: inline-block;
   max-width: 100%;
 }
 
-.stilo-image.ProseMirror-selectednode {
+.stilo-image.ProseMirror-selectednode,
+.ProseMirror-selectednode > .stilo-image {
   position: relative;
 }
 
@@ -389,7 +409,11 @@ li.ProseMirror-selectednode:after {
   right: 6px;
 }
 
-.stilo-content[contenteditable="true"] .stilo-image.ProseMirror-selectednode .stilo-image__handle {
+.stilo-content[contenteditable="true"] .stilo-image.ProseMirror-selectednode .stilo-image__handle,
+.stilo-content[contenteditable="true"]
+  .ProseMirror-selectednode
+  > .stilo-image
+  .stilo-image__handle {
   display: block;
 }
 

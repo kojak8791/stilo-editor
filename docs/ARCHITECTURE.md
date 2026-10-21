@@ -407,8 +407,12 @@ content: `getHTML()` comes from the schema's `toDOM` (§7), not from the editor'
   from `data-checked` for content under the class `stilo-content`.
 - `table` (`TableView` of `prosemirror-tables`, installed by `columnResizing`): draws the
   `<colgroup>` from the cells' `colwidth`.
-- `image` (`ImageView`): wraps the `<img>` in `span.stilo-image` with two side handles that
-  resize it; `content.css` explains their placement.
+- `image` and `figure` (`ImageView`): wraps the `<img>` in `span.stilo-image` with two side
+  handles that resize it; `content.css` explains their placement. A figure is a
+  `figure.stilo-figure` holding that span and its caption in a `div` (the content element:
+  ProseMirror removes what else a content element holds), with `stilo-figure--empty` while the
+  caption is empty. ProseMirror selects a node on a click only when it is an atom: the `Image`
+  extension selects a figure on a click on its image (`handleClickOn`).
 
 ### 6.5 Changes to many nodes
 
@@ -450,8 +454,9 @@ the default toolbar asks every command about the selection after every change. M
 | `table` | `<table>`, with `<colgroup>` when a column has a width (ADR 0005) | `table` | content `tableRow+` |
 | `tableRow` | `<tr>` | `tr` (`thead`, `tbody`, `tfoot` flattened: the rows keep their order) | content `(tableCell \| tableHeader)*` |
 | `tableCell` / `tableHeader` | `<td>` / `<th>` | same | `colspan`, `rowspan` (omitted when 1; clamped to 1000 and 65534 as browsers do), `colwidth` (`data-colwidth`, ADR 0005); content `block+`; a single paragraph without attributes is written without `<p>` (`compactParagraphs`, ADR 0001) |
-| `image` | `<img src alt title width height>` | `img[src]` (not inside `figure`, M2) | inline atom (F-601); `src` per SPEC NFR-2 (SVG data URLs dropped); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
-| `figure` (M2) | `<figure><img src alt title width height><figcaption>text</figcaption></figure>` | `figure` containing an `img[src]` | block atom; attrs `src`, `alt`, `title`, `width`, `height`, `caption` (plain text); `<figcaption>` omitted when caption is empty |
+| `image` | `<img src alt title width height>` | `img[src]` (not inside a `figure`) | inline atom (F-601); `src` per SPEC NFR-2 (SVG data URLs dropped); empty attributes omitted; `width` and `height` are whole pixels, other values (`50%`) dropped |
+| `figure` | `<figure><img src alt title width height><figcaption>…</figcaption></figure>` | `figure` containing an `img[src]` outside its `figcaption` | block, `isolating`; attrs `src`, `alt`, `title`, `width`, `height` as `image`; content one `figcaption`; `<figcaption>` omitted when the caption is empty |
+| `figcaption` | `<figcaption>` | the `figcaption` of a `figure`, reduced to what a caption takes: blocks become lines joined by `<br>`, images are dropped | content `caption*`; every mark |
 
 Notes on the nodes:
 
@@ -468,6 +473,15 @@ Notes on the nodes:
   declares itself the schema's `linebreakReplacement`, so a code block turned into another
   textblock gets a `<br>` for each newline, and back. `code: true` turns off marks and input
   rules inside it. `language` matches `^[\w-]+$`, the class the sanitizer keeps.
+- **Captions** (T-064). A `figure` always holds a `figcaption`, empty or not, so that a caption
+  can be written later; the HTML leaves an empty one out. Its content is the node group
+  `caption`, which `text` and `hardBreak` join: an inline node another extension adds stays out
+  of captions until it joins the group. No list of marks: every mark of the loaded extensions
+  applies. Being inline only, the caption cannot take blocks: block commands answer `false`
+  there, paste (`handlePaste`) and `setHTML` (`getContent` of the parse rule) keep the inline
+  content, a hard break between two blocks, and leave images out. `Enter` leaves the caption
+  for a new paragraph after the figure, `Backspace` at its start selects the figure, `Delete`
+  at its end does nothing (no merge with the next block).
 - **Tables** use `prosemirror-tables` (`TableMap`, commands, the `tableEditing` and
   `columnResizing` plugins) with our own node specs and the names of §4.1. `tableEditing` fixes
   irregular tables (missing cells, overlapping spans, widths that disagree) when a transaction
@@ -551,8 +565,10 @@ displays the saved HTML) gets the same look inside an element with that class.
   styles of its own is usable. No border, which belongs to the container of the page, and the
   focus outline of the browser.
 - **Editor only** (`.ProseMirror`): the node view controls (§6.4: task checkbox, image handles,
-  shown while the image is selected and the editor editable), the column resize handle and
-  selected cells, the placeholder, the search matches.
+  shown while the image or its figure is selected and the editor editable), the column resize
+  handle and selected cells, the placeholder, the search matches. An empty caption is hidden,
+  except while its figure is selected or holds the cursor (`stilo-figure--active`, a decoration
+  computed from the selection only): it then shows `captionPlaceholder`.
 - **Outside the editor** (`.stilo-content:not(.ProseMirror)`): the task list box is drawn from
   `data-checked` with `li::before`, since the checkbox is not in the HTML.
 - **Large documents**: top-level blocks have `content-visibility: auto` (ADR 0003); a block
@@ -636,10 +652,12 @@ a document parsed with an inert `DOMParser` (no scripts run, no images load):
   cell follows `colspan` and the `rowspan` of the rows above. Other units (`%`, `em`) are not
   read: those columns stay fluid. `setHTML` reads widths from `data-colwidth` only.
 
-Image files (`Image` extension): a paste whose clipboard has no HTML turns each PNG, JPEG, GIF or
-WebP file into an `image` with a base64 `data:` URL; a file over `maxInlineBytes` or of another
-type is reported with the `imageRejected` event. A clipboard with HTML is pasted as HTML, so an
-image copied from a web page keeps its URL.
+Image files (`Image` extension): a paste or a drop whose data has no HTML turns each PNG, JPEG,
+GIF or WebP file into an `image` with a base64 `data:` URL, in place of the selection (paste) or
+at the drop point (`dropPoint`: next to a figure when dropped on its caption); a file over
+`maxInlineBytes` or of another type is reported with the `imageRejected` event. Data with HTML
+is inserted as HTML, so an image copied from a web page keeps its URL. In a caption, paste keeps
+only what the caption takes (§7.1, *Captions*); image files are ignored there.
 
 `Mod-Shift-v` pastes the plain text of the clipboard (F-705): ProseMirror's own behavior while
 Shift is held, also when the clipboard has HTML.
@@ -777,4 +795,5 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 | D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |
 | D-16 | Table column widths written twice: `data-colwidth` on the cells, read back, and a `<colgroup>` for display ([ADR 0005](decisions/0005-table-column-widths.md)) | 2026-10-14 |
 | D-17 | Framework wrappers are subpath exports (`stilo-editor/react`, `stilo-editor/vue`, `stilo-editor/svelte`) with the framework as an optional peer dependency; a primitive and a ready component; content not controlled ([ADR 0006](decisions/0006-framework-wrappers.md)) | 2026-10-20 |
+| D-19 | Figure captions (T-064, replaces the caption part of D-08): inline content with every mark of the loaded extensions and hard breaks, no blocks or images, edited in the document; the image dialog takes a plain-text caption only when inserting, so it never overwrites the caption's styles | 2026-10-21 |
 | D-18 | Dark theme through `light-dark()` color defaults and the page's `color-scheme`, no class and no JS; full screen fills the browser window with `position: fixed` on the box of the toolbar and the editor, in the top layer through the Popover API where it exists (else `--stilo-z-fullscreen`), not the Fullscreen API ([UI.md](UI.md) §7, §8) | 2026-10-21 |

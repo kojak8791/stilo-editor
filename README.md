@@ -128,7 +128,7 @@ A component for Svelte 5, actions for Svelte 4 and 5, server-side rendering incl
 - **Blocks:** headings, quotes, code blocks, alignment, line spacing, move up/down
 - **Lists:** bulleted, numbered, checklists
 - **Tables:** insert, merge and split, row and column handles, resizable columns
-- **Images:** paste and resize
+- **Images:** paste, drop, insert and edit, captions with formatting, resize
 - **Tools:** links, find and replace, special characters and emoji, word count
 - **View:** full screen, light and dark theme
 
