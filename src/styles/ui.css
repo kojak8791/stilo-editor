@@ -411,7 +411,7 @@
 .stilo-link-popover__url {
   flex: 1 1 100%;
   box-sizing: border-box;
-  padding: 6px 8px;
+  padding: 3px 6px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
   background: var(--stilo-color-bg);
@@ -443,7 +443,7 @@
 
 .stilo-link-popover__button,
 .stilo-image-dialog__button {
-  padding: 4px 10px;
+  padding: 3px 10px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
   background: var(--stilo-color-bg);
@@ -472,29 +472,45 @@
   color: #ffffff;
 }
 
-/* Image dialog: as small as the link popover. Rows: thumbnail, address and file button; alt
-   text; caption (insert only); title, width and submit. */
+/* Image dialog: a label and a field per row; the image row holds a thumbnail, the address and
+   the file button, the width row the submit button. */
 .stilo-image-dialog__form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 320px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 8px;
+  width: 340px;
   padding: 4px;
   font-family: var(--stilo-font-family);
   font-size: var(--stilo-font-size);
   color: var(--stilo-color-text);
 }
 
-.stilo-image-dialog__row {
+.stilo-image-dialog__field {
+  display: contents;
+}
+
+.stilo-image-dialog__field[hidden] {
+  display: none;
+}
+
+.stilo-image-dialog__label {
+  color: var(--stilo-color-muted);
+  white-space: nowrap;
+}
+
+.stilo-image-dialog__cell {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .stilo-image-dialog__input {
+  flex: 1;
   box-sizing: border-box;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 3px 6px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
   background: var(--stilo-color-bg);
@@ -502,17 +518,10 @@
   font: inherit;
 }
 
-.stilo-image-dialog__input[hidden] {
-  display: none;
-}
-
-.stilo-image-dialog__url,
-.stilo-image-dialog__title {
-  flex: 1;
-}
-
 .stilo-image-dialog__width {
-  width: 64px;
+  flex: none;
+  width: 72px;
+  margin-right: auto;
 }
 
 .stilo-image-dialog__input:focus-visible {
@@ -526,8 +535,8 @@
 
 .stilo-image-dialog__preview {
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--stilo-radius);
   object-fit: cover;
 }
@@ -537,8 +546,8 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   padding: 0;
 }
 
@@ -548,6 +557,7 @@
 }
 
 .stilo-image-dialog__error {
+  grid-column: 1 / -1;
   margin: 0;
   color: var(--stilo-color-error);
 }

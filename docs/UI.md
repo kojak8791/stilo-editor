@@ -318,12 +318,12 @@ F-806). Its mode is chosen when it opens:
 - **Insert** (`Insert image`, *Insert*): anchored to the selection. Runs `insertFigure`; the
   *Caption* field is plain text, inserted as typed (`**x**` and `<b>` stay characters).
 
-As small as the link popover (320 px wide, four rows at most): each field has its label as
-placeholder and accessible name. First row: a 30 px thumbnail of the image, the address (focused
-and selected on open) and an icon button *Choose file* (`FolderOpen`, a hidden
-`input type="file"` for PNG, JPEG, GIF and WebP, read as a `data:` URL). Then *Alternative
-text*, *Caption* (insert only), and a last row with *Title*, *Width (px)* (the natural width as
-placeholder) and the submit button. The height follows the ratio of the preview, or of the image's own `width` and `height`;
+Compact, about 340 × 145 px: a row per field, the label on the left, the field on the right
+(the inputs are named by `aria-label`, since a cell may also hold buttons). *Image*: a 26 px
+thumbnail, the address (`https://` as placeholder, focused and selected on open) and an icon
+button *Choose file* (`FolderOpen`, a hidden `input type="file"` for PNG, JPEG, GIF and WebP,
+read as a `data:` URL). Then *Alternative text*, *Caption* (insert only), *Title*, and
+*Width (px)* (the natural width as placeholder) with the submit button. The height follows the ratio of the preview, or of the image's own `width` and `height`;
 an empty width removes the size. Width and height are sent only when the width or the image
 changed, so the size set with the handles stays. An error shows under the fields
 (`role="alert"`) and keeps the dialog open: no source, an address the editor refuses, a file of

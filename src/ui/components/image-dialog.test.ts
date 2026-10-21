@@ -97,7 +97,7 @@ describe('image dialog: insert', () => {
     expect(dialog.getAttribute('aria-label')).toBe('Insert image');
     expect(document.activeElement).toBe(url);
     expect(url.value).toBe('');
-    expect(caption.hidden).toBe(false);
+    expect(caption.closest('label')!.hidden).toBe(false);
     expect(submit.textContent).toBe('Insert');
     expect(preview.hidden).toBe(true);
   });
@@ -184,7 +184,7 @@ describe('image dialog: edit', () => {
     expect(alt.value).toBe('A');
     expect(title.value).toBe('');
     expect(width.value).toBe('40');
-    expect(caption.hidden).toBe(true);
+    expect(caption.closest('label')!.hidden).toBe(true);
     alt.value = '';
     title.value = 'T';
     submit.click();
@@ -211,7 +211,7 @@ describe('image dialog: edit', () => {
     );
     editor.commands.select(2);
     button.click();
-    expect(caption.hidden).toBe(true);
+    expect(caption.closest('label')!.hidden).toBe(true);
     type(url, 'b.png');
     submit.click();
     expect(editor.getHTML()).toBe(

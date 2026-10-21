@@ -67,15 +67,31 @@ export function imageNodePos(editor: Editor, box: HTMLElement): number {
   return editor.view.posAtDOM(parent, Array.prototype.indexOf.call(parent.childNodes, dom));
 }
 
-/** A field of the dialog: its label is the placeholder and the accessible name. */
-function createInput(name: string, label: string, type: 'text' | 'number'): HTMLInputElement {
+/**
+ * A row of the dialog: the label, then a cell with the input (and what the caller adds). The
+ * input is named by `aria-label`: the cell may hold buttons, whose text a `<label>` would add.
+ */
+function createField(
+  name: string,
+  label: string,
+  type: 'text' | 'number',
+  accessibleName = label,
+): { field: HTMLLabelElement; cell: HTMLElement; input: HTMLInputElement } {
+  const field = document.createElement('label');
+  field.className = 'stilo-image-dialog__field';
+  const text = document.createElement('span');
+  text.className = 'stilo-image-dialog__label';
+  text.textContent = label;
+  const cell = document.createElement('span');
+  cell.className = 'stilo-image-dialog__cell';
   const input = document.createElement('input');
   input.type = type;
   input.className = `stilo-image-dialog__input stilo-image-dialog__${name}`;
   input.autocomplete = 'off';
-  input.placeholder = label;
-  input.setAttribute('aria-label', label);
-  return input;
+  input.setAttribute('aria-label', accessibleName);
+  cell.append(input);
+  field.append(text, cell);
+  return { field, cell, input };
 }
 
 /** Reads a file as a `data:` URL, `''` when it cannot be read. */
@@ -122,16 +138,17 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
   const form = document.createElement('form');
   form.className = 'stilo-image-dialog__form';
 
-  // A row: thumbnail, address, file button. Then alt and caption; title, width and submit.
-  const source = document.createElement('div');
-  source.className = 'stilo-image-dialog__row';
+  // Rows: the image (thumbnail, address, file button), alt, caption (insert only), title, and
+  // the width with the submit button.
+  const source = createField('url', messages['toolbar.image'], 'text', messages['image.url']);
+  const url = source.input;
+  url.inputMode = 'url';
+  url.spellcheck = false;
+  url.placeholder = 'https://';
   const preview = document.createElement('img');
   preview.className = 'stilo-image-dialog__preview';
   preview.alt = '';
   preview.hidden = true;
-  const url = createInput('url', messages['image.url'], 'text');
-  url.inputMode = 'url';
-  url.spellcheck = false;
   const file = document.createElement('input');
   file.type = 'file';
   file.accept = FILE_TYPES.join(',');
@@ -141,27 +158,26 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
   choose.title = messages['image.chooseFile'];
   choose.setAttribute('aria-label', messages['image.chooseFile']);
   choose.append(createIcon(FolderOpen));
-  source.append(preview, url, choose, file);
+  source.cell.prepend(preview);
+  source.cell.append(choose, file);
 
-  const alt = createInput('alt', messages['image.alt'], 'text');
-  const caption = createInput('caption', messages['image.caption'], 'text');
-
-  const actions = document.createElement('div');
-  actions.className = 'stilo-image-dialog__row';
-  const title = createInput('title', messages['image.title'], 'text');
-  const width = createInput('width', messages['image.width'], 'number');
+  const alt = createField('alt', messages['image.alt'], 'text');
+  const caption = createField('caption', messages['image.caption'], 'text');
+  const title = createField('title', messages['image.title'], 'text');
+  const size = createField('width', messages['image.width'], 'number');
+  const width = size.input;
   width.min = '1';
   width.step = '1';
   const submit = createButton('submit', '');
   submit.classList.add('stilo-image-dialog__button--primary');
-  actions.append(title, width, submit);
+  size.cell.append(submit);
 
   const error = document.createElement('p');
   error.className = 'stilo-image-dialog__error';
   error.setAttribute('role', 'alert');
   error.hidden = true;
 
-  form.append(source, alt, caption, actions, error);
+  form.append(source.field, alt.field, caption.field, title.field, size.field, error);
   content.append(form);
 
   const popover = createPopover({
@@ -207,8 +223,8 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
     }
     const attributes: Partial<ImageAttributes> = {
       src,
-      alt: alt.value.trim(),
-      title: title.value.trim(),
+      alt: alt.input.value.trim(),
+      title: title.input.value.trim(),
     };
     // The size is set only when the width or the image changed: the handles keep theirs.
     if (width.value !== initialWidth || src !== initialSrc) {
@@ -219,7 +235,7 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
     }
     const done = editing
       ? editor.commands.updateImage(attributes)
-      : editor.commands.insertFigure({ ...attributes, src, caption: caption.value.trim() });
+      : editor.commands.insertFigure({ ...attributes, src, caption: caption.input.value.trim() });
     if (!done) {
       showError(embedded ? 'image.tooLarge' : 'image.invalidUrl');
       url.focus();
@@ -253,12 +269,12 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
     url.value = chosen.name;
     showError(null);
     showPreview(src);
-    if (!alt.value) alt.focus();
+    if (!alt.input.value) alt.input.focus();
   };
 
   // The width field shows the natural width of the image as a hint.
   const onPreviewLoad = (): void => {
-    width.placeholder = preview.naturalWidth ? String(preview.naturalWidth) : 'px';
+    width.placeholder = preview.naturalWidth ? String(preview.naturalWidth) : '';
   };
 
   form.addEventListener('submit', onSubmit);
@@ -277,13 +293,13 @@ export function createImageDialog(editor: Editor, options: ImageDialogOptions): 
     initialSrc = text(attrs.src);
     embedded = initialSrc.startsWith('data:') ? initialSrc : null;
     url.value = embedded ? messages['image.embedded'] : initialSrc;
-    alt.value = text(attrs.alt);
-    title.value = text(attrs.title);
-    caption.value = '';
-    caption.hidden = editing !== null;
+    alt.input.value = text(attrs.alt);
+    title.input.value = text(attrs.title);
+    caption.input.value = '';
+    caption.field.hidden = editing !== null;
     initialWidth = typeof attrs.width === 'number' ? String(attrs.width) : '';
     width.value = initialWidth;
-    width.placeholder = 'px';
+    width.placeholder = '';
     const label = messages[editing ? 'image.edit' : 'image.insert'];
     content.setAttribute('aria-label', label);
     submit.textContent = messages[editing ? 'image.apply' : 'image.insertButton'];
