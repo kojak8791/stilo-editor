@@ -1056,6 +1056,11 @@
   background: var(--stilo-color-bg);
 }
 
+/* The page under the editor in full screen: no scroll, no scrollbar. A class, not `:has()`. */
+.stilo-fullscreen-page {
+  overflow: hidden;
+}
+
 /*
  * The browser's popover look (border, padding, colors) off. In a layer: it wins over the
  * browser's styles and loses to any rule of the page, so the border of the host's box stays.

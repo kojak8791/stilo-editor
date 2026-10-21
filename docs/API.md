@@ -315,7 +315,9 @@ the highlights; the searched text stays in the field for the next time. Outside 
 The `fullscreen` button makes the editor fill the browser window: the nearest element that
 holds both the toolbar's `container` and the editor (your editor box) gets the class
 `stilo-fullscreen`, and the editor's element `stilo-fullscreen__editor`. The button again, or
-<kbd>Esc</kbd> in the editor, leaves full screen, and the page scrolls back where it was. In
+<kbd>Esc</kbd> in the editor, leaves full screen, and the page scrolls back where it was.
+Meanwhile the page does not scroll and hides its scrollbar: `<html>` gets the class
+`stilo-fullscreen-page` (`overflow: hidden`). In
 full screen only the editor's element scrolls: the toolbar stays at the top of the window and
 the status bar at the bottom, whatever `sticky` and whatever your layout outside full screen
 (an editor that scrolls with the page or inside a frame). A rule of yours more specific than

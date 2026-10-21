@@ -15,12 +15,14 @@ All notable changes to `stilo-editor`. The format follows
   used when the page sets `color-scheme: dark` (or `light dark` to follow the system). Without
   `color-scheme`, and in browsers without `light-dark()`, nothing changes. The gap cursor takes
   the color of the text.
-- Toolbar item `fullscreen`, last in the default toolbar: the element that holds the toolbar
-  and the editor fills the browser window, over the whole page (the browser's top layer, through
-  the Popover API; older browsers: `--stilo-z-fullscreen`). Only the text scrolls: the toolbar
-  and the status bar stay at the top and the bottom, with or without `sticky`. <kbd>Esc</kbd> in
-  the editor leaves full screen, and the page scrolls back where it was. `ToolbarContext` gains `toggleFullscreen()` and
-  `isFullscreen()`, and `isActive` of a custom button receives the context as second argument.
+- Toolbar item `fullscreen`, last in the default toolbar: the element that holds the toolbar and the
+  editor fills the browser window, over the whole page (the browser's top layer, through the Popover
+  API; older browsers: `--stilo-z-fullscreen`). Only the text scrolls: the toolbar and the status
+  bar stay at the top and the bottom, with or without `sticky`. <kbd>Esc</kbd> in the editor leaves
+  full screen, and the page scrolls back where it was. Meanwhile the page does not scroll and shows
+  no scrollbar (class `stilo-fullscreen-page` on `<html>`). `ToolbarContext` gains
+  `toggleFullscreen()` and `isFullscreen()`, and `isActive` of a custom button receives the context
+  as second argument.
 
 ## [0.3.1] - 2026-10-20
 

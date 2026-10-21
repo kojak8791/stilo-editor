@@ -289,6 +289,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     }
     fullscreen?.classList.toggle('stilo-fullscreen', on);
     editorHost.classList.toggle('stilo-fullscreen__editor', on);
+    // The page under it does not scroll and shows no scrollbar.
+    editorHost.ownerDocument.documentElement.classList.toggle('stilo-fullscreen-page', on);
     if (fullscreen) setTopLayer(fullscreen, on);
     if (!on) {
       fullscreen = null;

@@ -1330,10 +1330,17 @@ describe('full screen', () => {
     return { editor, box, toolbar, button };
   }
 
+  // Some tests end in full screen: the page class must not reach the next one.
+  afterEach(() => {
+    document.documentElement.classList.remove('stilo-fullscreen-page');
+  });
+
+  /** Whether the box, the editor's element and the page are all in full screen, or none. */
   function isFullscreen(box: HTMLElement, editor: ReturnType<typeof createTestEditor>): boolean {
     const onBox = box.classList.contains('stilo-fullscreen');
     const onEditor = editor.view.dom.parentElement!.classList.contains('stilo-fullscreen__editor');
-    expect(onEditor).toBe(onBox);
+    const onPage = document.documentElement.classList.contains('stilo-fullscreen-page');
+    expect([onEditor, onPage]).toEqual([onBox, onBox]);
     return onBox;
   }
 

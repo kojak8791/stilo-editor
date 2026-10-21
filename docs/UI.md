@@ -429,4 +429,9 @@ whole screen.
 - **Scroll**: out of the flow, the box shortens the page and the browser scrolls it back to the
   top. The toolbar keeps the scroll positions of the scrolled ancestors when full screen starts
   and puts them back when it ends.
+- **The page under it** does not scroll and shows no scrollbar: the root element (`<html>`)
+  gets the class `stilo-fullscreen-page` (`overflow: hidden`). A class set by the toolbar, not
+  `:root:has(.stilo-fullscreen)`, which the browser would check at every change of the DOM,
+  typing included. A page that scrolls another element (`body` with its own `overflow`) keeps
+  its scrollbar.
 - The button works in a read-only editor. `destroy()` leaves full screen.
