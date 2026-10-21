@@ -162,23 +162,24 @@ functions are on `window.__stilo` in the browser console, e.g.
 
 ## Download size
 
-What an app built with Vite downloads, measured on 2026-10-20 with `npm run size`:
+What an app built with Vite downloads, measured on 2026-10-21 with `npm run size`:
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.3 kB | 85.5 kB |
-| Core and `defaultExtensions` | 344.5 kB | 108.4 kB |
-| Core, `defaultExtensions` and the default UI | 428.8 kB | 133.1 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.3 kB | 85.6 kB |
+| Core and `defaultExtensions` | 344.6 kB | 108.4 kB |
+| Core, `defaultExtensions` and the default UI | 430.2 kB | 133.5 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
 | React app with `useStiloEditor` and `defaultExtensions`, React excluded | 345.0 kB | 108.6 kB |
-| React app with `StiloEditor`, React excluded | 431.1 kB | 134.0 kB |
+| React app with `StiloEditor`, React excluded | 432.6 kB | 134.4 kB |
 | Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 345.0 kB | 108.6 kB |
-| Vue app with `StiloEditor`, Vue excluded | 431.4 kB | 134.0 kB |
+| Vue app with `StiloEditor`, Vue excluded | 432.8 kB | 134.5 kB |
 | Svelte app with the `stiloEditor` action and `defaultExtensions`, Svelte excluded | 344.7 kB | 108.5 kB |
-| Svelte app with `StiloEditor`, Svelte excluded | 431.5 kB | 134.0 kB |
+| Svelte app with `StiloEditor`, Svelte excluded | 432.9 kB | 134.5 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
-styles add 2.9 kB gzip. `npm run size` builds the library, bundles these apps from `dist/` like a
+styles of the default UI (`ui.css`) add 3.3 kB gzip, those of the content (`content.css`)
+1.9 kB. `npm run size` builds the library, bundles these apps from `dist/` like a
 consumer would, and fails if the minimal app contains packages that only unused extensions need,
 or the React, Vue or Svelte app with the primitive alone (`useStiloEditor`, `stiloEditor`)
 contains the default UI.
