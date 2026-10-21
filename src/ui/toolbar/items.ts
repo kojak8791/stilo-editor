@@ -10,6 +10,7 @@ import {
   ListChevronsUpDown,
   ListOrdered,
   ListTodo,
+  Maximize,
   Minus,
   Quote,
   Redo2,
@@ -73,6 +74,7 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
     'characters',
   ],
   ['find'],
+  ['fullscreen'],
 ];
 
 /** The options of the text case dropdown, in menu order. */
@@ -351,6 +353,16 @@ export const DEFAULT_ITEMS: Readonly<Record<string, ToolbarItem>> = {
       toolbar.toggleFindBar();
     },
     isAvailable: (e) => 'setSearch' in e.commands,
+  },
+  fullscreen: {
+    id: 'fullscreen',
+    kind: 'button',
+    icon: Maximize,
+    labelKey: 'toolbar.fullscreen',
+    run: (_e, toolbar) => {
+      toolbar.toggleFullscreen();
+    },
+    isActive: (_e, toolbar) => toolbar.isFullscreen(),
   },
   heading: headingDropdown(),
   fontFamily: fontFamilyDropdown(),

@@ -77,10 +77,11 @@ component. The types, with JSDoc, are in `src/ui/toolbar/types.ts`.
 
 `DEFAULT_TOOLBAR` groups: history; text style; font and size; inline formatting, link, clear
 formatting and text case; colors; alignment and line spacing; blocks, table and characters;
-find. The default buttons follow one rule: `run` calls `editor.commands.<command>()`,
-`isEnabled` its `.can()`, `isAvailable` is `'<command>' in editor.commands`. In a read-only
-editor every default item except `find` is disabled: `isEnabled` checks `editor.isEditable`
-first, so the toolbar does not run the commands' checks, which cost as much as a run there.
+find; full screen. The default buttons follow one rule: `run` calls
+`editor.commands.<command>()`, `isEnabled` its `.can()`, `isAvailable` is
+`'<command>' in editor.commands`. In a read-only editor every default item except `find` and
+`fullscreen` is disabled: `isEnabled` checks `editor.isEditable` first, so the toolbar does not
+run the commands' checks, which cost as much as a run there.
 
 | ID | Icon (`lucide`) | Shortcut | Command | `isActive` |
 |---|---|---|---|---|
@@ -100,7 +101,8 @@ first, so the toolbar does not run the commands' checks, which cost as much as a
 | `codeBlock` | `SquareCode` | `Mod-Alt-c` | `toggleCodeBlock` | `isActive('codeBlock')` |
 | `horizontalRule` | `Minus` | — | `setHorizontalRule` | — |
 
-The other buttons open a component through the `ToolbarContext` passed to `run`:
+The other buttons open a component through the `ToolbarContext` passed to `run` (and, for
+`fullscreen`, to `isActive`):
 
 | ID | Icon | Opens | Enabled |
 |---|---|---|---|
@@ -108,6 +110,7 @@ The other buttons open a component through the `ToolbarContext` passed to `run`:
 | `characters` | `FaceSlightlySmilingPlus` | character picker (§5.3) | always (needs `Text`) |
 | `table` | `Table` | table menu (§5.9) | in a table, or where `insertTable.can()` |
 | `find` | `Search`, `Mod-f` | find bar (§5.7) | always (needs `Search`) |
+| `fullscreen` | `Maximize` | full screen (§8), a toggle button | always |
 
 ### 3.2 DOM and ARIA
 
@@ -131,6 +134,7 @@ popover, character picker, font size field) take the focus themselves.
   `Home` / `End` go to the ends. Composite items (color split button, font size control) count
   as two or three items with the same `data-item`.
 - `Escape` in the toolbar focuses the editor. `Alt-F10` in the editor focuses the toolbar.
+- `Escape` in the editor leaves full screen (§8), unless an open popover takes it first.
 - `Mod-k` in the editor opens the link popover, `Mod-f` the find bar. The toolbar owns the link
   popover, the link bubble and the table handles even without the matching buttons.
 - The toolbar handles keys only from its own items, never from inside an open menu.
@@ -140,7 +144,7 @@ popover, character picker, font size field) take the focus themselves.
 `update()` recomputes `isActive` and `isEnabled` of every item. It runs once when the toolbar
 is created, then in a `requestAnimationFrame` after every `transaction` event, with at most one
 frame pending: many transactions in one frame cost one refresh, and the refresh never delays the
-transaction.
+transaction. Entering or leaving full screen refreshes at once.
 
 ### 3.6 Shortcuts in tooltips
 
@@ -320,35 +324,45 @@ trigger is too.
 - The content has its own styles and properties (`content.css`, usable without `ui.css`):
   [ARCHITECTURE.md §7.6](ARCHITECTURE.md#76-content-styles-contentcss).
 - Visible focus: `:focus-visible` outline in `--stilo-color-focus`.
+- **Dark theme** (SPEC F-809): every color default is a `light-dark(light, dark)` pair. The
+  browser picks the value from the `color-scheme` of the element, which the host sets: `dark`
+  on the page or on the editor's box, or `light dark` to follow the system. Without
+  `color-scheme` the page is light and nothing changes. No class and no JS: the native fields
+  and checkboxes follow the same `color-scheme`. A host property overrides both values; to keep
+  two, it writes its own `light-dark()`.
 
-| Property | Default | Use |
-|---|---|---|
-| `--stilo-font-family` | `system-ui, sans-serif` | UI text |
-| `--stilo-font-size` | `14px` | UI text |
-| `--stilo-color-text` | `#1f2328` | Text and icons |
-| `--stilo-color-muted` | `#59636e` | Shortcuts in menus, secondary text |
-| `--stilo-color-bg` | `#ffffff` | Popover and sticky container background |
-| `--stilo-color-toolbar-bg` | `#f9fbfd` | Toolbar background: barely darker than the content, lighter than the hover |
-| `--stilo-color-border` | `#d1d9e0` | Popover and field borders |
-| `--stilo-color-separator` | `#e4e8ec` | Group separators |
-| `--stilo-color-hover` | `#eef1f4` | Button and option hover |
-| `--stilo-color-hover-group` | `#f5f7f9` | The part of a split button that is not hovered |
-| `--stilo-color-active` | `#dde4ee` | Pressed button, checked option |
-| `--stilo-color-focus` | `#0969da` | Focus ring, primary button |
-| `--stilo-color-error` | `#d1242f` | Border of an invalid field |
-| `--stilo-radius` | `6px` | Buttons, popover |
-| `--stilo-toolbar-padding-y` / `-x` | `4px` / `2px` | Toolbar padding |
-| `--stilo-toolbar-gap` | `2px` | Space between the items of a group |
-| `--stilo-toolbar-group-gap` | `4px` | Space on each side of a group separator |
-| `--stilo-toolbar-separator-height` | `18px` | Height of a group separator |
-| `--stilo-toolbar-shadow` | `0 2px 6px rgb(0 0 0 / 0.08)` | Toolbar shadow while it is stuck at the top |
-| `--stilo-toolbar-sticky-top` | `0` | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
-| `--stilo-z-toolbar` | `1001` | Sticky toolbar: above the content and the popovers anchored to it |
-| `--stilo-button-size` | `30px` | Button height and min width |
-| `--stilo-icon-size` | `18px` | Icons |
-| `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | Popover |
-| `--stilo-z-popover` | `1000` | Popovers; the find bar one less, so popovers open over it |
-| `--stilo-menu-h1-size` … `-h6-size` | `1.5em`, `1.3em`, `1.15em`, `1em`, `1em`, `1em` | Heading preview in the menu |
+| Property | Light | Dark | Use |
+|---|---|---|---|
+| `--stilo-font-family` | `system-ui, sans-serif` | | UI text |
+| `--stilo-font-size` | `14px` | | UI text |
+| `--stilo-color-text` | `#1f2328` | `#f0f6fc` | Text and icons |
+| `--stilo-color-muted` | `#59636e` | `#9198a1` | Shortcuts in menus, secondary text |
+| `--stilo-color-bg` | `#ffffff` | `#0d1117` | Popover, sticky container and full screen background |
+| `--stilo-color-toolbar-bg` | `#f9fbfd` | `#151b23` | Toolbar background: barely different from the content, less than the hover |
+| `--stilo-color-border` | `#d1d9e0` | `#3d444d` | Popover and field borders |
+| `--stilo-color-separator` | `#e4e8ec` | `#2f3742` | Group separators |
+| `--stilo-color-hover` | `#eef1f4` | `#262c36` | Button and option hover |
+| `--stilo-color-hover-group` | `#f5f7f9` | `#1c222b` | The part of a split button that is not hovered |
+| `--stilo-color-active` | `#dde4ee` | `#2a3548` | Pressed button, checked option |
+| `--stilo-color-focus` | `#0969da` | `#1f6feb` | Focus ring, primary button |
+| `--stilo-color-error` | `#d1242f` | `#f85149` | Border of an invalid field |
+| `--stilo-radius` | `6px` | | Buttons, popover |
+| `--stilo-toolbar-padding-y` / `-x` | `4px` / `2px` | | Toolbar padding |
+| `--stilo-toolbar-gap` | `2px` | | Space between the items of a group |
+| `--stilo-toolbar-group-gap` | `4px` | | Space on each side of a group separator |
+| `--stilo-toolbar-separator-height` | `18px` | | Height of a group separator |
+| `--stilo-toolbar-shadow` | `0 2px 6px rgb(0 0 0 / 0.08)` | `rgb(1 4 9 / 0.6)` | Toolbar shadow while it is stuck at the top |
+| `--stilo-toolbar-sticky-top` | `0` | | Distance of the sticky toolbar from the top (e.g. a fixed page header) |
+| `--stilo-z-toolbar` | `1001` | | Sticky toolbar: above the content and the popovers anchored to it |
+| `--stilo-button-size` | `30px` | | Button height and min width |
+| `--stilo-icon-size` | `18px` | | Icons |
+| `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | `rgb(1 4 9 / 0.8)` | Popover |
+| `--stilo-z-popover` | `1000` | | Popovers; the find bar one less, so popovers open over it |
+| `--stilo-z-fullscreen` | `1040` | | The editor in full screen (§8), over the page |
+| `--stilo-menu-h1-size` … `-h6-size` | `1.5em`, `1.3em`, `1.15em`, `1em`, `1em`, `1em` | | Heading preview in the menu |
+
+The swatches of the color popover get a light inset border in dark, so that dark colors stay
+visible.
 
 Layout choices:
 
@@ -368,3 +382,32 @@ Layout choices:
   long name ends with `…`.
 - The find bar slides in with a CSS transition (`@starting-style`), none with
   `prefers-reduced-motion`.
+
+## 8. Full screen
+
+The `fullscreen` item (SPEC F-810) makes the editor fill the browser window, not the screen:
+the Fullscreen API does not work on iPhone, takes `Escape` for the browser and hides what the
+page shows outside the editor, its dialogs included. Together with `F11`, the editor fills the
+whole screen.
+
+- **Which element**: the nearest ancestor of the toolbar's container that also holds the editor,
+  found when full screen starts: the editor's box of the page, or the root element of the React,
+  Vue and Svelte components. A status bar inside that box comes along. It gets the class
+  `stilo-fullscreen`, the editor's element (the parent of `view.dom`) `stilo-fullscreen__editor`.
+- **Layout, pure CSS**: `position: fixed; inset: 0`, over the page with `--stilo-z-fullscreen`,
+  a flex column that scrolls itself (`overflow-y: auto`, `overscroll-behavior: contain`), so the
+  sticky toolbar sticks at its top (`top: 0`, whatever `--stilo-toolbar-sticky-top`). The
+  editor's element and the editable area grow to the bottom, so the status bar ends at the
+  bottom of the window. Margins, sizes, `max-*` and corner radius are reset; a rule of the page
+  more specific than one class (a fixed height, for example) wins: write it for
+  `:not(.stilo-fullscreen)`, as the demo does in `?fixed`. An ancestor with `transform`,
+  `filter` or `contain` makes `position: fixed` relative to it (a CSS limit): the editor then
+  fills that ancestor.
+- **Leaving**: the button again, or `Escape` in the editor. The listener is a capture on
+  `view.dom`, because ProseMirror prevents the default of every `Escape`; an open popover takes
+  the key first (capture on the document) and prevents its default, so the first `Escape`
+  closes the popover and the second one leaves full screen.
+- **Scroll**: out of the flow, the box shortens the page and the browser scrolls it back to the
+  top. The toolbar keeps the scroll positions of the scrolled ancestors when full screen starts
+  and puts them back when it ends.
+- The button works in a read-only editor. `destroy()` leaves full screen.

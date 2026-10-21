@@ -562,14 +562,17 @@ displays the saved HTML) gets the same look inside an element with that class.
 
 Colors are `--stilo-*` custom properties with a fallback in every `var()`, so the file works
 without `ui.css`; those shared with the UI (`--stilo-color-text`, `-muted`, `-border`, `-hover`,
-`-focus`) take the value set for the UI ([UI.md](UI.md) §7). Only the content uses:
+`-focus`) take the value set for the UI ([UI.md](UI.md) §7). Every fallback is a
+`light-dark(light, dark)` pair, so the content follows the `color-scheme` of the page like the
+UI. The text and the background of the content are the page's own; the gap cursor takes the
+text color (`currentColor`), like the caret. Only the content uses:
 
-| Property | Default | Use |
-|---|---|---|
-| `--stilo-color-selected-cell` | `rgb(9 105 218 / 0.12)` | Tint of selected table cells |
-| `--stilo-color-table-header` | `#f6f8fa` | Header cell background |
-| `--stilo-color-search-match` | `#fff1a8` | Search match |
-| `--stilo-color-search-current` | `#ffb347` | Selected search match |
+| Property | Light | Dark | Use |
+|---|---|---|---|
+| `--stilo-color-selected-cell` | `rgb(9 105 218 / 0.12)` | `rgb(56 139 253 / 0.2)` | Tint of selected table cells |
+| `--stilo-color-table-header` | `#f6f8fa` | `#151b23` | Header cell background |
+| `--stilo-color-search-match` | `#fff1a8` | `rgb(187 128 9 / 0.4)` | Search match |
+| `--stilo-color-search-current` | `#ffb347` | `#9e6a03` | Selected search match |
 
 ---
 
@@ -772,3 +775,4 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 | D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |
 | D-16 | Table column widths written twice: `data-colwidth` on the cells, read back, and a `<colgroup>` for display ([ADR 0005](decisions/0005-table-column-widths.md)) | 2026-10-14 |
 | D-17 | Framework wrappers are subpath exports (`stilo-editor/react`, `stilo-editor/vue`, `stilo-editor/svelte`) with the framework as an optional peer dependency; a primitive and a ready component; content not controlled ([ADR 0006](decisions/0006-framework-wrappers.md)) | 2026-10-20 |
+| D-18 | Dark theme through `light-dark()` color defaults and the page's `color-scheme`, no class and no JS; full screen fills the browser window with `position: fixed` on the box of the toolbar and the editor, not the Fullscreen API ([UI.md](UI.md) §7, §8) | 2026-10-21 |

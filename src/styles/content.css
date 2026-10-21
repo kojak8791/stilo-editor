@@ -4,7 +4,8 @@
  * prosemirror-view/style/prosemirror.css and prosemirror-gapcursor/style/gapcursor.css.
  * Copyright (C) 2015-2017 by Marijn Haverbeke and others, MIT license. Adapted to the lint
  * rules: no `white-space: pre-wrap` fallback before `break-spaces`, and the separator image
- * rule gains specificity instead of `!important`.
+ * rule gains specificity instead of `!important`. The gap cursor takes the color of the text,
+ * like the caret, instead of `black`, so that it follows a dark theme.
  */
 .ProseMirror {
   position: relative;
@@ -82,7 +83,7 @@ li.ProseMirror-selectednode:after {
   position: absolute;
   top: -2px;
   width: 20px;
-  border-top: 1px solid black;
+  border-top: 1px solid currentColor;
   animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
 }
 
@@ -130,7 +131,7 @@ li.ProseMirror-selectednode:after {
   bottom: 0;
   width: 4px;
   z-index: 20;
-  background-color: var(--stilo-color-focus, #0969da);
+  background-color: var(--stilo-color-focus, light-dark(#0969da, #1f6feb));
   pointer-events: none;
 }
 
@@ -146,7 +147,10 @@ li.ProseMirror-selectednode:after {
   right: 0;
   top: 0;
   bottom: 0;
-  background: var(--stilo-color-selected-cell, rgb(9 105 218 / 0.12));
+  background: var(
+    --stilo-color-selected-cell,
+    light-dark(rgb(9 105 218 / 0.12), rgb(56 139 253 / 0.2))
+  );
   pointer-events: none;
 }
 
@@ -208,7 +212,7 @@ li.ProseMirror-selectednode:after {
   margin: calc(0.5lh - 0.5em) 0 0;
   font-size: inherit;
   line-height: inherit;
-  accent-color: var(--stilo-color-focus, #0969da);
+  accent-color: var(--stilo-color-focus, light-dark(#0969da, #1f6feb));
   cursor: pointer;
 }
 
@@ -227,41 +231,41 @@ li.ProseMirror-selectednode:after {
   height: 1em;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--stilo-color-muted, #59636e);
+  border: 1px solid var(--stilo-color-muted, light-dark(#59636e, #9198a1));
   border-radius: 0.2em;
   color: #ffffff;
 }
 
 .stilo-content:not(.ProseMirror) ul[data-type="taskList"] > li[data-checked="true"]::before {
   content: "\2713";
-  border-color: var(--stilo-color-focus, #0969da);
-  background: var(--stilo-color-focus, #0969da);
+  border-color: var(--stilo-color-focus, light-dark(#0969da, #1f6feb));
+  background: var(--stilo-color-focus, light-dark(#0969da, #1f6feb));
 }
 
 .stilo-content [data-checked="true"] > .stilo-task-item__content > p:first-child,
 .stilo-content:not(.ProseMirror) [data-checked="true"] > p:first-child,
 .stilo-content:not(.ProseMirror) [data-checked="true"]:not(:has(> p)) {
-  color: var(--stilo-color-muted, #59636e);
+  color: var(--stilo-color-muted, light-dark(#59636e, #9198a1));
   text-decoration: line-through;
 }
 
 .stilo-content blockquote {
   margin: 0.5em 0;
   padding-left: 1em;
-  border-left: 3px solid var(--stilo-color-border, #d1d9e0);
-  color: var(--stilo-color-muted, #59636e);
+  border-left: 3px solid var(--stilo-color-border, light-dark(#d1d9e0, #3d444d));
+  color: var(--stilo-color-muted, light-dark(#59636e, #9198a1));
 }
 
 .stilo-content hr {
   margin: 1em 0;
   border: none;
-  border-top: 1px solid var(--stilo-color-border, #d1d9e0);
+  border-top: 1px solid var(--stilo-color-border, light-dark(#d1d9e0, #3d444d));
 }
 
 .stilo-content code {
   padding: 0.1em 0.3em;
   border-radius: 0.25em;
-  background: var(--stilo-color-hover, #eef1f4);
+  background: var(--stilo-color-hover, light-dark(#eef1f4, #262c36));
   font-family: ui-monospace, monospace;
   font-size: 0.9em;
 }
@@ -271,7 +275,7 @@ li.ProseMirror-selectednode:after {
   margin: 0.5em 0;
   padding: 0.75em 1em;
   border-radius: 0.375em;
-  background: var(--stilo-color-hover, #eef1f4);
+  background: var(--stilo-color-hover, light-dark(#eef1f4, #262c36));
   font-family: ui-monospace, monospace;
   font-size: 0.9em;
   line-height: 1.5;
@@ -292,11 +296,11 @@ li.ProseMirror-selectednode:after {
 .stilo-content td,
 .stilo-content th {
   padding: 6px 8px;
-  border: 1px solid var(--stilo-color-border, #d1d9e0);
+  border: 1px solid var(--stilo-color-border, light-dark(#d1d9e0, #3d444d));
 }
 
 .stilo-content th {
-  background: var(--stilo-color-table-header, #f6f8fa);
+  background: var(--stilo-color-table-header, light-dark(#f6f8fa, #151b23));
   font-weight: 600;
   text-align: start;
 }
@@ -345,9 +349,9 @@ li.ProseMirror-selectednode:after {
   height: min(48px, 50%);
   min-height: 16px;
   transform: translateY(-50%);
-  border: 1px solid #ffffff;
+  border: 1px solid light-dark(#ffffff, #0d1117);
   border-radius: 3px;
-  background: var(--stilo-color-text, #1f2328);
+  background: var(--stilo-color-text, light-dark(#1f2328, #f0f6fc));
   opacity: 0.7;
   cursor: ew-resize;
   touch-action: none;
@@ -374,7 +378,7 @@ li.ProseMirror-selectednode:after {
   content: attr(data-placeholder);
   float: left;
   height: 0;
-  color: var(--stilo-color-muted, #59636e);
+  color: var(--stilo-color-muted, light-dark(#59636e, #9198a1));
   pointer-events: none;
 }
 
@@ -399,9 +403,9 @@ li.ProseMirror-selectednode:after {
 
 /* Find and replace (T-043): the matches and the selected one */
 .stilo-search-match {
-  background: var(--stilo-color-search-match, #fff1a8);
+  background: var(--stilo-color-search-match, light-dark(#fff1a8, rgb(187 128 9 / 0.4)));
 }
 
 .stilo-search-match--current {
-  background: var(--stilo-color-search-current, #ffb347);
+  background: var(--stilo-color-search-current, light-dark(#ffb347, #9e6a03));
 }

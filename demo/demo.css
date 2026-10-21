@@ -2,8 +2,8 @@
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  color: #1f2328;
-  background: #f6f8fa;
+  color: light-dark(#1f2328, #f0f6fc);
+  background: light-dark(#f6f8fa, #010409);
 }
 
 .demo {
@@ -23,9 +23,9 @@ body {
 }
 
 .demo__editor {
-  border: 1px solid #d1d9e0;
+  border: 1px solid light-dark(#d1d9e0, #3d444d);
   border-radius: 6px;
-  background: #fff;
+  background: light-dark(#ffffff, #0d1117);
 }
 
 /*
@@ -47,16 +47,19 @@ body {
 .demo__output {
   margin: 0;
   padding: 12px;
-  border: 1px solid #d1d9e0;
+  border: 1px solid light-dark(#d1d9e0, #3d444d);
   border-radius: 6px;
-  background: #fff;
+  background: light-dark(#ffffff, #0d1117);
   font-size: 0.8125rem;
   white-space: pre-wrap;
   word-break: break-all;
 }
 
-/* `?fixed`: the editor has a fixed height and scrolls inside its own container. */
-.demo--fixed .demo__editor {
+/*
+ * `?fixed`: the editor has a fixed height and scrolls inside its own container. Not in full
+ * screen: this rule is more specific than `.stilo-fullscreen`, its height would win.
+ */
+.demo--fixed .demo__editor:not(.stilo-fullscreen) {
   display: flex;
   flex-direction: column;
   height: 400px;
@@ -70,4 +73,9 @@ body {
 .demo__option {
   display: block;
   margin: 0 0 8px;
+}
+
+/* `?dark`: the dark theme, through the color scheme of the page. */
+.demo-dark {
+  color-scheme: dark;
 }

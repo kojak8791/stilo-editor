@@ -42,6 +42,11 @@ rules replace the defaults:
 Colors, font and sizes of the toolbar are `--stilo-*` CSS custom properties:
 [API.md §6.5](../API.md#65-styles).
 
+Dark theme: every color has a light and a dark value, chosen by the CSS `color-scheme` of the
+page. `color-scheme: dark` turns the toolbar, the popovers and the content defaults dark,
+`light dark` follows the system, and without it the editor stays light. The text and the
+background of the content are those of your page: [API.md §6.5](../API.md#65-styles).
+
 ## 3. The component
 
 ```tsx
@@ -152,8 +157,8 @@ const [readOnly, setReadOnly] = useState(false);
 <StiloEditor editable={!readOnly} />
 ```
 
-In read-only mode the toolbar disables its buttons, except find, and the commands do not
-change the content: `editor.commands.toggleBold()` returns `false`, and so does `.can()`.
+In read-only mode the toolbar disables its buttons, except find and full screen, and the commands do
+not change the content: `editor.commands.toggleBold()` returns `false`, and so does `.can()`.
 Loading a document with `setHTML` still works. To only show a document, without the toolbar:
 `<StiloEditor editable={false} toolbar={false} />`.
 
@@ -195,6 +200,19 @@ The toolbar sticks with CSS only: an element with `overflow: hidden`, even only
 scrolls away with the content. Use `overflow-x: clip` there: it cuts the content the same way
 and keeps the toolbar in view. The `globals.css` of a new Next.js app sets `overflow-x: hidden` on
 `html, body`: change it to `clip`.
+
+The `fullscreen` button, last in the default toolbar, makes the editor fill the browser window: the
+component's `<div>` gets the class `stilo-fullscreen`, and <kbd>Esc</kbd> in the editor or the
+button again leaves full screen. A height you give through `className` wins over the full screen
+size: limit it to `:not(.stilo-fullscreen)`:
+
+```css
+.note-editor:not(.stilo-fullscreen) {
+  height: 400px;
+}
+```
+
+Details in [API.md §6.1](../API.md#61-toolbar).
 
 ## 9. Custom buttons
 

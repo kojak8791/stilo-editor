@@ -14,7 +14,7 @@ export interface ToolbarButton {
   /** Runs on click, after the editor got the focus back. */
   run(editor: Editor, context: ToolbarContext): void;
   /** Present = toggle button (`aria-pressed`). */
-  isActive?(editor: Editor): boolean;
+  isActive?(editor: Editor, context: ToolbarContext): boolean;
   /** Default: always enabled. */
   isEnabled?(editor: Editor): boolean;
   /** False = not rendered (e.g. its extension is disabled). Default: available. */
@@ -31,6 +31,13 @@ export interface ToolbarContext {
   toggleFindBar(): void;
   /** Opens or closes the table menu (no-op without the `table` item). T-045. */
   toggleTableMenu(): void;
+  /**
+   * Turns full screen on or off: the nearest element that holds the toolbar's container and the
+   * editor gets the class `stilo-fullscreen` and fills the window. T-066.
+   */
+  toggleFullscreen(): void;
+  /** Whether the editor is in full screen. */
+  isFullscreen(): boolean;
 }
 
 /** A dropdown of mutually exclusive options, or of actions (T-048) (T-014). */

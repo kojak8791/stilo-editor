@@ -132,6 +132,7 @@ export const en: Messages = {
   'table.splitCell': 'Split cell',
   'table.deleteTable': 'Delete table',
   'toolbar.find': 'Find and replace',
+  'toolbar.fullscreen': 'Full screen',
   'find.find': 'Find',
   'find.replace': 'Replace with',
   'find.previous': 'Previous match',

@@ -130,6 +130,7 @@ export type MessageKey =
   | 'table.splitCell'
   | 'table.deleteTable'
   | 'toolbar.find'
+  | 'toolbar.fullscreen'
   | 'find.find'
   | 'find.replace'
   | 'find.previous'

@@ -61,6 +61,31 @@ function resolveItem(item: string | ToolbarItem, editor: Editor): ToolbarItem | 
   return item;
 }
 
+/** The nearest element that holds both `container` and the editor: it goes to full screen. */
+function fullscreenBox(container: HTMLElement, editor: Editor): HTMLElement {
+  let box: HTMLElement | null = container;
+  while (box && !box.contains(editor.view.dom)) box = box.parentElement;
+  return box ?? container;
+}
+
+/** The scroll position of an element. */
+interface ScrollPosition {
+  element: Element;
+  top: number;
+  left: number;
+}
+
+/** The ancestors of `element` that are scrolled, with their positions. */
+function scrollPositions(element: HTMLElement): ScrollPosition[] {
+  const positions: ScrollPosition[] = [];
+  for (let node = element.parentElement; node; node = node.parentElement) {
+    if (node.scrollTop || node.scrollLeft) {
+      positions.push({ element: node, top: node.scrollTop, left: node.scrollLeft });
+    }
+  }
+  return positions;
+}
+
 /** Whether `event` moves the caret in `input`: arrows leave the field only at its ends. */
 function movesCaret(event: KeyboardEvent, input: HTMLInputElement): boolean {
   const { selectionStart, selectionEnd, value } = input;
@@ -234,7 +259,30 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     toggleCharacterPicker: () => characterPicker?.toggle(),
     toggleFindBar: () => findBar?.toggle(),
     toggleTableMenu: () => tableMenu?.toggle(),
+    toggleFullscreen: () => setFullscreen(fullscreen === null),
+    isFullscreen: () => fullscreen !== null,
   };
+  // The element in full screen (`null` outside full screen) and the scroll positions of its
+  // ancestors: out of the flow, it shortens the page, which scrolls back to the top.
+  let fullscreen: HTMLElement | null = null;
+  let scrolled: ScrollPosition[] = [];
+  function setFullscreen(on: boolean): void {
+    if (on === (fullscreen !== null)) return;
+    if (on) {
+      fullscreen = fullscreenBox(container, editor);
+      scrolled = scrollPositions(fullscreen);
+    }
+    fullscreen?.classList.toggle('stilo-fullscreen', on);
+    editorHost.classList.toggle('stilo-fullscreen__editor', on);
+    if (!on) {
+      fullscreen = null;
+      for (const { element, top, left } of scrolled) {
+        element.scrollTop = top;
+        element.scrollLeft = left;
+      }
+    }
+    update();
+  }
 
   container.appendChild(element);
   // The find bar floats under the toolbar, in the same (sticky) container.
@@ -312,7 +360,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const btnItem = item as ToolbarButton;
 
         if (btnItem.isActive) {
-          const active = btnItem.isActive(editor);
+          const active = btnItem.isActive(editor, context);
           btn.setAttribute('aria-pressed', active ? 'true' : 'false');
           if (active) {
             btn.classList.add('stilo-toolbar__button--active');
@@ -452,6 +500,16 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   };
   editor.view.dom.addEventListener('keydown', onEditorKeydown);
 
+  // Escape in the editor leaves full screen, unless an open popover took it first (capture on
+  // the document) and prevented its default. Capture here too: ProseMirror prevents the default
+  // of every Escape.
+  const onEditorEscape = (e: KeyboardEvent): void => {
+    if (isDestroyed || fullscreen === null || e.key !== 'Escape' || e.defaultPrevented) return;
+    e.preventDefault();
+    setFullscreen(false);
+  };
+  editor.view.dom.addEventListener('keydown', onEditorEscape, true);
+
   // Editor destroy: destroy toolbar
   const onEditorDestroy = (): void => {
     destroy();
@@ -474,6 +532,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     element.removeEventListener('click', onButtonClick);
     element.removeEventListener('keydown', onToolbarKeydown);
     editor.view.dom.removeEventListener('keydown', onEditorKeydown);
+    editor.view.dom.removeEventListener('keydown', onEditorEscape, true);
+    setFullscreen(false);
 
     for (const ddInstance of dropdownMap.values()) {
       ddInstance.destroy();

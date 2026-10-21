@@ -2,23 +2,25 @@
 
 /*
  * Default values of the custom properties (docs/UI.md §7). `:where()` has no specificity, so any
- * rule of the host page that sets them wins, whatever the order of the stylesheets.
+ * rule of the host page that sets them wins, whatever the order of the stylesheets. Colors have a
+ * light and a dark value: `light-dark()` picks one from the `color-scheme` of the element, which
+ * the page sets (`dark`, or `light dark` to follow the system); without it they are light.
  */
 :where(:root) {
   --stilo-font-family: system-ui, sans-serif;
   --stilo-font-size: 14px;
 
-  --stilo-color-text: #1f2328;
-  --stilo-color-muted: #59636e;
-  --stilo-color-bg: #ffffff;
-  --stilo-color-toolbar-bg: #f9fbfd;
-  --stilo-color-border: #d1d9e0;
-  --stilo-color-separator: #e4e8ec;
-  --stilo-color-hover: #eef1f4;
-  --stilo-color-hover-group: #f5f7f9;
-  --stilo-color-active: #dde4ee;
-  --stilo-color-focus: #0969da;
-  --stilo-color-error: #d1242f;
+  --stilo-color-text: light-dark(#1f2328, #f0f6fc);
+  --stilo-color-muted: light-dark(#59636e, #9198a1);
+  --stilo-color-bg: light-dark(#ffffff, #0d1117);
+  --stilo-color-toolbar-bg: light-dark(#f9fbfd, #151b23);
+  --stilo-color-border: light-dark(#d1d9e0, #3d444d);
+  --stilo-color-separator: light-dark(#e4e8ec, #2f3742);
+  --stilo-color-hover: light-dark(#eef1f4, #262c36);
+  --stilo-color-hover-group: light-dark(#f5f7f9, #1c222b);
+  --stilo-color-active: light-dark(#dde4ee, #2a3548);
+  --stilo-color-focus: light-dark(#0969da, #1f6feb);
+  --stilo-color-error: light-dark(#d1242f, #f85149);
 
   --stilo-radius: 6px;
 
@@ -28,14 +30,16 @@
   --stilo-toolbar-group-gap: 4px;
   --stilo-toolbar-separator-height: 18px;
   --stilo-toolbar-sticky-top: 0;
-  --stilo-toolbar-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+  --stilo-toolbar-shadow: 0 2px 6px light-dark(rgb(0 0 0 / 0.08), rgb(1 4 9 / 0.6));
   --stilo-z-toolbar: 1001;
 
   --stilo-button-size: 30px;
   --stilo-icon-size: 18px;
 
-  --stilo-popover-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  --stilo-popover-shadow: 0 8px 24px light-dark(rgb(0 0 0 / 0.12), rgb(1 4 9 / 0.8));
   --stilo-z-popover: 1000;
+
+  --stilo-z-fullscreen: 1040;
 
   --stilo-menu-h1-size: 1.5em;
   --stilo-menu-h2-size: 1.3em;
@@ -485,6 +489,8 @@
   padding: 6px 8px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: inherit;
   font: inherit;
 }
 
@@ -717,7 +723,7 @@
   width: 16px;
   height: 4px;
   border-radius: 1px;
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.2));
 }
 
 .stilo-toolbar__button.stilo-split__arrow {
@@ -794,7 +800,7 @@
   padding: 0;
   border: none;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.2));
   cursor: pointer;
 }
 
@@ -840,6 +846,8 @@
   padding: 4px 8px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
+  background: var(--stilo-color-bg);
+  color: inherit;
   font: inherit;
 }
 
@@ -993,4 +1001,41 @@
   color: var(--stilo-color-muted);
   font-family: var(--stilo-font-family);
   font-size: 12px;
+}
+
+/*
+ * Full screen (T-066): the element that holds the toolbar and the editor fills the window and
+ * scrolls itself, so that the sticky toolbar sticks at its top. A rule of the page more specific
+ * than one class (a fixed height, for example) wins over these values.
+ */
+.stilo-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--stilo-z-fullscreen);
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  border-radius: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--stilo-color-bg);
+}
+
+.stilo-fullscreen > .stilo-toolbar-host {
+  top: 0;
+}
+
+/* The editor's element and the editable area grow to the bottom of the window. */
+.stilo-fullscreen__editor {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.stilo-fullscreen__editor > .stilo-content {
+  flex: 1 0 auto;
 }

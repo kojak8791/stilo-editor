@@ -288,12 +288,13 @@ scrolls away with the content. Use `overflow-x: clip` there: it cuts the content
 and keeps the toolbar in view.
 
 A button whose extension is not loaded is not shown. In a read-only editor every item is
-disabled except `find`, and the find bar hides its replace row. Default item IDs: `undo`, `redo`,
+disabled except `find` and `fullscreen`, and the find bar hides its replace row. Default item
+IDs: `undo`, `redo`,
 `heading`, `fontFamily`, `fontSize`, `bold`, `italic`, `underline`, `strike`, `code`,
 `subscript`, `superscript`,
 `link`, `clearFormatting`, `textCase`, `textColor`, `highlight`, `textAlign`, `lineHeight`,
 `bulletList`, `orderedList`, `taskList`,
-`blockquote`, `codeBlock`, `horizontalRule`, `table`, `characters`, `find`.
+`blockquote`, `codeBlock`, `horizontalRule`, `table`, `characters`, `find`, `fullscreen`.
 
 The `table` button opens a grid to insert a table (with or without a header row); with the
 cursor in a table it opens the table operations instead: rows, columns, merge and split,
@@ -310,6 +311,29 @@ searches 350 ms after the last keystroke and only from 2 characters; <kbd>Enter<
 <kbd>Shift</kbd>+<kbd>Enter</kbd> to the previous one, <kbd>Esc</kbd> closes the bar and clears
 the highlights; the searched text stays in the field for the next time. Outside the editor,
 <kbd>Ctrl</kbd>+<kbd>F</kbd> stays the browser's find.
+
+The `fullscreen` button makes the editor fill the browser window: the nearest element that
+holds both the toolbar's `container` and the editor (your editor box) gets the class
+`stilo-fullscreen`, and the editor's element `stilo-fullscreen__editor`. The button again, or
+<kbd>Esc</kbd> in the editor, leaves full screen, and the page scrolls back where it was. The
+box scrolls by itself and the sticky toolbar stays at its top. A rule of yours more specific than
+one class, such as a fixed height, wins over the full screen size: limit it to
+`:not(.stilo-fullscreen)`. The box covers the page with `--stilo-z-fullscreen` (`1040`); an
+ancestor with `transform`, `filter` or `contain` keeps it inside that ancestor (a CSS limit).
+
+```css
+.my-editor:not(.stilo-fullscreen) {
+  height: 400px;
+}
+
+/* A narrower column of text in full screen */
+.my-editor.stilo-fullscreen .stilo-content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+```
 
 ```ts
 createToolbar(editor, {
@@ -378,8 +402,8 @@ createToolbar(editor, {
 | `icon` | A `lucide` icon |
 | `labelKey` | Key of the label in `messages`; a missing key is shown as is |
 | `shortcut` | Shortcut shown in the tooltip, in keymap notation (`'Mod-b'`); the shortcut itself is defined by an extension |
-| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar, `context.toggleTableMenu()` the table menu |
-| `isActive(editor)` | Optional: makes it a toggle button and tells when it is pressed |
+| `run(editor, context)` | Runs on click. `context.openLinkPopover()` opens the link popover, `context.toggleFindBar()` opens or closes the find bar, `context.toggleTableMenu()` the table menu, `context.toggleFullscreen()` turns full screen on or off |
+| `isActive(editor, context)` | Optional: makes it a toggle button and tells when it is pressed; `context.isFullscreen()` tells whether the editor is in full screen |
 | `isEnabled(editor)` | Optional, default always enabled. A button that changes the content: `editor.isEditable && …`, so that it is disabled in a read-only editor |
 | `isAvailable(editor)` | Optional: `false` hides the button |
 
@@ -416,6 +440,24 @@ the editor:
 The full list is in [UI.md §7](UI.md#7-styles-srcstylesuicss). The content is styled by
 `content.css` under the class `stilo-content`: rules such as `.stilo-content h2`, loaded after
 it, change it.
+
+**Dark theme.** Every color has a light and a dark value, chosen by the CSS `color-scheme` of
+the page: set `dark` to have the dark theme, or `light dark` to follow the system. Without
+`color-scheme` the editor is light. The text and the background of the content are those of
+your page, which sets its own colors for dark too:
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+.my-editor {
+  background: light-dark(#ffffff, #0d1117);
+}
+```
+
+A color you set replaces both values; write `light-dark()` to keep two:
+`--stilo-color-focus: light-dark(#7c3aed, #a78bfa);`.
 
 The editable area has a small default padding (`12px 16px`) and height (`min-height: 6em`) and
 no border. Any rule of yours replaces them, whatever its specificity or order:

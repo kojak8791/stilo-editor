@@ -55,7 +55,7 @@ describe('toolbar', () => {
     const groups = [...toolbar.element.children].filter(
       (el) => el.getAttribute('role') === 'group',
     );
-    expect(groups.length).toBe(8);
+    expect(groups.length).toBe(9);
     expect(toolbar.element.firstElementChild).toBe(groups[0]);
 
     const items = [...toolbar.element.querySelectorAll('[data-item]')].map((el) =>
@@ -94,6 +94,7 @@ describe('toolbar', () => {
       'table',
       'characters',
       'find',
+      'fullscreen',
     ]);
 
     toolbar.destroy();
@@ -448,14 +449,15 @@ describe('toolbar', () => {
     expect(byId('redo').getAttribute('tabindex')).toBe('0');
     expect(byId('undo').getAttribute('tabindex')).toBe('-1');
     expect(from('redo', 'ArrowLeft')).toBe('undo');
-    expect(from('undo', 'ArrowLeft')).toBe('find');
+    expect(from('undo', 'ArrowLeft')).toBe('fullscreen');
+    expect(from('fullscreen', 'ArrowLeft')).toBe('find');
     expect(from('find', 'ArrowLeft')).toBe('characters');
     expect(from('characters', 'ArrowLeft')).toBe('table');
     expect(from('table', 'ArrowLeft')).toBe('horizontalRule');
     expect(from('horizontalRule', 'ArrowLeft')).toBe('codeBlock');
-    expect(from('find', 'ArrowRight')).toBe('undo');
+    expect(from('fullscreen', 'ArrowRight')).toBe('undo');
     expect(from('redo', 'ArrowRight')).toBe('heading');
-    expect(from('bold', 'End')).toBe('find');
+    expect(from('bold', 'End')).toBe('fullscreen');
     expect(from('bold', 'Home')).toBe('undo');
     expect(items.filter((el) => el.getAttribute('tabindex') === '0')).toEqual([byId('undo')]);
 
@@ -1276,7 +1278,7 @@ describe('read-only', () => {
       .map((control) => control.dataset.item ?? control.className);
   }
 
-  it('disables every default item except find, and enables them again', () => {
+  it('disables every default item except find and full screen, and enables them again', () => {
     const editor = createTestEditor({ html: '<p>[ab]</p>' });
     attachEditor(editor);
     vi.useFakeTimers();
@@ -1285,7 +1287,7 @@ describe('read-only', () => {
 
     editor.setEditable(false);
     vi.advanceTimersToNextFrame();
-    expect(enabledControls(toolbar)).toEqual(['find']);
+    expect(enabledControls(toolbar)).toEqual(['find', 'fullscreen']);
     const input = toolbar.element.querySelector<HTMLInputElement>('.stilo-font-size__input')!;
     expect(input.readOnly).toBe(true);
 
@@ -1312,5 +1314,110 @@ describe('read-only', () => {
     const toolbar = createToolbar(editor, { container: createToolbarContainer() });
     toolbar.element.querySelector<HTMLButtonElement>('[data-item="bold"]')!.click();
     expect(editor.getHTML()).toBe('<p>ab</p>');
+  });
+});
+
+describe('full screen', () => {
+  /** A box with the toolbar's container and the editor's element, as a page lays them out. */
+  function setup(options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html: '<p>a|b</p>' });
+    const box = document.createElement('div');
+    const container = document.createElement('div');
+    box.append(container, editor.view.dom.parentElement!);
+    document.body.append(box);
+    const toolbar = createToolbar(editor, { container, ...options });
+    const button = toolbar.element.querySelector<HTMLButtonElement>('[data-item="fullscreen"]');
+    return { editor, box, toolbar, button };
+  }
+
+  function isFullscreen(box: HTMLElement, editor: ReturnType<typeof createTestEditor>): boolean {
+    const onBox = box.classList.contains('stilo-fullscreen');
+    const onEditor = editor.view.dom.parentElement!.classList.contains('stilo-fullscreen__editor');
+    expect(onEditor).toBe(onBox);
+    return onBox;
+  }
+
+  it('the button puts the box of the toolbar and the editor in full screen, and back', () => {
+    const { editor, box, button } = setup();
+    expect(button!.title).toBe('Full screen');
+    expect(button!.getAttribute('aria-pressed')).toBe('false');
+
+    button!.click();
+    expect(isFullscreen(box, editor)).toBe(true);
+    expect(button!.getAttribute('aria-pressed')).toBe('true');
+    expect(document.activeElement).toBe(editor.view.dom);
+
+    button!.click();
+    expect(isFullscreen(box, editor)).toBe(false);
+    expect(button!.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('puts the container in full screen when it holds the editor', () => {
+    const editor = createTestEditor({ html: '<p>ab</p>' });
+    const container = createToolbarContainer();
+    container.append(editor.view.dom.parentElement!);
+    const toolbar = createToolbar(editor, { container });
+    toolbar.element.querySelector<HTMLButtonElement>('[data-item="fullscreen"]')!.click();
+    expect(isFullscreen(container, editor)).toBe(true);
+  });
+
+  it('Escape in the editor leaves full screen', () => {
+    const { editor, box, button } = setup();
+    button!.click();
+    press(editor.view.dom, 'Escape');
+    expect(isFullscreen(box, editor)).toBe(false);
+    expect(button!.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('leaves Escape to an open popover, which prevents its default', () => {
+    const { editor, box, button } = setup();
+    button!.click();
+    const popover = (e: KeyboardEvent): void => e.preventDefault();
+    document.addEventListener('keydown', popover, true);
+    press(editor.view.dom, 'Escape');
+    document.removeEventListener('keydown', popover, true);
+    expect(isFullscreen(box, editor)).toBe(true);
+  });
+
+  it('scrolls the page back where it was when it leaves full screen', () => {
+    const { editor, box, button } = setup();
+    // jsdom does not scroll: a scrolled ancestor, which the browser clamps while the page is short.
+    const page = box.parentElement!;
+    let scrollTop = 200;
+    Object.defineProperty(page, 'scrollTop', { get: () => scrollTop, set: (v) => (scrollTop = v) });
+    button!.click();
+    scrollTop = 0;
+    press(editor.view.dom, 'Escape');
+    expect(scrollTop).toBe(200);
+  });
+
+  it('works in a read-only editor', () => {
+    const { editor, box, button } = setup();
+    editor.setEditable(false);
+    button!.click();
+    expect(isFullscreen(box, editor)).toBe(true);
+  });
+
+  it('destroy() leaves full screen', () => {
+    const { editor, box, toolbar, button } = setup();
+    button!.click();
+    toolbar.destroy();
+    expect(isFullscreen(box, editor)).toBe(false);
+  });
+
+  it('a custom button toggles it through the context, which isActive receives', () => {
+    const custom: ToolbarButton = {
+      id: 'maximize',
+      kind: 'button',
+      icon: Star,
+      labelKey: 'Maximize',
+      run: (_e, toolbar) => toolbar.toggleFullscreen(),
+      isActive: (_e, toolbar) => toolbar.isFullscreen(),
+    };
+    const { editor, box, toolbar } = setup({ items: [[custom]] });
+    const button = toolbar.element.querySelector<HTMLButtonElement>('[data-item="maximize"]')!;
+    button.click();
+    expect(isFullscreen(box, editor)).toBe(true);
+    expect(button.getAttribute('aria-pressed')).toBe('true');
   });
 });

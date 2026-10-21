@@ -29,6 +29,11 @@ if (params.has('fixed')) {
   document.querySelector('.demo')!.classList.add('demo--fixed');
 }
 
+// `?dark`: the dark theme.
+if (params.has('dark')) {
+  document.documentElement.classList.add('demo-dark');
+}
+
 // `?nomarkdown`: Markdown shortcuts off.
 const editor = new Editor({
   element: document.querySelector<HTMLElement>('#editor')!,

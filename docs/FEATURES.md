@@ -108,6 +108,13 @@ the Markdown shortcuts off.
 
 <img src="https://raw.githubusercontent.com/kojak8791/stilo-editor/main/assets/screenshot-find.png" alt="The find bar under the toolbar: five matches of espresso highlighted, the current one in orange, and ristretto in the replace field" width="600">
 
+## View
+
+| Feature | Keyboard | Markdown | Notes |
+|---|---|---|---|
+| Full screen | | | The last toolbar button: the toolbar and the text fill the browser window; <kbd>Esc</kbd> in the text, or the button again, leaves it |
+| Dark theme | | | The toolbar, the popovers and the content defaults turn dark when the page sets `color-scheme: dark`, or follow the system with `color-scheme: light dark` |
+
 ## Keyboard and accessibility
 
 Most shortcuts are the ones of Google Docs; the others follow
