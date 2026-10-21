@@ -39,10 +39,15 @@ describe('StiloEditor', () => {
   });
 
   it('passes the editor options, not as attributes of the element', async () => {
-    const { container } = await mountEditor({ ariaLabel: 'Notes', editable: false });
+    const { container, editor } = await mountEditor({
+      ariaLabel: 'Notes',
+      editable: false,
+      markdownShortcuts: false,
+    });
     const content = container.querySelector('.stilo-content');
     expect(content?.getAttribute('aria-label')).toBe('Notes');
     expect(content?.getAttribute('contenteditable')).toBe('false');
+    expect(editor.state.plugins.some((p) => 'isInputRules' in p.spec)).toBe(false);
     expect(container.firstElementChild?.hasAttribute('aria-label')).toBe(false);
   });
 

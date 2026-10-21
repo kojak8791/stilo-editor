@@ -85,7 +85,7 @@ changes. To create the editor again with other props, wrap the component in `{#k
 | `extensions` | `[defaultExtensions()]` | Extensions to load (§12) |
 | `content` | empty document | Initial HTML (§5) |
 | `editable` | `true` | Whether the content can be edited (§6) |
-| `autofocus`, `ariaLabel`, `compactParagraphs` | | The editor options: [API.md §2.1](../API.md#21-options) |
+| `autofocus`, `ariaLabel`, `compactParagraphs`, `markdownShortcuts` | | The editor options: [API.md §2.1](../API.md#21-options) |
 | `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options `items` and `sticky` (§8) |
 | `statusBar` | `false` | Shows the word and character count under the editor |
 | `messages` | `en` | Strings of the toolbar and the status bar (§10) |

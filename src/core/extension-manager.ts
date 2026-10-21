@@ -115,8 +115,15 @@ export class ExtensionManager {
    * 3. one `keymap()` plugin per extension that defines a keymap, in extension order;
    * 4. all extension plugins, in extension order;
    * 5. `keymap(baseKeymap)` from prosemirror-commands.
+   *
+   * With `withInputRules` `false` (editor option `markdownShortcuts: false`), no `inputRules` of
+   * the extensions is called and plugins 1 and 2 are left out.
    */
-  createPlugins(editor: Editor, emit: ExtensionContext<object>['emit']): Plugin[] {
+  createPlugins(
+    editor: Editor,
+    emit: ExtensionContext<object>['emit'],
+    withInputRules = true,
+  ): Plugin[] {
     const rules: InputRule[] = [];
     const keymaps: Plugin[] = [];
     const plugins: Plugin[] = [];
@@ -129,17 +136,14 @@ export class ExtensionManager {
         assertUnique(this.commandFactories.has(name), 'command', name);
         this.commandFactories.set(name, factory);
       }
-      rules.push(...(spec.inputRules?.(ctx) ?? []));
+      if (withInputRules) rules.push(...(spec.inputRules?.(ctx) ?? []));
       const bindings = spec.keymap?.(ctx);
       if (bindings) keymaps.push(keymap(bindings));
       plugins.push(...(spec.plugins?.(ctx) ?? []));
     }
-    return [
-      inputRules({ rules }),
-      keymap({ Backspace: undoInputRule }),
-      ...keymaps,
-      ...plugins,
-      keymap(baseKeymap),
-    ];
+    const rulePlugins = withInputRules
+      ? [inputRules({ rules }), keymap({ Backspace: undoInputRule })]
+      : [];
+    return [...rulePlugins, ...keymaps, ...plugins, keymap(baseKeymap)];
   }
 }

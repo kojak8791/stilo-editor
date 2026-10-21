@@ -5,7 +5,9 @@ What Stilo does with `defaultExtensions` and the default toolbar. Try each featu
 [API.md](API.md).
 
 On macOS, use <kbd>⌘</kbd> for <kbd>Ctrl</kbd> and <kbd>Option</kbd> for <kbd>Alt</kbd>. The
-*Markdown* column is what you type to get the format as you write.
+*Markdown* column is what you type to get the format as you write. <kbd>Backspace</kbd> right
+after a conversion gives back the typed text; the editor option `markdownShortcuts: false` turns
+the Markdown shortcuts off.
 
 ## Text
 

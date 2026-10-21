@@ -31,7 +31,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-010 | HTML sanitization of all input (setHTML, paste, drop) with DOMPurify | M1 | See ARCHITECTURE §8 |
 | F-011 | Placeholder text on empty document | M1 | Option `placeholder` |
 | F-012 | Drop cursor and gap cursor | M1 | `prosemirror-dropcursor`, `prosemirror-gapcursor` |
-| F-013 | Markdown shortcuts can be turned off: an editor option disables every Markdown input rule, so `#`, `>`, `*`, ... are typed as text | M2 | Option name, and whether a single extension can turn off its own rules, decided with the task. `Backspace` right after a conversion already undoes it |
+| F-013 | Markdown shortcuts can be turned off: an editor option disables every Markdown input rule, so `#`, `>`, `*`, ... are typed as text | M2 | Option `markdownShortcuts`, default `true`, set when the editor is created. Per extension: not planned. `Backspace` right after a conversion undoes it |
 
 ## 2. History (`F-1xx`)
 

@@ -6,6 +6,12 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Editor option `markdownShortcuts` (default `true`): `false` turns the Markdown shortcuts off,
+  so `#`, `>`, `*` and the other Markdown characters are typed as text. Also a prop of the
+  React, Vue and Svelte components.
+
 ## [0.3.1] - 2026-10-20
 
 ### Changed

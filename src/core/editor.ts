@@ -71,8 +71,8 @@ export class Editor {
    * Creates the editor:
    *
    * 1. `ExtensionManager` from `options.extensions` → `schema`;
-   * 2. `createPlugins(this, emit)`, then the core `createDropMovePlugin()`; command runners are built
-   *    from the manager's commands;
+   * 2. `createPlugins(this, emit, markdownShortcuts)`, then the core `createDropMovePlugin()`;
+   *    command runners are built from the manager's commands;
    * 3. initial document from `parseHTML(schema, options.content ?? '')`;
    * 4. `EditorView` mounted inside `options.element`, with attributes `class="stilo-content"`,
    *    `role="textbox"`, `aria-multiline="true"`, `aria-label` (if given); `editable` from
@@ -86,7 +86,10 @@ export class Editor {
     this.schema = this.manager.schema;
     const emit: ExtensionContext<object>['emit'] = (event, payload) =>
       this.emitter.emit(event, payload);
-    this.plugins = [...this.manager.createPlugins(this, emit), createDropMovePlugin()];
+    this.plugins = [
+      ...this.manager.createPlugins(this, emit, options.markdownShortcuts ?? true),
+      createDropMovePlugin(),
+    ];
     this.commands = this.createRunners();
     this.compactParagraphs = options.compactParagraphs ?? true;
 

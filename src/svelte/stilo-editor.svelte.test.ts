@@ -30,11 +30,12 @@ describe('StiloEditor', () => {
   });
 
   it('puts the attributes on its element and the editor options on the editor', () => {
-    const { container } = mountEditor({
+    const { container, editor } = mountEditor({
       class: 'my-editor',
       id: 'notes',
       ariaLabel: 'Notes',
       editable: false,
+      markdownShortcuts: false,
     });
     const root = container.firstElementChild;
     expect(root?.className).toBe('my-editor');
@@ -43,6 +44,7 @@ describe('StiloEditor', () => {
     const content = container.querySelector('.stilo-content');
     expect(content?.getAttribute('aria-label')).toBe('Notes');
     expect(content?.getAttribute('contenteditable')).toBe('false');
+    expect(editor.state.plugins.some((p) => 'isInputRules' in p.spec)).toBe(false);
   });
 
   it('passes the toolbar, the status bar and the messages', () => {

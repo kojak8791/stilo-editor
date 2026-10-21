@@ -70,6 +70,12 @@ export interface EditorOptions {
    * `<li><p>text</p></li>`. Default: `true`. See docs/decisions/0001-tight-list-items.md.
    */
   compactParagraphs?: boolean;
+  /**
+   * Markdown shortcuts: typed Markdown syntax becomes formatting (`# ` a heading, `**text**`
+   * bold). `false` turns off the input rules of every extension, so the characters stay text.
+   * Default: `true`.
+   */
+  markdownShortcuts?: boolean;
 }
 
 /** Options of `setHTML` / `setJSON`. */

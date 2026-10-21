@@ -1,8 +1,10 @@
 import { history, undo } from 'prosemirror-history';
 import { type Command, Selection } from 'prosemirror-state';
 import { describe, expect, it, vi } from 'vitest';
+import { typeText } from '../../tests/helpers';
 import { createCoreEditor, select, selectNode } from '../../tests/helpers/core';
-import type { Editor } from './editor';
+import { defaultExtensions } from '../extensions';
+import { Editor } from './editor';
 import { defineExtension } from './extension';
 import type { CommandRunner, CommandRunners } from './types';
 
@@ -94,6 +96,42 @@ describe('Editor: compactParagraphs', () => {
     expect(editor.getHTML()).toBe('<ul><li><p>a</p></li></ul>');
     editor.setHTML(loose);
     expect(editor.getHTML()).toBe(loose);
+  });
+});
+
+describe('Editor: markdownShortcuts', () => {
+  const sources = [
+    '# Title',
+    '> Quote',
+    '- Item',
+    '1. Item',
+    '[ ] Task',
+    '``` ',
+    '---',
+    '**bold**',
+    '*italic*',
+    '_italic_',
+    '`code`',
+    '~~strike~~',
+    '==mark==',
+  ];
+  const typed = (text: string, markdownShortcuts?: boolean) => {
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [defaultExtensions()],
+      markdownShortcuts,
+    });
+    typeText(editor, text);
+    return editor.getHTML();
+  };
+  const asText = (text: string) => `<p>${text.replace('>', '&gt;')}</p>`;
+
+  it.each(sources)('turns %s into formatting by default', (text) => {
+    expect(typed(text)).not.toBe(asText(text));
+  });
+
+  it.each(sources)('keeps %s as text with markdownShortcuts: false', (text) => {
+    expect(typed(text, false)).toBe(asText(text));
   });
 });
 

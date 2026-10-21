@@ -59,6 +59,7 @@ createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar
 | `autofocus` | `boolean \| 'start' \| 'end'` | `false` | Focus the editor after creation, optionally with the cursor at the start or end |
 | `ariaLabel` | `string` | none | `aria-label` of the editable area |
 | `compactParagraphs` | `boolean` | `true` | Write a list item holding one plain paragraph as `<li>text</li>`; `false` writes `<li><p>text</p></li>` |
+| `markdownShortcuts` | `boolean` | `true` | Markdown typed in the text becomes formatting (`# ` a heading, `**text**` bold); `false` keeps the characters as text. The list: [FEATURES.md](FEATURES.md) |
 
 The editable element has the class `stilo-content`, `role="textbox"` and
 `aria-multiline="true"`.

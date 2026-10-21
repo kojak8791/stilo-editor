@@ -60,6 +60,7 @@ const PROPS = {
   },
   ariaLabel: null,
   compactParagraphs: { type: Boolean, default: undefined },
+  markdownShortcuts: { type: Boolean, default: undefined },
   toolbar: { type: [Boolean, Object] as PropType<StiloEditorProps['toolbar']>, default: true },
   statusBar: { type: Boolean, default: false },
   messages: null,

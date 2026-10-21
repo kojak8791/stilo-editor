@@ -130,4 +130,15 @@ describe('ExtensionManager', () => {
     expect(plugins.at(-2)).toBe(plugin);
     expect(plugins.at(-1)?.props.handleKeyDown).toBeTypeOf('function');
   });
+
+  it('leaves out the input rules and undoInputRule without input rules', () => {
+    const inputRules = vi.fn(() => []);
+    const extensions = () => [...base(), defineExtension({ name: 'r', inputRules })()];
+    const all = new ExtensionManager(extensions()).createPlugins({} as Editor, () => {});
+    inputRules.mockClear();
+    const plugins = new ExtensionManager(extensions()).createPlugins({} as Editor, () => {}, false);
+    expect(inputRules).not.toHaveBeenCalled();
+    expect(plugins).toHaveLength(all.length - 2);
+    expect(plugins.some((p) => 'isInputRules' in p.spec)).toBe(false);
+  });
 });

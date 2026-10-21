@@ -37,10 +37,15 @@ describe('StiloEditor', () => {
   });
 
   it('passes the editor options', () => {
-    const { container } = renderEditor({ ariaLabel: 'Notes', editable: false });
+    const { container, editor } = renderEditor({
+      ariaLabel: 'Notes',
+      editable: false,
+      markdownShortcuts: false,
+    });
     const content = container.querySelector('.stilo-content');
     expect(content?.getAttribute('aria-label')).toBe('Notes');
     expect(content?.getAttribute('contenteditable')).toBe('false');
+    expect(editor.state.plugins.some((p) => 'isInputRules' in p.spec)).toBe(false);
   });
 
   it('puts the toolbar before the editor in the element with className', () => {

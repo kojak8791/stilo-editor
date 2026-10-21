@@ -387,7 +387,8 @@ result. `editor.commands.x.can(...args)` runs it without `dispatch`, except in r
    `defaultExtensions` order.
 5. Plugin order: input rules plugin, then `Backspace: undoInputRule` (it applies only right after
    an input rule, so it may take precedence over every extension), then keymaps (by priority),
-   then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last.
+   then other plugins (by priority), then `baseKeymap` from `prosemirror-commands` last. With
+   `markdownShortcuts: false` the first two are left out and no `inputRules` is called.
 
 ### 6.3 Default extensions
 

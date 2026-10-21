@@ -29,11 +29,13 @@ if (params.has('fixed')) {
   document.querySelector('.demo')!.classList.add('demo--fixed');
 }
 
+// `?nomarkdown`: Markdown shortcuts off.
 const editor = new Editor({
   element: document.querySelector<HTMLElement>('#editor')!,
   extensions: [defaultExtensions({ placeholder: { placeholder: 'Write something…' } })],
   content,
   ariaLabel: 'Demo editor',
+  markdownShortcuts: !params.has('nomarkdown'),
 });
 
 createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
