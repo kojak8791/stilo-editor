@@ -1,6 +1,6 @@
 # Backlog
 
-The history of the work done and the plan of the next tasks, derived from `docs/SPEC.md` §13
+The history of the work done and the plan of the next tasks, derived from `docs/SPEC.md` §14
 (roadmap). A task is one branch (`task/T-NNN-short-title`); its record is the commit history,
 and its decisions live in `docs/` (ARCHITECTURE, UI, ADRs). This is a plan, not a contract: rows
 may be split or merged when a task starts.
@@ -121,6 +121,8 @@ before the remaining M2 features and before collaboration.
 | T-064 | Images, second part: block `figure` with a plain-text caption, drop of image files as a data URL (the same size limit as paste), an insert dialog (local file or remote URL, preview, `alt`, `title`, caption) that inserts a `figure`, editing the properties of an image or a figure, resize of both nodes keeping the aspect ratio | F-602, F-604…F-607, F-806 | todo |
 | T-065 | Bubble menu on a text selection: its content and how it relates to the toolbar decided at the start | F-807 | todo |
 | T-066 | Fullscreen mode and dark theme: a dark set of the `--stilo-*` custom properties; the gap cursor line of `content.css` (`.ProseMirror-gapcursor:after`, a fixed `black` today) takes a color that follows the theme | F-809, F-810 | todo |
+| T-071 | Markdown shortcuts can be turned off: an editor option that disables every Markdown input rule, so their characters are typed as text; its name, and whether a single extension can turn off its own rules, decided at the start; documented next to the `Backspace` that undoes a conversion | F-013 | todo |
+| T-072 | Compact toolbar (optional) for narrow editors, items on two levels, built from the same item configuration as the toolbar; designed together with the bubble menu (T-065) and done right after it | F-813 | todo |
 
 ## Notes for later milestones
 

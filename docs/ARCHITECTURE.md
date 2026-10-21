@@ -740,7 +740,7 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 (where the toolbar refreshes) and the paint of that frame. For readers:
 [`docs/PERFORMANCE.md`](PERFORMANCE.md).
 
-## 12. Collaboration readiness (M3)
+## 12. Collaboration readiness (M4)
 
 - `History` is an extension providing the `undo`/`redo` commands. The future `Collaboration`
   extension provides the same commands via Yjs undo; using both together is a duplicate-command

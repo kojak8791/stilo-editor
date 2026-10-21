@@ -7,8 +7,9 @@ Every feature has a stable ID (`F-xxx`) referenced by tasks. Priority / mileston
 
 - **M1 — MVP**: usable rich-text editor, HTML in/out, default toolbar, demo page, benchmark harness.
 - **M2 — v1.0**: tables, images, fonts/colors, paste cleanup, i18n, productivity tools, framework
-  wrappers.
-- **M3 — Later**: advanced features, collaboration.
+  wrappers, compact toolbar.
+- **M3 — Later**: advanced editing features and UI, embeds, export.
+- **M4 — AI and collaboration**: AI features, real-time collaboration.
 
 Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd on macOS.
 
@@ -30,6 +31,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-010 | HTML sanitization of all input (setHTML, paste, drop) with DOMPurify | M1 | See ARCHITECTURE §8 |
 | F-011 | Placeholder text on empty document | M1 | Option `placeholder` |
 | F-012 | Drop cursor and gap cursor | M1 | `prosemirror-dropcursor`, `prosemirror-gapcursor` |
+| F-013 | Markdown shortcuts can be turned off: an editor option disables every Markdown input rule, so `#`, `>`, `*`, ... are typed as text | M2 | Option name, and whether a single extension can turn off its own rules, decided with the task. `Backspace` right after a conversion already undoes it |
 
 ## 2. History (`F-1xx`)
 
@@ -153,9 +155,9 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-808 | i18n: English and Italian, pluggable dictionaries | M2 |
 | F-809 | Light/dark theme via CSS custom properties | M2 |
 | F-810 | Fullscreen mode | M2 |
-| F-811 | Slash command menu (`/`) | M3 |
+| F-811 | Slash command menu (`/`): a Floating UI menu opens where `/` is typed. First release: every active item that applies with one tap or click. Second release: the items that need more input (dialogs, pickers) in a submenu | M3 |
 | F-812 | Block drag handle (BlockNote-like): drag a block or list item anywhere; a list item dropped outside its list gets wrapped in a new list of the same type, at the drop level | M3 |
-| F-813 | Compact toolbar (optional) for narrow editors: phones, side panels about 400 px wide. The items are packed on two levels: a first row of groups (and the most used actions) opens a group's items in its place, with a way back. Built from the same item configuration as the full toolbar; it can follow the width of its container. To design together with the bubble menu (F-807), which may take the marks on desktop but conflicts with the native selection menu on phones | M3 |
+| F-813 | Compact toolbar (optional) for narrow editors: phones, side panels about 400 px wide. The items are packed on two levels: a first row of groups (and the most used actions) opens a group's items in its place, with a way back. Built from the same item configuration as the full toolbar; it can follow the width of its container. To design together with the bubble menu (F-807), which may take the marks on desktop but conflicts with the native selection menu on phones | M2 |
 
 ## 10. Productivity tools (`F-9xx`)
 
@@ -174,15 +176,31 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 
 | ID | Feature | M |
 |---|---|---|
-| F-1001 | Real-time collaboration with Yjs (`y-prosemirror`), remote cursors | M3 |
+| F-1001 | Real-time collaboration with Yjs (`y-prosemirror`), remote cursors | M4 |
 | F-1002 | React wrapper | M2 |
 | F-1003 | Vue wrapper | M2 |
 | F-1004 | Optional CSS-class output mode for style-based marks | M3 |
 | F-1005 | Svelte wrapper | M2 |
 
+## 12. AI (`F-11xx`)
+
+The list is open and each feature is detailed when its task starts. To decide by ADR before the
+first AI task: how an app connects its model or service, and how the changes proposed by the AI
+are shown, accepted and undone.
+
+| ID | Feature | M |
+|---|---|---|
+| F-1101 | Commands on the selection: rewrite, shorten, translate, correct | M4 |
+| F-1102 | Continue writing from the cursor | M4 |
+| F-1103 | Free prompt from the slash menu (F-811) | M4 |
+| F-1104 | Generate an image from a prompt | M4 |
+| F-1105 | Edit an image with a prompt | M4 |
+| F-1106 | Format the document from a prompt: the AI applies a series of changes to the styles and the formatting of the blocks | M4 |
+| F-1107 | Find sources for the text | M4 |
+
 ---
 
-## 12. Non-functional requirements
+## 13. Non-functional requirements
 
 ### NFR-1 Performance (measured, not assumed)
 
@@ -282,11 +300,12 @@ best-effort in M2, tested in M3. E2E tests run on Chromium, Firefox and WebKit.
 
 ---
 
-## 13. Roadmap
+## 14. Roadmap
 
 | Milestone | Content | Status |
 |---|---|---|
 | **M0 — Foundations** | Docs, scaffolding, config, core contracts (`Editor`, extension API, HTML pipeline skeleton, test helpers), first reference extension (`Bold`) | Done |
 | **M1 — MVP** | F-001…F-012, F-101…F-103, F-201…F-206, F-212, F-301…F-305, F-309, F-401…F-405, F-701, F-702, F-706, F-801…F-803, NFR-1 harness, demo page | Done |
 | **M2 — v1.0** | Remaining M2 features, framework wrappers (React, Vue, Svelte); `0.x` previews on npm from `0.1.0`, `1.0.0` at the end of M2 | In progress |
-| **M3 — Later** | Collaboration, advanced UI, embeds | Planned |
+| **M3 — Later** | Advanced editing features and UI (slash menu, block drag handle), embeds, export, print; mobile browsers tested (NFR-3) | Planned |
+| **M4 — AI and collaboration** | AI features (§12), real-time collaboration (F-1001) | Planned |
