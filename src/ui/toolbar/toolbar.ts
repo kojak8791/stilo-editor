@@ -68,6 +68,21 @@ function fullscreenBox(container: HTMLElement, editor: Editor): HTMLElement {
   return box ?? container;
 }
 
+/**
+ * Puts `box` in the browser's top layer, over everything of the page whatever its z-index, or
+ * takes it out. Browsers without the Popover API keep it in the page: `--stilo-z-fullscreen`.
+ */
+function setTopLayer(box: HTMLElement, on: boolean): void {
+  if (!('showPopover' in box)) return;
+  if (on) {
+    box.setAttribute('popover', 'manual');
+    box.showPopover();
+  } else {
+    box.hidePopover();
+    box.removeAttribute('popover');
+  }
+}
+
 /** The scroll position of an element. */
 interface ScrollPosition {
   element: Element;
@@ -274,6 +289,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     }
     fullscreen?.classList.toggle('stilo-fullscreen', on);
     editorHost.classList.toggle('stilo-fullscreen__editor', on);
+    if (fullscreen) setTopLayer(fullscreen, on);
     if (!on) {
       fullscreen = null;
       for (const { element, top, left } of scrolled) {

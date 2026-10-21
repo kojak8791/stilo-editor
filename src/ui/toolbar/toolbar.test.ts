@@ -1391,6 +1391,27 @@ describe('full screen', () => {
     expect(scrollTop).toBe(200);
   });
 
+  it('puts the box in the top layer where the Popover API exists', () => {
+    const { editor, box, button } = setup();
+    // jsdom has no Popover API: the calls are recorded with the popover attribute they see.
+    const calls: string[] = [];
+    Object.assign(box, {
+      showPopover: () => calls.push(`show ${box.getAttribute('popover')}`),
+      hidePopover: () => calls.push(`hide ${box.getAttribute('popover')}`),
+    });
+    button!.click();
+    expect(calls).toEqual(['show manual']);
+    press(editor.view.dom, 'Escape');
+    expect(calls).toEqual(['show manual', 'hide manual']);
+    expect(box.hasAttribute('popover')).toBe(false);
+  });
+
+  it('stays in the page without the Popover API', () => {
+    const { box, button } = setup();
+    button!.click();
+    expect(box.hasAttribute('popover')).toBe(false);
+  });
+
   it('works in a read-only editor', () => {
     const { editor, box, button } = setup();
     editor.setEditable(false);

@@ -562,10 +562,12 @@ displays the saved HTML) gets the same look inside an element with that class.
 
 Colors are `--stilo-*` custom properties with a fallback in every `var()`, so the file works
 without `ui.css`; those shared with the UI (`--stilo-color-text`, `-muted`, `-border`, `-hover`,
-`-focus`) take the value set for the UI ([UI.md](UI.md) §7). Every fallback is a
-`light-dark(light, dark)` pair, so the content follows the `color-scheme` of the page like the
-UI. The text and the background of the content are the page's own; the gap cursor takes the
-text color (`currentColor`), like the caret. Only the content uses:
+`-focus`) take the value set for the UI ([UI.md](UI.md) §7). The fallbacks are the light
+colors. Inside `@supports (color: light-dark(#000, #fff))`, a `:where(:root)` block sets every
+color the content uses as a `light-dark(light, dark)` pair (the same values as `ui.css`), so the
+content follows the `color-scheme` of the page like the UI, and browsers without `light-dark()`
+stay light. The text and the background of the content are the page's own; the gap cursor
+takes the text color (`currentColor`), like the caret. Only the content uses:
 
 | Property | Light | Dark | Use |
 |---|---|---|---|
@@ -775,4 +777,4 @@ splits the time of an operation into phases: the command, `applyTransaction` (st
 | D-15 | Find and replace on `SearchQuery` of `prosemirror-search`, with our own incremental highlight plugin capped at 1,000 matches ([ADR 0004](decisions/0004-find-and-replace.md)) | 2026-10-14 |
 | D-16 | Table column widths written twice: `data-colwidth` on the cells, read back, and a `<colgroup>` for display ([ADR 0005](decisions/0005-table-column-widths.md)) | 2026-10-14 |
 | D-17 | Framework wrappers are subpath exports (`stilo-editor/react`, `stilo-editor/vue`, `stilo-editor/svelte`) with the framework as an optional peer dependency; a primitive and a ready component; content not controlled ([ADR 0006](decisions/0006-framework-wrappers.md)) | 2026-10-20 |
-| D-18 | Dark theme through `light-dark()` color defaults and the page's `color-scheme`, no class and no JS; full screen fills the browser window with `position: fixed` on the box of the toolbar and the editor, not the Fullscreen API ([UI.md](UI.md) §7, §8) | 2026-10-21 |
+| D-18 | Dark theme through `light-dark()` color defaults and the page's `color-scheme`, no class and no JS; full screen fills the browser window with `position: fixed` on the box of the toolbar and the editor, in the top layer through the Popover API where it exists (else `--stilo-z-fullscreen`), not the Fullscreen API ([UI.md](UI.md) §7, §8) | 2026-10-21 |

@@ -55,8 +55,9 @@ Colors, font and sizes of the toolbar are `--stilo-*` CSS custom properties:
 
 Dark theme: every color has a light and a dark value, chosen by the CSS `color-scheme` of the
 page. `color-scheme: dark` turns the toolbar, the popovers and the content defaults dark,
-`light dark` follows the system, and without it the editor stays light. The text and the
-background of the content are those of your page: [API.md §6.5](../API.md#65-styles).
+`light dark` follows the system, and without it the editor stays light, as in browsers without
+the CSS `light-dark()` function. The text and the background of the content are those of your
+page: [API.md §6.5](../API.md#65-styles).
 
 ## 3. The component
 

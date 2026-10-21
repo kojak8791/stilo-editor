@@ -2,25 +2,23 @@
 
 /*
  * Default values of the custom properties (docs/UI.md §7). `:where()` has no specificity, so any
- * rule of the host page that sets them wins, whatever the order of the stylesheets. Colors have a
- * light and a dark value: `light-dark()` picks one from the `color-scheme` of the element, which
- * the page sets (`dark`, or `light dark` to follow the system); without it they are light.
+ * rule of the host page that sets them wins, whatever the order of the stylesheets.
  */
 :where(:root) {
   --stilo-font-family: system-ui, sans-serif;
   --stilo-font-size: 14px;
 
-  --stilo-color-text: light-dark(#1f2328, #f0f6fc);
-  --stilo-color-muted: light-dark(#59636e, #9198a1);
-  --stilo-color-bg: light-dark(#ffffff, #0d1117);
-  --stilo-color-toolbar-bg: light-dark(#f9fbfd, #151b23);
-  --stilo-color-border: light-dark(#d1d9e0, #3d444d);
-  --stilo-color-separator: light-dark(#e4e8ec, #2f3742);
-  --stilo-color-hover: light-dark(#eef1f4, #262c36);
-  --stilo-color-hover-group: light-dark(#f5f7f9, #1c222b);
-  --stilo-color-active: light-dark(#dde4ee, #2a3548);
-  --stilo-color-focus: light-dark(#0969da, #1f6feb);
-  --stilo-color-error: light-dark(#d1242f, #f85149);
+  --stilo-color-text: #1f2328;
+  --stilo-color-muted: #59636e;
+  --stilo-color-bg: #ffffff;
+  --stilo-color-toolbar-bg: #f9fbfd;
+  --stilo-color-border: #d1d9e0;
+  --stilo-color-separator: #e4e8ec;
+  --stilo-color-hover: #eef1f4;
+  --stilo-color-hover-group: #f5f7f9;
+  --stilo-color-active: #dde4ee;
+  --stilo-color-focus: #0969da;
+  --stilo-color-error: #d1242f;
 
   --stilo-radius: 6px;
 
@@ -30,13 +28,13 @@
   --stilo-toolbar-group-gap: 4px;
   --stilo-toolbar-separator-height: 18px;
   --stilo-toolbar-sticky-top: 0;
-  --stilo-toolbar-shadow: 0 2px 6px light-dark(rgb(0 0 0 / 0.08), rgb(1 4 9 / 0.6));
+  --stilo-toolbar-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
   --stilo-z-toolbar: 1001;
 
   --stilo-button-size: 30px;
   --stilo-icon-size: 18px;
 
-  --stilo-popover-shadow: 0 8px 24px light-dark(rgb(0 0 0 / 0.12), rgb(1 4 9 / 0.8));
+  --stilo-popover-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
   --stilo-z-popover: 1000;
 
   --stilo-z-fullscreen: 1040;
@@ -47,6 +45,30 @@
   --stilo-menu-h4-size: 1em;
   --stilo-menu-h5-size: 1em;
   --stilo-menu-h6-size: 1em;
+}
+
+/*
+ * Dark theme: the colors get a light and a dark value, and `light-dark()` picks one from the
+ * `color-scheme` of the element, which the page sets (`dark`, or `light dark` to follow the
+ * system). Only where `light-dark()` exists: a custom property is checked where it is used, and
+ * an unknown function there would leave toolbar and popovers without colors.
+ */
+@supports (color: light-dark(#000, #fff)) {
+  :where(:root) {
+    --stilo-color-text: light-dark(#1f2328, #f0f6fc);
+    --stilo-color-muted: light-dark(#59636e, #9198a1);
+    --stilo-color-bg: light-dark(#ffffff, #0d1117);
+    --stilo-color-toolbar-bg: light-dark(#f9fbfd, #151b23);
+    --stilo-color-border: light-dark(#d1d9e0, #3d444d);
+    --stilo-color-separator: light-dark(#e4e8ec, #2f3742);
+    --stilo-color-hover: light-dark(#eef1f4, #262c36);
+    --stilo-color-hover-group: light-dark(#f5f7f9, #1c222b);
+    --stilo-color-active: light-dark(#dde4ee, #2a3548);
+    --stilo-color-focus: light-dark(#0969da, #1f6feb);
+    --stilo-color-error: light-dark(#d1242f, #f85149);
+    --stilo-toolbar-shadow: 0 2px 6px light-dark(rgb(0 0 0 / 0.08), rgb(1 4 9 / 0.6));
+    --stilo-popover-shadow: 0 8px 24px light-dark(rgb(0 0 0 / 0.12), rgb(1 4 9 / 0.8));
+  }
 }
 
 /* Toolbar */
@@ -723,7 +745,7 @@
   width: 16px;
   height: 4px;
   border-radius: 1px;
-  box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.2));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
 }
 
 .stilo-toolbar__button.stilo-split__arrow {
@@ -800,8 +822,16 @@
   padding: 0;
   border: none;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.2));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
   cursor: pointer;
+}
+
+/* In dark, the color bars and swatches get a light edge, so that dark colors stay visible. */
+@supports (color: light-dark(#000, #fff)) {
+  .stilo-split__color,
+  .stilo-color-picker__swatch {
+    box-shadow: inset 0 0 0 1px light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.2));
+  }
 }
 
 .stilo-color-picker__swatch:hover {
@@ -1006,7 +1036,8 @@
 /*
  * Full screen (T-066): the element that holds the toolbar and the editor fills the window and
  * scrolls itself, so that the sticky toolbar sticks at its top. A rule of the page more specific
- * than one class (a fixed height, for example) wins over these values.
+ * than one class (a fixed height, for example) wins over these values. With the Popover API it
+ * is a popover in the top layer, over the whole page; elsewhere `z-index` places it.
  */
 .stilo-fullscreen {
   position: fixed;
@@ -1023,6 +1054,18 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--stilo-color-bg);
+}
+
+/*
+ * The browser's popover look (border, padding, colors) off. In a layer: it wins over the
+ * browser's styles and loses to any rule of the page, so the border of the host's box stays.
+ */
+@layer stilo-fullscreen {
+  .stilo-fullscreen {
+    border: none;
+    padding: 0;
+    color: inherit;
+  }
 }
 
 .stilo-fullscreen > .stilo-toolbar-host {

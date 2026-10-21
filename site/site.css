@@ -44,6 +44,8 @@
   --stilo-color-focus: var(--accent);
   --stilo-color-table-header: var(--surface-sunken);
   --stilo-radius: 8px;
+  /* Full screen without the Popover API: over the sticky header (z-index 2000). */
+  --stilo-z-fullscreen: 2001;
 }
 
 :root[data-theme="light"] {

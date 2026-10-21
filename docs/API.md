@@ -318,8 +318,11 @@ holds both the toolbar's `container` and the editor (your editor box) gets the c
 <kbd>Esc</kbd> in the editor, leaves full screen, and the page scrolls back where it was. The
 box scrolls by itself and the sticky toolbar stays at its top. A rule of yours more specific than
 one class, such as a fixed height, wins over the full screen size: limit it to
-`:not(.stilo-fullscreen)`. The box covers the page with `--stilo-z-fullscreen` (`1040`); an
-ancestor with `transform`, `filter` or `contain` keeps it inside that ancestor (a CSS limit).
+`:not(.stilo-fullscreen)`. Where the Popover API exists, the box goes to the browser's top
+layer, over everything of the page whatever its `z-index`. Older browsers place it with
+`--stilo-z-fullscreen` (`1040`): if your page has fixed or sticky bars above that, set it
+higher (it has no effect in the top layer); there an ancestor with `transform`, `filter` or
+`contain` keeps the box inside that ancestor (a CSS limit).
 
 ```css
 .my-editor:not(.stilo-fullscreen) {
@@ -443,8 +446,9 @@ it, change it.
 
 **Dark theme.** Every color has a light and a dark value, chosen by the CSS `color-scheme` of
 the page: set `dark` to have the dark theme, or `light dark` to follow the system. Without
-`color-scheme` the editor is light. The text and the background of the content are those of
-your page, which sets its own colors for dark too:
+`color-scheme`, and in browsers without the CSS `light-dark()` function, the editor is light.
+The text and the background of the content are those of your page, which sets its own colors
+for dark too:
 
 ```css
 :root {

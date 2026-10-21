@@ -330,6 +330,10 @@ trigger is too.
   `color-scheme` the page is light and nothing changes. No class and no JS: the native fields
   and checkboxes follow the same `color-scheme`. A host property overrides both values; to keep
   two, it writes its own `light-dark()`.
+- **Browsers without `light-dark()`** stay light. The `:where(:root)` block holds plain light
+  colors; a second block inside `@supports (color: light-dark(#000, #fff))` sets the pairs. Not
+  one block with both: a custom property takes any value and is checked only where it is used,
+  so an unknown function there would leave the toolbar and the popovers without colors.
 
 | Property | Light | Dark | Use |
 |---|---|---|---|
@@ -358,7 +362,7 @@ trigger is too.
 | `--stilo-icon-size` | `18px` | | Icons |
 | `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | `rgb(1 4 9 / 0.8)` | Popover |
 | `--stilo-z-popover` | `1000` | | Popovers; the find bar one less, so popovers open over it |
-| `--stilo-z-fullscreen` | `1040` | | The editor in full screen (§8), over the page |
+| `--stilo-z-fullscreen` | `1040` | | The editor in full screen in browsers without the Popover API (§8); above the page's fixed bars |
 | `--stilo-menu-h1-size` … `-h6-size` | `1.5em`, `1.3em`, `1.15em`, `1em`, `1em`, `1em` | | Heading preview in the menu |
 
 The swatches of the color popover get a light inset border in dark, so that dark colors stay
@@ -390,19 +394,31 @@ the Fullscreen API does not work on iPhone, takes `Escape` for the browser and h
 page shows outside the editor, its dialogs included. Together with `F11`, the editor fills the
 whole screen.
 
+- **Over the page: the top layer.** Where the Popover API exists, the box gets
+  `popover="manual"` and `showPopover()`: the browser draws it in the top layer, over every
+  element of the page whatever its `z-index` (a sticky header, a fixed bar), and an ancestor with
+  `transform`, `filter` or `contain` does not hold it. A modal `<dialog>` the page opens later
+  goes over it. A manual popover does not close by itself nor with `Escape`. Leaving calls
+  `hidePopover()` and removes the attribute.
+- **Without the Popover API** (older browsers), the box stays in the page: `z-index:
+  var(--stilo-z-fullscreen)` (`1040`) places it. A page with fixed or sticky elements above
+  that raises the property; it has no effect in the top layer. There an ancestor with
+  `transform`, `filter` or `contain` makes `position: fixed` relative to it (a CSS limit), and
+  the editor fills that ancestor.
+
 - **Which element**: the nearest ancestor of the toolbar's container that also holds the editor,
   found when full screen starts: the editor's box of the page, or the root element of the React,
   Vue and Svelte components. A status bar inside that box comes along. It gets the class
   `stilo-fullscreen`, the editor's element (the parent of `view.dom`) `stilo-fullscreen__editor`.
-- **Layout, pure CSS**: `position: fixed; inset: 0`, over the page with `--stilo-z-fullscreen`,
-  a flex column that scrolls itself (`overflow-y: auto`, `overscroll-behavior: contain`), so the
-  sticky toolbar sticks at its top (`top: 0`, whatever `--stilo-toolbar-sticky-top`). The
-  editor's element and the editable area grow to the bottom, so the status bar ends at the
-  bottom of the window. Margins, sizes, `max-*` and corner radius are reset; a rule of the page
-  more specific than one class (a fixed height, for example) wins: write it for
-  `:not(.stilo-fullscreen)`, as the demo does in `?fixed`. An ancestor with `transform`,
-  `filter` or `contain` makes `position: fixed` relative to it (a CSS limit): the editor then
-  fills that ancestor.
+- **Layout, pure CSS**: `position: fixed; inset: 0`, a flex column that scrolls itself
+  (`overflow-y: auto`, `overscroll-behavior: contain`), so the sticky toolbar sticks at its top
+  (`top: 0`, whatever `--stilo-toolbar-sticky-top`). The editor's element and the editable area
+  grow to the bottom, so the status bar ends at the bottom of the window. Margins, sizes,
+  `max-*` and corner radius are reset; a rule of the page more specific than one class (a fixed
+  height, for example) wins: write it for `:not(.stilo-fullscreen)`, as the demo does in
+  `?fixed`. The browser's popover look (border, padding, colors) is reset in
+  `@layer stilo-fullscreen`: a layer wins over the browser's styles and loses to any rule of the
+  page, so the border and the padding of the host's box stay.
 - **Leaving**: the button again, or `Escape` in the editor. The listener is a capture on
   `view.dom`, because ProseMirror prevents the default of every `Escape`; an open popover takes
   the key first (capture on the document) and prevents its default, so the first `Escape`
