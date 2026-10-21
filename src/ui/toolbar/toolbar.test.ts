@@ -1412,6 +1412,17 @@ describe('full screen', () => {
     expect(box.hasAttribute('popover')).toBe(false);
   });
 
+  it('drops the scroll margin of the sticky toolbar, which covers no content in full screen', () => {
+    const { editor, toolbar, button } = setup();
+    // jsdom has no layout: a toolbar container 40px tall.
+    Object.defineProperty(toolbar.element.parentElement!, 'offsetHeight', { value: 40 });
+    const margin = () => editor.view.props.scrollMargin;
+    button!.click();
+    expect(margin()).toEqual({ top: 5, right: 5, bottom: 5, left: 5 });
+    button!.click();
+    expect(margin()).toEqual({ top: 45, right: 5, bottom: 5, left: 5 });
+  });
+
   it('works in a read-only editor', () => {
     const { editor, box, button } = setup();
     editor.setEditable(false);

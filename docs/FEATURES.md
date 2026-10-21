@@ -112,7 +112,7 @@ the Markdown shortcuts off.
 
 | Feature | Keyboard | Markdown | Notes |
 |---|---|---|---|
-| Full screen | | | The last toolbar button: the toolbar and the text fill the browser window; <kbd>Esc</kbd> in the text, or the button again, leaves it |
+| Full screen | | | The last toolbar button: the toolbar and the text fill the browser window, only the text scrolls (the toolbar and the status bar stay in place); <kbd>Esc</kbd> in the text, or the button again, leaves it |
 | Dark theme | | | The toolbar, the popovers and the content defaults turn dark when the page sets `color-scheme: dark`, or follow the system with `color-scheme: light dark` |
 
 ## Keyboard and accessibility

@@ -410,10 +410,13 @@ whole screen.
   found when full screen starts: the editor's box of the page, or the root element of the React,
   Vue and Svelte components. A status bar inside that box comes along. It gets the class
   `stilo-fullscreen`, the editor's element (the parent of `view.dom`) `stilo-fullscreen__editor`.
-- **Layout, pure CSS**: `position: fixed; inset: 0`, a flex column that scrolls itself
-  (`overflow-y: auto`, `overscroll-behavior: contain`), so the sticky toolbar sticks at its top
-  (`top: 0`, whatever `--stilo-toolbar-sticky-top`). The editor's element and the editable area
-  grow to the bottom, so the status bar ends at the bottom of the window. Margins, sizes,
+- **Layout, pure CSS**: `position: fixed; inset: 0`, a flex column. The toolbar and the status
+  bar never scroll: the editor's element takes the height left (`flex: 1 1 auto; min-height: 0`)
+  and is the only part that scrolls (`overflow-y: auto`, `overscroll-behavior: contain`),
+  whatever `sticky` and whatever the host's layout outside full screen (an editor that flows in
+  the page or scrolls inside a frame). The editable area fills it. With `sticky`, the scroll
+  margin of ProseMirror drops the toolbar height (§7): the toolbar covers no content. The box
+  scrolls itself only when the editor's element is not one of its children. Margins, sizes,
   `max-*` and corner radius are reset; a rule of the page more specific than one class (a fixed
   height, for example) wins: write it for `:not(.stilo-fullscreen)`, as the demo does in
   `?fixed`. The browser's popover look (border, padding, colors) is reset in

@@ -297,6 +297,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         element.scrollLeft = left;
       }
     }
+    if (sticky) setScrollMargin();
     update();
   }
 
@@ -309,14 +310,15 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
       : null;
   // Sticky on the container: a sticky element only moves inside its parent. ProseMirror scrolls
   // the selection into view without knowing that the toolbar covers the top: the scroll margin
-  // keeps it below the toolbar (5 is ProseMirror's default margin).
+  // keeps it below the toolbar (5 is ProseMirror's default margin). In full screen the editor's
+  // element scrolls under the toolbar, which covers nothing.
   let resizeObserver: ResizeObserver | null = null;
+  function setScrollMargin(): void {
+    const top = (fullscreen ? 0 : container.offsetHeight) + 5;
+    editor.view.setProps({ scrollMargin: { top, right: 5, bottom: 5, left: 5 } });
+  }
   if (sticky) {
     container.classList.add('stilo-toolbar-host');
-    const setScrollMargin = (): void => {
-      const top = container.offsetHeight + 5;
-      editor.view.setProps({ scrollMargin: { top, right: 5, bottom: 5, left: 5 } });
-    };
     setScrollMargin();
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(setScrollMargin);

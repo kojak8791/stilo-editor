@@ -1034,10 +1034,10 @@
 }
 
 /*
- * Full screen (T-066): the element that holds the toolbar and the editor fills the window and
- * scrolls itself, so that the sticky toolbar sticks at its top. A rule of the page more specific
- * than one class (a fixed height, for example) wins over these values. With the Popover API it
- * is a popover in the top layer, over the whole page; elsewhere `z-index` places it.
+ * Full screen (T-066): the element that holds the toolbar and the editor fills the window. With
+ * the Popover API it is a popover in the top layer, over the whole page; elsewhere `z-index`
+ * places it. A rule of the page more specific than one class (a fixed height, for example) wins
+ * over these values. It scrolls only when the editor's element is not one of its children.
  */
 .stilo-fullscreen {
   position: fixed;
@@ -1068,15 +1068,17 @@
   }
 }
 
-.stilo-fullscreen > .stilo-toolbar-host {
-  top: 0;
-}
-
-/* The editor's element and the editable area grow to the bottom of the window. */
+/*
+ * The editor's element takes the height left and scrolls: the toolbar stays at the top and the
+ * status bar at the bottom of the window, sticky toolbar or not. The editable area fills it.
+ */
 .stilo-fullscreen__editor {
   display: flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .stilo-fullscreen__editor > .stilo-content {
