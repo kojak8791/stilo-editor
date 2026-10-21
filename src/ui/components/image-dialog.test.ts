@@ -18,16 +18,16 @@ function setup(html: string, extensions = [defaultExtensions()]) {
   const toolbar = createToolbar(editor, { container });
   const button = toolbar.element.querySelector<HTMLButtonElement>('[data-item="image"]')!;
   const dialog = host.querySelector<HTMLElement>('.stilo-image-dialog')!;
-  const field = (index: number) =>
-    dialog.querySelectorAll<HTMLInputElement>('.stilo-image-dialog__field input')[index]!;
+  const field = (name: string) =>
+    dialog.querySelector<HTMLInputElement>(`.stilo-image-dialog__${name}`)!;
   const parts = dialog && {
-    url: dialog.querySelector<HTMLInputElement>('.stilo-image-dialog__url')!,
+    url: field('url'),
     file: dialog.querySelector<HTMLInputElement>('input[type="file"]')!,
     preview: dialog.querySelector<HTMLImageElement>('.stilo-image-dialog__preview')!,
-    alt: field(0),
-    title: field(1),
-    caption: field(2),
-    width: field(3),
+    alt: field('alt'),
+    title: field('title'),
+    caption: field('caption'),
+    width: field('width'),
     error: dialog.querySelector<HTMLElement>('.stilo-image-dialog__error')!,
     submit: dialog.querySelector<HTMLButtonElement>('button[type="submit"]')!,
   };
@@ -97,7 +97,7 @@ describe('image dialog: insert', () => {
     expect(dialog.getAttribute('aria-label')).toBe('Insert image');
     expect(document.activeElement).toBe(url);
     expect(url.value).toBe('');
-    expect(caption.closest('label')!.hidden).toBe(false);
+    expect(caption.hidden).toBe(false);
     expect(submit.textContent).toBe('Insert');
     expect(preview.hidden).toBe(true);
   });
@@ -184,7 +184,7 @@ describe('image dialog: edit', () => {
     expect(alt.value).toBe('A');
     expect(title.value).toBe('');
     expect(width.value).toBe('40');
-    expect(caption.closest('label')!.hidden).toBe(true);
+    expect(caption.hidden).toBe(true);
     alt.value = '';
     title.value = 'T';
     submit.click();
@@ -211,7 +211,7 @@ describe('image dialog: edit', () => {
     );
     editor.commands.select(2);
     button.click();
-    expect(caption.closest('label')!.hidden).toBe(true);
+    expect(caption.hidden).toBe(true);
     type(url, 'b.png');
     submit.click();
     expect(editor.getHTML()).toBe(

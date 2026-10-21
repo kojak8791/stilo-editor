@@ -472,11 +472,12 @@
   color: #ffffff;
 }
 
-/* Image dialog: the source (address or file), a preview, the fields in a column */
+/* Image dialog: as small as the link popover. Rows: thumbnail, address and file button; alt
+   text; caption (insert only); title, width and submit. */
 .stilo-image-dialog__form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 320px;
   padding: 4px;
   font-family: var(--stilo-font-family);
@@ -484,15 +485,16 @@
   color: var(--stilo-color-text);
 }
 
-.stilo-image-dialog__source {
+.stilo-image-dialog__row {
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
 .stilo-image-dialog__input {
   box-sizing: border-box;
   min-width: 0;
-  padding: 6px 8px;
+  padding: 5px 8px;
   border: 1px solid var(--stilo-color-border);
   border-radius: var(--stilo-radius);
   background: var(--stilo-color-bg);
@@ -500,8 +502,17 @@
   font: inherit;
 }
 
-.stilo-image-dialog__url {
+.stilo-image-dialog__input[hidden] {
+  display: none;
+}
+
+.stilo-image-dialog__url,
+.stilo-image-dialog__title {
   flex: 1;
+}
+
+.stilo-image-dialog__width {
+  width: 64px;
 }
 
 .stilo-image-dialog__input:focus-visible {
@@ -514,31 +525,31 @@
 }
 
 .stilo-image-dialog__preview {
-  align-self: center;
-  max-width: 100%;
-  max-height: 160px;
-  object-fit: contain;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--stilo-radius);
+  object-fit: cover;
 }
 
-.stilo-image-dialog__field {
+.stilo-image-dialog__button--icon {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  color: var(--stilo-color-muted);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
 }
 
-.stilo-image-dialog__field[hidden] {
-  display: none;
+.stilo-image-dialog__button--icon .stilo-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .stilo-image-dialog__error {
   margin: 0;
   color: var(--stilo-color-error);
-}
-
-.stilo-image-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
 }
 
 /* Edit button of images: in the top right corner of the image */
