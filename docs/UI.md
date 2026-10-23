@@ -360,7 +360,15 @@ tab order: the keyboard path is the `image` button of the toolbar.
   overrides.
 - The content has its own styles and properties (`content.css`, usable without `ui.css`):
   [ARCHITECTURE.md §7.6](ARCHITECTURE.md#76-content-styles-contentcss).
-- Visible focus: `:focus-visible` outline in `--stilo-color-focus`.
+- Visible focus: `:focus-visible` outline in `--stilo-color-focus`. Text fields get a ring
+  instead: a 1px line in `--stilo-color-focus` and a 2px halo in `--stilo-color-ring`, with a
+  transparent outline for forced colors mode.
+- **Popovers and fields** have no borders. Popovers and the find bar are translucent glass
+  (`--stilo-color-popover-bg`, a `backdrop-filter` blur) lifted by their shadow; text fields
+  stand out by their background only (`--stilo-color-field`, a translucent tint, so it works
+  on any surface), secondary buttons are flat (`--stilo-color-button`). Fields and buttons on
+  the same row have the same fixed height (28px in the find bar and the color popover, 26px in
+  the link and image dialogs), so the font and line height of the host page do not change it.
 - **Dark theme** (SPEC F-809): every color default is a `light-dark(light, dark)` pair. The
   browser picks the value from the `color-scheme` of the element, which the host sets: `dark`
   on the page or on the editor's box, or `light dark` to follow the system. Without
@@ -380,13 +388,18 @@ tab order: the keyboard path is the `image` button of the toolbar.
 | `--stilo-color-muted` | `#59636e` | `#9198a1` | Shortcuts in menus, secondary text |
 | `--stilo-color-bg` | `#ffffff` | `#0d1117` | Popover, sticky container and full screen background |
 | `--stilo-color-toolbar-bg` | `#f9fbfd` | `#151b23` | Toolbar background: barely different from the content, less than the hover |
-| `--stilo-color-border` | `#d1d9e0` | `#3d444d` | Popover and field borders |
+| `--stilo-color-border` | `#d1d9e0` | `#3d444d` | Edges of the image edit button, the table handles and the insert grid; tabs of the character picker |
 | `--stilo-color-separator` | `#e4e8ec` | `#2f3742` | Group separators |
 | `--stilo-color-hover` | `#eef1f4` | `#262c36` | Button and option hover |
 | `--stilo-color-hover-group` | `#f5f7f9` | `#1c222b` | The part of a split button that is not hovered |
 | `--stilo-color-active` | `#dde4ee` | `#2a3548` | Pressed button, checked option |
 | `--stilo-color-focus` | `#0969da` | `#1f6feb` | Focus ring, primary button |
-| `--stilo-color-error` | `#d1242f` | `#f85149` | Border of an invalid field |
+| `--stilo-color-error` | `#d1242f` | `#f85149` | Ring of an invalid field |
+| `--stilo-color-popover-bg` | `rgb(244 246 249 / 0.82)` | `rgb(33 40 50 / 0.82)` | Popover and find bar background, translucent under the blur |
+| `--stilo-color-field` | `rgb(31 35 40 / 0.06)` | `rgb(240 246 252 / 0.08)` | Text field background; `--stilo-color-bg` while focused |
+| `--stilo-color-button` | `rgb(31 35 40 / 0.08)` | `rgb(240 246 252 / 0.1)` | Secondary buttons of the forms (find bar, link, image) |
+| `--stilo-color-button-hover` | `rgb(31 35 40 / 0.14)` | `rgb(240 246 252 / 0.16)` | Their hover |
+| `--stilo-color-ring` | `rgb(9 105 218 / 0.3)` | `rgb(31 111 235 / 0.45)` | Halo around a focused text field |
 | `--stilo-radius` | `6px` | | Buttons, popover |
 | `--stilo-toolbar-padding-y` / `-x` | `4px` / `2px` | | Toolbar padding |
 | `--stilo-toolbar-gap` | `2px` | | Space between the items of a group |
@@ -397,7 +410,8 @@ tab order: the keyboard path is the `image` button of the toolbar.
 | `--stilo-z-toolbar` | `1001` | | Sticky toolbar: above the content and the popovers anchored to it |
 | `--stilo-button-size` | `30px` | | Button height and min width |
 | `--stilo-icon-size` | `18px` | | Icons |
-| `--stilo-popover-shadow` | `0 8px 24px rgb(0 0 0 / 0.12)` | `rgb(1 4 9 / 0.8)` | Popover |
+| `--stilo-popover-shadow` | `0 12px 32px rgb(0 0 0 / 0.16), 0 2px 8px rgb(0 0 0 / 0.08)` | `rgb(1 4 9 / 0.85)`, `rgb(1 4 9 / 0.6)` | Popover and find bar |
+| `--stilo-popover-blur` | `12px` | | Blur of the content behind popovers and the find bar |
 | `--stilo-z-popover` | `1000` | | Popovers; the find bar one less, so popovers open over it |
 | `--stilo-z-fullscreen` | `1040` | | The editor in full screen in browsers without the Popover API (§8); above the page's fixed bars |
 | `--stilo-menu-h1-size` … `-h6-size` | `1.5em`, `1.3em`, `1.15em`, `1em`, `1em`, `1em` | | Heading preview in the menu |
