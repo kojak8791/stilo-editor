@@ -7,8 +7,8 @@ Every feature has a stable ID (`F-xxx`) referenced by tasks. Priority / mileston
 
 - **M1 — MVP**: usable rich-text editor, HTML in/out, default toolbar, demo page, benchmark harness.
 - **M2 — v1.0**: tables, images, fonts/colors, paste cleanup, i18n, productivity tools, framework
-  wrappers, compact toolbar.
-- **M3 — Later**: advanced editing features and UI, embeds, export.
+  wrappers, compact toolbar, audio and video embeds.
+- **M3 — Later**: advanced editing features and UI, export.
 - **M4 — AI and collaboration**: AI features, real-time collaboration.
 
 Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd on macOS.
@@ -168,7 +168,7 @@ Keyboard shortcuts use ProseMirror notation: `Mod` = Ctrl on Windows/Linux, Cmd 
 | F-903 | HTML source view (edit and apply): not in the library, an app builds it on `getHTML()` and `setHTML()` | — |
 | F-904 | Special characters picker | M2 |
 | F-905 | Emoji picker | M2 |
-| F-906 | Video / iframe embeds (allowlisted providers) | M3 |
+| F-906 | Audio and video embeds from streaming services (YouTube, Vimeo, SoundCloud, Spotify; allowlisted addresses), chosen in a popover whose form follows the service, with a caption like images | M2 |
 | F-907 | Markdown export | M3 |
 | F-908 | Print | M3 |
 
@@ -307,5 +307,5 @@ best-effort in M2, tested in M3. E2E tests run on Chromium, Firefox and WebKit.
 | **M0 — Foundations** | Docs, scaffolding, config, core contracts (`Editor`, extension API, HTML pipeline skeleton, test helpers), first reference extension (`Bold`) | Done |
 | **M1 — MVP** | F-001…F-012, F-101…F-103, F-201…F-206, F-212, F-301…F-305, F-309, F-401…F-405, F-701, F-702, F-706, F-801…F-803, NFR-1 harness, demo page | Done |
 | **M2 — v1.0** | Remaining M2 features, framework wrappers (React, Vue, Svelte); `0.x` previews on npm from `0.1.0`, `1.0.0` at the end of M2 | In progress |
-| **M3 — Later** | Advanced editing features and UI (slash menu, block drag handle), embeds, export, print; mobile browsers tested (NFR-3) | Planned |
+| **M3 — Later** | Advanced editing features and UI (slash menu, block drag handle), export, print; mobile browsers tested (NFR-3) | Planned |
 | **M4 — AI and collaboration** | AI features (§12), real-time collaboration (F-1001) | Planned |
