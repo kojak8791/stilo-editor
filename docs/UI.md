@@ -322,7 +322,7 @@ Compact, about 340 × 145 px: a row per field, the label on the left, the field 
 (the inputs are named by `aria-label`, since a cell may also hold buttons). *Image*: a 26 px
 thumbnail, the address (`https://` as placeholder, focused and selected on open) and an icon
 button *Choose file* (`FolderOpen`, a hidden `input type="file"` for PNG, JPEG, GIF and WebP,
-read as a `data:` URL). Then *Alternative text*, *Caption* (insert only), *Title*, and
+read as a `data:` URL). Then *Alt text*, *Caption* (insert only), *Title*, and
 *Width (px)* (the natural width as placeholder) with the submit button. The height follows the ratio of the preview, or of the image's own `width` and `height`;
 an empty width removes the size. Width and height are sent only when the width or the image
 changed, so the size set with the handles stays. An error shows under the fields

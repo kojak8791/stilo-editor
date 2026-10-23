@@ -122,7 +122,7 @@ export const it: Messages = {
   'image.url': "Indirizzo dell'immagine",
   'image.chooseFile': 'Scegli file',
   'image.embedded': 'Immagine incorporata',
-  'image.alt': 'Testo alternativo',
+  'image.alt': 'Testo alt',
   'image.title': 'Titolo',
   'image.caption': 'Didascalia',
   'image.width': 'Larghezza (px)',

@@ -122,7 +122,7 @@ export const en: Messages = {
   'image.url': 'Image address',
   'image.chooseFile': 'Choose file',
   'image.embedded': 'Embedded image',
-  'image.alt': 'Alternative text',
+  'image.alt': 'Alt text',
   'image.title': 'Title',
   'image.caption': 'Caption',
   'image.width': 'Width (px)',
