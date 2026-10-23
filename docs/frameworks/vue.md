@@ -85,7 +85,7 @@ create the editor again with other props, change its `key`.
 | `content` | empty document | Initial HTML (§5) |
 | `editable` | `true` | Whether the content can be edited (§6) |
 | `autofocus`, `aria-label`, `compact-paragraphs`, `markdown-shortcuts` | | The editor options: [API.md §2.1](../API.md#21-options) |
-| `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options `items` and `sticky` (§8) |
+| `toolbar` | `true` | `false` hides the toolbar; an object passes the toolbar options `items`, `sticky`, `layout`, `compact` and `compactBelow` (§8) |
 | `status-bar` | `false` | Shows the word and character count under the editor |
 | `messages` | `en` | Strings of the toolbar and the status bar (§10) |
 
@@ -195,8 +195,10 @@ is emitted in the browser only. No `<ClientOnly>` is needed.
 
 ## 8. Toolbar items
 
-`toolbar` takes the toolbar options: `items`, groups of item IDs, and `sticky`, which keeps the
-toolbar visible at the top of the scrolling area (default `true`):
+`toolbar` takes the toolbar options: `items`, groups of item IDs; `sticky`, which keeps the
+toolbar visible at the top of the scrolling area (default `true`); `layout: 'compact'` or
+`'auto'` for the compact toolbar of phones and narrow panels, arranged by `compact`
+([API.md §6.1](../API.md#61-toolbar)):
 
 ```vue
 <StiloEditor

@@ -176,3 +176,23 @@ export type ToolbarItem =
   | ToolbarColorButton
   | ToolbarFontSizeInput
   | ToolbarIconMenu;
+
+/**
+ * A button of the compact toolbar (T-072): it shows its items in place of the first row, after a
+ * back button.
+ */
+export interface CompactToolbarGroup {
+  /** Unique within the toolbar; written as `data-group`. */
+  id: string;
+  icon: IconNode;
+  /** Key of the label in `messages`; a missing key is shown as is. */
+  labelKey: string;
+  /** Groups of item IDs of the toolbar's `items`, separated like the toolbar groups. */
+  items: ReadonlyArray<ReadonlyArray<string>>;
+}
+
+/**
+ * The first row of the compact toolbar: groups of item IDs of the toolbar's `items`, shown as
+ * they are, and of {@link CompactToolbarGroup} buttons.
+ */
+export type CompactToolbar = ReadonlyArray<ReadonlyArray<string | CompactToolbarGroup>>;

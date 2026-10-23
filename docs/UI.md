@@ -156,6 +156,46 @@ transaction. Entering or leaving full screen refreshes at once.
 elsewhere, `⇧⌘Z` on Mac (modifiers in the order `⌃⌥⇧⌘`, no separator). `isMacPlatform()` is read
 once by `createToolbar`, never at module top level.
 
+### 3.7 Compact layout (T-072)
+
+For phones and narrow panels. The option `layout` is `'full'` (default: every group, in rows that
+wrap), `'compact'` or `'auto'`: compact while the container is narrower than `compactBelow`
+(default 600 px), measured by the `ResizeObserver` of the toolbar; a container without width (not
+laid out) keeps the layout as it is.
+
+- **Two levels.** A first row of items and of group buttons; a group button shows its items in
+  place of the first row, after a back button. One row at a time, on one line: a row that does
+  not fit scrolls sideways (no scrollbar) and fades at the edges where items are hidden.
+- **Configuration** (`compact`, type `CompactToolbar`): groups like `items`, of item IDs and of
+  `CompactToolbarGroup` (`id`, `icon`, `labelKey`, `items`: groups of item IDs). It only arranges
+  the items of `items`: an ID that is not there throws `StiloError`; an unavailable item is left
+  out, a group without items too. Default: `DEFAULT_COMPACT_TOOLBAR` with the default `items`;
+  with other `items`, every group of up to two buttons stays on the first row and every other
+  group gets a button with the icon and the label of its first item (`Ellipsis` without icon).
+
+| First row | Group (`data-group`, icon, label) | Items |
+|---|---|---|
+| `undo` `redo` · `bold` `italic` | `text`, `CaseSensitive`, *Text* | `heading` · `fontFamily` `fontSize` · `underline` `strike` `code` `subscript` `superscript` `link` `clearFormatting` `textCase` · `textColor` `highlight` |
+| | `paragraph`, `Pilcrow`, *Paragraph* | `textAlign` `lineHeight` · `bulletList` `orderedList` `taskList` · `blockquote` `codeBlock` |
+| | `insert`, `Plus`, *Insert* | `table` `image` `characters` `horizontalRule` |
+| | `more`, `Ellipsis`, *More* | `find` `fullscreen` |
+
+- **Same elements.** The item elements are created once and move between the layouts; the
+  toolbar gets `stilo-toolbar--compact`. Rows are `div.stilo-toolbar__row` (`hidden` when not
+  shown) holding the usual groups. Group buttons and back buttons are `stilo-toolbar__button`
+  with `data-group="<id>"` / `data-back`, not `data-item`.
+- **State.** An open group stays open while its items are used, until the back button. A group
+  button gets `stilo-toolbar__button--marked` (a dot) while an item of its row is pressed
+  (`aria-pressed="true"`); `update()` computes it.
+- **Focus and keyboard.** Taps and clicks leave the focus in the editor (§3.3), so the virtual
+  keyboard of a phone stays open. The roving tabindex runs over the shown row only; a group
+  opened from the keyboard focuses its first item, the back button focuses the group button
+  again. `Escape` in an open group goes back to the first row, then to the editor.
+- **Touch.** With `pointer: coarse` the buttons of the compact toolbar are 40 px with 20 px icons
+  (`--stilo-button-size`, `--stilo-icon-size`). Hover styles of the toolbar apply only with
+  `hover: hover`, and the toolbar has no tap highlight. The toolbar stays where `sticky` puts it:
+  keeping it above the virtual keyboard is a separate task.
+
 ## 4. Popover
 
 `createPopover({ anchor, content, container, placement?, offset?, onClose? })` (internal) is

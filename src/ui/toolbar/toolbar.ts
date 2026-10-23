@@ -1,3 +1,5 @@
+import type { IconNode } from 'lucide';
+import { ChevronLeft, Ellipsis } from 'lucide';
 import type { Editor } from '../../index';
 import { StiloError } from '../../index';
 import { createCharacterPicker } from '../components/character-picker';
@@ -17,8 +19,14 @@ import { createTableHandles } from '../components/table-handles';
 import { createTableMenu } from '../components/table-menu';
 import { en } from '../i18n/en';
 import type { Messages } from '../i18n/types';
-import { DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
-import type { ToolbarButton, ToolbarContext, ToolbarItem } from './types';
+import { DEFAULT_COMPACT_TOOLBAR, DEFAULT_ITEMS, DEFAULT_TOOLBAR } from './items';
+import type {
+  CompactToolbar,
+  CompactToolbarGroup,
+  ToolbarButton,
+  ToolbarContext,
+  ToolbarItem,
+} from './types';
 
 /** Options of {@link createToolbar}. */
 export interface ToolbarOptions {
@@ -33,6 +41,18 @@ export interface ToolbarOptions {
    * `stilo-toolbar-host` (`position: sticky`). Default: `true`.
    */
   sticky?: boolean;
+  /**
+   * `'full'`: every group, in rows that wrap; `'compact'`: the two levels of `compact`; `'auto'`:
+   * compact while `container` is narrower than `compactBelow`. Default: `'full'`. T-072.
+   */
+  layout?: 'full' | 'compact' | 'auto';
+  /**
+   * The compact layout. Default: DEFAULT_COMPACT_TOOLBAR with the default `items`; with other
+   * `items`, the groups of up to two buttons on the first row and a button for every other group.
+   */
+  compact?: CompactToolbar;
+  /** Width of `container` in px under which the `'auto'` layout is compact. Default: 600. */
+  compactBelow?: number;
 }
 
 /** A toolbar created by {@link createToolbar}. */
@@ -103,6 +123,68 @@ function scrollPositions(element: HTMLElement): ScrollPosition[] {
   return positions;
 }
 
+/** The compact layout of custom `items`: short groups of buttons stay, the others get a button. */
+function deriveCompact(groups: ReadonlyArray<ReadonlyArray<ToolbarItem>>): CompactToolbar {
+  const layout: Array<Array<string | CompactToolbarGroup>> = [];
+  let buttons: CompactToolbarGroup[] | null = null;
+  groups.forEach((group, index) => {
+    const ids = group.map((item) => item.id);
+    if (group.length <= 2 && group.every((item) => item.kind === 'button')) {
+      layout.push(ids);
+      buttons = null;
+      return;
+    }
+    const first = group[0]!;
+    const icon = ('icon' in first && first.icon) || Ellipsis;
+    if (!buttons) {
+      buttons = [];
+      layout.push(buttons);
+    }
+    buttons.push({ id: `group${index}`, icon, labelKey: first.labelKey, items: [ids] });
+  });
+  return layout;
+}
+
+/** A toolbar button with an icon, its label as accessible name and `title`. */
+function createButton(icon: IconNode, label: string, title = label): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'stilo-toolbar__button';
+  button.setAttribute('aria-label', label);
+  button.setAttribute('title', title);
+  button.setAttribute('tabindex', '-1');
+  button.appendChild(createIcon(icon));
+  return button;
+}
+
+/** A `role="group"` element of the toolbar. */
+function createGroup(): HTMLElement {
+  const group = document.createElement('div');
+  group.className = 'stilo-toolbar__group';
+  group.setAttribute('role', 'group');
+  return group;
+}
+
+/** A row of the compact toolbar. */
+function createRow(): HTMLElement {
+  const row = document.createElement('div');
+  row.className = 'stilo-toolbar__row';
+  return row;
+}
+
+/** A group element and the elements it holds in one layout. */
+interface Slot {
+  element: HTMLElement;
+  children: HTMLElement[];
+}
+
+/** A group button of the compact toolbar and the row it opens. */
+interface GroupView {
+  button: HTMLButtonElement;
+  back: HTMLButtonElement;
+  row: HTMLElement;
+}
+
 /** Whether `event` moves the caret in `input`: arrows leave the field only at its ends. */
 function movesCaret(event: KeyboardEvent, input: HTMLInputElement): boolean {
   const { selectionStart, selectionEnd, value } = input;
@@ -121,7 +203,14 @@ function movesCaret(event: KeyboardEvent, input: HTMLInputElement): boolean {
 
 /** Creates the toolbar element and buttons, and registers event handlers. */
 export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar {
-  const { container, items = DEFAULT_TOOLBAR, messages = en, sticky = true } = options;
+  const {
+    container,
+    items = DEFAULT_TOOLBAR,
+    messages = en,
+    sticky = true,
+    layout = 'full',
+    compactBelow = 600,
+  } = options;
   const mac = isMacPlatform();
 
   // Resolve all items, keeping one group per original group
@@ -150,10 +239,12 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const fontSizeInputs: FontSizeInput[] = [];
   const iconMenus: IconMenu[] = [];
 
+  // The element of every item by ID, and the groups of the full layout
+  const roots = new Map<string, HTMLElement>();
+  const fullSlots: Slot[] = [];
+
   for (const group of resolvedGroups) {
-    const groupEl = document.createElement('div');
-    groupEl.className = 'stilo-toolbar__group';
-    groupEl.setAttribute('role', 'group');
+    const groupEl = createGroup();
 
     for (const item of group) {
       if (item.kind === 'dropdown') {
@@ -216,21 +307,13 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         const hasShortcut = btnItem.shortcut !== undefined;
         const title = hasShortcut ? `${label} (${formatShortcut(btnItem.shortcut!, mac)})` : label;
 
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'stilo-toolbar__button';
+        const button = createButton(btnItem.icon, label, title);
         button.setAttribute('data-item', btnItem.id);
-        button.setAttribute('aria-label', label);
-        button.setAttribute('title', title);
-        button.setAttribute('tabindex', '-1');
 
         // Toggle button: aria-pressed
         if (btnItem.isActive) {
           button.setAttribute('aria-pressed', 'false');
         }
-
-        const icon = createIcon(btnItem.icon);
-        button.appendChild(icon);
 
         groupEl.appendChild(button);
         itemElements.push(button);
@@ -239,6 +322,66 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     }
 
     element.appendChild(groupEl);
+    const children = [...groupEl.children] as HTMLElement[];
+    for (const [index, item] of group.entries()) roots.set(item.id, children[index]!);
+    fullSlots.push({ element: groupEl, children });
+  }
+
+  // The compact layout: a first row, and a row per group button that opens in its place
+  const fullTops = fullSlots.map((slot) => slot.element);
+  const compactSlots: Slot[] = [];
+  const views: GroupView[] = [];
+  const mainRow = createRow();
+  const compactTops = [mainRow];
+  const known = new Set(items.flat().map((item) => (typeof item === 'string' ? item : item.id)));
+  function fillRow(
+    row: HTMLElement,
+    groups: ReadonlyArray<ReadonlyArray<string | CompactToolbarGroup | HTMLElement>>,
+  ): void {
+    for (const group of groups) {
+      const children: HTMLElement[] = [];
+      for (const entry of group) {
+        if (entry instanceof HTMLElement) {
+          children.push(entry);
+        } else if (typeof entry !== 'string') {
+          const view = createGroupView(entry);
+          if (view) children.push(view.button);
+        } else if (!known.has(entry)) {
+          throw new StiloError(`Toolbar: compact item "${entry}" is not in items`);
+        } else {
+          const root = roots.get(entry);
+          if (root) children.push(root);
+        }
+      }
+      if (children.length === 0) continue;
+      const slot = { element: createGroup(), children };
+      compactSlots.push(slot);
+      row.appendChild(slot.element);
+    }
+  }
+  // A group whose items are all unavailable is not shown.
+  function createGroupView(group: CompactToolbarGroup): GroupView | null {
+    const row = createRow();
+    const back = createButton(ChevronLeft, messages['toolbar.back'] ?? 'Back');
+    back.setAttribute('data-back', '');
+    fillRow(row, [[back], ...group.items]);
+    if (row.childElementCount < 2) return null;
+    const button = createButton(group.icon, messages[group.labelKey] ?? group.labelKey);
+    button.setAttribute('data-group', group.id);
+    row.hidden = true;
+    const view = { button, back, row };
+    views.push(view);
+    compactTops.push(row);
+    return view;
+  }
+  if (layout !== 'full') {
+    const defaultCompact = items === DEFAULT_TOOLBAR ? DEFAULT_COMPACT_TOOLBAR : null;
+    fillRow(mainRow, options.compact ?? defaultCompact ?? deriveCompact(resolvedGroups));
+  }
+  const navigable = new Set<HTMLElement>(itemElements);
+  for (const view of views) {
+    navigable.add(view.button);
+    navigable.add(view.back);
   }
 
   // One link popover and link bubble per toolbar, mounted next to the editable element so that
@@ -334,30 +477,74 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     const top = (fullscreen ? 0 : container.offsetHeight) + 5;
     editor.view.setProps({ scrollMargin: { top, right: 5, bottom: 5, left: 5 } });
   }
+  // The 'auto' layout follows the width of the container; 0 = not laid out.
+  function onResize(): void {
+    if (sticky) setScrollMargin();
+    const width = container.clientWidth;
+    if (layout === 'auto' && width > 0) setCompact(width < compactBelow);
+  }
   if (sticky) {
     container.classList.add('stilo-toolbar-host');
     setScrollMargin();
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(setScrollMargin);
-      resizeObserver.observe(container);
-    }
+  }
+  if ((sticky || layout === 'auto') && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(onResize);
+    resizeObserver.observe(container);
   }
 
   // State tracking
   let pendingFrame = 0;
   let isDestroyed = false;
 
-  // Roving tabindex state
+  // Roving tabindex state: `nav` holds the items of the shown layout or row, in order
   let focusedIndex = 0;
+  let nav: HTMLElement[] = itemElements;
 
   function setRovingFocus(index: number): void {
-    itemElements.forEach((el, i) => {
-      el.setAttribute('tabindex', i === index ? '0' : '-1');
-    });
+    for (const el of navigable) el.setAttribute('tabindex', '-1');
+    nav[index]?.setAttribute('tabindex', '0');
     focusedIndex = index;
   }
 
   setRovingFocus(0);
+
+  // Compact layout state: the group open in place of the first row (`null`: the first row)
+  let compact = false;
+  let openView: GroupView | null = null;
+
+  // Shows a row of the compact layout; the focus follows when it is in the toolbar.
+  function showRow(view: GroupView | null): void {
+    const previous = openView;
+    const focused = element.contains(element.ownerDocument.activeElement);
+    openView = view;
+    mainRow.hidden = view !== null;
+    for (const other of views) other.row.hidden = other !== view;
+    const row = view?.row ?? mainRow;
+    const selector = '[data-item], [data-group], [data-back]';
+    nav = [...row.querySelectorAll<HTMLElement>(selector)].filter((el) => navigable.has(el));
+    // An open group focuses its first item, the back button focuses the group button.
+    const target = view ? (nav[1] ?? nav[0]) : previous?.button;
+    setRovingFocus(Math.max(0, target ? nav.indexOf(target) : 0));
+    if (focused) nav[focusedIndex]?.focus();
+  }
+
+  // Moves the item elements between the full and the compact layout.
+  function setCompact(on: boolean): void {
+    if (on === compact) return;
+    compact = on;
+    for (const top of on ? fullTops : compactTops) top.remove();
+    for (const slot of on ? compactSlots : fullSlots) slot.element.append(...slot.children);
+    element.prepend(...(on ? compactTops : fullTops));
+    element.classList.toggle('stilo-toolbar--compact', on);
+    if (on) {
+      showRow(null);
+    } else {
+      openView = null;
+      nav = itemElements;
+      setRovingFocus(0);
+    }
+    update();
+  }
 
   // Update function: refresh active/enabled states
   function update(): void {
@@ -418,10 +605,18 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         }
       }
     }
+    // A group button is marked while one of its items is pressed.
+    if (!compact) return;
+    for (const view of views) {
+      const pressed = view.row.querySelector('[aria-pressed="true"]') !== null;
+      view.button.classList.toggle('stilo-toolbar__button--marked', pressed);
+    }
   }
 
   // Initial update
   update();
+  if (layout === 'compact') setCompact(true);
+  if (layout === 'auto') onResize();
 
   // Transaction handler: schedule update with rAF
   const onTransaction = (): void => {
@@ -451,6 +646,11 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onButtonClick = (e: Event): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
+    const opener = target.closest<HTMLElement>('[data-group], [data-back]');
+    if (opener) {
+      showRow(views.find((view) => view.button === opener) ?? null);
+      return;
+    }
     const btn = target.closest<HTMLElement>('[data-item]');
     if (!btn) return;
 
@@ -468,43 +668,45 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onToolbarKeydown = (e: KeyboardEvent): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
-    const btn = target.closest<HTMLElement>('[data-item]');
+    const btn = target.closest<HTMLElement>('[data-item], [data-group], [data-back]');
     if (!btn) return;
 
-    const index = itemElements.indexOf(btn);
+    const index = nav.indexOf(btn);
     if (index === -1 || (btn instanceof HTMLInputElement && movesCaret(e, btn))) return;
 
     switch (e.key) {
       case 'ArrowRight': {
         e.preventDefault();
-        const next = (index + 1) % itemElements.length;
+        const next = (index + 1) % nav.length;
         setRovingFocus(next);
-        itemElements[next]!.focus();
+        nav[next]!.focus();
         break;
       }
       case 'ArrowLeft': {
         e.preventDefault();
-        const prev = (index - 1 + itemElements.length) % itemElements.length;
+        const prev = (index - 1 + nav.length) % nav.length;
         setRovingFocus(prev);
-        itemElements[prev]!.focus();
+        nav[prev]!.focus();
         break;
       }
       case 'Home': {
         e.preventDefault();
         setRovingFocus(0);
-        itemElements[0]!.focus();
+        nav[0]!.focus();
         break;
       }
       case 'End': {
         e.preventDefault();
-        const last = itemElements.length - 1;
+        const last = nav.length - 1;
         setRovingFocus(last);
-        itemElements[last]!.focus();
+        nav[last]!.focus();
         break;
       }
       case 'Escape': {
+        // An open group goes back to the first row first.
         e.preventDefault();
-        editor.focus();
+        if (openView) showRow(null);
+        else editor.focus();
         break;
       }
     }
@@ -528,8 +730,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (e.key === 'F10' && e.altKey) {
       e.preventDefault();
       editor.focus();
-      if (focusedIndex >= 0 && focusedIndex < itemElements.length) {
-        itemElements[focusedIndex]!.focus();
+      if (focusedIndex >= 0 && focusedIndex < nav.length) {
+        nav[focusedIndex]!.focus();
       }
     }
   };
@@ -588,8 +790,8 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     if (container.contains(element)) {
       container.removeChild(element);
     }
+    resizeObserver?.disconnect();
     if (sticky) {
-      resizeObserver?.disconnect();
       container.classList.remove('stilo-toolbar-host');
       editor.view.setProps({ scrollMargin: undefined });
     }

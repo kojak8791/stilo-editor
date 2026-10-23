@@ -282,11 +282,42 @@ ones work.
 | `items` | `DEFAULT_TOOLBAR` | Groups of items: an ID of the default items or a custom item object |
 | `messages` | `en` | UI strings |
 | `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
+| `layout` | `'full'` | `'compact'`: the compact toolbar; `'auto'`: compact while `container` is narrower than `compactBelow` |
+| `compact` | see below | The two levels of the compact toolbar |
+| `compactBelow` | `600` | Width of `container` in px under which `'auto'` is compact |
 
 The toolbar sticks with CSS only: an element with `overflow: hidden`, even only
 `overflow-x`, between the editor and the scrolling area of the page stops it, and the toolbar
 scrolls away with the content. Use `overflow-x: clip` there: it cuts the content the same way
 and keeps the toolbar in view.
+
+The compact toolbar is for phones and narrow panels: it shows undo, redo, bold, italic and four
+group buttons, *Text*, *Paragraph*, *Insert* and *More*. A group button shows the items of its
+group in place of that row, with a back button; a row that does not fit scrolls sideways. A dot
+on a group button tells that one of its items is on (e.g. underline at the cursor). On touch
+screens its buttons are bigger. `layout: 'auto'` switches between the full and the compact
+toolbar as the container narrows or widens.
+
+`compact` arranges the same items (the IDs of `items`, also of your custom items) on two levels:
+groups like `items`, of item IDs and of group buttons. The default is `DEFAULT_COMPACT_TOOLBAR`
+with the default `items`; with your own `items`, the groups of one or two buttons stay on the
+first row and every other group gets a button with the icon and the name of its first item.
+
+```ts
+import { Bold, List } from 'lucide';
+
+createToolbar(editor, {
+  container,
+  layout: 'auto',
+  compact: [
+    ['undo', 'redo'],
+    [
+      { id: 'format', icon: Bold, labelKey: 'Format', items: [['bold', 'italic', 'link']] },
+      { id: 'lists', icon: List, labelKey: 'Lists', items: [['bulletList', 'orderedList']] },
+    ],
+  ],
+});
+```
 
 A button whose extension is not loaded is not shown. In a read-only editor every item is
 disabled except `find` and `fullscreen`, and the find bar hides its replace row. Default item

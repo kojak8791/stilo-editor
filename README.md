@@ -130,7 +130,7 @@ A component for Svelte 5, actions for Svelte 4 and 5, server-side rendering incl
 - **Tables:** insert, merge and split, row and column handles, resizable columns
 - **Images:** paste, drop, insert and edit, captions with formatting, resize
 - **Tools:** links, find and replace, special characters and emoji, word count
-- **View:** full screen, light and dark theme
+- **View:** full screen, light and dark theme, compact toolbar for phones
 
 Markdown shortcuts as you type, a keyboard shortcut for everything, a toolbar you can drive
 from the keyboard alone. Every feature, shortcut and option: [All features](docs/FEATURES.md).

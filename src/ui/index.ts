@@ -25,6 +25,7 @@ export type { MessageKey, Messages } from './i18n/types';
 export { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './toolbar/fonts';
 /** Default toolbar items and layout. */
 export {
+  DEFAULT_COMPACT_TOOLBAR,
   DEFAULT_ITEMS,
   DEFAULT_TOOLBAR,
   type FontSizeInputOptions,
@@ -42,6 +43,8 @@ export { DEFAULT_PALETTE } from './toolbar/palette';
 export { createToolbar, type Toolbar, type ToolbarOptions } from './toolbar/toolbar';
 /** Toolbar item types. */
 export type {
+  CompactToolbar,
+  CompactToolbarGroup,
   ToolbarButton,
   ToolbarColor,
   ToolbarColorButton,

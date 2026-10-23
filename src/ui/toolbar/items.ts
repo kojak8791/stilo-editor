@@ -1,7 +1,9 @@
 import {
   ALargeSmall,
   Bold,
+  CaseSensitive,
   Code,
+  Ellipsis,
   FaceSlightlySmilingPlus,
   Highlighter,
   Image as ImageIcon,
@@ -13,6 +15,8 @@ import {
   ListTodo,
   Maximize,
   Minus,
+  Pilcrow,
+  Plus,
   Quote,
   Redo2,
   RemoveFormatting,
@@ -37,6 +41,7 @@ import type { MessageKey } from '../i18n/types';
 import { DEFAULT_FONT_SIZES, DEFAULT_FONTS } from './fonts';
 import { DEFAULT_PALETTE } from './palette';
 import type {
+  CompactToolbar,
   ToolbarColor,
   ToolbarColorButton,
   ToolbarDropdown,
@@ -78,6 +83,51 @@ export const DEFAULT_TOOLBAR: ReadonlyArray<ReadonlyArray<string>> = [
   ],
   ['find'],
   ['fullscreen'],
+];
+
+/** Default layout of the compact toolbar (T-072): every item of DEFAULT_TOOLBAR, on two levels. */
+export const DEFAULT_COMPACT_TOOLBAR: CompactToolbar = [
+  ['undo', 'redo'],
+  ['bold', 'italic'],
+  [
+    {
+      id: 'text',
+      icon: CaseSensitive,
+      labelKey: 'toolbar.text',
+      items: [
+        ['heading'],
+        ['fontFamily', 'fontSize'],
+        [
+          'underline',
+          'strike',
+          'code',
+          'subscript',
+          'superscript',
+          'link',
+          'clearFormatting',
+          'textCase',
+        ],
+        ['textColor', 'highlight'],
+      ],
+    },
+    {
+      id: 'paragraph',
+      icon: Pilcrow,
+      labelKey: 'toolbar.paragraph',
+      items: [
+        ['textAlign', 'lineHeight'],
+        ['bulletList', 'orderedList', 'taskList'],
+        ['blockquote', 'codeBlock'],
+      ],
+    },
+    {
+      id: 'insert',
+      icon: Plus,
+      labelKey: 'toolbar.insert',
+      items: [['table', 'image', 'characters', 'horizontalRule']],
+    },
+    { id: 'more', icon: Ellipsis, labelKey: 'toolbar.more', items: [['find', 'fullscreen']] },
+  ],
 ];
 
 /** The options of the text case dropdown, in menu order. */

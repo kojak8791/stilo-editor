@@ -65,7 +65,11 @@ const editor = new Editor({
   markdownShortcuts: !params.has('nomarkdown'),
 });
 
-createToolbar(editor, { container: document.querySelector<HTMLElement>('#toolbar')! });
+// The toolbar turns compact in a narrow window; `?compact`: always compact.
+createToolbar(editor, {
+  container: document.querySelector<HTMLElement>('#toolbar')!,
+  layout: params.has('compact') ? 'compact' : 'auto',
+});
 createStatusBar(editor, { container: document.querySelector<HTMLElement>('#status')! });
 
 const showHTML = () => {

@@ -117,6 +117,7 @@ the Markdown shortcuts off.
 | Feature | Keyboard | Markdown | Notes |
 |---|---|---|---|
 | Full screen | | | The last toolbar button: the toolbar and the text fill the browser window, only the text scrolls (the toolbar and the status bar stay in place); <kbd>Esc</kbd> in the text, or the button again, leaves it |
+| Compact toolbar | | | For phones and narrow panels (toolbar option `layout`): undo, redo, bold, italic and four group buttons, *Text*, *Paragraph*, *Insert* and *More*, that show their items in place of the row, with a back button; a dot marks a group with an item on; bigger buttons on touch screens. `'auto'` turns it on when the editor gets narrow |
 | Dark theme | | | The toolbar, the popovers and the content defaults turn dark when the page sets `color-scheme: dark`, or follow the system with `color-scheme: light dark` |
 
 ## Keyboard and accessibility

@@ -1462,3 +1462,178 @@ describe('full screen', () => {
     expect(button.getAttribute('aria-pressed')).toBe('true');
   });
 });
+
+describe('compact layout', () => {
+  function setup(options: Partial<ToolbarOptions> = {}) {
+    const editor = createTestEditor({ html: '<p>a|b</p>' });
+    attachEditor(editor);
+    const container = createToolbarContainer();
+    const toolbar = createToolbar(editor, { container, layout: 'compact', ...options });
+    const rows = [...toolbar.element.querySelectorAll<HTMLElement>('.stilo-toolbar__row')];
+    const ids = (row: Element) =>
+      [...row.querySelectorAll('[data-item], [data-group], [data-back]')].map(
+        (el) => el.getAttribute('data-item') ?? el.getAttribute('data-group') ?? 'back',
+      );
+    const group = (id: string) =>
+      toolbar.element.querySelector<HTMLButtonElement>(`[data-group="${id}"]`)!;
+    return { editor, container, toolbar, rows, ids, group };
+  }
+
+  it('shows the first row: undo, redo, bold, italic and the group buttons', () => {
+    const { toolbar, rows, ids } = setup();
+    expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(true);
+    expect(rows.length).toBe(5);
+    expect(rows.map((row) => row.hidden)).toEqual([false, true, true, true, true]);
+    expect(ids(rows[0]!)).toEqual([
+      'undo',
+      'redo',
+      'bold',
+      'italic',
+      'text',
+      'paragraph',
+      'insert',
+      'more',
+    ]);
+    expect(rows[0]!.querySelectorAll('[role="group"]').length).toBe(3);
+    expect(toolbar.element.querySelector('[data-group="text"]')!.getAttribute('aria-label')).toBe(
+      'Text',
+    );
+  });
+
+  it('holds every item of the default toolbar once', () => {
+    const { rows, ids } = setup();
+    const all = rows.flatMap(ids).filter((id) => id !== 'back');
+    const full = setup({ layout: 'full' });
+    const fullIds = [...full.toolbar.element.querySelectorAll('[data-item]')].map((el) =>
+      el.getAttribute('data-item'),
+    );
+    const groups = ['text', 'paragraph', 'insert', 'more'];
+    expect(all.filter((id) => !groups.includes(id)).sort()).toEqual(fullIds.sort());
+  });
+
+  it('a group button shows its items in place of the first row, back shows the first row', () => {
+    const { editor, rows, ids, group } = setup();
+    editor.focus();
+    group('insert').click();
+    expect(rows.map((row) => row.hidden)).toEqual([true, true, true, false, true]);
+    expect(ids(rows[3]!)).toEqual(['back', 'table', 'image', 'characters', 'horizontalRule']);
+    expect(editor.view.hasFocus()).toBe(true);
+    rows[3]!.querySelector<HTMLElement>('[data-back]')!.click();
+    expect(rows.map((row) => row.hidden)).toEqual([false, true, true, true, true]);
+    expect(editor.view.hasFocus()).toBe(true);
+  });
+
+  it('the items of an open group run their commands', () => {
+    const { editor, toolbar, group } = setup();
+    // jsdom has no layout: scrolling the selection into view needs Range.getClientRects.
+    vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
+    group('paragraph').click();
+    toolbar.element.querySelector<HTMLElement>('[data-item="bulletList"]')!.click();
+    expect(editor.getHTML()).toBe('<ul><li>ab</li></ul>');
+  });
+
+  it('the keyboard moves inside the shown row; Escape goes back, then to the editor', () => {
+    const { editor, rows, group } = setup();
+    const more = group('more');
+    more.focus();
+    more.click();
+    const row = rows[4]!;
+    const find = row.querySelector<HTMLElement>('[data-item="find"]')!;
+    const fullscreen = row.querySelector<HTMLElement>('[data-item="fullscreen"]')!;
+    const back = row.querySelector<HTMLElement>('[data-back]')!;
+    expect(document.activeElement).toBe(find);
+    press(find, 'ArrowRight');
+    expect(document.activeElement).toBe(fullscreen);
+    press(fullscreen, 'ArrowRight');
+    expect(document.activeElement).toBe(back);
+    expect(back.getAttribute('tabindex')).toBe('0');
+    press(back, 'Escape');
+    expect(row.hidden).toBe(true);
+    expect(document.activeElement).toBe(more);
+    expect(more.getAttribute('tabindex')).toBe('0');
+    press(more, 'Escape');
+    expect(editor.view.hasFocus()).toBe(true);
+  });
+
+  it('Alt-F10 focuses the item of the shown row that has the roving tabindex', () => {
+    const { editor, rows, group } = setup();
+    group('text').click();
+    press(editor.view.dom, 'F10', { altKey: true });
+    expect(document.activeElement).toBe(rows[1]!.querySelector('[data-item="heading"]'));
+  });
+
+  it('marks a group button while one of its items is pressed', () => {
+    const { editor, toolbar, group } = setup();
+    editor.commands.selectAll();
+    editor.commands.toggleUnderline();
+    toolbar.update();
+    expect(group('text').classList.contains('stilo-toolbar__button--marked')).toBe(true);
+    expect(group('paragraph').classList.contains('stilo-toolbar__button--marked')).toBe(false);
+    editor.commands.toggleUnderline();
+    toolbar.update();
+    expect(group('text').classList.contains('stilo-toolbar__button--marked')).toBe(false);
+  });
+
+  it('takes a custom layout of the same items', () => {
+    const { rows, ids } = setup({
+      compact: [
+        ['undo', 'bold'],
+        [{ id: 'lists', icon: Star, labelKey: 'Lists', items: [['bulletList', 'orderedList']] }],
+      ],
+    });
+    expect(rows.length).toBe(2);
+    expect(ids(rows[0]!)).toEqual(['undo', 'bold', 'lists']);
+    expect(ids(rows[1]!)).toEqual(['back', 'bulletList', 'orderedList']);
+  });
+
+  it('throws on an item that is not in items', () => {
+    expect(() => setup({ items: [['bold']], compact: [['italic']] })).toThrow(StiloError);
+  });
+
+  it('builds the layout of custom items: short groups of buttons stay, the others get a button', () => {
+    const { rows, ids, group } = setup({
+      items: [['undo', 'redo'], ['bold', 'italic', 'underline'], ['heading'], ['find']],
+    });
+    expect(ids(rows[0]!)).toEqual(['undo', 'redo', 'group1', 'group2', 'find']);
+    expect(ids(rows[1]!)).toEqual(['back', 'bold', 'italic', 'underline']);
+    expect(group('group1').getAttribute('aria-label')).toBe('Bold');
+    expect(group('group2').getAttribute('aria-label')).toBe('Text style');
+  });
+
+  it('auto follows the width of the container and moves the same elements', () => {
+    let resize = (): void => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe(): void {}
+        disconnect(): void {}
+      },
+    );
+    let width = 400;
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(() => width);
+    const { toolbar } = setup({ layout: 'auto', sticky: false });
+    const bold = toolbar.element.querySelector('[data-item="bold"]');
+    expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(true);
+
+    width = 800;
+    resize();
+    expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(false);
+    expect(toolbar.element.querySelector('.stilo-toolbar__row')).toBeNull();
+    const groups = [...toolbar.element.children].filter((el) => el.matches('[role="group"]'));
+    expect(groups.length).toBe(9);
+    expect(toolbar.element.querySelector('[data-item="bold"]')).toBe(bold);
+
+    width = 599;
+    resize();
+    expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
+  it('auto stays full while the container has no width', () => {
+    const { toolbar } = setup({ layout: 'auto' });
+    expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(false);
+  });
+});

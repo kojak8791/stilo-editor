@@ -91,6 +91,8 @@
   gap: var(--stilo-toolbar-group-gap);
   padding: var(--stilo-toolbar-padding-y) var(--stilo-toolbar-padding-x);
   background: var(--stilo-color-toolbar-bg);
+  /* Touch screens: no flash over the tapped button, its pressed state shows it */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /*
@@ -166,8 +168,11 @@
   transition: background-color 0.15s;
 }
 
-.stilo-toolbar__button:hover {
-  background: var(--stilo-color-hover);
+/* Hover only where a pointer hovers: on touch screens it would stay on the tapped button */
+@media (hover: hover) {
+  .stilo-toolbar__button:hover {
+    background: var(--stilo-color-hover);
+  }
 }
 
 .stilo-toolbar__button:focus-visible {
@@ -191,6 +196,106 @@
 
 .stilo-toolbar__button[aria-disabled="true"]:hover {
   background: transparent;
+}
+
+/*
+ * Compact toolbar (T-072): one row at a time, on one line that scrolls sideways when it does not
+ * fit. The popovers hang from the toolbar, outside the rows, so the scrolling cuts none of them.
+ * The padding keeps the focus outline inside the row, which cuts what overflows it.
+ */
+.stilo-toolbar--compact {
+  flex-wrap: nowrap;
+}
+
+.stilo-toolbar__row {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: var(--stilo-toolbar-group-gap);
+  padding: 4px;
+  margin: -4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.stilo-toolbar__row[hidden] {
+  display: none;
+}
+
+.stilo-toolbar__row > .stilo-toolbar__group {
+  flex-shrink: 0;
+}
+
+/* Bigger touch targets on touch screens */
+@media (pointer: coarse) {
+  .stilo-toolbar--compact {
+    --stilo-button-size: 40px;
+    --stilo-icon-size: 20px;
+  }
+}
+
+/* A group button with a pressed item: a dot under its icon */
+.stilo-toolbar__button--marked {
+  position: relative;
+}
+
+.stilo-toolbar__button--marked::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--stilo-color-focus);
+  transform: translateX(-50%);
+}
+
+/*
+ * A row that scrolls fades at the edges where more items are hidden: a scroll-driven animation,
+ * inactive while the row fits. Browsers without it show the row without fading.
+ */
+@property --stilo-row-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --stilo-row-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes stilo-row-fade {
+  0% {
+    --stilo-row-fade-start: 0px;
+    --stilo-row-fade-end: 24px;
+  }
+  8% {
+    --stilo-row-fade-start: 24px;
+  }
+  92% {
+    --stilo-row-fade-end: 24px;
+  }
+  100% {
+    --stilo-row-fade-start: 24px;
+    --stilo-row-fade-end: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .stilo-toolbar__row {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--stilo-row-fade-start),
+      #000 calc(100% - var(--stilo-row-fade-end)),
+      transparent
+    );
+    animation: stilo-row-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
 }
 
 /* Icon */
@@ -868,14 +973,16 @@
 }
 
 /* Group hover: hovering one part lightly highlights both; the hovered part stays darker */
-.stilo-split:hover
-.stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]) {
-  background: var(--stilo-color-hover-group);
-}
+@media (hover: hover) {
+  .stilo-split:hover
+    .stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]) {
+    background: var(--stilo-color-hover-group);
+  }
 
-.stilo-split
-  .stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]):hover {
-  background: var(--stilo-color-hover);
+  .stilo-split
+    .stilo-toolbar__button:not(.stilo-toolbar__button--active, [aria-disabled="true"]):hover {
+    background: var(--stilo-color-hover);
+  }
 }
 
 .stilo-toolbar__button.stilo-split__main {
