@@ -1471,8 +1471,8 @@ describe('compact layout', () => {
     const toolbar = createToolbar(editor, { container, layout: 'compact', ...options });
     const rows = [...toolbar.element.querySelectorAll<HTMLElement>('.stilo-toolbar__row')];
     const ids = (row: Element) =>
-      [...row.querySelectorAll('[data-item], [data-group], [data-back]')].map(
-        (el) => el.getAttribute('data-item') ?? el.getAttribute('data-group') ?? 'back',
+      [...row.querySelectorAll('[data-item], [data-group]')].map(
+        (el) => el.getAttribute('data-item') ?? el.getAttribute('data-group'),
       );
     const group = (id: string) =>
       toolbar.element.querySelector<HTMLButtonElement>(`[data-group="${id}"]`)!;
@@ -1495,31 +1495,36 @@ describe('compact layout', () => {
       'more',
     ]);
     expect(rows[0]!.querySelectorAll('[role="group"]').length).toBe(3);
-    expect(toolbar.element.querySelector('[data-group="text"]')!.getAttribute('aria-label')).toBe(
-      'Text',
-    );
+    const text = toolbar.element.querySelector('[data-group="text"]')!;
+    expect(text.getAttribute('aria-label')).toBe('Text');
+    expect(text.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('holds every item of the default toolbar once', () => {
     const { rows, ids } = setup();
-    const all = rows.flatMap(ids).filter((id) => id !== 'back');
+    const all = rows.flatMap(ids);
     const full = setup({ layout: 'full' });
     const fullIds = [...full.toolbar.element.querySelectorAll('[data-item]')].map((el) =>
       el.getAttribute('data-item'),
     );
     const groups = ['text', 'paragraph', 'insert', 'more'];
-    expect(all.filter((id) => !groups.includes(id)).sort()).toEqual(fullIds.sort());
+    expect(all.filter((id) => !groups.includes(id!)).sort()).toEqual(fullIds.sort());
   });
 
-  it('a group button shows its items in place of the first row, back shows the first row', () => {
+  it('a group button opens its items in a second row, another switches, again closes', () => {
     const { editor, rows, ids, group } = setup();
     editor.focus();
     group('insert').click();
-    expect(rows.map((row) => row.hidden)).toEqual([true, true, true, false, true]);
-    expect(ids(rows[3]!)).toEqual(['back', 'table', 'image', 'characters', 'horizontalRule']);
+    expect(rows.map((row) => row.hidden)).toEqual([false, true, true, false, true]);
+    expect(ids(rows[3]!)).toEqual(['table', 'image', 'characters', 'horizontalRule']);
+    expect(group('insert').getAttribute('aria-expanded')).toBe('true');
     expect(editor.view.hasFocus()).toBe(true);
-    rows[3]!.querySelector<HTMLElement>('[data-back]')!.click();
+    group('paragraph').click();
+    expect(rows.map((row) => row.hidden)).toEqual([false, true, false, true, true]);
+    expect(group('insert').getAttribute('aria-expanded')).toBe('false');
+    group('paragraph').click();
     expect(rows.map((row) => row.hidden)).toEqual([false, true, true, true, true]);
+    expect(group('paragraph').getAttribute('aria-expanded')).toBe('false');
     expect(editor.view.hasFocus()).toBe(true);
   });
 
@@ -1532,22 +1537,24 @@ describe('compact layout', () => {
     expect(editor.getHTML()).toBe('<ul><li>ab</li></ul>');
   });
 
-  it('the keyboard moves inside the shown row; Escape goes back, then to the editor', () => {
-    const { editor, rows, group } = setup();
+  it('the keyboard reaches the open group after its button; Escape closes it, then leaves', () => {
+    const { editor, toolbar, rows, group } = setup();
     const more = group('more');
     more.focus();
     more.click();
     const row = rows[4]!;
     const find = row.querySelector<HTMLElement>('[data-item="find"]')!;
     const fullscreen = row.querySelector<HTMLElement>('[data-item="fullscreen"]')!;
-    const back = row.querySelector<HTMLElement>('[data-back]')!;
+    const undo = toolbar.element.querySelector<HTMLElement>('[data-item="undo"]')!;
     expect(document.activeElement).toBe(find);
-    press(find, 'ArrowRight');
+    press(find, 'ArrowLeft');
+    expect(document.activeElement).toBe(more);
+    press(more, 'End');
     expect(document.activeElement).toBe(fullscreen);
     press(fullscreen, 'ArrowRight');
-    expect(document.activeElement).toBe(back);
-    expect(back.getAttribute('tabindex')).toBe('0');
-    press(back, 'Escape');
+    expect(document.activeElement).toBe(undo);
+    expect(undo.getAttribute('tabindex')).toBe('0');
+    press(undo, 'Escape');
     expect(row.hidden).toBe(true);
     expect(document.activeElement).toBe(more);
     expect(more.getAttribute('tabindex')).toBe('0');
@@ -1583,7 +1590,7 @@ describe('compact layout', () => {
     });
     expect(rows.length).toBe(2);
     expect(ids(rows[0]!)).toEqual(['undo', 'bold', 'lists']);
-    expect(ids(rows[1]!)).toEqual(['back', 'bulletList', 'orderedList']);
+    expect(ids(rows[1]!)).toEqual(['bulletList', 'orderedList']);
   });
 
   it('throws on an item that is not in items', () => {
@@ -1595,7 +1602,7 @@ describe('compact layout', () => {
       items: [['undo', 'redo'], ['bold', 'italic', 'underline'], ['heading'], ['find']],
     });
     expect(ids(rows[0]!)).toEqual(['undo', 'redo', 'group1', 'group2', 'find']);
-    expect(ids(rows[1]!)).toEqual(['back', 'bold', 'italic', 'underline']);
+    expect(ids(rows[1]!)).toEqual(['bold', 'italic', 'underline']);
     expect(group('group1').getAttribute('aria-label')).toBe('Bold');
     expect(group('group2').getAttribute('aria-label')).toBe('Text style');
   });
@@ -1626,7 +1633,7 @@ describe('compact layout', () => {
     expect(groups.length).toBe(9);
     expect(toolbar.element.querySelector('[data-item="bold"]')).toBe(bold);
 
-    width = 599;
+    width = 575;
     resize();
     expect(toolbar.element.classList.contains('stilo-toolbar--compact')).toBe(true);
     vi.unstubAllGlobals();

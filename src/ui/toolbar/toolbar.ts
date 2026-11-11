@@ -1,5 +1,5 @@
 import type { IconNode } from 'lucide';
-import { ChevronLeft, Ellipsis } from 'lucide';
+import { Ellipsis } from 'lucide';
 import type { Editor } from '../../index';
 import { StiloError } from '../../index';
 import { createCharacterPicker } from '../components/character-picker';
@@ -42,7 +42,7 @@ export interface ToolbarOptions {
    */
   sticky?: boolean;
   /**
-   * `'full'`: every group, in rows that wrap; `'compact'`: the two levels of `compact`; `'auto'`:
+   * `'full'`: every group, in rows that wrap; `'compact'`: the two rows of `compact`; `'auto'`:
    * compact while `container` is narrower than `compactBelow`. Default: `'full'`. T-072.
    */
   layout?: 'full' | 'compact' | 'auto';
@@ -51,7 +51,7 @@ export interface ToolbarOptions {
    * `items`, the groups of up to two buttons on the first row and a button for every other group.
    */
   compact?: CompactToolbar;
-  /** Width of `container` in px under which the `'auto'` layout is compact. Default: 600. */
+  /** Width of `container` in px under which the `'auto'` layout is compact. Default: 576. */
   compactBelow?: number;
 }
 
@@ -181,7 +181,6 @@ interface Slot {
 /** A group button of the compact toolbar and the row it opens. */
 interface GroupView {
   button: HTMLButtonElement;
-  back: HTMLButtonElement;
   row: HTMLElement;
 }
 
@@ -209,7 +208,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     messages = en,
     sticky = true,
     layout = 'full',
-    compactBelow = 600,
+    compactBelow = 576,
   } = options;
   const mac = isMacPlatform();
 
@@ -327,7 +326,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     fullSlots.push({ element: groupEl, children });
   }
 
-  // The compact layout: a first row, and a row per group button that opens in its place
+  // The compact layout: a first row, and under it the row of the open group button
   const fullTops = fullSlots.map((slot) => slot.element);
   const compactSlots: Slot[] = [];
   const views: GroupView[] = [];
@@ -362,14 +361,13 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   // A group whose items are all unavailable is not shown.
   function createGroupView(group: CompactToolbarGroup): GroupView | null {
     const row = createRow();
-    const back = createButton(ChevronLeft, messages['toolbar.back'] ?? 'Back');
-    back.setAttribute('data-back', '');
-    fillRow(row, [[back], ...group.items]);
-    if (row.childElementCount < 2) return null;
+    fillRow(row, group.items);
+    if (row.childElementCount === 0) return null;
     const button = createButton(group.icon, messages[group.labelKey] ?? group.labelKey);
     button.setAttribute('data-group', group.id);
+    button.setAttribute('aria-expanded', 'false');
     row.hidden = true;
-    const view = { button, back, row };
+    const view = { button, row };
     views.push(view);
     compactTops.push(row);
     return view;
@@ -379,10 +377,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     fillRow(mainRow, options.compact ?? defaultCompact ?? deriveCompact(resolvedGroups));
   }
   const navigable = new Set<HTMLElement>(itemElements);
-  for (const view of views) {
-    navigable.add(view.button);
-    navigable.add(view.back);
-  }
+  for (const view of views) navigable.add(view.button);
 
   // One link popover and link bubble per toolbar, mounted next to the editable element so that
   // they scroll with the content. The popover opens with the link button, Mod-k in the editor
@@ -508,22 +503,28 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
 
   setRovingFocus(0);
 
-  // Compact layout state: the group open in place of the first row (`null`: the first row)
+  // Compact layout state: the group open in the second row (`null`: none)
   let compact = false;
   let openView: GroupView | null = null;
 
-  // Shows a row of the compact layout; the focus follows when it is in the toolbar.
-  function showRow(view: GroupView | null): void {
+  // Opens a group in the second row or closes it; the focus follows when it is in the toolbar.
+  function openGroup(view: GroupView | null): void {
     const previous = openView;
     const focused = element.contains(element.ownerDocument.activeElement);
     openView = view;
-    mainRow.hidden = view !== null;
-    for (const other of views) other.row.hidden = other !== view;
-    const row = view?.row ?? mainRow;
-    const selector = '[data-item], [data-group], [data-back]';
-    nav = [...row.querySelectorAll<HTMLElement>(selector)].filter((el) => navigable.has(el));
-    // An open group focuses its first item, the back button focuses the group button.
-    const target = view ? (nav[1] ?? nav[0]) : previous?.button;
+    for (const other of views) {
+      other.row.hidden = other !== view;
+      other.button.setAttribute('aria-expanded', String(other === view));
+    }
+    // The keyboard reaches the items of the open group right after its button.
+    const navigableIn = (row: HTMLElement) =>
+      [...row.querySelectorAll<HTMLElement>('[data-item], [data-group]')].filter((el) =>
+        navigable.has(el),
+      );
+    nav = navigableIn(mainRow);
+    if (view) nav.splice(nav.indexOf(view.button) + 1, 0, ...navigableIn(view.row));
+    // An open group focuses its first item, a closed one its button.
+    const target = view ? nav[nav.indexOf(view.button) + 1] : previous?.button;
     setRovingFocus(Math.max(0, target ? nav.indexOf(target) : 0));
     if (focused) nav[focusedIndex]?.focus();
   }
@@ -537,7 +538,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
     element.prepend(...(on ? compactTops : fullTops));
     element.classList.toggle('stilo-toolbar--compact', on);
     if (on) {
-      showRow(null);
+      openGroup(null);
     } else {
       openView = null;
       nav = itemElements;
@@ -646,9 +647,9 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onButtonClick = (e: Event): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
-    const opener = target.closest<HTMLElement>('[data-group], [data-back]');
+    const opener = views.find((view) => view.button === target.closest('[data-group]'));
     if (opener) {
-      showRow(views.find((view) => view.button === opener) ?? null);
+      openGroup(opener === openView ? null : opener);
       return;
     }
     const btn = target.closest<HTMLElement>('[data-item]');
@@ -668,7 +669,7 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
   const onToolbarKeydown = (e: KeyboardEvent): void => {
     if (isDestroyed) return;
     const target = e.target as HTMLElement;
-    const btn = target.closest<HTMLElement>('[data-item], [data-group], [data-back]');
+    const btn = target.closest<HTMLElement>('[data-item], [data-group]');
     if (!btn) return;
 
     const index = nav.indexOf(btn);
@@ -703,9 +704,9 @@ export function createToolbar(editor: Editor, options: ToolbarOptions): Toolbar 
         break;
       }
       case 'Escape': {
-        // An open group goes back to the first row first.
+        // An open group closes first.
         e.preventDefault();
-        if (openView) showRow(null);
+        if (openView) openGroup(null);
         else editor.focus();
         break;
       }

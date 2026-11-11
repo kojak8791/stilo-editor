@@ -284,7 +284,7 @@ ones work.
 | `sticky` | `true` | Keeps the toolbar visible at the top of the scrolling area |
 | `layout` | `'full'` | `'compact'`: the compact toolbar; `'auto'`: compact while `container` is narrower than `compactBelow` |
 | `compact` | see below | The two levels of the compact toolbar |
-| `compactBelow` | `600` | Width of `container` in px under which `'auto'` is compact |
+| `compactBelow` | `576` | Width of `container` in px under which `'auto'` is compact |
 
 The toolbar sticks with CSS only: an element with `overflow: hidden`, even only
 `overflow-x`, between the editor and the scrolling area of the page stops it, and the toolbar
@@ -292,8 +292,8 @@ scrolls away with the content. Use `overflow-x: clip` there: it cuts the content
 and keeps the toolbar in view.
 
 The compact toolbar is for phones and narrow panels: it shows undo, redo, bold, italic and four
-group buttons, *Text*, *Paragraph*, *Insert* and *More*. A group button shows the items of its
-group in place of that row, with a back button; a row that does not fit scrolls sideways. A dot
+group buttons, *Text*, *Paragraph*, *Insert* and *More*. A group button opens the items of its
+group in a second row and closes them; a row that does not fit scrolls sideways. A dot
 on a group button tells that one of its items is on (e.g. underline at the cursor). On touch
 screens its buttons are bigger. `layout: 'auto'` switches between the full and the compact
 toolbar as the container narrows or widens.

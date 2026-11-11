@@ -24,9 +24,9 @@ All notable changes to `stilo-editor`. The format follows
 - Drop of image files: embedded where they are dropped, with the size limit and the
   `imageRejected` event of paste.
 - Compact toolbar for phones and narrow panels: the toolbar option `layout: 'compact'`, or
-  `'auto'` to switch below the width `compactBelow` (default 600 px). Undo, redo, bold, italic
-  and four group buttons (*Text*, *Paragraph*, *Insert*, *More*) that show their items in place
-  of the row, with a back button; a row that does not fit scrolls sideways. Bigger buttons on
+  `'auto'` to switch below the width `compactBelow` (default 576 px). Undo, redo, bold, italic
+  and four group buttons (*Text*, *Paragraph*, *Insert*, *More*) that open their items in a
+  second row; a row that does not fit scrolls sideways. Bigger buttons on
   touch screens. The option `compact` arranges the items in your own way
   (`DEFAULT_COMPACT_TOOLBAR`, types `CompactToolbar` and `CompactToolbarGroup`).
 

@@ -153,7 +153,6 @@ export const it: Messages = {
   'toolbar.paragraph': 'Paragrafo',
   'toolbar.insert': 'Inserisci',
   'toolbar.more': 'Altro',
-  'toolbar.back': 'Indietro',
   'find.find': 'Trova',
   'find.replace': 'Sostituisci con',
   'find.previous': 'Risultato precedente',

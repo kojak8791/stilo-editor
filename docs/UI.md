@@ -160,12 +160,13 @@ once by `createToolbar`, never at module top level.
 
 For phones and narrow panels. The option `layout` is `'full'` (default: every group, in rows that
 wrap), `'compact'` or `'auto'`: compact while the container is narrower than `compactBelow`
-(default 600 px), measured by the `ResizeObserver` of the toolbar; a container without width (not
+(default 576 px, the `sm` breakpoint of Bootstrap), measured by the `ResizeObserver` of the toolbar; a container without width (not
 laid out) keeps the layout as it is.
 
-- **Two levels.** A first row of items and of group buttons; a group button shows its items in
-  place of the first row, after a back button. One row at a time, on one line: a row that does
-  not fit scrolls sideways (no scrollbar) and fades at the edges where items are hidden.
+- **Two levels.** A first row of items and of group buttons, always shown; a group button
+  opens its items in a second row under it, another group button switches to its group, the same
+  button again closes it. Each row stays on one line: a row that does not fit scrolls sideways
+  (no scrollbar) and fades at the edges where items are hidden.
 - **Configuration** (`compact`, type `CompactToolbar`): groups like `items`, of item IDs and of
   `CompactToolbarGroup` (`id`, `icon`, `labelKey`, `items`: groups of item IDs). It only arranges
   the items of `items`: an ID that is not there throws `StiloError`; an unavailable item is left
@@ -181,16 +182,17 @@ laid out) keeps the layout as it is.
 | | `more`, `Ellipsis`, *More* | `find` `fullscreen` |
 
 - **Same elements.** The item elements are created once and move between the layouts; the
-  toolbar gets `stilo-toolbar--compact`. Rows are `div.stilo-toolbar__row` (`hidden` when not
-  shown) holding the usual groups. Group buttons and back buttons are `stilo-toolbar__button`
-  with `data-group="<id>"` / `data-back`, not `data-item`.
-- **State.** An open group stays open while its items are used, until the back button. A group
+  toolbar gets `stilo-toolbar--compact` (a column of rows). Rows are `div.stilo-toolbar__row`
+  (`hidden` when closed) holding the usual groups. Group buttons are `stilo-toolbar__button` with
+  `data-group="<id>"` (not `data-item`) and `aria-expanded`; the open one has the pressed
+  background.
+- **State.** An open group stays open while its items are used, until it is closed. A group
   button gets `stilo-toolbar__button--marked` (a dot) while an item of its row is pressed
   (`aria-pressed="true"`); `update()` computes it.
 - **Focus and keyboard.** Taps and clicks leave the focus in the editor (§3.3), so the virtual
-  keyboard of a phone stays open. The roving tabindex runs over the shown row only; a group
-  opened from the keyboard focuses its first item, the back button focuses the group button
-  again. `Escape` in an open group goes back to the first row, then to the editor.
+  keyboard of a phone stays open. The roving tabindex runs over the first row, with the items of
+  the open group right after its button; a group opened from the keyboard focuses its first
+  item. `Escape` closes the open group and focuses its button, then goes to the editor.
 - **Touch.** With `pointer: coarse` the buttons of the compact toolbar are 40 px with 20 px icons
   (`--stilo-button-size`, `--stilo-icon-size`). Hover styles of the toolbar apply only with
   `hover: hover`, and the toolbar has no tap highlight. The toolbar stays where `sticky` puts it:

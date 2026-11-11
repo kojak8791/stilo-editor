@@ -178,8 +178,7 @@ export type ToolbarItem =
   | ToolbarIconMenu;
 
 /**
- * A button of the compact toolbar (T-072): it shows its items in place of the first row, after a
- * back button.
+ * A button of the compact toolbar (T-072): it opens its items in a second row, and closes them.
  */
 export interface CompactToolbarGroup {
   /** Unique within the toolbar; written as `data-group`. */

@@ -184,8 +184,9 @@
   background: var(--stilo-color-active);
 }
 
-/* The find button while its bar is open (T-043) */
-.stilo-toolbar__button[data-item="find"][aria-expanded="true"] {
+/* The find button while its bar is open (T-043), a group button while its row is open (T-072) */
+.stilo-toolbar__button[data-item="find"][aria-expanded="true"],
+.stilo-toolbar__button[data-group][aria-expanded="true"] {
   background: var(--stilo-color-active);
 }
 
@@ -199,17 +200,18 @@
 }
 
 /*
- * Compact toolbar (T-072): one row at a time, on one line that scrolls sideways when it does not
- * fit. The popovers hang from the toolbar, outside the rows, so the scrolling cuts none of them.
- * The padding keeps the focus outline inside the row, which cuts what overflows it.
+ * Compact toolbar (T-072): the first row, and under it the row of the open group. A row stays on
+ * one line and scrolls sideways when it does not fit. The popovers hang from the toolbar, outside
+ * the rows, so the scrolling cuts none of them. The padding keeps the focus outline inside the
+ * row, which cuts what overflows it.
  */
 .stilo-toolbar--compact {
+  flex-direction: column;
   flex-wrap: nowrap;
 }
 
 .stilo-toolbar__row {
   display: flex;
-  flex: 1;
   min-width: 0;
   gap: var(--stilo-toolbar-group-gap);
   padding: 4px;

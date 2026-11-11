@@ -151,7 +151,6 @@ export type MessageKey =
   | 'toolbar.paragraph'
   | 'toolbar.insert'
   | 'toolbar.more'
-  | 'toolbar.back'
   | 'find.find'
   | 'find.replace'
   | 'find.previous'
