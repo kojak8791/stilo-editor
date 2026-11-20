@@ -40,8 +40,9 @@ All notable changes to `stilo-editor`. The format follows
 - A lighter look for the popovers, the find bar and their forms: no borders, popovers of
   translucent glass with a blur and a deeper shadow, text fields that stand out by a slightly
   darker background (lighter in dark) and show a ring when focused, flat secondary buttons.
-  Fields and buttons on the same row have the same height whatever the font and line height of
-  the page. New custom properties `--stilo-color-popover-bg`, `--stilo-color-field`,
+  Fields and form buttons have one height everywhere (26px), whatever the font and line height
+  of the page; labels and other secondary text are 1px smaller than the text. Smaller image
+  dialog and character picker; the table size grid has no borders. New custom properties `--stilo-color-popover-bg`, `--stilo-color-field`,
   `--stilo-color-button`, `--stilo-color-button-hover`, `--stilo-color-ring` and
   `--stilo-popover-blur`; `--stilo-color-border` no longer draws popover and field borders.
 - HTML with a `<figure>` holding an image loads as a figure; before, the image became an inline

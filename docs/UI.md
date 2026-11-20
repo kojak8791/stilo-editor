@@ -360,7 +360,7 @@ F-806). Its mode is chosen when it opens:
 - **Insert** (`Insert image`, *Insert*): anchored to the selection. Runs `insertFigure`; the
   *Caption* field is plain text, inserted as typed (`**x**` and `<b>` stay characters).
 
-Compact, about 340 × 145 px: a row per field, the label on the left, the field on the right
+Compact, about 315 × 160 px: a row per field, the label on the left, the field on the right
 (the inputs are named by `aria-label`, since a cell may also hold buttons). *Image*: a 26 px
 thumbnail, the address (`https://` as placeholder, focused and selected on open) and an icon
 button *Choose file* (`FolderOpen`, a hidden `input type="file"` for PNG, JPEG, GIF and WebP,
@@ -408,9 +408,12 @@ tab order: the keyboard path is the `image` button of the toolbar.
 - **Popovers and fields** have no borders. Popovers and the find bar are translucent glass
   (`--stilo-color-popover-bg`, a `backdrop-filter` blur) lifted by their shadow; text fields
   stand out by their background only (`--stilo-color-field`, a translucent tint, so it works
-  on any surface), secondary buttons are flat (`--stilo-color-button`). Fields and buttons on
-  the same row have the same fixed height (28px in the find bar and the color popover, 26px in
-  the link and image dialogs), so the font and line height of the host page do not change it.
+  on any surface), secondary buttons are flat (`--stilo-color-button`). Fields and form
+  buttons have one fixed height, 26px, in every popover and in the find bar, so the font and
+  line height of the host page do not change it. Text is `--stilo-font-size`; secondary text
+  (field labels of the image dialog, group headings of the character picker, shortcuts in menus,
+  the table size, the match count) is 1px smaller. The cells of the table grid have no border,
+  like the fields.
 - **Dark theme** (SPEC F-809): every color default is a `light-dark(light, dark)` pair. The
   browser picks the value from the `color-scheme` of the element, which the host sets: `dark`
   on the page or on the editor's box, or `light dark` to follow the system. Without
