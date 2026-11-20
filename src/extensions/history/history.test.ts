@@ -38,7 +38,8 @@ describe('History: undo/redo', () => {
     expect(editor.commands.undo()).toBe(true);
     expect(getHTMLWithSelection(editor)).toBe('<p>[ab]</p>');
     expect(editor.commands.redo()).toBe(true);
-    expect(getHTMLWithSelection(editor)).toBe('<p><strong>[ab]</strong></p>');
+    // prosemirror-history (since 1.5.2) puts the cursor near the change, not the old selection.
+    expect(getHTMLWithSelection(editor)).toBe('<p><strong>ab|</strong></p>');
   });
 
   it('undoes setHTML', () => {

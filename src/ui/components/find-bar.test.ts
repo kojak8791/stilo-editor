@@ -6,6 +6,8 @@ import { createToolbar, it as italian } from '../index';
 function setup(html: string, extensions = [defaultExtensions()]) {
   const editor = createTestEditor({ html, extensions });
   document.body.append(editor.view.dom.parentElement!);
+  // jsdom has no layout: scrolling the selection into view needs Range.getClientRects.
+  vi.spyOn(editor.view, 'coordsAtPos').mockReturnValue({ left: 0, right: 0, top: 0, bottom: 0 });
   const container = document.createElement('div');
   document.body.append(container);
   const toolbar = createToolbar(editor, { container });

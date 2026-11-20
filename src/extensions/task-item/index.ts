@@ -26,13 +26,16 @@ declare module '../../core/types' {
 }
 
 /**
- * Splits a task item: `splitListItem` gives an unchecked item at the end and copies the state in
- * the middle. At the start of a non-empty checked item, the empty item made before the text is
- * unchecked instead of the text.
+ * Splits a task item: an unchecked item at the end, a copy of the state in the middle. At the
+ * start of a non-empty checked item, the empty item made before the text is unchecked instead of
+ * the text.
  */
 function splitTaskItem(taskItem: NodeType): Command {
   return (state, dispatch) => {
-    const { $from } = state.selection;
+    const { $from, $to } = state.selection;
+    // `splitListItem` applies the attributes to the new item wherever it splits (since
+    // prosemirror-schema-list 1.6.1): without them, it copies the item.
+    const split = splitListItem(taskItem, $to.pos === $from.end() ? { checked: false } : undefined);
     const item = $from.depth >= 2 ? $from.node(-1) : null;
     const before =
       item?.type === taskItem &&
@@ -40,8 +43,8 @@ function splitTaskItem(taskItem: NodeType): Command {
       $from.parentOffset === 0 &&
       $from.index(-1) === 0 &&
       $from.parent.content.size > 0;
-    if (!before) return splitListItem(taskItem, { checked: false })(state, dispatch);
-    return splitListItem(taskItem, { checked: true })(
+    if (!before) return split(state, dispatch);
+    return split(
       state,
       dispatch && ((tr) => dispatch(tr.setNodeAttribute($from.before(-1), 'checked', false))),
     );

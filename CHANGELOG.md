@@ -48,6 +48,16 @@ All notable changes to `stilo-editor`. The format follows
   image and the caption a paragraph.
 - `maxInlineBytes` also limits the `data:` URLs of dropped files, `insertFigure` and
   `updateImage`.
+- After a redo, the cursor goes next to the change instead of selecting again the text that was
+  selected (prosemirror-history 1.5.2).
+- Tested with prosemirror-view 1.43, prosemirror-schema-list 1.6.1, prosemirror-inputrules 1.7,
+  prosemirror-history 1.5.2, prosemirror-model 1.25.13, prosemirror-transform 1.12.7 and
+  DOMPurify 3.4.18 (security fixes), the latest versions in the ranges of `stilo-editor`.
+
+### Fixed
+
+- Checklists: <kbd>Enter</kbd> in the middle of a checked item made the second half unchecked
+  with prosemirror-schema-list 1.6.1 or later, which new installs get. It stays checked again.
 
 ## [0.4.0] - 2026-10-21
 
