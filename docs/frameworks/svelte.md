@@ -3,7 +3,7 @@
 `stilo-editor/svelte` gives Svelte 5 the editor with the default toolbar, the `StiloEditor`
 component, and gives Svelte 4 and 5 two actions: `stiloEditorWithUI`, the same editor with the
 toolbar, and `stiloEditor`, the editor alone for a UI of your own. This guide shows every task
-in Svelte 5, and Svelte 4 in §14; the reference tables (commands, extensions, toolbar item IDs,
+in Svelte 5, and Svelte 4 in §15; the reference tables (commands, extensions, toolbar item IDs,
 events, CSS custom properties) are in [API.md](../API.md) and linked where they are needed.
 
 ## 1. Install
@@ -404,7 +404,86 @@ For an editor with only some features, list the extensions one by one:
 
 The names, the extensions and their options are in [API.md §4](../API.md#4-extensions).
 
-## 13. TypeScript
+## 13. Your own extensions
+
+`defineExtension(spec)` builds an extension the same way as the built-in ones. This is also the way
+to bring existing ProseMirror plugins, keymaps and input rules: they go in through the `extensions`
+prop (the same option of the actions), when the editor is created, with the plugins of the other
+extensions; there is no need to reach into the editor after it is mounted. Define the extension
+once, in a module of its own or outside the component:
+
+```svelte
+<script lang="ts">
+  import { defaultExtensions, defineExtension } from 'stilo-editor';
+  import { StiloEditor } from 'stilo-editor/svelte';
+  import { myPlugin, otherPlugin } from './my-plugins';
+
+  const MyPlugins = defineExtension({
+    name: 'myPlugins',
+    plugins: () => [myPlugin, otherPlugin],
+  });
+
+  const extensions = [defaultExtensions(), MyPlugins()];
+</script>
+
+<StiloEditor {extensions} />
+```
+
+`name` is unique (a name used twice stops the editor with a `StiloError`). Besides `plugins`, an
+extension can have `keymap`, `inputRules`, `commands`, `nodes`, `marks`, `priority` and
+`defaultOptions`: the fields are in [API.md §4.1](../API.md#41-your-own-extensions).
+
+- These functions get `{ options, schema, editor, emit }` and run while the editor is being created,
+  before `editor.view` exists: use `editor` inside the plugins, commands and shortcuts, not in the
+  body of the function. A plugin's own `view(editorView)` gets the `EditorView` as usual.
+- The plugins stay for the life of the editor, also after `setHTML(…, { resetHistory: true })`,
+  which starts their state again.
+- The ProseMirror packages that your plugins import (`prosemirror-state`, `prosemirror-view`, …)
+  must resolve to the same copy as those of `stilo-editor`: install versions in its ranges, and
+  `npm ls prosemirror-state` shows one version.
+- The `EditorView` is `editor.view`, next to `editor.state` and `editor.schema`; the `Editor` comes
+  from `onready` (§4) or the actions (§11). They are an escape hatch, outside the guarantees of the
+  API: [API.md §2.3](../API.md#23-selection-state-and-focus).
+
+A command of yours is declared on the `Commands` interface, so that `editor.commands` knows its
+type:
+
+```ts
+// signature.ts
+import type { Command } from 'prosemirror-state';
+import { defineExtension } from 'stilo-editor';
+
+declare module 'stilo-editor' {
+  interface Commands {
+    insertSignature: (name: string) => Command;
+  }
+}
+
+export const Signature = defineExtension({
+  name: 'signature',
+  commands: () => ({
+    insertSignature: (name) => (state, dispatch) => {
+      dispatch?.(state.tr.insertText(`— ${name}`));
+      return true;
+    },
+  }),
+  keymap: ({ editor }) => ({
+    'Mod-Shift-s': () => editor.commands.insertSignature('Ada'),
+  }),
+});
+```
+
+A command calls `dispatch` only when it gets one, and returns whether it applies: without `dispatch`
+it is the `.can()` check that your buttons use. In read-only mode your commands are blocked like the
+built-in ones.
+
+New nodes and marks have a limit: the HTML of `content`, `setHTML` and paste passes the sanitizer
+first, which keeps only the tags and attributes of the built-in extensions. A node or mark of yours
+that is written with another tag, or with `class` or `data-*` attributes, loses them when it is
+loaded again. Plugins, shortcuts, input rules and commands on the built-in nodes and marks have no
+such limit.
+
+## 14. TypeScript
 
 The package ships its types. The wrapper exports:
 
@@ -419,7 +498,7 @@ The package ships its types. The wrapper exports:
 `ToolbarButton`, `ToolbarItem` and `Messages` from `stilo-editor/ui`. Commands are typed by the
 extensions that declare them: `editor.commands.setHeading({ level: 2 })` is checked.
 
-## 14. Svelte 4
+## 15. Svelte 4
 
 On Svelte 4, import from `stilo-editor/svelte/action` only: `stilo-editor/svelte` contains a
 component written with runes, which the Svelte 4 compiler cannot compile.

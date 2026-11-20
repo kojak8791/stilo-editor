@@ -247,10 +247,86 @@ new Editor({
 });
 ```
 
-The package also exports what extensions are built with (`defineExtension` and helpers such as
-`toggleMark`, `isMarkActive`, `markInputRule`). Writing your own extensions is not documented
-for users yet; [ARCHITECTURE.md §6](ARCHITECTURE.md#6-extension-api) describes how the built-in
-ones work.
+### 4.1 Your own extensions
+
+`defineExtension(spec)` builds an extension the same way as the built-in ones: it returns a
+factory, and the factory's result goes into `extensions` next to the others. This is also the
+way to bring existing ProseMirror plugins, keymaps and input rules: they go in when the editor
+is created, with the plugins of the other extensions.
+
+```ts
+import { defaultExtensions, defineExtension, Editor } from 'stilo-editor';
+import { myPlugin, otherPlugin } from './my-plugins';
+
+const MyPlugins = defineExtension({
+  name: 'myPlugins',
+  plugins: () => [myPlugin, otherPlugin],
+});
+
+new Editor({ element, extensions: [defaultExtensions(), MyPlugins()] });
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | Unique camelCase name; a name used twice stops the editor with a `StiloError` |
+| `priority` | Default `100` (`DEFAULT_PRIORITY`). Higher: earlier in the schema, and its keymap and plugins before those of lower priority |
+| `defaultOptions` | The options of the extension; the factory takes a part of them: `MyExtension({ … })` |
+| `plugins(ctx)` | ProseMirror plugins |
+| `keymap(ctx)` | Keyboard shortcuts: `{ 'Mod-Shift-x': command }` |
+| `inputRules(ctx)` | ProseMirror input rules; none of them is called with `markdownShortcuts: false` |
+| `commands(ctx)` | Commands added to `editor.commands`, each with `.can()` (§3) |
+| `nodes(options)`, `marks(options)` | New schema nodes and marks (see the limits below) |
+
+`ctx` is `{ options, schema, editor, emit }`. These functions run while the editor is being
+created, before `editor.view` exists: use `editor` inside the plugins, commands and shortcuts,
+not in the body of the function. A plugin's own `view(editorView)` gets the `EditorView` as
+usual. The plugins stay for the life of the editor, also after `setHTML(…, { resetHistory: true
+})`, which starts their state again. The ProseMirror packages that your plugins import
+(`prosemirror-state`, `prosemirror-view`, …) must resolve to the same copy as those of
+`stilo-editor`: install versions in its ranges, and `npm ls prosemirror-state` shows one
+version.
+
+A command is a factory that returns a ProseMirror `Command`. Declare it on the `Commands`
+interface so that `editor.commands` knows its type:
+
+```ts
+import type { Command } from 'prosemirror-state';
+import { defineExtension } from 'stilo-editor';
+
+declare module 'stilo-editor' {
+  interface Commands {
+    insertSignature: (name: string) => Command;
+  }
+}
+
+export const Signature = defineExtension({
+  name: 'signature',
+  commands: () => ({
+    insertSignature: (name) => (state, dispatch) => {
+      dispatch?.(state.tr.insertText(`— ${name}`));
+      return true;
+    },
+  }),
+  keymap: ({ editor }) => ({
+    'Mod-Shift-s': () => editor.commands.insertSignature('Ada'),
+  }),
+});
+```
+
+A command calls `dispatch` only when it gets one, and returns whether it applies: without
+`dispatch` it is the `.can()` check. In read-only mode your commands are blocked like the
+built-in ones.
+
+New nodes and marks have a limit: the HTML of `content`, `setHTML` and paste passes the
+sanitizer first, which keeps only the tags and attributes of the built-in extensions (§5). A
+node or mark of yours that is written with another tag, or with `class` or `data-*`
+attributes, loses them when it is loaded again. Plugins, shortcuts, input rules and commands
+on the built-in nodes and marks have no such limit.
+
+The package also exports helpers to build commands and rules: `toggleMark`, `setMark`,
+`unsetMark`, `isMarkActive`, `isNodeActive`, `toggleList`, `insertBlock`, `insertBlockNode`,
+`markInputRule`. The built-in extensions are written the same way:
+[ARCHITECTURE.md §6](ARCHITECTURE.md#6-extension-api) describes them.
 
 ## 5. HTML in and out
 

@@ -29,6 +29,9 @@ All notable changes to `stilo-editor`. The format follows
   second row; a row that does not fit scrolls sideways. Bigger buttons on
   touch screens. The option `compact` arranges the items in your own way
   (`DEFAULT_COMPACT_TOOLBAR`, types `CompactToolbar` and `CompactToolbarGroup`).
+- Documentation of your own extensions ([API.md §4.1](docs/API.md#41-your-own-extensions) and
+  the framework guides): existing ProseMirror plugins, shortcuts and input rules go in through
+  `extensions` when the editor is created, and your commands get their types.
 
 ### Changed
 
