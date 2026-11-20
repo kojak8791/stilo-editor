@@ -102,6 +102,11 @@ not controlled (read once at creation). In Svelte both levels are also actions, 
 | `prepublishOnly` | `npm run check && npm run build` | Run by `npm publish`: never publish an old or failing build |
 
 `.github/workflows/ci.yml` runs `check` and `size` at every push and pull request.
+`.github/workflows/latest-deps.yml` runs `check` every Monday (and on demand) after `npm update`
+of the `dependencies` and of React, Vue and Svelte: the newest versions that our ranges allow,
+which a new install of `stilo-editor` gets. Nothing is committed. A failure shows an upstream
+release that changed something before our next release; the ranges stay `^` (exact pins would
+put a second copy of ProseMirror in apps and delay security fixes of DOMPurify).
 
 ### 2.2 Headless-first dependency rules
 
@@ -141,7 +146,7 @@ stilo-editor/
 ├── SECURITY.md                   Private vulnerability reports
 ├── LICENSE                       MIT
 ├── .github/ISSUE_TEMPLATE/       Issue forms: bug report, feature request
-├── .github/workflows/            CI (check, size) and the GitHub Pages site
+├── .github/workflows/            CI (check, size, weekly latest deps) and the GitHub Pages site
 ├── package.json / package-lock.json
 ├── tsconfig.json                 Dev/typecheck config (src, tests, demo, bench)
 ├── tsconfig.build.json           Declarations for src/ only

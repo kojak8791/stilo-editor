@@ -1,0 +1,34 @@
+# Runs the quality gate once a week with the newest versions that the ranges of package.json
+# allow, for the dependencies and the frameworks: what a new install of stilo-editor gets. A
+# failure means that an upstream release changed something before our next release does.
+# Nothing is committed: the lockfile stays as it is in the repository.
+name: Latest dependencies
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Update to the newest versions in range
+        run: |
+          packages=$(node -p "Object.keys(require('./package.json').dependencies).join(' ')")
+          npm update $packages react react-dom vue svelte
+          {
+            echo '```'
+            npm ls $packages react react-dom vue svelte --depth=0
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: npm run check
