@@ -6,6 +6,12 @@ All notable changes to `stilo-editor`. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-26
+
+A compact toolbar for phones and narrow panels, figures with captions and an image dialog, and a
+lighter look for the popovers. No breaking API changes: the new toolbar item `image` is on as soon
+as you update, and `--stilo-color-border` no longer draws the borders of popovers and fields.
+
 ### Added
 
 - Figures: an image in its own block with a caption under it (`<figure>`, `<figcaption>`). The
@@ -42,9 +48,10 @@ All notable changes to `stilo-editor`. The format follows
   darker background (lighter in dark) and show a ring when focused, flat secondary buttons.
   Fields and form buttons have one height everywhere (26px), whatever the font and line height
   of the page; labels and other secondary text are 1px smaller than the text. Smaller image
-  dialog and character picker; the table size grid has no borders. New custom properties `--stilo-color-popover-bg`, `--stilo-color-field`,
-  `--stilo-color-button`, `--stilo-color-button-hover`, `--stilo-color-ring` and
-  `--stilo-popover-blur`; `--stilo-color-border` no longer draws popover and field borders.
+  dialog and character picker; the table size grid has no borders. New custom properties
+  `--stilo-color-popover-bg`, `--stilo-color-field`, `--stilo-color-button`,
+  `--stilo-color-button-hover`, `--stilo-color-ring` and `--stilo-popover-blur`;
+  `--stilo-color-border` no longer draws popover and field borders.
 - HTML with a `<figure>` holding an image loads as a figure; before, the image became an inline
   image and the caption a paragraph.
 - `maxInlineBytes` also limits the `data:` URLs of dropped files, `insertFigure` and
@@ -185,7 +192,8 @@ First preview release.
 - Default toolbar (`stilo-editor/ui`): sticky option, keyboard navigation, special
   characters and emoji picker.
 
-[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/kojak8791/stilo-editor/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/kojak8791/stilo-editor/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/kojak8791/stilo-editor/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/kojak8791/stilo-editor/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/kojak8791/stilo-editor/compare/v0.2.1...v0.3.0

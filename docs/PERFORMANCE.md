@@ -162,23 +162,23 @@ functions are on `window.__stilo` in the browser console, e.g.
 
 ## Download size
 
-What an app built with Vite downloads, measured on 2026-10-21 with `npm run size`:
+What an app built with Vite downloads, measured on 2026-11-26 with `npm run size`:
 
 | App | Minified | Gzip |
 |---|---|---|
-| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 270.3 kB | 85.6 kB |
-| Core and `defaultExtensions` | 344.6 kB | 108.4 kB |
-| Core, `defaultExtensions` and the default UI | 430.2 kB | 133.5 kB |
+| Minimal: `Document`, `Text`, `Paragraph`, `Bold` | 272.1 kB | 86.8 kB |
+| Core and `defaultExtensions` | 351.0 kB | 111.1 kB |
+| Core, `defaultExtensions` and the default UI | 448.0 kB | 139.6 kB |
 | … plus, on the first opening of the character picker | 21.2 kB | 7.1 kB |
-| React app with `useStiloEditor` and `defaultExtensions`, React excluded | 345.0 kB | 108.6 kB |
-| React app with `StiloEditor`, React excluded | 432.6 kB | 134.4 kB |
-| Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 345.0 kB | 108.6 kB |
-| Vue app with `StiloEditor`, Vue excluded | 432.8 kB | 134.5 kB |
-| Svelte app with the `stiloEditor` action and `defaultExtensions`, Svelte excluded | 344.7 kB | 108.5 kB |
-| Svelte app with `StiloEditor`, Svelte excluded | 432.9 kB | 134.5 kB |
+| React app with `useStiloEditor` and `defaultExtensions`, React excluded | 351.4 kB | 111.3 kB |
+| React app with `StiloEditor`, React excluded | 450.4 kB | 140.4 kB |
+| Vue app with `useStiloEditor` and `defaultExtensions`, Vue excluded | 351.4 kB | 111.2 kB |
+| Vue app with `StiloEditor`, Vue excluded | 450.7 kB | 140.5 kB |
+| Svelte app with the `stiloEditor` action and `defaultExtensions`, Svelte excluded | 351.1 kB | 111.2 kB |
+| Svelte app with `StiloEditor`, Svelte excluded | 450.8 kB | 140.5 kB |
 
 Most of it is ProseMirror, which every app needs, and DOMPurify, which sanitizes the HTML. The
-styles of the default UI (`ui.css`) add 3.3 kB gzip, those of the content (`content.css`)
+styles of the default UI (`ui.css`) add 4.2 kB gzip, those of the content (`content.css`)
 1.9 kB. `npm run size` builds the library, bundles these apps from `dist/` like a
 consumer would, and fails if the minimal app contains packages that only unused extensions need,
 or the React, Vue or Svelte app with the primitive alone (`useStiloEditor`, `stiloEditor`)
